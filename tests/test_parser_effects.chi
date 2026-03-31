@@ -1,0 +1,267 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/token { Token, newToken, TK_INT, TK_FLOAT, TK_STRING, TK_TRUE, TK_FALSE, TK_UNIT, TK_ID, TK_PLUS, TK_MINUS, TK_STAR, TK_SLASH, TK_PERCENT, TK_EQEQ, TK_NEQ, TK_LT, TK_LTEQ, TK_GT, TK_GTEQ, TK_NOT, TK_AND, TK_OR, TK_AMP, TK_PIPE, TK_LSHIFT, TK_RSHIFT, TK_WEAVE, TK_UNDERSCORE, TK_DOT, TK_COMMA, TK_COLON, TK_EQ, TK_PLUSEQ, TK_MINUSEQ, TK_STAREQ, TK_SLASHEQ, TK_LPAREN, TK_RPAREN, TK_LBRACE, TK_RBRACE, TK_LBRACKET, TK_RBRACKET, TK_RETURN, TK_BREAK, TK_CONTINUE, TK_EOF, TK_NEWLINE, TK_FN, TK_VAL, TK_VAR, TK_PUB, TK_ARROW, TK_IF, TK_ELSE, TK_WHILE, TK_FOR, TK_IN, TK_WHEN, TK_WITH, TK_HANDLE, TK_EFFECT }
+import user/parser { newParser, parseExpression, parseExpr }
+import user/parse_ast { paTag, paName, paIsPublic, paTypeParameters, paFormalArguments, paReturnTypeRef, paBody, paEffectCases, paHandleBody, paLongValue, paVariableName }
+import std/lang.array { size }
+
+fn tk(kind: int, value: string): Token { newToken(kind, value, unit) }
+fn eof(): Token { newToken(TK_EOF, "", unit) }
+
+// ==============================
+// parseEffectDef tests
+// ==============================
+
+test("parse simple effect definition") {
+    // effect ask(prompt: string): string
+    val tokens = [
+        tk(TK_EFFECT, "effect"), tk(TK_ID, "ask"),
+        tk(TK_LPAREN, "("), tk(TK_ID, "prompt"), tk(TK_COLON, ":"), tk(TK_ID, "string"), tk(TK_RPAREN, ")"),
+        tk(TK_COLON, ":"), tk(TK_ID, "string"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseEffectDefinition")
+    assertEqual(paName(result), "ask")
+    assertFalse(paIsPublic(result))
+    assertEqual(paFormalArguments(result).size(), 1)
+    assertEqual(paFormalArguments(result)[1].name, "prompt")
+    assertTrue(paReturnTypeRef(result) != unit)
+}
+
+test("parse pub effect definition") {
+    // pub effect log(msg: string): unit
+    val tokens = [
+        tk(TK_PUB, "pub"), tk(TK_EFFECT, "effect"), tk(TK_ID, "log"),
+        tk(TK_LPAREN, "("), tk(TK_ID, "msg"), tk(TK_COLON, ":"), tk(TK_ID, "string"), tk(TK_RPAREN, ")"),
+        tk(TK_COLON, ":"), tk(TK_UNIT, "unit"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseEffectDefinition")
+    assertEqual(paName(result), "log")
+    assertTrue(paIsPublic(result))
+    assertEqual(paFormalArguments(result).size(), 1)
+}
+
+test("parse effect with no return type") {
+    // effect notify(msg: string)
+    val tokens = [
+        tk(TK_EFFECT, "effect"), tk(TK_ID, "notify"),
+        tk(TK_LPAREN, "("), tk(TK_ID, "msg"), tk(TK_COLON, ":"), tk(TK_ID, "string"), tk(TK_RPAREN, ")"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseEffectDefinition")
+    assertEqual(paName(result), "notify")
+    assertEqual(paFormalArguments(result).size(), 1)
+    assertTrue(paReturnTypeRef(result) == unit)
+}
+
+test("parse effect with type parameters") {
+    // effect read[T](): T
+    val tokens = [
+        tk(TK_EFFECT, "effect"), tk(TK_ID, "read"),
+        tk(TK_LBRACKET, "["), tk(TK_ID, "T"), tk(TK_RBRACKET, "]"),
+        tk(TK_LPAREN, "("), tk(TK_RPAREN, ")"),
+        tk(TK_COLON, ":"), tk(TK_ID, "T"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseEffectDefinition")
+    assertEqual(paName(result), "read")
+    assertEqual(paTypeParameters(result).size(), 1)
+    assertEqual(paFormalArguments(result).size(), 0)
+    assertTrue(paReturnTypeRef(result) != unit)
+}
+
+test("parse effect with multiple args") {
+    // effect put(key: string, value: int): bool
+    val tokens = [
+        tk(TK_EFFECT, "effect"), tk(TK_ID, "put"),
+        tk(TK_LPAREN, "("),
+        tk(TK_ID, "key"), tk(TK_COLON, ":"), tk(TK_ID, "string"),
+        tk(TK_COMMA, ","),
+        tk(TK_ID, "value"), tk(TK_COLON, ":"), tk(TK_ID, "int"),
+        tk(TK_RPAREN, ")"),
+        tk(TK_COLON, ":"), tk(TK_ID, "bool"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseEffectDefinition")
+    assertEqual(paName(result), "put")
+    assertEqual(paFormalArguments(result).size(), 2)
+    assertEqual(paFormalArguments(result)[1].name, "key")
+    assertEqual(paFormalArguments(result)[2].name, "value")
+}
+
+test("parse effect with multiple type parameters") {
+    // effect transform[A, B](x: A): B
+    val tokens = [
+        tk(TK_EFFECT, "effect"), tk(TK_ID, "transform"),
+        tk(TK_LBRACKET, "["), tk(TK_ID, "A"), tk(TK_COMMA, ","), tk(TK_ID, "B"), tk(TK_RBRACKET, "]"),
+        tk(TK_LPAREN, "("), tk(TK_ID, "x"), tk(TK_COLON, ":"), tk(TK_ID, "A"), tk(TK_RPAREN, ")"),
+        tk(TK_COLON, ":"), tk(TK_ID, "B"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseEffectDefinition")
+    assertEqual(paName(result), "transform")
+    assertEqual(paTypeParameters(result).size(), 2)
+    assertEqual(paFormalArguments(result).size(), 1)
+}
+
+// ==============================
+// parseHandleExpr tests
+// ==============================
+
+test("parse simple handle expression") {
+    // handle { 42 } with { ask(prompt) -> 1 }
+    val tokens = [
+        tk(TK_HANDLE, "handle"),
+        tk(TK_LBRACE, "{"), tk(TK_INT, "42"), tk(TK_RBRACE, "}"),
+        tk(TK_WITH, "with"),
+        tk(TK_LBRACE, "{"),
+        tk(TK_ID, "ask"), tk(TK_LPAREN, "("), tk(TK_ID, "prompt"), tk(TK_RPAREN, ")"),
+        tk(TK_ARROW, "->"), tk(TK_INT, "1"),
+        tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseHandle")
+    val hBody = paHandleBody(result)
+    assertEqual(paTag(hBody), "ParseBlock")
+    assertEqual(paBody(hBody).size(), 1)
+    val cases = paEffectCases(result)
+    assertEqual(cases.size(), 1)
+    assertEqual(cases[1].effectName, "ask")
+    assertEqual(cases[1].argumentNames.size(), 1)
+    assertEqual(cases[1].argumentNames[1], "prompt")
+}
+
+test("parse handle with multiple cases") {
+    // handle { x } with { ask(p) -> 1 \n log(msg) -> 2 }
+    val tokens = [
+        tk(TK_HANDLE, "handle"),
+        tk(TK_LBRACE, "{"), tk(TK_ID, "x"), tk(TK_RBRACE, "}"),
+        tk(TK_WITH, "with"),
+        tk(TK_LBRACE, "{"),
+        tk(TK_ID, "ask"), tk(TK_LPAREN, "("), tk(TK_ID, "p"), tk(TK_RPAREN, ")"),
+        tk(TK_ARROW, "->"), tk(TK_INT, "1"),
+        tk(TK_NEWLINE, "\n"),
+        tk(TK_ID, "log"), tk(TK_LPAREN, "("), tk(TK_ID, "msg"), tk(TK_RPAREN, ")"),
+        tk(TK_ARROW, "->"), tk(TK_INT, "2"),
+        tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseHandle")
+    val cases = paEffectCases(result)
+    assertEqual(cases.size(), 2)
+    assertEqual(cases[1].effectName, "ask")
+    assertEqual(cases[1].argumentNames[1], "p")
+    assertEqual(cases[2].effectName, "log")
+    assertEqual(cases[2].argumentNames[1], "msg")
+}
+
+test("parse handle with multiple effect args") {
+    // handle { 0 } with { put(key, value) -> 1 }
+    val tokens = [
+        tk(TK_HANDLE, "handle"),
+        tk(TK_LBRACE, "{"), tk(TK_INT, "0"), tk(TK_RBRACE, "}"),
+        tk(TK_WITH, "with"),
+        tk(TK_LBRACE, "{"),
+        tk(TK_ID, "put"), tk(TK_LPAREN, "("), tk(TK_ID, "key"), tk(TK_COMMA, ","), tk(TK_ID, "value"), tk(TK_RPAREN, ")"),
+        tk(TK_ARROW, "->"), tk(TK_INT, "1"),
+        tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseHandle")
+    val cases = paEffectCases(result)
+    assertEqual(cases.size(), 1)
+    assertEqual(cases[1].effectName, "put")
+    assertEqual(cases[1].argumentNames.size(), 2)
+    assertEqual(cases[1].argumentNames[1], "key")
+    assertEqual(cases[1].argumentNames[2], "value")
+}
+
+test("parse handle with no-arg effect") {
+    // handle { 0 } with { getState() -> 1 }
+    val tokens = [
+        tk(TK_HANDLE, "handle"),
+        tk(TK_LBRACE, "{"), tk(TK_INT, "0"), tk(TK_RBRACE, "}"),
+        tk(TK_WITH, "with"),
+        tk(TK_LBRACE, "{"),
+        tk(TK_ID, "getState"), tk(TK_LPAREN, "("), tk(TK_RPAREN, ")"),
+        tk(TK_ARROW, "->"), tk(TK_INT, "1"),
+        tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseHandle")
+    val cases = paEffectCases(result)
+    assertEqual(cases.size(), 1)
+    assertEqual(cases[1].effectName, "getState")
+    assertEqual(cases[1].argumentNames.size(), 0)
+}
+
+test("parse handle with block body in case") {
+    // handle { 42 } with { ask(p) -> { 1 } }
+    val tokens = [
+        tk(TK_HANDLE, "handle"),
+        tk(TK_LBRACE, "{"), tk(TK_INT, "42"), tk(TK_RBRACE, "}"),
+        tk(TK_WITH, "with"),
+        tk(TK_LBRACE, "{"),
+        tk(TK_ID, "ask"), tk(TK_LPAREN, "("), tk(TK_ID, "p"), tk(TK_RPAREN, ")"),
+        tk(TK_ARROW, "->"),
+        tk(TK_LBRACE, "{"), tk(TK_INT, "1"), tk(TK_RBRACE, "}"),
+        tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseHandle")
+    val cases = paEffectCases(result)
+    assertEqual(cases.size(), 1)
+    // Case body should be a block/lambda
+    val caseBody = cases[1].body
+    assertTrue(caseBody != unit)
+}
+
+test("parse handle body with multiple expressions") {
+    // handle { \n x \n y \n } with { ask(p) -> 1 }
+    val tokens = [
+        tk(TK_HANDLE, "handle"),
+        tk(TK_LBRACE, "{"),
+        tk(TK_NEWLINE, "\n"),
+        tk(TK_ID, "x"),
+        tk(TK_NEWLINE, "\n"),
+        tk(TK_ID, "y"),
+        tk(TK_NEWLINE, "\n"),
+        tk(TK_RBRACE, "}"),
+        tk(TK_WITH, "with"),
+        tk(TK_LBRACE, "{"),
+        tk(TK_ID, "ask"), tk(TK_LPAREN, "("), tk(TK_ID, "p"), tk(TK_RPAREN, ")"),
+        tk(TK_ARROW, "->"), tk(TK_INT, "1"),
+        tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseHandle")
+    val hBody = paHandleBody(result)
+    assertEqual(paTag(hBody), "ParseBlock")
+    assertEqual(paBody(hBody).size(), 2)
+}
+
+summary()

@@ -1,0 +1,502 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, functionType, typeEquals, isFunction }
+import user/ast { localTarget, packageTarget, atomExpr, variableAccessExpr, fnCallExpr, nameDeclarationExpr, assignmentExpr, fnExpr, blockExpr, returnExpr, setExprType, newFnParam, exprExprType }
+import user/parse_ast { parseVariableRead, parseNameDeclaration, parseLambda, parseFor, parseFuncWithName, parseEffectDefinition, parseHandle, parseFnCall, parseBlock, parseBinaryOp, parseIfElse, newFormalArgument, newParseHandleCase }
+import user/symbols { newSymbol, newCompileTables, ctDefineSymbol }
+import user/messages { Message, unrecognizedName, cannotAccessInternalName, notAFunction, cannotChangeImmutableVariable, typeMismatch, genericError }
+import user/source { newSection }
+import std/lang { luaExpr, embedLua }
+import std/lang.array { size, push }
+
+val testSection = newSection(1, 1, 1, 10)
+
+// =========================================================================
+// checkNames tests
+// =========================================================================
+
+test("checkNames: defined variable is recognized") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val messages: any = luaExpr("{}")
+
+    // Define x, then read x
+    val decl = parseNameDeclaration(false, "x", false, unit, parseLongValue(42, testSection), testSection, testSection)
+    val readX = parseVariableRead("x", testSection)
+    val nodes: any = luaExpr("{}")
+    embedLua("table.insert(nodes, decl)")
+    embedLua("table.insert(nodes, readX)")
+    checkNames(nodes, ct, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 0)
+}
+
+test("checkNames: undefined variable produces UnrecognizedName") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val messages: any = luaExpr("{}")
+
+    val readY = parseVariableRead("undefinedVar", testSection)
+    val nodes: any = luaExpr("{}")
+    embedLua("table.insert(nodes, readY)")
+    checkNames(nodes, ct, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 1)
+    val msg: any = luaExpr("messages[1]")
+    val code: string = luaExpr("msg.code")
+    assertEqual(code, "UNRECOGNIZED_NAME")
+}
+
+test("checkNames: variable from compileTables is recognized") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val sym = newSymbol("test", "pkg", "existingVar", tInt, true, false)
+    ctDefineSymbol(ct, sym)
+    val messages: any = luaExpr("{}")
+
+    val readX = parseVariableRead("existingVar", testSection)
+    val nodes: any = luaExpr("{}")
+    embedLua("table.insert(nodes, readX)")
+    checkNames(nodes, ct, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 0)
+}
+
+test("checkNames: aliased package is recognized") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val imp: any = { moduleName: "std", packageName: "math", packageAlias: "m", entries: [], section: unit }
+    val ct = newCompileTables(pkg, unit, [imp])
+    val messages: any = luaExpr("{}")
+
+    val readM = parseVariableRead("m", testSection)
+    val nodes: any = luaExpr("{}")
+    embedLua("table.insert(nodes, readM)")
+    checkNames(nodes, ct, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 0)
+}
+
+test("checkNames: lambda creates new scope for args") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val messages: any = luaExpr("{}")
+
+    // Lambda { a -> a }
+    val args: any = luaExpr("{}")
+    val arg = newFormalArgument("a", unit, unit, testSection)
+    embedLua("table.insert(args, arg)")
+    val lambdaBody: any = luaExpr("{}")
+    val readA = parseVariableRead("a", testSection)
+    embedLua("table.insert(lambdaBody, readA)")
+    val lambda = parseLambda(args, lambdaBody, testSection)
+
+    val nodes: any = luaExpr("{}")
+    embedLua("table.insert(nodes, lambda)")
+    checkNames(nodes, ct, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 0)
+}
+
+test("checkNames: lambda arg not visible outside") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val messages: any = luaExpr("{}")
+
+    // Lambda { a -> unit }, then read a outside
+    val args: any = luaExpr("{}")
+    val arg = newFormalArgument("lambdaArg", unit, unit, testSection)
+    embedLua("table.insert(args, arg)")
+    val lambdaBody: any = luaExpr("{}")
+    embedLua("table.insert(lambdaBody, parseUnitValue(testSection))")
+    val lambda = parseLambda(args, lambdaBody, testSection)
+
+    val readArg = parseVariableRead("lambdaArg", testSection)
+    val nodes: any = luaExpr("{}")
+    embedLua("table.insert(nodes, lambda)")
+    embedLua("table.insert(nodes, readArg)")
+    checkNames(nodes, ct, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 1)
+}
+
+test("checkNames: for loop vars are scoped") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val messages: any = luaExpr("{}")
+
+    // for i in iter { i } — i is accessible inside
+    val iter = parseVariableRead("iter", testSection)
+    // iter is undefined, so define it
+    val declIter = parseNameDeclaration(false, "iter", false, unit, parseCreateArray(luaExpr("{}"), testSection), testSection, testSection)
+    val readI = parseVariableRead("i", testSection)
+    val forBody = parseBlock([readI], testSection)
+    val forNode = parseFor(["i"], iter, unit, unit, forBody, testSection)
+
+    // After for, i should not be accessible
+    val readIAfter = parseVariableRead("i", testSection)
+
+    val nodes: any = luaExpr("{}")
+    embedLua("table.insert(nodes, declIter)")
+    embedLua("table.insert(nodes, forNode)")
+    embedLua("table.insert(nodes, readIAfter)")
+    checkNames(nodes, ct, messages)
+    val msgCount: int = luaExpr("#messages")
+    // readIAfter should produce 1 message
+    assertEqual(msgCount, 1)
+}
+
+test("checkNames: func name is visible, args are scoped") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val messages: any = luaExpr("{}")
+
+    // fn myFunc(p) { p }
+    val args: any = luaExpr("{}")
+    val arg = newFormalArgument("p", unit, unit, testSection)
+    embedLua("table.insert(args, arg)")
+    val readP = parseVariableRead("p", testSection)
+    val funcBody = parseBlock([readP], testSection)
+    val funcNode = parseFuncWithName(false, "myFunc", [], args, unit, funcBody, testSection)
+
+    // After func, myFunc is visible but p is not
+    val readFunc = parseVariableRead("myFunc", testSection)
+    val readPAfter = parseVariableRead("p", testSection)
+
+    val nodes: any = luaExpr("{}")
+    embedLua("table.insert(nodes, funcNode)")
+    embedLua("table.insert(nodes, readFunc)")
+    embedLua("table.insert(nodes, readPAfter)")
+    checkNames(nodes, ct, messages)
+    val msgCount: int = luaExpr("#messages")
+    // p after func should produce 1 message
+    assertEqual(msgCount, 1)
+}
+
+test("checkNames: effect definition adds name") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val messages: any = luaExpr("{}")
+
+    val effDef = parseEffectDefinition(false, "myEffect", [], [], unit, testSection)
+    val readEff = parseVariableRead("myEffect", testSection)
+    val nodes: any = luaExpr("{}")
+    embedLua("table.insert(nodes, effDef)")
+    embedLua("table.insert(nodes, readEff)")
+    checkNames(nodes, ct, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 0)
+}
+
+test("checkNames: handle cases have resume and arg names") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val messages: any = luaExpr("{}")
+
+    // handle { unit } with { eff(x) -> resume }
+    val hBody = parseUnitValue(testSection)
+    val readResume = parseVariableRead("resume", testSection)
+    val readX = parseVariableRead("x", testSection)
+    val caseBody = parseBlock([readResume, readX], testSection)
+    val hCase = newParseHandleCase("eff", ["x"], caseBody, testSection)
+    val handleNode = parseHandle(hBody, [hCase], testSection)
+
+    val nodes: any = luaExpr("{}")
+    embedLua("table.insert(nodes, handleNode)")
+    checkNames(nodes, ct, messages)
+    val msgCount: int = luaExpr("#messages")
+    // "eff" is the effect name (not a variable read), resume and x should be defined in case scope
+    assertEqual(msgCount, 0)
+}
+
+// =========================================================================
+// visibilityCheck tests
+// =========================================================================
+
+test("visibilityCheck: local access is fine") {
+    val messages: any = luaExpr("{}")
+    val expr = variableAccessExpr(localTarget("x"), testSection)
+    setExprType(expr, tInt)
+    val exprs: any = luaExpr("{}")
+    embedLua("table.insert(exprs, expr)")
+    visibilityCheck(exprs, "mymod", unit, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 0)
+}
+
+test("visibilityCheck: same module package access is fine") {
+    val messages: any = luaExpr("{}")
+    val expr = variableAccessExpr(packageTarget("mymod", "pkg", "foo"), testSection)
+    setExprType(expr, tInt)
+    val exprs: any = luaExpr("{}")
+    embedLua("table.insert(exprs, expr)")
+    visibilityCheck(exprs, "mymod", unit, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 0)
+}
+
+test("visibilityCheck: cross-module non-public access produces error") {
+    val ns: any = luaExpr("{}")
+    embedLua("ns.getSymbol = function(mod, pkg, name) return { moduleName = mod, packageName = pkg, name = name, symbolType = nil, isPublic = false, isMutable = false } end")
+    val messages: any = luaExpr("{}")
+
+    val expr = variableAccessExpr(packageTarget("othermod", "otherpkg", "secret"), testSection)
+    setExprType(expr, tInt)
+    val exprs: any = luaExpr("{}")
+    embedLua("table.insert(exprs, expr)")
+    visibilityCheck(exprs, "mymod", ns, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 1)
+    val msg: any = luaExpr("messages[1]")
+    val code: string = luaExpr("msg.code")
+    assertEqual(code, "CANNOT_ACCESS_INTERNAL")
+}
+
+test("visibilityCheck: cross-module public access is fine") {
+    val ns: any = luaExpr("{}")
+    embedLua("ns.getSymbol = function(mod, pkg, name) return { moduleName = mod, packageName = pkg, name = name, symbolType = nil, isPublic = true, isMutable = false } end")
+    val messages: any = luaExpr("{}")
+
+    val expr = variableAccessExpr(packageTarget("othermod", "otherpkg", "pubFn"), testSection)
+    setExprType(expr, tInt)
+    val exprs: any = luaExpr("{}")
+    embedLua("table.insert(exprs, expr)")
+    visibilityCheck(exprs, "mymod", ns, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 0)
+}
+
+// =========================================================================
+// fnCallCheck tests
+// =========================================================================
+
+test("fnCallCheck: calling a function type is fine") {
+    val messages: any = luaExpr("{}")
+    val fnType = functionType([tInt, tString], [], 0)
+    val callee = variableAccessExpr(localTarget("f"), testSection)
+    setExprType(callee, fnType)
+    val arg = atomExpr("42", tInt, testSection)
+    val callExpr = fnCallExpr(callee, [arg], testSection)
+    setExprType(callExpr, tString)
+
+    val exprs: any = luaExpr("{}")
+    embedLua("table.insert(exprs, callExpr)")
+    fnCallCheck(exprs, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 0)
+}
+
+test("fnCallCheck: calling a non-function type produces error") {
+    val messages: any = luaExpr("{}")
+    val callee = variableAccessExpr(localTarget("x"), testSection)
+    setExprType(callee, tInt)
+    val arg = atomExpr("42", tInt, testSection)
+    val callExpr = fnCallExpr(callee, [arg], testSection)
+    setExprType(callExpr, tInt)
+
+    val exprs: any = luaExpr("{}")
+    embedLua("table.insert(exprs, callExpr)")
+    fnCallCheck(exprs, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 1)
+    val msg: any = luaExpr("messages[1]")
+    val code: string = luaExpr("msg.code")
+    assertEqual(code, "NOT_A_FUNCTION")
+}
+
+test("fnCallCheck: nested fn_call checks callee types") {
+    val messages: any = luaExpr("{}")
+    // Inner call: callee is int (bad)
+    val innerCallee = variableAccessExpr(localTarget("x"), testSection)
+    setExprType(innerCallee, tInt)
+    val innerCall = fnCallExpr(innerCallee, [], testSection)
+    setExprType(innerCall, tInt)
+
+    // Outer call: callee is fn (good)
+    val fnType = functionType([tInt, tString], [], 0)
+    val outerCallee = variableAccessExpr(localTarget("f"), testSection)
+    setExprType(outerCallee, fnType)
+    val outerCall = fnCallExpr(outerCallee, [innerCall], testSection)
+    setExprType(outerCall, tString)
+
+    val exprs: any = luaExpr("{}")
+    embedLua("table.insert(exprs, outerCall)")
+    fnCallCheck(exprs, messages)
+    val msgCount: int = luaExpr("#messages")
+    // Only inner call should produce an error
+    assertEqual(msgCount, 1)
+}
+
+// =========================================================================
+// immutabilityCheck tests
+// =========================================================================
+
+test("immutabilityCheck: assignment to mutable is fine") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val sym = newSymbol("test", "pkg", "x", tInt, true, true)
+    ctDefineSymbol(ct, sym)
+    val messages: any = luaExpr("{}")
+
+    val value = atomExpr("42", tInt, testSection)
+    val expr = assignmentExpr(localTarget("x"), value, testSection)
+    setExprType(expr, tInt)
+    val exprs: any = luaExpr("{}")
+    embedLua("table.insert(exprs, expr)")
+    immutabilityCheck(exprs, "test", "pkg", ct, unit, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 0)
+}
+
+test("immutabilityCheck: assignment to immutable produces error") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val sym = newSymbol("test", "pkg", "y", tInt, true, false)
+    ctDefineSymbol(ct, sym)
+    val messages: any = luaExpr("{}")
+
+    val value = atomExpr("42", tInt, testSection)
+    val expr = assignmentExpr(localTarget("y"), value, testSection)
+    setExprType(expr, tInt)
+    val exprs: any = luaExpr("{}")
+    embedLua("table.insert(exprs, expr)")
+    immutabilityCheck(exprs, "test", "pkg", ct, unit, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 1)
+    val msg: any = luaExpr("messages[1]")
+    val code: string = luaExpr("msg.code")
+    assertEqual(code, "CANNOT_CHANGE_IMMUTABLE")
+}
+
+test("immutabilityCheck: package target same module") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val sym = newSymbol("test", "pkg", "z", tInt, true, false)
+    ctDefineSymbol(ct, sym)
+    val messages: any = luaExpr("{}")
+
+    val value = atomExpr("42", tInt, testSection)
+    val expr = assignmentExpr(packageTarget("test", "pkg", "z"), value, testSection)
+    setExprType(expr, tInt)
+    val exprs: any = luaExpr("{}")
+    embedLua("table.insert(exprs, expr)")
+    immutabilityCheck(exprs, "test", "pkg", ct, unit, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 1)
+}
+
+test("immutabilityCheck: cross-module package target") {
+    val ns: any = luaExpr("{}")
+    embedLua("ns.getSymbol = function(mod, pkg, name) return { moduleName = mod, packageName = pkg, name = name, symbolType = nil, isPublic = true, isMutable = false } end")
+    val messages: any = luaExpr("{}")
+
+    val value = atomExpr("42", tInt, testSection)
+    val expr = assignmentExpr(packageTarget("other", "otherpkg", "w"), value, testSection)
+    setExprType(expr, tInt)
+    val exprs: any = luaExpr("{}")
+    embedLua("table.insert(exprs, expr)")
+    immutabilityCheck(exprs, "test", "pkg", unit, ns, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 1)
+}
+
+// =========================================================================
+// returnTypeCheck tests
+// =========================================================================
+
+test("returnTypeCheck: matching return type is fine") {
+    val messages: any = luaExpr("{}")
+
+    // fn: (int) -> int, body has return with int value
+    val fnType = functionType([tInt, tInt], [], 0)
+    val retValue = atomExpr("42", tInt, testSection)
+    setExprType(retValue, tInt)
+    val retExpr = returnExpr(retValue, testSection)
+    setExprType(retExpr, tInt)
+    val body = blockExpr([retExpr], testSection)
+    setExprType(body, tInt)
+    val params: any = luaExpr("{}")
+    val p = newFnParam("x", tInt, testSection)
+    embedLua("table.insert(params, p)")
+    val fnNode = fnExpr(params, unit, body, testSection)
+    setExprType(fnNode, fnType)
+
+    val exprs: any = luaExpr("{}")
+    embedLua("table.insert(exprs, fnNode)")
+    returnTypeCheck(exprs, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 0)
+}
+
+test("returnTypeCheck: mismatched return type produces error") {
+    val messages: any = luaExpr("{}")
+
+    // fn: (int) -> int, body has return with string value
+    val fnType = functionType([tInt, tInt], [], 0)
+    val retValue = atomExpr("hello", tString, testSection)
+    setExprType(retValue, tString)
+    val retExpr = returnExpr(retValue, testSection)
+    setExprType(retExpr, tString)
+    val body = blockExpr([retExpr], testSection)
+    setExprType(body, tString)
+    val params: any = luaExpr("{}")
+    val p = newFnParam("x", tInt, testSection)
+    embedLua("table.insert(params, p)")
+    val fnNode = fnExpr(params, unit, body, testSection)
+    setExprType(fnNode, fnType)
+
+    val exprs: any = luaExpr("{}")
+    embedLua("table.insert(exprs, fnNode)")
+    returnTypeCheck(exprs, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 1)
+    val msg: any = luaExpr("messages[1]")
+    val code: string = luaExpr("msg.code")
+    assertEqual(code, "TYPE_MISMATCH")
+}
+
+test("returnTypeCheck: return outside function produces error") {
+    val messages: any = luaExpr("{}")
+
+    val retValue = atomExpr("42", tInt, testSection)
+    setExprType(retValue, tInt)
+    val retExpr = returnExpr(retValue, testSection)
+    setExprType(retExpr, tInt)
+
+    val exprs: any = luaExpr("{}")
+    embedLua("table.insert(exprs, retExpr)")
+    returnTypeCheck(exprs, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 1)
+    val msg: any = luaExpr("messages[1]")
+    val code: string = luaExpr("msg.code")
+    assertEqual(code, "ERROR")
+}
+
+test("returnTypeCheck: name_declaration with fn value sets expected return type") {
+    val messages: any = luaExpr("{}")
+
+    // val f = fn(x: int): int { return "hello" }
+    val fnType = functionType([tInt, tInt], [], 0)
+    val retValue = atomExpr("hello", tString, testSection)
+    setExprType(retValue, tString)
+    val retExpr = returnExpr(retValue, testSection)
+    setExprType(retExpr, tString)
+    val body = blockExpr([retExpr], testSection)
+    setExprType(body, tString)
+    val params: any = luaExpr("{}")
+    val p = newFnParam("x", tInt, testSection)
+    embedLua("table.insert(params, p)")
+    val fnNode = fnExpr(params, unit, body, testSection)
+    setExprType(fnNode, fnType)
+
+    val decl = nameDeclarationExpr(false, "f", false, unit, fnNode, testSection)
+    setExprType(decl, fnType)
+
+    val exprs: any = luaExpr("{}")
+    embedLua("table.insert(exprs, decl)")
+    returnTypeCheck(exprs, messages)
+    val msgCount: int = luaExpr("#messages")
+    // The return "hello" should produce a type mismatch (int vs string)
+    assertEqual(msgCount, 1)
+}
+
+summary()

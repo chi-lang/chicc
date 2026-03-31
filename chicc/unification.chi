@@ -1,0 +1,319 @@
+// chicc/chicc/unification.chi
+package user/unification
+import std/lang { luaExpr, embedLua }
+import std/lang.array { size, push }
+import user/types { Type, TypeId, RecordField, typeTag, typeIds, typeTypes, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeEquals, replaceVariable, occursInExcludingSumBranches, unfoldRecursive, isPrimitive, isFunction, isRecord, isSum, isArray, isVariable, isRecursive, typeTypesCount, typeFieldsCount, typeIdEquals, tAny, tUnit }
+import user/messages { Message, typeMismatch, notAFunction, functionArityError, infiniteType }
+import user/source { Section, toCodePoint }
+
+// Constraint type
+type Constraint = {
+    expected: any,
+    actual: any,
+    section: any,
+    history: array[any]
+}
+
+pub fn newConstraint(expected: any, actual: any, section: any, history: array[any]): Constraint {
+    { expected: expected, actual: actual, section: section, history: history }
+}
+
+// Apply variable replacement to both expected and actual types in a constraint
+pub fn constraintWithReplacedVariable(c: Constraint, toReplace: Type, substitution: Type): Constraint {
+    val exp = luaExpr("c.expected") as Type
+    val act = luaExpr("c.actual") as Type
+    val newExp = replaceVariable(exp, toReplace, substitution)
+    val newAct = replaceVariable(act, toReplace, substitution)
+    { expected: newExp, actual: newAct, section: c.section, history: c.history }
+}
+
+// Simple type description for error messages
+fn typeDescr(t: Type): string {
+    val tag = typeTag(t)
+    if tag == "primitive" {
+        val ids = typeIds(t)
+        val first = ids[1]
+        first.name
+    } else if tag == "fn" {
+        "function"
+    } else if tag == "record" {
+        "record"
+    } else if tag == "sum" {
+        "sum"
+    } else if tag == "array" {
+        "array"
+    } else if tag == "var" {
+        typeName(t)
+    } else if tag == "recursive" {
+        "recursive"
+    } else {
+        tag
+    }
+}
+
+// Extract codepoint from section (which can be unit)
+fn sectionToCodePoint(section: any): any {
+    val isUnit = luaExpr("section == nil") as bool
+    if isUnit {
+        unit
+    } else {
+        val sec = luaExpr("section") as Section
+        toCodePoint(sec)
+    }
+}
+
+// Check if two TypeId arrays share any common element
+fn idsIntersect(a: array[TypeId], b: array[TypeId]): bool {
+    val aLen = a.size()
+    val bLen = b.size()
+    var i = 1
+    while i <= aLen {
+        var j = 1
+        while j <= bLen {
+            if typeIdEquals(a[i], b[j]) { return true }
+            j = j + 1
+        }
+        i = i + 1
+    }
+    false
+}
+
+// Throw a Message as a Lua error
+fn throwMessage(msg: Message) {
+    embedLua("error(msg)")
+}
+
+// Main unification function
+pub fn unify(constraints: array[any]): array[any] {
+    // Build the queue as a Lua array, use pos index to advance
+    val queue: array[any] = luaExpr("{}") as array[any]
+    val initialCount = luaExpr("#constraints") as int
+    var i = 1
+    while i <= initialCount {
+        val c = luaExpr("constraints[i]") as any
+        embedLua("table.insert(queue, c)")
+        i = i + 1
+    }
+
+    val solutions: array[any] = luaExpr("{}")
+    var pos = 1
+
+    while pos <= luaExpr("#queue") as int {
+        val constraint = luaExpr("queue[pos]") as Constraint
+        pos = pos + 1
+        val expected = luaExpr("constraint.expected") as Type
+        val actual = luaExpr("constraint.actual") as Type
+        val section = luaExpr("constraint.section") as any
+        val history = luaExpr("constraint.history or {}") as array[any]
+
+        if typeEquals(expected, actual) {
+            // skip - types are equal
+        } else if typeEquals(expected, tAny) {
+            // skip - expected is any
+        } else if isPrimitive(expected) && isPrimitive(actual) {
+            val expIds = typeIds(expected)
+            val actIds = typeIds(actual)
+            if idsIntersect(expIds, actIds) == false {
+                val cp = sectionToCodePoint(section)
+                throwMessage(typeMismatch(typeDescr(expected), typeDescr(actual), cp))
+            }
+        } else if isRecursive(expected) {
+            val unfolded = unfoldRecursive(expected)
+            val newHistory: array[any] = luaExpr("{}")
+            val hLen = luaExpr("#history") as int
+            var hi = 1
+            while hi <= hLen {
+                val hItem = luaExpr("history[hi]") as any
+                embedLua("table.insert(newHistory, hItem)")
+                hi = hi + 1
+            }
+            embedLua("table.insert(newHistory, constraint)")
+            val nc = newConstraint(unfolded, actual, section, newHistory)
+            // Insert at current position (before remaining items)
+            embedLua("table.insert(queue, pos, nc)")
+        } else if isRecursive(actual) {
+            val unfolded = unfoldRecursive(actual)
+            val newHistory: array[any] = luaExpr("{}")
+            val hLen = luaExpr("#history") as int
+            var hi = 1
+            while hi <= hLen {
+                val hItem = luaExpr("history[hi]") as any
+                embedLua("table.insert(newHistory, hItem)")
+                hi = hi + 1
+            }
+            embedLua("table.insert(newHistory, constraint)")
+            val nc = newConstraint(expected, unfolded, section, newHistory)
+            embedLua("table.insert(queue, pos, nc)")
+        } else if isVariable(expected) {
+            if occursInExcludingSumBranches(expected, actual) {
+                val cp = sectionToCodePoint(section)
+                throwMessage(infiniteType(typeName(expected), typeDescr(actual), cp))
+            }
+            val sol = { variable: expected, replacement: actual }
+            embedLua("table.insert(solutions, sol)")
+            // Replace in all remaining constraints
+            val qLen = luaExpr("#queue") as int
+            var qi = pos
+            while qi <= qLen {
+                val qc = luaExpr("queue[qi]") as Constraint
+                val replaced = constraintWithReplacedVariable(qc, expected, actual)
+                embedLua("queue[qi] = replaced")
+                qi = qi + 1
+            }
+        } else if isVariable(actual) {
+            if occursInExcludingSumBranches(actual, expected) {
+                val cp = sectionToCodePoint(section)
+                throwMessage(infiniteType(typeName(actual), typeDescr(expected), cp))
+            }
+            val sol = { variable: actual, replacement: expected }
+            embedLua("table.insert(solutions, sol)")
+            // Replace in all remaining constraints
+            val qLen = luaExpr("#queue") as int
+            var qi = pos
+            while qi <= qLen {
+                val qc = luaExpr("queue[qi]") as Constraint
+                val replaced = constraintWithReplacedVariable(qc, actual, expected)
+                embedLua("queue[qi] = replaced")
+                qi = qi + 1
+            }
+        } else if isFunction(expected) && isFunction(actual) {
+            val expTypes = typeTypes(expected)
+            val actTypes = typeTypes(actual)
+            val expLen = luaExpr("#expTypes") as int
+            val actLen = luaExpr("#actTypes") as int
+            if expLen != actLen {
+                val cp = sectionToCodePoint(section)
+                throwMessage(functionArityError(expLen - 1, actLen - 1, cp))
+            }
+            val lastIndex = expLen
+            var fi = 1
+            while fi <= expLen {
+                val expParam = luaExpr("expTypes[fi]") as Type
+                val actParam = luaExpr("actTypes[fi]") as Type
+                // Special: if last type is unit expected and actual is not a variable, skip
+                if fi == lastIndex && typeEquals(expParam, tUnit) && isVariable(actParam) == false {
+                    // void return accepts anything - skip
+                } else {
+                    val newHistory: array[any] = luaExpr("{}")
+                    val hLen = luaExpr("#history") as int
+                    var hi = 1
+                    while hi <= hLen {
+                        val hItem = luaExpr("history[hi]") as any
+                        embedLua("table.insert(newHistory, hItem)")
+                        hi = hi + 1
+                    }
+                    embedLua("table.insert(newHistory, constraint)")
+                    val nc = newConstraint(expParam, actParam, section, newHistory)
+                    embedLua("table.insert(queue, pos, nc)")
+                }
+                fi = fi + 1
+            }
+        } else if isRecord(expected) && isRecord(actual) {
+            val expFields = typeFields(expected)
+            val actFields = typeFields(actual)
+            val expFCount = luaExpr("#expFields") as int
+            val actFCount = luaExpr("#actFields") as int
+            var fi = 1
+            while fi <= expFCount {
+                val expField = luaExpr("expFields[fi]") as RecordField
+                val expFieldName = expField.name
+                val expFieldType = luaExpr("expField.fieldType") as Type
+                // Find matching actual field by name
+                var found = false
+                var actFieldType: Type = tUnit
+                var aj = 1
+                while aj <= actFCount {
+                    val af = luaExpr("actFields[aj]") as RecordField
+                    if af.name == expFieldName {
+                        found = true
+                        actFieldType = luaExpr("af.fieldType") as Type
+                    }
+                    aj = aj + 1
+                }
+                if found == false {
+                    val cp = sectionToCodePoint(section)
+                    throwMessage(typeMismatch("record with field '$expFieldName'", "record without field '$expFieldName'", cp))
+                }
+                val newHistory: array[any] = luaExpr("{}")
+                val hLen = luaExpr("#history") as int
+                var hi = 1
+                while hi <= hLen {
+                    val hItem = luaExpr("history[hi]") as any
+                    embedLua("table.insert(newHistory, hItem)")
+                    hi = hi + 1
+                }
+                embedLua("table.insert(newHistory, constraint)")
+                val nc = newConstraint(expFieldType, actFieldType, section, newHistory)
+                embedLua("table.insert(queue, pos, nc)")
+                fi = fi + 1
+            }
+        } else if isArray(expected) && isArray(actual) {
+            val expElem = luaExpr("expected.elementType") as Type
+            val actElem = luaExpr("actual.elementType") as Type
+            val newHistory: array[any] = luaExpr("{}")
+            val hLen = luaExpr("#history") as int
+            var hi = 1
+            while hi <= hLen {
+                val hItem = luaExpr("history[hi]") as any
+                embedLua("table.insert(newHistory, hItem)")
+                hi = hi + 1
+            }
+            embedLua("table.insert(newHistory, constraint)")
+            val nc = newConstraint(expElem, actElem, section, newHistory)
+            embedLua("table.insert(queue, pos, nc)")
+        } else if isSum(expected) {
+            // Try unifying with rhs first, fall back to lhs
+            val expRhs = luaExpr("expected.rhs") as Type
+            val expLhs = luaExpr("expected.lhs") as Type
+            val newHistory: array[any] = luaExpr("{}")
+            val hLen = luaExpr("#history") as int
+            var hi = 1
+            while hi <= hLen {
+                val hItem = luaExpr("history[hi]") as any
+                embedLua("table.insert(newHistory, hItem)")
+                hi = hi + 1
+            }
+            embedLua("table.insert(newHistory, constraint)")
+            val rhsConstraint = newConstraint(expRhs, actual, section, newHistory)
+            val rhsConstraints: array[any] = luaExpr("{}")
+            embedLua("table.insert(rhsConstraints, rhsConstraint)")
+
+            // Use pcall to try rhs first
+            embedLua("local __pcall_ok, __pcall_result = pcall(unify, rhsConstraints)")
+            val pcallOk = luaExpr("__pcall_ok") as bool
+            if pcallOk {
+                // Apply partial solutions to remaining queue
+                val partialSolutions: array[any] = luaExpr("__pcall_result")
+                val psLen = luaExpr("#partialSolutions") as int
+                var si = 1
+                while si <= psLen {
+                    val psEntry = luaExpr("partialSolutions[si]") as any
+                    val psVar = luaExpr("psEntry.variable") as Type
+                    val psRepl = luaExpr("psEntry.replacement") as Type
+                    embedLua("table.insert(solutions, psEntry)")
+                    val qLen = luaExpr("#queue") as int
+                    var qi = pos
+                    while qi <= qLen {
+                        val qc = luaExpr("queue[qi]") as Constraint
+                        val replaced = constraintWithReplacedVariable(qc, psVar, psRepl)
+                        embedLua("queue[qi] = replaced")
+                        qi = qi + 1
+                    }
+                    si = si + 1
+                }
+            } else {
+                // rhs failed, try lhs
+                val lhsConstraint = newConstraint(expLhs, actual, section, newHistory)
+                embedLua("table.insert(queue, pos, lhsConstraint)")
+            }
+        } else if isFunction(expected) && isFunction(actual) == false {
+            val cp = sectionToCodePoint(section)
+            throwMessage(notAFunction(cp))
+        } else {
+            val cp = sectionToCodePoint(section)
+            throwMessage(typeMismatch(typeDescr(expected), typeDescr(actual), cp))
+        }
+    }
+
+    solutions
+}

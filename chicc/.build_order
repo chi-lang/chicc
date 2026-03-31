@@ -1,0 +1,22 @@
+# Explicit build order for chicc source files
+# Files listed here are inlined first, in this order.
+# Any .chi files not listed are appended alphabetically after these.
+messages.chi
+source.chi
+token.chi
+types.chi
+util.chi
+ast.chi
+parse_ast.chi
+type_writer.chi
+emitter.chi
+lexer.chi
+parser.chi
+symbols.chi
+ast_converter.chi
+unification.chi
+inference_context.chi
+typer.chi
+checks.chi
+compiler.chi
+cli.chi

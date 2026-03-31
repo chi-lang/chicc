@@ -1,0 +1,316 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/parse_ast { PackageDefinition }
+import std/io.file { readString }
+import std/lang { luaExpr, embedLua }
+import std/lang.array { size }
+
+// Helper: parse a golden file and return the ParseProgram
+// Uses pcall internally so parse failures don't crash the whole test suite
+fn parseGoldenFile(path: string): any {
+    val source = readString(path)
+    val tokens = tokenize(source)
+    val p = newParser(tokens, source)
+    parseProgram(p)
+}
+
+// Helper: attempt to parse and return whether it succeeded
+// Returns { ok: bool, result: any, error: string }
+fn tryParseGolden(path: string): { ok: bool, result: any, errMsg: string } {
+    embedLua("local source = readString(path)")
+    embedLua("local ok2, tokens = pcall(tokenize, source)")
+    embedLua("if not ok2 then __chi_parse_ok = false; __chi_parse_err = tostring(tokens); __chi_parse_result = nil; return end")
+    embedLua("local p = newParser(tokens, source)")
+    embedLua("local ok3, prog = pcall(parseProgram, p)")
+    embedLua("__chi_parse_ok = ok3")
+    embedLua("__chi_parse_err = ok3 and '' or tostring(prog)")
+    embedLua("__chi_parse_result = ok3 and prog or nil")
+    val ok: bool = luaExpr("__chi_parse_ok")
+    val errMsg: string = luaExpr("__chi_parse_err") as string
+    val result: any = luaExpr("__chi_parse_result")
+    { ok: ok, result: result, errMsg: errMsg }
+}
+
+// ===== Control Flow =====
+
+test("parse golden: control_flow/break") {
+    val r = tryParseGolden("golden/control_flow/break.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+    assertTrue(prog.packageDefinition is unit)
+}
+
+test("parse golden: control_flow/if_else") {
+    val r = tryParseGolden("golden/control_flow/if_else.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: control_flow/while") {
+    val r = tryParseGolden("golden/control_flow/while.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: control_flow/for_array") {
+    val r = tryParseGolden("golden/control_flow/for_array.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: control_flow/continue") {
+    val r = tryParseGolden("golden/control_flow/continue.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: control_flow/for_indexed") {
+    val r = tryParseGolden("golden/control_flow/for_indexed.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: control_flow/nested_loops") {
+    val r = tryParseGolden("golden/control_flow/nested_loops.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+// ===== Functions =====
+
+test("parse golden: functions/definitions") {
+    val r = tryParseGolden("golden/functions/definitions.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: functions/lambdas") {
+    val r = tryParseGolden("golden/functions/lambdas.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: functions/higher_order") {
+    val r = tryParseGolden("golden/functions/higher_order.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: functions/recursion") {
+    val r = tryParseGolden("golden/functions/recursion.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: functions/closures") {
+    val r = tryParseGolden("golden/functions/closures.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: functions/early_return") {
+    val r = tryParseGolden("golden/functions/early_return.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: functions/mutual_recursion") {
+    val r = tryParseGolden("golden/functions/mutual_recursion.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: functions/defaults") {
+    val r = tryParseGolden("golden/functions/defaults.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+// ===== Strings =====
+
+test("parse golden: strings/basic") {
+    val r = tryParseGolden("golden/strings/basic.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: strings/interpolation") {
+    val r = tryParseGolden("golden/strings/interpolation.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: strings/escape") {
+    val r = tryParseGolden("golden/strings/escape.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: strings/concat") {
+    val r = tryParseGolden("golden/strings/concat.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: strings/operations") {
+    val r = tryParseGolden("golden/strings/operations.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+// ===== Types =====
+
+test("parse golden: types/arrays") {
+    val r = tryParseGolden("golden/types/arrays.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: types/records") {
+    val r = tryParseGolden("golden/types/records.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: types/sum_types") {
+    val r = tryParseGolden("golden/types/sum_types.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    // sum_types.chi has type aliases (type Num = int | float)
+    assertTrue(prog.typeAliases.size() > 0)
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: types/generics") {
+    val r = tryParseGolden("golden/types/generics.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: types/float_and_bool") {
+    val r = tryParseGolden("golden/types/float_and_bool.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: types/when_expr") {
+    val r = tryParseGolden("golden/types/when_expr.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: types/option") {
+    val r = tryParseGolden("golden/types/option.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: types/type_aliases") {
+    val r = tryParseGolden("golden/types/type_aliases.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.typeAliases.size() > 0)
+}
+
+test("parse golden: types/generic_polymorphism") {
+    val r = tryParseGolden("golden/types/generic_polymorphism.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+// ===== Effects =====
+
+test("parse golden: effects/basic") {
+    val r = tryParseGolden("golden/effects/basic.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    // effects/basic.chi has 'package user/effects'
+    assertTrue(prog.packageDefinition is PackageDefinition)
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: effects/logging") {
+    val r = tryParseGolden("golden/effects/logging.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: effects/nested") {
+    val r = tryParseGolden("golden/effects/nested.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+// ===== Modules =====
+
+test("parse golden: modules/public_private") {
+    val r = tryParseGolden("golden/modules/public_private.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    // This file has a package declaration
+    assertTrue(prog.packageDefinition is PackageDefinition)
+    val pkg = prog.packageDefinition as PackageDefinition
+    assertEqual(pkg.moduleName, "user")
+    assertEqual(pkg.packageName, "mymod")
+    assertTrue(prog.code.size() > 0)
+}
+
+// ===== Additional edge cases =====
+
+test("parse golden: control_flow/for_record") {
+    val r = tryParseGolden("golden/control_flow/for_record.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: functions/return_sum_type") {
+    val r = tryParseGolden("golden/functions/return_sum_type.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: strings/compare") {
+    val r = tryParseGolden("golden/strings/compare.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parse golden: strings/unicode") {
+    val r = tryParseGolden("golden/strings/unicode.chi")
+    assertTrue(r.ok)
+    val prog = r.result
+    assertTrue(prog.code.size() > 0)
+}
+
+summary()

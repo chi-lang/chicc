@@ -1,0 +1,495 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/token { Token, newToken, TK_INT, TK_FLOAT, TK_STRING, TK_TRUE, TK_FALSE, TK_UNIT, TK_ID, TK_PLUS, TK_MINUS, TK_STAR, TK_SLASH, TK_PERCENT, TK_EQEQ, TK_NEQ, TK_LT, TK_LTEQ, TK_GT, TK_GTEQ, TK_NOT, TK_AND, TK_OR, TK_AMP, TK_PIPE, TK_LSHIFT, TK_RSHIFT, TK_WEAVE, TK_UNDERSCORE, TK_DOT, TK_COMMA, TK_COLON, TK_EQ, TK_PLUSEQ, TK_MINUSEQ, TK_STAREQ, TK_SLASHEQ, TK_LPAREN, TK_RPAREN, TK_LBRACE, TK_RBRACE, TK_LBRACKET, TK_RBRACKET, TK_RETURN, TK_BREAK, TK_CONTINUE, TK_EOF, TK_NEWLINE, TK_FN, TK_VAL, TK_VAR, TK_PUB, TK_ARROW }
+import user/parser { newParser, parseExpression, parseExpr }
+import user/parse_ast { paTag, paLongValue, paFloatValue, paBoolValue, paStringValue, paVariableName, paOp, paLeft, paRight, paValue, paReturnValue, paArrayValues, paRecordFields, paCallee, paArguments, paReceiverName, paMemberName, paReceiver, paVariable, paIndexExpr, paIndexValue, paName, paIsPublic, paTypeParameters, paFormalArguments, paReturnTypeRef, paBody, paFuncBody, paIsMutable, paSymbolName, paSymbolSection, paTypeRef }
+import std/lang.array { size }
+
+fn tk(kind: int, value: string): Token { newToken(kind, value, unit) }
+fn eof(): Token { newToken(TK_EOF, "", unit) }
+
+// ==============================
+// parseFuncWithName tests
+// ==============================
+
+test("parse simple fn declaration") {
+    // fn foo() { 42 }
+    val tokens = [
+        tk(TK_FN, "fn"), tk(TK_ID, "foo"),
+        tk(TK_LPAREN, "("), tk(TK_RPAREN, ")"),
+        tk(TK_LBRACE, "{"), tk(TK_INT, "42"), tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseFuncWithName")
+    assertEqual(paName(result), "foo")
+    assertFalse(paIsPublic(result))
+    assertEqual(paFormalArguments(result).size(), 0)
+    assertEqual(paTypeParameters(result).size(), 0)
+}
+
+test("parse pub fn declaration") {
+    // pub fn bar() { 1 }
+    val tokens = [
+        tk(TK_PUB, "pub"), tk(TK_FN, "fn"), tk(TK_ID, "bar"),
+        tk(TK_LPAREN, "("), tk(TK_RPAREN, ")"),
+        tk(TK_LBRACE, "{"), tk(TK_INT, "1"), tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseFuncWithName")
+    assertEqual(paName(result), "bar")
+    assertTrue(paIsPublic(result))
+}
+
+test("parse fn with one arg") {
+    // fn add(x: int) { x }
+    // Note: parseTypeRefFwd is a stub that just advances, so "int" is consumed as one token
+    val tokens = [
+        tk(TK_FN, "fn"), tk(TK_ID, "add"),
+        tk(TK_LPAREN, "("), tk(TK_ID, "x"), tk(TK_COLON, ":"), tk(TK_ID, "int"), tk(TK_RPAREN, ")"),
+        tk(TK_LBRACE, "{"), tk(TK_ID, "x"), tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseFuncWithName")
+    assertEqual(paName(result), "add")
+    assertEqual(paFormalArguments(result).size(), 1)
+    val arg1 = paFormalArguments(result)[1]
+    assertEqual(arg1.name, "x")
+}
+
+test("parse fn with multiple args") {
+    // fn add(a: int, b: int) { 0 }
+    val tokens = [
+        tk(TK_FN, "fn"), tk(TK_ID, "add"),
+        tk(TK_LPAREN, "("),
+        tk(TK_ID, "a"), tk(TK_COLON, ":"), tk(TK_ID, "int"), tk(TK_COMMA, ","),
+        tk(TK_ID, "b"), tk(TK_COLON, ":"), tk(TK_ID, "int"),
+        tk(TK_RPAREN, ")"),
+        tk(TK_LBRACE, "{"), tk(TK_INT, "0"), tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseFuncWithName")
+    assertEqual(paName(result), "add")
+    assertEqual(paFormalArguments(result).size(), 2)
+    val arg1 = paFormalArguments(result)[1]
+    val arg2 = paFormalArguments(result)[2]
+    assertEqual(arg1.name, "a")
+    assertEqual(arg2.name, "b")
+}
+
+test("parse fn with return type") {
+    // fn foo(): int { 42 }
+    val tokens = [
+        tk(TK_FN, "fn"), tk(TK_ID, "foo"),
+        tk(TK_LPAREN, "("), tk(TK_RPAREN, ")"),
+        tk(TK_COLON, ":"), tk(TK_ID, "int"),
+        tk(TK_LBRACE, "{"), tk(TK_INT, "42"), tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseFuncWithName")
+    assertEqual(paName(result), "foo")
+    // Return type was parsed (not unit)
+    val retType = paReturnTypeRef(result)
+    assertTrue(retType != unit)
+}
+
+test("parse fn with type parameters") {
+    // fn identity[T](x: T) { x }
+    val tokens = [
+        tk(TK_FN, "fn"), tk(TK_ID, "identity"),
+        tk(TK_LBRACKET, "["), tk(TK_ID, "T"), tk(TK_RBRACKET, "]"),
+        tk(TK_LPAREN, "("), tk(TK_ID, "x"), tk(TK_COLON, ":"), tk(TK_ID, "T"), tk(TK_RPAREN, ")"),
+        tk(TK_LBRACE, "{"), tk(TK_ID, "x"), tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseFuncWithName")
+    assertEqual(paName(result), "identity")
+    assertEqual(paTypeParameters(result).size(), 1)
+}
+
+test("parse fn with multiple type parameters") {
+    // fn pair[A, B](a: A, b: B) { 0 }
+    val tokens = [
+        tk(TK_FN, "fn"), tk(TK_ID, "pair"),
+        tk(TK_LBRACKET, "["), tk(TK_ID, "A"), tk(TK_COMMA, ","), tk(TK_ID, "B"), tk(TK_RBRACKET, "]"),
+        tk(TK_LPAREN, "("),
+        tk(TK_ID, "a"), tk(TK_COLON, ":"), tk(TK_ID, "A"), tk(TK_COMMA, ","),
+        tk(TK_ID, "b"), tk(TK_COLON, ":"), tk(TK_ID, "B"),
+        tk(TK_RPAREN, ")"),
+        tk(TK_LBRACE, "{"), tk(TK_INT, "0"), tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseFuncWithName")
+    assertEqual(paTypeParameters(result).size(), 2)
+    assertEqual(paFormalArguments(result).size(), 2)
+}
+
+test("parse fn with default arg value") {
+    // fn foo(x: int = 10) { x }
+    val tokens = [
+        tk(TK_FN, "fn"), tk(TK_ID, "foo"),
+        tk(TK_LPAREN, "("),
+        tk(TK_ID, "x"), tk(TK_COLON, ":"), tk(TK_ID, "int"), tk(TK_EQ, "="), tk(TK_INT, "10"),
+        tk(TK_RPAREN, ")"),
+        tk(TK_LBRACE, "{"), tk(TK_ID, "x"), tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseFuncWithName")
+    assertEqual(paFormalArguments(result).size(), 1)
+    val arg1 = paFormalArguments(result)[1]
+    assertEqual(arg1.name, "x")
+    // Default value should be set
+    assertTrue(arg1.defaultValue != unit)
+}
+
+test("parse fn body is a block") {
+    // fn foo() { 1 }
+    val tokens = [
+        tk(TK_FN, "fn"), tk(TK_ID, "foo"),
+        tk(TK_LPAREN, "("), tk(TK_RPAREN, ")"),
+        tk(TK_LBRACE, "{"), tk(TK_INT, "1"), tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseFuncWithName")
+    val body = paFuncBody(result)
+    assertEqual(paTag(body), "ParseBlock")
+    assertEqual(paBody(body).size(), 1)
+}
+
+// ==============================
+// parseNameDeclaration tests
+// ==============================
+
+test("parse val declaration") {
+    // val x = 42
+    val tokens = [
+        tk(TK_VAL, "val"), tk(TK_ID, "x"), tk(TK_EQ, "="), tk(TK_INT, "42"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseNameDeclaration")
+    assertEqual(paSymbolName(result), "x")
+    assertFalse(paIsMutable(result))
+    assertFalse(paIsPublic(result))
+    assertEqual(paLongValue(paValue(result)), 42)
+}
+
+test("parse var declaration") {
+    // var count = 0
+    val tokens = [
+        tk(TK_VAR, "var"), tk(TK_ID, "count"), tk(TK_EQ, "="), tk(TK_INT, "0"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseNameDeclaration")
+    assertEqual(paSymbolName(result), "count")
+    assertTrue(paIsMutable(result))
+    assertFalse(paIsPublic(result))
+}
+
+test("parse pub val declaration") {
+    // pub val x = 42
+    val tokens = [
+        tk(TK_PUB, "pub"), tk(TK_VAL, "val"), tk(TK_ID, "x"), tk(TK_EQ, "="), tk(TK_INT, "42"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseNameDeclaration")
+    assertEqual(paSymbolName(result), "x")
+    assertFalse(paIsMutable(result))
+    assertTrue(paIsPublic(result))
+}
+
+test("parse pub var declaration") {
+    // pub var x = 0
+    val tokens = [
+        tk(TK_PUB, "pub"), tk(TK_VAR, "var"), tk(TK_ID, "x"), tk(TK_EQ, "="), tk(TK_INT, "0"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseNameDeclaration")
+    assertEqual(paSymbolName(result), "x")
+    assertTrue(paIsMutable(result))
+    assertTrue(paIsPublic(result))
+}
+
+test("parse val with type annotation") {
+    // val x: int = 42
+    // parseTypeRefFwd stub advances one token for the type
+    val tokens = [
+        tk(TK_VAL, "val"), tk(TK_ID, "x"), tk(TK_COLON, ":"), tk(TK_ID, "int"), tk(TK_EQ, "="), tk(TK_INT, "42"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseNameDeclaration")
+    assertEqual(paSymbolName(result), "x")
+    // Type ref was parsed (not unit)
+    val tRef = paTypeRef(result)
+    assertTrue(tRef != unit)
+    assertEqual(paLongValue(paValue(result)), 42)
+}
+
+test("parse val with string value") {
+    // val name = "hello"
+    val tokens = [
+        tk(TK_VAL, "val"), tk(TK_ID, "name"), tk(TK_EQ, "="), tk(TK_STRING, "hello"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseNameDeclaration")
+    assertEqual(paSymbolName(result), "name")
+    assertEqual(paStringValue(paValue(result)), "hello")
+}
+
+test("parse val with expression value") {
+    // val sum = 1 + 2
+    val tokens = [
+        tk(TK_VAL, "val"), tk(TK_ID, "sum"), tk(TK_EQ, "="),
+        tk(TK_INT, "1"), tk(TK_PLUS, "+"), tk(TK_INT, "2"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseNameDeclaration")
+    assertEqual(paSymbolName(result), "sum")
+    val valExpr = paValue(result)
+    assertEqual(paTag(valExpr), "ParseBinaryOp")
+    assertEqual(paOp(valExpr), "+")
+}
+
+test("parse var without type") {
+    // var counter = 0
+    val tokens = [
+        tk(TK_VAR, "var"), tk(TK_ID, "counter"), tk(TK_EQ, "="), tk(TK_INT, "0"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseNameDeclaration")
+    // Type ref should be unit
+    val tRef = paTypeRef(result)
+    assertTrue(tRef == unit)
+}
+
+// ==============================
+// parseBlock tests
+// ==============================
+
+test("parse empty block") {
+    // { }
+    val tokens = [
+        tk(TK_LBRACE, "{"), tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseBlock")
+    assertEqual(paBody(result).size(), 0)
+}
+
+test("parse block with single expr") {
+    // { 42 }
+    val tokens = [
+        tk(TK_LBRACE, "{"), tk(TK_INT, "42"), tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseBlock")
+    assertEqual(paBody(result).size(), 1)
+    assertEqual(paLongValue(paBody(result)[1]), 42)
+}
+
+test("parse block with multiple exprs") {
+    // { 1 \n 2 \n 3 }
+    val tokens = [
+        tk(TK_LBRACE, "{"),
+        tk(TK_INT, "1"), tk(TK_NEWLINE, "\n"),
+        tk(TK_INT, "2"), tk(TK_NEWLINE, "\n"),
+        tk(TK_INT, "3"),
+        tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseBlock")
+    assertEqual(paBody(result).size(), 3)
+}
+
+// ==============================
+// parseLambda tests
+// ==============================
+
+test("parse lambda with single arg") {
+    // { x -> x }
+    val tokens = [
+        tk(TK_LBRACE, "{"), tk(TK_ID, "x"), tk(TK_ARROW, "->"),
+        tk(TK_ID, "x"),
+        tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseLambda")
+    assertEqual(paFormalArguments(result).size(), 1)
+    val arg1 = paFormalArguments(result)[1]
+    assertEqual(arg1.name, "x")
+    assertEqual(paBody(result).size(), 1)
+}
+
+test("parse lambda with multiple args") {
+    // { a, b -> a }
+    val tokens = [
+        tk(TK_LBRACE, "{"),
+        tk(TK_ID, "a"), tk(TK_COMMA, ","), tk(TK_ID, "b"), tk(TK_ARROW, "->"),
+        tk(TK_ID, "a"),
+        tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseLambda")
+    assertEqual(paFormalArguments(result).size(), 2)
+    val arg1 = paFormalArguments(result)[1]
+    val arg2 = paFormalArguments(result)[2]
+    assertEqual(arg1.name, "a")
+    assertEqual(arg2.name, "b")
+}
+
+test("parse no-arg lambda") {
+    // { -> 42 }
+    val tokens = [
+        tk(TK_LBRACE, "{"), tk(TK_ARROW, "->"),
+        tk(TK_INT, "42"),
+        tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseLambda")
+    assertEqual(paFormalArguments(result).size(), 0)
+    assertEqual(paBody(result).size(), 1)
+    assertEqual(paLongValue(paBody(result)[1]), 42)
+}
+
+test("parse lambda with body expressions") {
+    // { x -> 1 \n 2 }
+    val tokens = [
+        tk(TK_LBRACE, "{"), tk(TK_ID, "x"), tk(TK_ARROW, "->"),
+        tk(TK_INT, "1"), tk(TK_NEWLINE, "\n"),
+        tk(TK_INT, "2"),
+        tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseLambda")
+    assertEqual(paBody(result).size(), 2)
+}
+
+// ==============================
+// Integration tests: fn with block body
+// ==============================
+
+test("parse fn with multi-line body") {
+    // fn foo() { 1 \n 2 }
+    val tokens = [
+        tk(TK_FN, "fn"), tk(TK_ID, "foo"),
+        tk(TK_LPAREN, "("), tk(TK_RPAREN, ")"),
+        tk(TK_LBRACE, "{"),
+        tk(TK_INT, "1"), tk(TK_NEWLINE, "\n"),
+        tk(TK_INT, "2"),
+        tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseFuncWithName")
+    val body = paFuncBody(result)
+    assertEqual(paTag(body), "ParseBlock")
+    assertEqual(paBody(body).size(), 2)
+}
+
+test("parse fn with empty body") {
+    // fn foo() { }
+    val tokens = [
+        tk(TK_FN, "fn"), tk(TK_ID, "foo"),
+        tk(TK_LPAREN, "("), tk(TK_RPAREN, ")"),
+        tk(TK_LBRACE, "{"), tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseFuncWithName")
+    val body = paFuncBody(result)
+    assertEqual(paTag(body), "ParseBlock")
+    assertEqual(paBody(body).size(), 0)
+}
+
+test("parse val with lambda value") {
+    // val f = { x -> x }
+    val tokens = [
+        tk(TK_VAL, "val"), tk(TK_ID, "f"), tk(TK_EQ, "="),
+        tk(TK_LBRACE, "{"), tk(TK_ID, "x"), tk(TK_ARROW, "->"),
+        tk(TK_ID, "x"),
+        tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseNameDeclaration")
+    assertEqual(paSymbolName(result), "f")
+    val valExpr = paValue(result)
+    assertEqual(paTag(valExpr), "ParseLambda")
+}
+
+test("parse block with newlines before content") {
+    // { \n 42 \n }
+    val tokens = [
+        tk(TK_LBRACE, "{"), tk(TK_NEWLINE, "\n"),
+        tk(TK_INT, "42"), tk(TK_NEWLINE, "\n"),
+        tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseBlock")
+    assertEqual(paBody(result).size(), 1)
+}
+
+test("parse block with leading newlines is empty") {
+    // { \n }
+    val tokens = [
+        tk(TK_LBRACE, "{"), tk(TK_NEWLINE, "\n"),
+        tk(TK_RBRACE, "}"),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseBlock")
+    assertEqual(paBody(result).size(), 0)
+}
+
+summary()

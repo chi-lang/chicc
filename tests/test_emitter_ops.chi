@@ -1,0 +1,249 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/util { newStringBuilder, StringBuilder, toString }
+import user/ast { Program, Package, newPackage, newProgram }
+import user/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitInfixOp, emitPrefixOp, emitCast, emitIs, mapInfixOperation }
+import std/lang { luaExpr, embedLua }
+
+fn freshState(): EmitterState {
+    val pkg = newPackage("mymod", "mypkg")
+    val prog = newProgram(pkg, [], [], [], unit)
+    newState(prog)
+}
+
+// Wire emitExpr for tests — handle atom, infix_op, prefix_op, cast, is
+emitExpr = { st, expr ->
+    val kind: string = luaExpr("expr.kind")
+    if kind == "atom" { emitAtom(st, expr) }
+    else if kind == "infix_op" { emitInfixOp(st, expr) }
+    else if kind == "prefix_op" { emitPrefixOp(st, expr) }
+    else if kind == "cast" { emitCast(st, expr) }
+    else if kind == "is" { emitIs(st, expr) }
+    else { "nil" }
+}
+
+// ===== emitInfixOp tests =====
+
+test("emitInfixOp - integer addition") {
+    val st = freshState()
+    embedLua("test_infix1 = {kind='infix_op', op='+', left={kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}, right={kind='atom', atomValue='2', exprType={tag='primitive',ids={{name='int'}}}}}")
+    val e: any = luaExpr("test_infix1")
+    val result = emitInfixOp(st, e)
+    assertEqual(result, "((1) + (2))")
+}
+
+test("emitInfixOp - string concatenation with +") {
+    val st = freshState()
+    embedLua("test_infix2 = {kind='infix_op', op='+', left={kind='atom', atomValue='hello', exprType={tag='primitive',ids={{name='string'}}}}, right={kind='atom', atomValue='world', exprType={tag='primitive',ids={{name='string'}}}}}")
+    val e: any = luaExpr("test_infix2")
+    val result = emitInfixOp(st, e)
+    assertEqual(result, "((tmp0) .. (tmp1))")
+}
+
+test("emitInfixOp - != maps to ~=") {
+    val st = freshState()
+    embedLua("test_infix3 = {kind='infix_op', op='!=', left={kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}, right={kind='atom', atomValue='2', exprType={tag='primitive',ids={{name='int'}}}}}")
+    val e: any = luaExpr("test_infix3")
+    val result = emitInfixOp(st, e)
+    assertEqual(result, "((1) ~= (2))")
+}
+
+test("emitInfixOp - && maps to and") {
+    val st = freshState()
+    embedLua("test_infix4 = {kind='infix_op', op='&&', left={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}, right={kind='atom', atomValue='false', exprType={tag='primitive',ids={{name='bool'}}}}}")
+    val e: any = luaExpr("test_infix4")
+    val result = emitInfixOp(st, e)
+    assertEqual(result, "((true) and (false))")
+}
+
+test("emitInfixOp - || maps to or") {
+    val st = freshState()
+    embedLua("test_infix5 = {kind='infix_op', op='||', left={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}, right={kind='atom', atomValue='false', exprType={tag='primitive',ids={{name='bool'}}}}}")
+    val e: any = luaExpr("test_infix5")
+    val result = emitInfixOp(st, e)
+    assertEqual(result, "((true) or (false))")
+}
+
+test("emitInfixOp - == on strings") {
+    val st = freshState()
+    embedLua("test_infix6 = {kind='infix_op', op='==', left={kind='atom', atomValue='a', exprType={tag='primitive',ids={{name='string'}}}}, right={kind='atom', atomValue='b', exprType={tag='primitive',ids={{name='string'}}}}}")
+    val e: any = luaExpr("test_infix6")
+    val result = emitInfixOp(st, e)
+    assertEqual(result, "((tmp0) == (tmp1))")
+}
+
+test("emitInfixOp - comparison > passes through") {
+    val st = freshState()
+    embedLua("test_infix7 = {kind='infix_op', op='>', left={kind='atom', atomValue='3', exprType={tag='primitive',ids={{name='int'}}}}, right={kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}")
+    val e: any = luaExpr("test_infix7")
+    val result = emitInfixOp(st, e)
+    assertEqual(result, "((3) > (1))")
+}
+
+test("emitInfixOp - multiplication passes through") {
+    val st = freshState()
+    embedLua("test_infix8 = {kind='infix_op', op='*', left={kind='atom', atomValue='3', exprType={tag='primitive',ids={{name='int'}}}}, right={kind='atom', atomValue='4', exprType={tag='primitive',ids={{name='int'}}}}}")
+    val e: any = luaExpr("test_infix8")
+    val result = emitInfixOp(st, e)
+    assertEqual(result, "((3) * (4))")
+}
+
+// ===== emitPrefixOp tests =====
+
+test("emitPrefixOp - negation with !") {
+    val st = freshState()
+    st.inFunction = true
+    embedLua("test_prefix1 = {kind='prefix_op', op='!', prefixExpr={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}}")
+    val e: any = luaExpr("test_prefix1")
+    val result = emitPrefixOp(st, e)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0=not (true);")
+}
+
+test("emitPrefixOp - minus operator") {
+    val st = freshState()
+    st.inFunction = true
+    embedLua("test_prefix2 = {kind='prefix_op', op='-', prefixExpr={kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='int'}}}}}")
+    val e: any = luaExpr("test_prefix2")
+    val result = emitPrefixOp(st, e)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0=-(42);")
+}
+
+// ===== emitCast tests =====
+
+test("emitCast - string to int uses tonumber") {
+    val st = freshState()
+    embedLua("test_cast1 = {kind='cast', castExpr={kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='string'}}}}, targetType={tag='primitive',ids={{name='int'}}}}")
+    val e: any = luaExpr("test_cast1")
+    val result = emitCast(st, e)
+    assertEqual(result, "tmp1")
+    val output = st.sb.toString()
+    embedLua("__cast1_a = string.find(output, 'tonumber', 1, true) ~= nil")
+    assertTrue(luaExpr("__cast1_a") as bool)
+}
+
+test("emitCast - string to float uses tonumber") {
+    val st = freshState()
+    embedLua("test_cast2 = {kind='cast', castExpr={kind='atom', atomValue='3.14', exprType={tag='primitive',ids={{name='string'}}}}, targetType={tag='primitive',ids={{name='float'}}}}")
+    val e: any = luaExpr("test_cast2")
+    val result = emitCast(st, e)
+    assertEqual(result, "tmp1")
+    val output = st.sb.toString()
+    embedLua("__cast2_a = string.find(output, 'tonumber', 1, true) ~= nil")
+    assertTrue(luaExpr("__cast2_a") as bool)
+}
+
+test("emitCast - int to float is passthrough") {
+    val st = freshState()
+    embedLua("test_cast3 = {kind='cast', castExpr={kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='int'}}}}, targetType={tag='primitive',ids={{name='float'}}}}")
+    val e: any = luaExpr("test_cast3")
+    val result = emitCast(st, e)
+    assertEqual(result, "(42)")
+    assertEqual(st.sb.toString(), "")
+}
+
+test("emitCast - string to string is passthrough") {
+    val st = freshState()
+    embedLua("test_cast4 = {kind='cast', castExpr={kind='atom', atomValue='hello', exprType={tag='primitive',ids={{name='string'}}}}, targetType={tag='primitive',ids={{name='string'}}}}")
+    val e: any = luaExpr("test_cast4")
+    val result = emitCast(st, e)
+    // string to string: no tonumber, just return the value directly
+    assertEqual(result, "(tmp0)")
+    // Only the atom's string allocation is emitted
+    assertEqual(st.sb.toString(), "local tmp0 = 'hello';")
+}
+
+// ===== emitIs tests =====
+
+test("emitIs - same primitive type returns true") {
+    val st = freshState()
+    embedLua("test_is1 = {kind='is', castExpr={kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='int'}}}}, checkedType={tag='primitive',ids={{name='int'}}}}")
+    val e: any = luaExpr("test_is1")
+    val result = emitIs(st, e)
+    assertEqual(result, "true")
+    // No code emitted since it's statically known
+    assertEqual(st.sb.toString(), "")
+}
+
+test("emitIs - check unit type") {
+    val st = freshState()
+    embedLua("test_is2 = {kind='is', castExpr={kind='atom', atomValue='x', exprType={tag='primitive',ids={{name='int'}}}}, checkedType={tag='primitive',ids={{name='unit'}}}}")
+    val e: any = luaExpr("test_is2")
+    val result = emitIs(st, e)
+    assertEqual(result, "type((x)) == \"nil\"")
+}
+
+test("emitIs - check float type") {
+    val st = freshState()
+    embedLua("test_is3 = {kind='is', castExpr={kind='atom', atomValue='x', exprType={tag='primitive',ids={{name='int'}}}}, checkedType={tag='primitive',ids={{name='float'}}}}")
+    val e: any = luaExpr("test_is3")
+    val result = emitIs(st, e)
+    assertEqual(result, "chi_is_float((x))")
+}
+
+test("emitIs - check int type") {
+    val st = freshState()
+    embedLua("test_is4 = {kind='is', castExpr={kind='atom', atomValue='x', exprType={tag='primitive',ids={{name='string'}}}}, checkedType={tag='primitive',ids={{name='int'}}}}")
+    val e: any = luaExpr("test_is4")
+    val result = emitIs(st, e)
+    assertEqual(result, "chi_is_int((tmp0))")
+}
+
+test("emitIs - check bool type") {
+    val st = freshState()
+    embedLua("test_is5 = {kind='is', castExpr={kind='atom', atomValue='x', exprType={tag='primitive',ids={{name='int'}}}}, checkedType={tag='primitive',ids={{name='bool'}}}}")
+    val e: any = luaExpr("test_is5")
+    val result = emitIs(st, e)
+    assertEqual(result, "type((x)) == \"boolean\"")
+}
+
+test("emitIs - check string type") {
+    val st = freshState()
+    embedLua("test_is6 = {kind='is', castExpr={kind='atom', atomValue='x', exprType={tag='primitive',ids={{name='int'}}}}, checkedType={tag='primitive',ids={{name='string'}}}}")
+    val e: any = luaExpr("test_is6")
+    val result = emitIs(st, e)
+    assertEqual(result, "type((x)) == \"string\"")
+}
+
+test("emitIs - check array type") {
+    val st = freshState()
+    embedLua("test_is7 = {kind='is', castExpr={kind='atom', atomValue='x', exprType={tag='primitive',ids={{name='int'}}}}, checkedType={tag='array',ids={{name='array'}}}}")
+    val e: any = luaExpr("test_is7")
+    val result = emitIs(st, e)
+    assertEqual(result, "chi_is_array((x))")
+}
+
+test("emitIs - check record type") {
+    val st = freshState()
+    embedLua("test_is8 = {kind='is', castExpr={kind='atom', atomValue='x', exprType={tag='primitive',ids={{name='int'}}}}, checkedType={tag='record',ids={}}}")
+    val e: any = luaExpr("test_is8")
+    val result = emitIs(st, e)
+    assertEqual(result, "chi_is_record((x))")
+}
+
+test("emitIs - check function type") {
+    val st = freshState()
+    embedLua("test_is9 = {kind='is', castExpr={kind='atom', atomValue='x', exprType={tag='primitive',ids={{name='int'}}}}, checkedType={tag='fn',types={},typeParams={},defaults=0}}")
+    val e: any = luaExpr("test_is9")
+    val result = emitIs(st, e)
+    assertEqual(result, "type((x)) == \"function\"")
+}
+
+test("emitIs - check variable type returns false") {
+    val st = freshState()
+    embedLua("test_is10 = {kind='is', castExpr={kind='atom', atomValue='x', exprType={tag='primitive',ids={{name='int'}}}}, checkedType={tag='variable',ids={{name='T'}}}}")
+    val e: any = luaExpr("test_is10")
+    val result = emitIs(st, e)
+    assertEqual(result, "false")
+}
+
+test("emitIs - same array type returns true") {
+    val st = freshState()
+    embedLua("test_is11 = {kind='is', castExpr={kind='atom', atomValue='x', exprType={tag='array',ids={{name='array'}}}}, checkedType={tag='array',ids={{name='array'}}}}")
+    val e: any = luaExpr("test_is11")
+    val result = emitIs(st, e)
+    assertEqual(result, "true")
+    assertEqual(st.sb.toString(), "")
+}
+
+summary()

@@ -1,0 +1,619 @@
+// chicc/chicc/compiler.chi
+// Task 4H.2: Compiler Orchestrator
+// Full pipeline: tokenize -> parse -> validate -> build tables -> check names ->
+//   convert AST -> mark used -> type inference -> semantic checks -> build Program
+package user/compiler
+import std/lang { luaExpr, embedLua }
+import std/lang.array { size, push }
+
+// ============================================================================
+// CompilationResult
+// ============================================================================
+
+type CompilationResult = {
+    messages: array[any],
+    program: any
+}
+
+pub fn newCompilationResult(msgs: array[any], prog: any): CompilationResult {
+    { messages: msgs, program: prog }
+}
+
+pub fn hasErrors(result: CompilationResult): bool {
+    result.messages.size() > 0
+}
+
+// ============================================================================
+// LuaCompilationEnv — reads symbol/type metadata from loaded Lua packages
+// ============================================================================
+
+// Define the Lua-side env factory at module init time
+embedLua("__chicc_mkEnv = function() local env = {}; local cache = {}; function env.getSymbol(mod, pkg, name) local qualifier = mod .. '/' .. pkg; local pkgSymbols = cache[qualifier]; if pkgSymbols == nil then local loaded = package.loaded[qualifier]; if loaded == nil or loaded._package == nil then return nil end; pkgSymbols = {}; for symName, props in pairs(loaded._package) do if type(props) == 'table' then local symType = nil; if props.type then local ok, decoded = pcall(function() return decodeType(props.type) end); if ok then symType = decoded end end; pkgSymbols[symName] = { moduleName = mod, packageName = pkg, name = symName, symbolType = symType, isPublic = props.public == true, isMutable = props.mutable == true } end end; cache[qualifier] = pkgSymbols end; return pkgSymbols[name] end; function env.getTypeAlias(mod, pkg, name) local qualifier = mod .. '/' .. pkg; local loaded = package.loaded[qualifier]; if loaded == nil or loaded._types == nil then return nil end; local spec = loaded._types[name]; if spec == nil or type(spec) ~= 'string' then return nil end; local ok, decoded = pcall(function() return decodeType(spec) end); if not ok then return nil end; return { typeId = { moduleName = mod, packageName = pkg, name = name }, aliasType = decoded } end; function env.getPreludeImports() return { { moduleName = 'std', packageName = 'lang', packageAlias = nil, entries = { { name = 'println', alias = nil, section = nil }, { name = 'print', alias = nil, section = nil }, { name = 'eval', alias = nil, section = nil } }, section = nil } } end; return env end")
+
+pub fn newLuaCompilationEnv(): any {
+    val ns: any = luaExpr("__chicc_mkEnv()")
+    ns
+}
+
+// ============================================================================
+// Lua helper: merge two import arrays
+// ============================================================================
+
+embedLua("__chicc_mergeImports = function(a, b) local result = {}; for _, imp in ipairs(a) do result[#result+1] = imp end; for _, imp in ipairs(b) do result[#result+1] = imp end; return result end")
+
+// ============================================================================
+// Lua helper: build type scheme var name array from type parameters
+// ============================================================================
+
+embedLua("__chicc_typeParamNames = function(params) local vars = {}; for _, tp in ipairs(params) do vars[#vars+1] = tp.name end; return vars end")
+
+// ============================================================================
+// Lua helper: split expressions into functions vs code
+// ============================================================================
+
+embedLua("__chicc_splitExprs = function(expressions) local functions = {}; local code = {}; for _, expr in ipairs(expressions) do if (expr.kind == 'name_declaration' and expr.value and expr.value.kind == 'fn' and expr.expectedType ~= nil) or expr.kind == 'effect_definition' then functions[#functions+1] = expr else code[#code+1] = expr end end; return { functions = functions, code = code } end")
+
+// ============================================================================
+// Lua helper: convert raw imports to typed Import records
+// ============================================================================
+
+embedLua("__chicc_convertImports = function(rawImports) local r = {}; for _, imp in ipairs(rawImports) do local entries = {}; if imp.entries then for _, e in ipairs(imp.entries) do entries[#entries+1] = newImportEntry(e.name, e.alias, e.section) end end; r[#r+1] = newImport(imp.moduleName, imp.packageName, imp.packageAlias, entries, imp.section) end; return r end")
+
+// ============================================================================
+// Lua helper: convert raw type aliases to typed TypeAlias records
+// ============================================================================
+
+embedLua("__chicc_convertTypeAliases = function(rawAliases) local r = {}; for _, alias in ipairs(rawAliases) do r[#r+1] = newTypeAlias(alias.typeId, alias.aliasType) end; return r end")
+
+// ============================================================================
+// markUsed — propagate usage flags through expression AST
+// ============================================================================
+
+// --- Forward declaration for markUsedWalk (needed before markUsed references it) ---
+var markUsedWalk: (any) -> unit = { expr: any -> }
+
+pub fn markUsed(expressions: any) {
+    val count = luaExpr("#expressions") as int
+    var i = 1
+    while i <= count {
+        val expr = luaExpr("expressions[i]") as any
+        markUsedWalk(expr)
+        i = i + 1
+    }
+}
+
+fn markUsedWalkImpl(expr: any) {
+    if expr == unit { return unit }
+    val kind = luaExpr("expr.kind") as string
+
+    if kind == "name_declaration" {
+        val value = luaExpr("expr.value") as any
+        if value != unit {
+            embedLua("value.used = true")
+            markUsedWalk(value)
+        }
+    } else if kind == "assignment" {
+        val value = luaExpr("expr.value") as any
+        if value != unit {
+            embedLua("value.used = true")
+            markUsedWalk(value)
+        }
+    } else if kind == "block" {
+        val body = luaExpr("expr.blockBody") as any
+        val bodyCount = luaExpr("#body") as int
+        if bodyCount > 0 {
+            val used = luaExpr("expr.used == true") as bool
+            val lastExpr = luaExpr("body[#body]") as any
+            if used {
+                embedLua("lastExpr.used = true")
+            }
+            var bi = 1
+            while bi <= bodyCount {
+                val child = luaExpr("body[bi]") as any
+                markUsedWalk(child)
+                bi = bi + 1
+            }
+        }
+    } else if kind == "fn_call" {
+        val callee = luaExpr("expr.callee") as any
+        if callee != unit {
+            embedLua("callee.used = true")
+            markUsedWalk(callee)
+        }
+        val params = luaExpr("expr.callParams") as any
+        val paramCount = luaExpr("#params") as int
+        var pi = 1
+        while pi <= paramCount {
+            val p = luaExpr("params[pi]") as any
+            embedLua("p.used = true")
+            markUsedWalk(p)
+            pi = pi + 1
+        }
+    } else if kind == "if_else" {
+        val used = luaExpr("expr.used == true") as bool
+        val cond = luaExpr("expr.condition") as any
+        if cond != unit {
+            embedLua("cond.used = true")
+            markUsedWalk(cond)
+        }
+        val thenB = luaExpr("expr.thenBranch") as any
+        if thenB != unit {
+            if used { embedLua("thenB.used = true") }
+            markUsedWalk(thenB)
+        }
+        val elseB = luaExpr("expr.elseBranch") as any
+        if elseB != unit {
+            if used { embedLua("elseB.used = true") }
+            markUsedWalk(elseB)
+        }
+    } else if kind == "infix_op" {
+        val used = luaExpr("expr.used == true") as bool
+        val left = luaExpr("expr.left") as any
+        if left != unit {
+            if used { embedLua("left.used = true") }
+            markUsedWalk(left)
+        }
+        val right = luaExpr("expr.right") as any
+        if right != unit {
+            if used { embedLua("right.used = true") }
+            markUsedWalk(right)
+        }
+    } else if kind == "prefix_op" {
+        val used = luaExpr("expr.used == true") as bool
+        val inner = luaExpr("expr.prefixExpr") as any
+        if inner != unit {
+            if used { embedLua("inner.used = true") }
+            markUsedWalk(inner)
+        }
+    } else if kind == "cast" {
+        val used = luaExpr("expr.used == true") as bool
+        val inner = luaExpr("expr.castExpr") as any
+        if inner != unit {
+            if used { embedLua("inner.used = true") }
+            markUsedWalk(inner)
+        }
+    } else if kind == "is" {
+        val used = luaExpr("expr.used == true") as bool
+        val inner = luaExpr("expr.castExpr") as any
+        if inner != unit {
+            if used { embedLua("inner.used = true") }
+            markUsedWalk(inner)
+        }
+    } else if kind == "create_record" {
+        val used = luaExpr("expr.used == true") as bool
+        val fields = luaExpr("expr.recordFields") as any
+        val fieldCount = luaExpr("#fields") as int
+        var fi = 1
+        while fi <= fieldCount {
+            val f = luaExpr("fields[fi]") as any
+            val fVal = luaExpr("f.value") as any
+            if fVal != unit {
+                if used { embedLua("fVal.used = true") }
+                markUsedWalk(fVal)
+            }
+            fi = fi + 1
+        }
+    } else if kind == "create_array" {
+        val used = luaExpr("expr.used == true") as bool
+        val values = luaExpr("expr.arrayValues") as any
+        val valCount = luaExpr("#values") as int
+        var vi = 1
+        while vi <= valCount {
+            val v = luaExpr("values[vi]") as any
+            if used { embedLua("v.used = true") }
+            markUsedWalk(v)
+            vi = vi + 1
+        }
+    } else if kind == "index_op" {
+        val indexVar = luaExpr("expr.indexVariable") as any
+        if indexVar != unit {
+            embedLua("indexVar.used = true")
+            markUsedWalk(indexVar)
+        }
+        val indexExpr = luaExpr("expr.indexExpr") as any
+        if indexExpr != unit {
+            embedLua("indexExpr.used = true")
+            markUsedWalk(indexExpr)
+        }
+    } else if kind == "indexed_assignment" {
+        val indexVar = luaExpr("expr.indexVariable") as any
+        if indexVar != unit {
+            embedLua("indexVar.used = true")
+            markUsedWalk(indexVar)
+        }
+        val indexExpr = luaExpr("expr.indexExpr") as any
+        if indexExpr != unit {
+            embedLua("indexExpr.used = true")
+            markUsedWalk(indexExpr)
+        }
+        val indexVal = luaExpr("expr.indexValue") as any
+        if indexVal != unit {
+            embedLua("indexVal.used = true")
+            markUsedWalk(indexVal)
+        }
+    } else if kind == "handle" {
+        val used = luaExpr("expr.used == true") as bool
+        val body = luaExpr("expr.handleBody") as any
+        if body != unit {
+            if used { embedLua("body.used = true") }
+            markUsedWalk(body)
+        }
+        val cases = luaExpr("expr.handleCases") as any
+        val caseCount = luaExpr("#cases") as int
+        var ci = 1
+        while ci <= caseCount {
+            val c = luaExpr("cases[ci]") as any
+            val cBody = luaExpr("c.body") as any
+            if cBody != unit {
+                markUsedWalk(cBody)
+            }
+            ci = ci + 1
+        }
+    } else if kind == "return" {
+        val retVal = luaExpr("expr.returnValue") as any
+        if retVal != unit {
+            embedLua("retVal.used = true")
+            markUsedWalk(retVal)
+        }
+    } else if kind == "for_loop" {
+        val iter = luaExpr("expr.iterable") as any
+        if iter != unit {
+            embedLua("iter.used = true")
+            markUsedWalk(iter)
+        }
+        val forBody = luaExpr("expr.forBody") as any
+        if forBody != unit {
+            markUsedWalk(forBody)
+        }
+    } else if kind == "while_loop" {
+        val cond = luaExpr("expr.loopCondition") as any
+        if cond != unit {
+            embedLua("cond.used = true")
+            markUsedWalk(cond)
+        }
+        val loopBody = luaExpr("expr.loopBody") as any
+        if loopBody != unit {
+            markUsedWalk(loopBody)
+        }
+    } else if kind == "fn" {
+        val fnBody = luaExpr("expr.body") as any
+        if fnBody != unit {
+            markUsedWalk(fnBody)
+        }
+    } else if kind == "field_assignment" {
+        val recv = luaExpr("expr.receiver") as any
+        if recv != unit {
+            embedLua("recv.used = true")
+            markUsedWalk(recv)
+        }
+        val value = luaExpr("expr.value") as any
+        if value != unit {
+            embedLua("value.used = true")
+            markUsedWalk(value)
+        }
+    } else if kind == "field_access" {
+        val recv = luaExpr("expr.receiver") as any
+        if recv != unit {
+            embedLua("recv.used = true")
+            markUsedWalk(recv)
+        }
+    } else if kind == "interpolated_string" {
+        val used = luaExpr("expr.used == true") as bool
+        val parts = luaExpr("expr.parts") as any
+        val partCount = luaExpr("#parts") as int
+        var pi = 1
+        while pi <= partCount {
+            val p = luaExpr("parts[pi]") as any
+            if used { embedLua("p.used = true") }
+            markUsedWalk(p)
+            pi = pi + 1
+        }
+    }
+}
+markUsedWalk = markUsedWalkImpl
+
+// ============================================================================
+// replaceTypes — apply type substitutions to expression AST
+// ============================================================================
+
+pub fn replaceTypes(expr: any, solutions: any) {
+    if expr == unit { return unit }
+    val exprType = luaExpr("expr.exprType") as any
+    if exprType != unit {
+        val replaced = luaExpr("mapType(exprType, solutions)") as any
+        embedLua("expr.exprType = replaced")
+    }
+    val children = luaExpr("exprChildren(expr)") as any
+    val childCount = luaExpr("#children") as int
+    var i = 1
+    while i <= childCount {
+        val child = luaExpr("children[i]") as any
+        replaceTypes(child, solutions)
+        i = i + 1
+    }
+}
+
+// ============================================================================
+// parseSource — tokenize + parse with error handling
+// ============================================================================
+
+fn parseSource(source: string): any {
+    // Returns { parsedProgram, messages }
+    // Use pcall to catch parse errors
+    embedLua("__chicc_parse_msgs = {}")
+    embedLua("__chicc_parse_ok, __chicc_parse_prog = pcall(function() local tokens = tokenize(source); local p = newParser(tokens, source); return parseProgram(p) end)")
+    val ok = luaExpr("__chicc_parse_ok") as bool
+    if ok {
+        val prog = luaExpr("__chicc_parse_prog") as any
+        val msgs = luaExpr("__chicc_parse_msgs") as any
+        luaExpr("{ parsedProgram = prog, messages = msgs }") as any
+    } else {
+        val errVal = luaExpr("__chicc_parse_prog") as any
+        val isMsg = luaExpr("type(__chicc_parse_prog) == 'table' and __chicc_parse_prog.code ~= nil") as bool
+        if isMsg {
+            embedLua("table.insert(__chicc_parse_msgs, __chicc_parse_prog)")
+        } else {
+            embedLua("table.insert(__chicc_parse_msgs, { code = 'SYNTAX_ERROR', text = tostring(__chicc_parse_prog), codePoint = nil })")
+        }
+        val emptyProg = luaExpr("{ packageDefinition = nil, imports = {}, typeAliases = {}, variantTypes = {}, code = {}, section = nil }") as any
+        luaExpr("{ parsedProgram = emptyProg, messages = __chicc_parse_msgs }") as any
+    }
+}
+
+// ============================================================================
+// compile — main compilation pipeline
+// ============================================================================
+
+pub fn compile(source: string, ns: any): CompilationResult {
+    // PHASE 1: PARSE
+    val parseResult = parseSource(source)
+    val parsedProgram = luaExpr("parseResult.parsedProgram") as any
+    val parseMessages = luaExpr("parseResult.messages") as any
+
+    val resultMessages = luaExpr("{}") as array[any]
+    val parseMsgCount = luaExpr("#parseMessages") as int
+    var mi = 1
+    while mi <= parseMsgCount {
+        val msg = luaExpr("parseMessages[mi]") as any
+        embedLua("table.insert(resultMessages, msg)")
+        mi = mi + 1
+    }
+
+    // Extract package definition
+    val pkgDef = luaExpr("parsedProgram.packageDefinition") as any
+    var moduleName: string = "user"
+    var packageName: string = "default"
+    if pkgDef != unit {
+        moduleName = luaExpr("parsedProgram.packageDefinition.moduleName") as string
+        packageName = luaExpr("parsedProgram.packageDefinition.packageName") as string
+    }
+    val pkg = luaExpr("{ moduleName = moduleName, packageName = packageName }") as any
+
+    // PHASE 2: VALIDATE PACKAGE AND IMPORTS
+    val emptyModName = luaExpr("moduleName == ''") as bool
+    if emptyModName {
+        val msg = invalidModuleName(moduleName, { line: 1, column: 0 })
+        embedLua("table.insert(resultMessages, msg)")
+    }
+    val emptyPkgName = luaExpr("packageName == ''") as bool
+    if emptyPkgName {
+        val msg = invalidPackageName(packageName, { line: 1, column: 0 })
+        embedLua("table.insert(resultMessages, msg)")
+    }
+
+    // Validate imported names exist and are public
+    val sourceImports = luaExpr("parsedProgram.imports") as any
+    val importCount = luaExpr("#sourceImports") as int
+    var ii = 1
+    while ii <= importCount {
+        val imp = luaExpr("sourceImports[ii]") as any
+        val impMod = luaExpr("imp.moduleName") as string
+        val impPkg = luaExpr("imp.packageName") as string
+        val entries = luaExpr("imp.entries") as any
+        val entryCount = luaExpr("#entries") as int
+        var ei = 1
+        while ei <= entryCount {
+            val entry = luaExpr("entries[ei]") as any
+            val entryName = luaExpr("entry.name") as string
+            val entrySec = luaExpr("entry.section") as any
+            val sym = luaExpr("ns ~= nil and ns.getSymbol and ns.getSymbol(impMod, impPkg, entryName) or nil") as any
+            val typeAlias = luaExpr("ns ~= nil and ns.getTypeAlias and ns.getTypeAlias(impMod, impPkg, entryName) or nil") as any
+            if sym != unit && typeAlias == unit {
+                val isPublic = luaExpr("sym.isPublic") as bool
+                if isPublic == false && impMod != moduleName {
+                    val cp = if entrySec != unit {
+                        val line = luaExpr("entrySec.startLine") as int
+                        val col = luaExpr("entrySec.startCol") as int
+                        luaExpr("{ line = line, column = col }") as any
+                    } else { unit }
+                    val msg = cannotAccessInternalName(entryName, cp as {line: int, column: int} | unit)
+                    embedLua("table.insert(resultMessages, msg)")
+                }
+            } else if sym == unit && typeAlias == unit {
+                val cp = if entrySec != unit {
+                    val line = luaExpr("entrySec.startLine") as int
+                    val col = luaExpr("entrySec.startCol") as int
+                    luaExpr("{ line = line, column = col }") as any
+                } else { unit }
+                val msg = unrecognizedName(entryName, cp as {line: int, column: int} | unit)
+                embedLua("table.insert(resultMessages, msg)")
+            }
+            ei = ei + 1
+        }
+        ii = ii + 1
+    }
+
+    // PHASE 3: BUILD COMPILE TABLES
+    val preludeImports = luaExpr("ns ~= nil and ns.getPreludeImports and ns.getPreludeImports() or {}") as any
+    val allImports = luaExpr("__chicc_mergeImports(preludeImports, sourceImports)") as any
+    val tables = newCompileTables(pkg, ns, allImports)
+
+    // Resolve type aliases from source
+    val definedTypeAliases = luaExpr("{}") as any
+    val srcTypeAliases = luaExpr("parsedProgram.typeAliases") as any
+    val aliasCount = luaExpr("#srcTypeAliases") as int
+    var ai = 1
+    while ai <= aliasCount {
+        val aliasDef = luaExpr("srcTypeAliases[ai]") as any
+        val aliasName = luaExpr("aliasDef.name") as string
+        val aliasTypeRef = luaExpr("aliasDef.typeRef") as any
+        val aliasTypeParams = luaExpr("aliasDef.typeParameters") as any
+        val typeSchemeVars = luaExpr("__chicc_typeParamNames(aliasTypeParams)") as any
+        val typeId = luaExpr("{ moduleName = moduleName, packageName = packageName, name = aliasName }") as any
+        val resolved = luaExpr("resolveTypeAndWrapRecursive(tables.localTypeTable, typeSchemeVars, aliasTypeRef, typeId, 1)") as any
+        val typeAlias = luaExpr("{ typeId = typeId, aliasType = resolved }") as any
+        embedLua("table.insert(definedTypeAliases, typeAlias)")
+        ctDefineTypeAlias(tables, typeAlias)
+        ai = ai + 1
+    }
+
+    // PHASE 4: CHECK NAMES (on parse AST)
+    val parseCode = luaExpr("parsedProgram.code") as any
+    checkNames(parseCode, tables, resultMessages)
+
+    val msgCountAfterNames = luaExpr("#resultMessages") as int
+    if msgCountAfterNames > 0 {
+        val emptyExprs = luaExpr("{}") as array[Expr]
+        val section = luaExpr("parsedProgram.section") as Section | unit
+        val pkgR = newPackage(moduleName, packageName)
+        val impsR = luaExpr("__chicc_convertImports(allImports)") as array[Import]
+        val aliasesR = luaExpr("__chicc_convertTypeAliases(definedTypeAliases)") as array[TypeAlias]
+        val program = newProgram(pkgR, impsR, aliasesR, emptyExprs, section)
+        return newCompilationResult(resultMessages, program)
+    }
+
+    // PHASE 5: CONVERT parse AST -> expression AST
+    embedLua("__chicc_conv_ok, __chicc_conv_result = pcall(function() return convertProgram(parsedProgram, pkg, tables) end)")
+    val convOk = luaExpr("__chicc_conv_ok") as bool
+    val expressions: any = if convOk {
+        luaExpr("__chicc_conv_result") as any
+    } else {
+        val isMsg = luaExpr("type(__chicc_conv_result) == 'table' and __chicc_conv_result.code ~= nil") as bool
+        if isMsg {
+            embedLua("table.insert(resultMessages, __chicc_conv_result)")
+        } else {
+            embedLua("table.insert(resultMessages, { code = 'ERROR', text = tostring(__chicc_conv_result), codePoint = nil })")
+        }
+        luaExpr("{}") as any
+    }
+
+    // PHASE 5.5: MARK USAGE
+    markUsed(expressions)
+
+    // PHASE 6: TYPE INFERENCE (Hindley-Milner)
+    val groups = luaExpr("__chicc_splitExprs(expressions)") as any
+    val functions = luaExpr("groups.functions") as any
+    val code = luaExpr("groups.code") as any
+
+    // Initialize inference context
+    icInit(pkg, ns, tables)
+
+    // Pre-register all named functions and effects
+    val fnCount = luaExpr("#functions") as int
+    var fi = 1
+    while fi <= fnCount {
+        val fn_ = luaExpr("functions[fi]") as any
+        val fnKind = luaExpr("fn_.kind") as string
+        if fnKind == "name_declaration" {
+            val expectedType = luaExpr("fn_.expectedType") as any
+            if expectedType != unit {
+                val fnName = luaExpr("fn_.declName") as string
+                val scheme = luaExpr("polyType(0, expectedType)") as any
+                icDefineLocalSymbol(fnName, scheme)
+            }
+        } else if fnKind == "effect_definition" {
+            val effType = luaExpr("fn_.exprType") as any
+            if effType != unit {
+                val effName = luaExpr("fn_.effectName") as string
+                val scheme = luaExpr("polyType(0, effType)") as any
+                icDefineLocalSymbol(effName, scheme)
+            }
+        }
+        fi = fi + 1
+    }
+
+    // Type-check non-function code as a group
+    val codeConstraints = luaExpr("{}") as any
+    embedLua("__chicc_tc_ok, __chicc_tc_err = pcall(function() local codeCount = #code; for i = 1, codeCount do typeTerm(code[i], 0, codeConstraints) end; local solutions = unify(codeConstraints); for i = 1, codeCount do replaceTypes(code[i], solutions) end end)")
+    val tcOk = luaExpr("__chicc_tc_ok") as bool
+    if tcOk == false {
+        val isTcMsg = luaExpr("type(__chicc_tc_err) == 'table' and __chicc_tc_err.code ~= nil") as bool
+        if isTcMsg {
+            embedLua("table.insert(resultMessages, __chicc_tc_err)")
+        } else {
+            embedLua("table.insert(resultMessages, { code = 'ERROR', text = tostring(__chicc_tc_err), codePoint = nil })")
+        }
+    }
+
+    // Type-check each function independently
+    fi = 1
+    while fi <= fnCount {
+        val fn_ = luaExpr("functions[fi]") as any
+        embedLua("__chicc_fn_ok, __chicc_fn_err = pcall(function() local constraints = {}; typeTerm(fn_, 0, constraints); local solutions = unify(constraints); replaceTypes(fn_, solutions) end)")
+        val fnOk = luaExpr("__chicc_fn_ok") as bool
+        if fnOk == false {
+            val isFnMsg = luaExpr("type(__chicc_fn_err) == 'table' and __chicc_fn_err.code ~= nil") as bool
+            if isFnMsg {
+                embedLua("table.insert(resultMessages, __chicc_fn_err)")
+            } else {
+                embedLua("table.insert(resultMessages, { code = 'ERROR', text = tostring(__chicc_fn_err), codePoint = nil })")
+            }
+        }
+        fi = fi + 1
+    }
+
+    val msgCountAfterTyping = luaExpr("#resultMessages") as int
+    if msgCountAfterTyping > 0 {
+        val section = luaExpr("parsedProgram.section") as Section | unit
+        val pkgT = newPackage(moduleName, packageName)
+        val impsT = luaExpr("__chicc_convertImports(allImports)") as array[Import]
+        val aliasesT = luaExpr("__chicc_convertTypeAliases(definedTypeAliases)") as array[TypeAlias]
+        val program = newProgram(pkgT, impsT, aliasesT, expressions as array[Expr], section)
+        return newCompilationResult(resultMessages, program)
+    }
+
+    // PHASE 7: SEMANTIC CHECKS (post-type-inference)
+    visibilityCheck(expressions, moduleName, ns, resultMessages)
+    fnCallCheck(expressions, resultMessages)
+    immutabilityCheck(expressions, moduleName, packageName, tables, ns, resultMessages)
+    returnTypeCheck(expressions, resultMessages)
+
+    // PHASE 8: BUILD AND RETURN RESULT
+    val section = luaExpr("parsedProgram.section") as Section | unit
+    val pkgF = newPackage(moduleName, packageName)
+    val impsF = luaExpr("__chicc_convertImports(allImports)") as array[Import]
+    val aliasesF = luaExpr("__chicc_convertTypeAliases(definedTypeAliases)") as array[TypeAlias]
+    val program = newProgram(pkgF, impsF, aliasesF, expressions as array[Expr], section)
+    newCompilationResult(resultMessages, program)
+}
+
+// ============================================================================
+// compileToLua — full pipeline from source to Lua code
+// ============================================================================
+
+pub fn compileToLua(source: string, ns: any): any {
+    val result = compile(source, ns)
+    if hasErrors(result) {
+        luaExpr("{ luaCode = nil, messages = result.messages }")
+    } else {
+        val luaCode = emitProgram(result.program as Program, true)
+        luaExpr("{ luaCode = luaCode, messages = {} }")
+    }
+}
+
+// ============================================================================
+// formatMessage — format a compilation message for display
+// ============================================================================
+
+pub fn formatMessage(msg: any): string {
+    val code = luaExpr("msg.code or 'ERROR'") as string
+    val text = luaExpr("msg.text or 'Unknown error'") as string
+    val cp = luaExpr("msg.codePoint") as any
+    if cp != unit {
+        val line = luaExpr("cp.line") as int
+        val col = luaExpr("cp.column") as int
+        "[$code] $text (line $line, col $col)"
+    } else {
+        "[$code] $text"
+    }
+}

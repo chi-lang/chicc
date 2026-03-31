@@ -1,0 +1,361 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, typeTag, typeIds, typeTypes, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeEquals, isPrimitive, isFunction, isRecord, isSum, isArray, isVariable, isRecursive, replaceVariable, occursInExcludingSumBranches, unfoldRecursive, intTypeId, stringTypeId, boolTypeId, floatTypeId, unitTypeId }
+import user/unification { Constraint, newConstraint, constraintWithReplacedVariable, unify }
+import user/source { newSection, Section }
+import std/lang { luaExpr, embedLua }
+import std/lang.array { size, push }
+
+val testSection = newSection(1, 1, 1, 10)
+
+// --- Constraint type ---
+
+test("newConstraint: creates constraint with expected, actual, section, history") {
+    val c = newConstraint(tInt, tString, testSection, [])
+    val exp: Type = luaExpr("c.expected")
+    val act: Type = luaExpr("c.actual")
+    assertTrue(typeEquals(exp, tInt))
+    assertTrue(typeEquals(act, tString))
+}
+
+test("newConstraint: with unit section") {
+    val c = newConstraint(tInt, tString, unit, [])
+    val sec: any = luaExpr("c.section")
+    val isNil: bool = luaExpr("sec == nil")
+    assertTrue(isNil)
+}
+
+// --- constraintWithReplacedVariable ---
+
+test("constraintWithReplacedVariable: replaces variable in expected and actual") {
+    val v = variableType("T", 0)
+    val c = newConstraint(v, functionType([v, tString], [], 0), testSection, [])
+    val replaced = constraintWithReplacedVariable(c, v, tInt)
+    val exp: Type = luaExpr("replaced.expected")
+    val act: Type = luaExpr("replaced.actual")
+    assertTrue(typeEquals(exp, tInt))
+    val expectedAct = functionType([tInt, tString], [], 0)
+    assertTrue(typeEquals(act, expectedAct))
+}
+
+test("constraintWithReplacedVariable: no-op when variable not present") {
+    val v = variableType("T", 0)
+    val c = newConstraint(tInt, tString, testSection, [])
+    val replaced = constraintWithReplacedVariable(c, v, tBool)
+    val exp: Type = luaExpr("replaced.expected")
+    val act: Type = luaExpr("replaced.actual")
+    assertTrue(typeEquals(exp, tInt))
+    assertTrue(typeEquals(act, tString))
+}
+
+// --- unify: basic cases ---
+
+test("unify: equal types produce no solutions") {
+    val c = newConstraint(tInt, tInt, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    val solutions = unify(constraints)
+    val count: int = luaExpr("#solutions")
+    assertEqual(count, 0)
+}
+
+test("unify: expected is any produces no solutions") {
+    val c = newConstraint(tAny, tString, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    val solutions = unify(constraints)
+    val count: int = luaExpr("#solutions")
+    assertEqual(count, 0)
+}
+
+test("unify: variable expected resolves to actual") {
+    val v = variableType("T", 0)
+    val c = newConstraint(v, tInt, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    val solutions = unify(constraints)
+    val count: int = luaExpr("#solutions")
+    assertEqual(count, 1)
+    val sol: any = luaExpr("solutions[1]")
+    val solVar: Type = luaExpr("sol.variable")
+    val solRepl: Type = luaExpr("sol.replacement")
+    assertTrue(typeEquals(solVar, v))
+    assertTrue(typeEquals(solRepl, tInt))
+}
+
+test("unify: variable actual resolves to expected") {
+    val v = variableType("T", 0)
+    val c = newConstraint(tString, v, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    val solutions = unify(constraints)
+    val count: int = luaExpr("#solutions")
+    assertEqual(count, 1)
+    val sol: any = luaExpr("solutions[1]")
+    val solVar: Type = luaExpr("sol.variable")
+    val solRepl: Type = luaExpr("sol.replacement")
+    assertTrue(typeEquals(solVar, v))
+    assertTrue(typeEquals(solRepl, tString))
+}
+
+// --- unify: primitive mismatch ---
+
+test("unify: mismatched primitives throws typeMismatch") {
+    val c = newConstraint(tInt, tString, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    embedLua("local ok, err = pcall(unify, constraints)")
+    val ok: bool = luaExpr("ok")
+    assertFalse(ok)
+    val code: string = luaExpr("err.code")
+    assertEqual(code, "TYPE_MISMATCH")
+}
+
+// --- unify: function types ---
+
+test("unify: matching function types") {
+    val v1 = variableType("T", 0)
+    val v2 = variableType("U", 0)
+    val expected = functionType([v1, v2], [], 0)
+    val actual = functionType([tInt, tString], [], 0)
+    val c = newConstraint(expected, actual, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    val solutions = unify(constraints)
+    val count: int = luaExpr("#solutions")
+    assertEqual(count, 2)
+}
+
+test("unify: function arity mismatch throws error") {
+    val expected = functionType([tInt, tString], [], 0)
+    val actual = functionType([tInt, tString, tBool], [], 0)
+    val c = newConstraint(expected, actual, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    embedLua("local ok, err = pcall(unify, constraints)")
+    val ok: bool = luaExpr("ok")
+    assertFalse(ok)
+    val code: string = luaExpr("err.code")
+    assertEqual(code, "FUNCTION_ARITY_ERROR")
+}
+
+test("unify: void return accepts anything") {
+    // Function with unit return type should accept any actual return type
+    val expected = functionType([tInt, tUnit], [], 0)
+    val actual = functionType([tInt, tString], [], 0)
+    val c = newConstraint(expected, actual, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    val solutions = unify(constraints)
+    // Should succeed - no error
+    val count: int = luaExpr("#solutions")
+    assertEqual(count, 0)
+}
+
+test("unify: void return does NOT skip if actual is variable") {
+    val v = variableType("T", 0)
+    val expected = functionType([tInt, tUnit], [], 0)
+    val actual = functionType([tInt, v], [], 0)
+    val c = newConstraint(expected, actual, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    val solutions = unify(constraints)
+    // Should solve the variable to unit
+    val count: int = luaExpr("#solutions")
+    assertEqual(count, 1)
+    val sol: any = luaExpr("solutions[1]")
+    val solRepl: Type = luaExpr("sol.replacement")
+    assertTrue(typeEquals(solRepl, tUnit))
+}
+
+// --- unify: record types ---
+
+test("unify: matching record types") {
+    val v = variableType("T", 0)
+    val expected = recordType([], [{ name: "x", fieldType: v }], [])
+    val actual = recordType([], [{ name: "x", fieldType: tInt }], [])
+    val c = newConstraint(expected, actual, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    val solutions = unify(constraints)
+    val count: int = luaExpr("#solutions")
+    assertEqual(count, 1)
+    val sol: any = luaExpr("solutions[1]")
+    val solRepl: Type = luaExpr("sol.replacement")
+    assertTrue(typeEquals(solRepl, tInt))
+}
+
+test("unify: record missing field throws error") {
+    val expected = recordType([], [{ name: "x", fieldType: tInt }, { name: "y", fieldType: tString }], [])
+    val actual = recordType([], [{ name: "x", fieldType: tInt }], [])
+    val c = newConstraint(expected, actual, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    embedLua("local ok, err = pcall(unify, constraints)")
+    val ok: bool = luaExpr("ok")
+    assertFalse(ok)
+    val code: string = luaExpr("err.code")
+    assertEqual(code, "TYPE_MISMATCH")
+}
+
+// --- unify: array types ---
+
+test("unify: matching array types") {
+    val v = variableType("T", 0)
+    val expected = arrayType(v, [])
+    val actual = arrayType(tInt, [])
+    val c = newConstraint(expected, actual, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    val solutions = unify(constraints)
+    val count: int = luaExpr("#solutions")
+    assertEqual(count, 1)
+    val sol: any = luaExpr("solutions[1]")
+    val solRepl: Type = luaExpr("sol.replacement")
+    assertTrue(typeEquals(solRepl, tInt))
+}
+
+// --- unify: sum types ---
+
+test("unify: sum type tries rhs first") {
+    // sum(int, string) expected, string actual -> should match via rhs
+    val sumT = sumType([], tInt, tString, [])
+    val c = newConstraint(sumT, tString, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    val solutions = unify(constraints)
+    // string == string -> no solutions needed
+    val count: int = luaExpr("#solutions")
+    assertEqual(count, 0)
+}
+
+test("unify: sum type falls back to lhs") {
+    // sum(int, string) expected, int actual -> rhs fails, lhs matches
+    val sumT = sumType([], tInt, tString, [])
+    val c = newConstraint(sumT, tInt, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    val solutions = unify(constraints)
+    val count: int = luaExpr("#solutions")
+    assertEqual(count, 0)
+}
+
+test("unify: sum type with variable") {
+    val v = variableType("T", 0)
+    val sumT = sumType([], tInt, v, [])
+    val c = newConstraint(sumT, tString, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    val solutions = unify(constraints)
+    // rhs is v, so v should unify with tString
+    val count: int = luaExpr("#solutions")
+    assertEqual(count, 1)
+    val sol: any = luaExpr("solutions[1]")
+    val solVar: Type = luaExpr("sol.variable")
+    val solRepl: Type = luaExpr("sol.replacement")
+    assertTrue(typeEquals(solVar, v))
+    assertTrue(typeEquals(solRepl, tString))
+}
+
+// --- unify: recursive types ---
+
+test("unify: recursive type gets unfolded") {
+    val v = variableType("X", 0)
+    val inner = functionType([tInt, v], [], 0)
+    val recType = recursiveType(v, inner)
+    val v2 = variableType("T", 0)
+    val c = newConstraint(recType, v2, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    val solutions = unify(constraints)
+    // The recursive type unfolds: fn(int, recType)
+    // Then v2 should be assigned to the unfolded type
+    val count: int = luaExpr("#solutions")
+    assertTrue(count >= 1)
+}
+
+// --- unify: not a function ---
+
+test("unify: function expected but non-function actual throws notAFunction") {
+    val expected = functionType([tInt, tString], [], 0)
+    val c = newConstraint(expected, tInt, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    embedLua("local ok, err = pcall(unify, constraints)")
+    val ok: bool = luaExpr("ok")
+    assertFalse(ok)
+    val code: string = luaExpr("err.code")
+    assertEqual(code, "NOT_A_FUNCTION")
+}
+
+// --- unify: infinite type ---
+
+test("unify: infinite type throws error") {
+    val v = variableType("T", 0)
+    // T = fn(T, int) -> occurs check should catch this
+    val fnType = functionType([v, tInt], [], 0)
+    val c = newConstraint(v, fnType, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    embedLua("local ok, err = pcall(unify, constraints)")
+    val ok: bool = luaExpr("ok")
+    assertFalse(ok)
+    val code: string = luaExpr("err.code")
+    assertEqual(code, "INFINITE_TYPE")
+}
+
+// --- unify: variable propagation ---
+
+test("unify: variable solution propagates to remaining constraints") {
+    val v = variableType("T", 0)
+    val c1 = newConstraint(v, tInt, testSection, [])
+    val c2 = newConstraint(v, tString, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c1)")
+    embedLua("table.insert(constraints, c2)")
+    // After solving T=int, second constraint becomes int=string -> mismatch
+    embedLua("local ok, err = pcall(unify, constraints)")
+    val ok: bool = luaExpr("ok")
+    assertFalse(ok)
+    val code: string = luaExpr("err.code")
+    assertEqual(code, "TYPE_MISMATCH")
+}
+
+test("unify: multiple variables resolved") {
+    val v1 = variableType("T", 0)
+    val v2 = variableType("U", 0)
+    val c1 = newConstraint(v1, tInt, testSection, [])
+    val c2 = newConstraint(v2, tString, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c1)")
+    embedLua("table.insert(constraints, c2)")
+    val solutions = unify(constraints)
+    val count: int = luaExpr("#solutions")
+    assertEqual(count, 2)
+}
+
+// --- unify: else case (tag mismatch) ---
+
+test("unify: mismatched tags throws typeMismatch") {
+    // record vs array
+    val rec = recordType([], [{ name: "x", fieldType: tInt }], [])
+    val arr = arrayType(tInt, [])
+    val c = newConstraint(rec, arr, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    embedLua("local ok, err = pcall(unify, constraints)")
+    val ok: bool = luaExpr("ok")
+    assertFalse(ok)
+    val code: string = luaExpr("err.code")
+    assertEqual(code, "TYPE_MISMATCH")
+}
+
+// --- unify: empty constraints ---
+
+test("unify: empty constraints returns empty solutions") {
+    val constraints: array[any] = luaExpr("{}")
+    val solutions = unify(constraints)
+    val count: int = luaExpr("#solutions")
+    assertEqual(count, 0)
+}
+
+summary()

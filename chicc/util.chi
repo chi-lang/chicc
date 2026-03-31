@@ -1,0 +1,25 @@
+// chicc/chicc/util.chi
+package user/util
+import std/lang { luaExpr, embedLua }
+import std/lang.array { push }
+
+// StringBuilder — array-based string buffer for efficient concatenation
+type StringBuilder = { parts: array[string], length: int }
+
+pub fn newStringBuilder(): StringBuilder {
+    { parts: [], length: 0 }
+}
+
+pub fn append(sb: StringBuilder, s: string) {
+    sb.parts.push(s)
+    val sLen: int = luaExpr("#s")
+    sb.length = sb.length + sLen
+}
+
+pub fn toString(sb: StringBuilder): string {
+    luaExpr("table.concat(sb.parts)")
+}
+
+pub fn len(sb: StringBuilder): int {
+    sb.length
+}

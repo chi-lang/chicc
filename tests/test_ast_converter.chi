@@ -1,0 +1,544 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/source { newSection }
+import user/types { tAny, tUnit, tBool, tInt, tFloat, tString, functionType, variableType }
+import user/ast { localTarget, packageTarget, exprKind, exprAtomValue, exprExprType, exprTarget, exprOp, exprBlockBody, exprValue, exprDeclName, exprIsPublic, exprIsMutable, exprParts, exprCallParams, exprCondition, exprThenBranch, exprElseBranch, exprForVars, exprFieldName, exprParameters, exprEffectName, exprEffectModuleName, exprEffectPackageName, exprHandleCases, exprReturnValue, exprPrefixExpr, exprLeft, exprRight, exprArrayValues, exprRecordFields, exprLoopCondition, exprLoopBody, exprIndexVariable, exprIndexExpr, exprIndexValue, exprReceiver, exprFunction, exprCastExpr, exprTargetType, exprCheckedType, exprBody }
+import user/parse_ast { parseUnitValue, parseLongValue, parseFloatValue, parseBoolValue, parseStringValue, parseStringText, parseInterpolation, parseInterpolatedString, parseLambda, parseFuncWithName, parseFnCall, parseVariableRead, parseAssignment, parseBlock, parseGroup, parseIfElse, parseWhile, parseFor, parseWhen, parseReturn, parseBreak, parseContinue, parseNot, parseBinaryOp, parseCast, parseIs, parseFieldAccess, parseFieldAssignment, parseCreateArray, parseCreateRecord, parseWeave, parseWeavePlaceholder, parseEffectDefinition, parseHandle, parseNameDeclaration, parseIndexOperator, parseIndexedAssignment, newFormalArgument, newParseWhenCase, newParseElseCase, newParseRecordField, newParseHandleCase, typeNameRef }
+import user/symbols { newCompileTables, newSymbol, ctDefineSymbol, ctGetLocalSymbol }
+import user/ast_converter { convert, convertProgram, getSymbol, addLocalSymbol, removeLocalSymbol }
+
+// Helper: create a minimal package and tables for testing
+fn makeTestContext(): { pkg: any, tables: any } {
+    val pkg: any = { moduleName: "test", packageName: "main" }
+    val tables = newCompileTables(pkg, unit, [])
+    { pkg: pkg, tables: tables }
+}
+
+// --- Atom conversions ---
+
+test("convert UnitValue") {
+    val ctx = makeTestContext()
+    val node = parseUnitValue(unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "atom")
+    assertEqual(exprAtomValue(result), "unit")
+}
+
+test("convert LongValue") {
+    val ctx = makeTestContext()
+    val node = parseLongValue(42, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "atom")
+    assertEqual(exprAtomValue(result), "42")
+}
+
+test("convert FloatValue") {
+    val ctx = makeTestContext()
+    val v: float = 3.14
+    val node = parseFloatValue(v, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "atom")
+    // Float formatting may vary, just check it's an atom
+}
+
+test("convert BoolValue true") {
+    val ctx = makeTestContext()
+    val node = parseBoolValue(true, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "atom")
+    assertEqual(exprAtomValue(result), "true")
+}
+
+test("convert BoolValue false") {
+    val ctx = makeTestContext()
+    val node = parseBoolValue(false, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "atom")
+    assertEqual(exprAtomValue(result), "false")
+}
+
+test("convert StringValue") {
+    val ctx = makeTestContext()
+    val node = parseStringValue("hello", unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "atom")
+    assertEqual(exprAtomValue(result), "hello")
+}
+
+test("convert StringText") {
+    val ctx = makeTestContext()
+    val node = parseStringText("world", unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "atom")
+    assertEqual(exprAtomValue(result), "world")
+}
+
+// --- String interpolation ---
+
+test("convert ParseInterpolation") {
+    val ctx = makeTestContext()
+    val inner = parseLongValue(42, unit)
+    val node = parseInterpolation(inner, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "cast")
+}
+
+test("convert ParseInterpolatedString") {
+    val ctx = makeTestContext()
+    val part1 = parseStringText("hello ", unit)
+    val part2 = parseInterpolation(parseLongValue(42, unit), unit)
+    val node = parseInterpolatedString([part1, part2], unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "interpolated_string")
+    val parts = exprParts(result)
+    assertEqual(parts.size(), 2)
+}
+
+// --- Variable read/assignment ---
+
+test("convert ParseVariableRead - local symbol") {
+    val ctx = makeTestContext()
+    val sym = newSymbol("test", "main", "x", tInt, false, false)
+    ctDefineSymbol(ctx.tables, sym)
+    val node = parseVariableRead("x", unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "variable_access")
+    val tgt = exprTarget(result)
+    assertTrue(tgt != unit)
+    val tgtTag: string = luaExpr("tgt.tag")
+    assertEqual(tgtTag, "package")
+}
+
+test("convert ParseAssignment") {
+    val ctx = makeTestContext()
+    val sym = newSymbol("test", "main", "y", tInt, false, true)
+    ctDefineSymbol(ctx.tables, sym)
+    val valNode = parseLongValue(10, unit)
+    val node = parseAssignment("y", valNode, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "assignment")
+}
+
+// --- Operators ---
+
+test("convert ParseBinaryOp") {
+    val ctx = makeTestContext()
+    val left = parseLongValue(1, unit)
+    val right = parseLongValue(2, unit)
+    val node = parseBinaryOp("+", left, right, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "infix_op")
+    assertEqual(exprOp(result), "+")
+}
+
+test("convert ParseNot") {
+    val ctx = makeTestContext()
+    val inner = parseBoolValue(true, unit)
+    val node = parseNot(inner, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "prefix_op")
+    assertEqual(exprOp(result), "!")
+}
+
+// --- Block and Group ---
+
+test("convert ParseBlock") {
+    val ctx = makeTestContext()
+    val e1 = parseLongValue(1, unit)
+    val e2 = parseLongValue(2, unit)
+    val node = parseBlock([e1, e2], unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "block")
+    val body = exprBlockBody(result)
+    assertEqual(body.size(), 2)
+}
+
+test("convert ParseGroup - unwraps inner") {
+    val ctx = makeTestContext()
+    val inner = parseLongValue(42, unit)
+    val node = parseGroup(inner, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "atom")
+    assertEqual(exprAtomValue(result), "42")
+}
+
+// --- Control flow ---
+
+test("convert ParseIfElse") {
+    val ctx = makeTestContext()
+    val cond = parseBoolValue(true, unit)
+    val thenB = parseLongValue(1, unit)
+    val elseB = parseLongValue(2, unit)
+    val node = parseIfElse(cond, thenB, elseB, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "if_else")
+    assertTrue(exprCondition(result) != unit)
+    assertTrue(exprThenBranch(result) != unit)
+    assertTrue(exprElseBranch(result) != unit)
+}
+
+test("convert ParseIfElse - no else") {
+    val ctx = makeTestContext()
+    val cond = parseBoolValue(true, unit)
+    val thenB = parseLongValue(1, unit)
+    val node = parseIfElse(cond, thenB, unit, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "if_else")
+    assertTrue(exprElseBranch(result) == unit)
+}
+
+test("convert ParseWhile") {
+    val ctx = makeTestContext()
+    val cond = parseBoolValue(true, unit)
+    val body = parseLongValue(1, unit)
+    val node = parseWhile(cond, body, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "while_loop")
+}
+
+test("convert ParseReturn") {
+    val ctx = makeTestContext()
+    val retVal = parseLongValue(42, unit)
+    val node = parseReturn(retVal, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "return")
+    assertTrue(exprReturnValue(result) != unit)
+}
+
+test("convert ParseBreak") {
+    val ctx = makeTestContext()
+    val node = parseBreak(unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "break")
+}
+
+test("convert ParseContinue") {
+    val ctx = makeTestContext()
+    val node = parseContinue(unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "continue")
+}
+
+// --- When conversion ---
+
+test("convert ParseWhen - empty") {
+    val ctx = makeTestContext()
+    val node = parseWhen([], unit, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "atom")
+    assertEqual(exprAtomValue(result), "unit")
+}
+
+test("convert ParseWhen - single case") {
+    val ctx = makeTestContext()
+    val cond = parseBoolValue(true, unit)
+    val body = parseLongValue(1, unit)
+    val wc = newParseWhenCase(cond, body, unit)
+    val node = parseWhen([wc], unit, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "if_else")
+}
+
+test("convert ParseWhen - with else") {
+    val ctx = makeTestContext()
+    val cond = parseBoolValue(true, unit)
+    val body = parseLongValue(1, unit)
+    val wc = newParseWhenCase(cond, body, unit)
+    val elseBody = parseLongValue(2, unit)
+    val ec = newParseElseCase(elseBody, unit)
+    val node = parseWhen([wc], ec, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "if_else")
+    assertTrue(exprElseBranch(result) != unit)
+}
+
+test("convert ParseWhen - multiple cases fold into nested IfElse") {
+    val ctx = makeTestContext()
+    val c1 = newParseWhenCase(parseBoolValue(true, unit), parseLongValue(1, unit), unit)
+    val c2 = newParseWhenCase(parseBoolValue(false, unit), parseLongValue(2, unit), unit)
+    val node = parseWhen([c1, c2], unit, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "if_else")
+    // The else branch should be the inner if_else
+    val inner: any = exprElseBranch(result)
+    assertTrue(inner != unit)
+    assertEqual(exprKind(inner), "if_else")
+}
+
+// --- Lambda conversion ---
+
+test("convert ParseLambda - no args") {
+    val ctx = makeTestContext()
+    val body = parseLongValue(42, unit)
+    val node = parseLambda([], [body], unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "fn")
+    val params = exprParameters(result)
+    assertEqual(params.size(), 0)
+}
+
+test("convert ParseLambda - with args") {
+    val ctx = makeTestContext()
+    val arg1 = newFormalArgument("x", typeNameRef("", "", "int", unit), unit, unit)
+    val body = parseVariableRead("x", unit)
+    val node = parseLambda([arg1], [body], unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "fn")
+    val params = exprParameters(result)
+    assertEqual(params.size(), 1)
+}
+
+// --- FuncWithName conversion ---
+
+test("convert ParseFuncWithName") {
+    val ctx = makeTestContext()
+    val arg = newFormalArgument("n", typeNameRef("", "", "int", unit), unit, unit)
+    val retType = typeNameRef("", "", "int", unit)
+    val body = parseBlock([parseLongValue(1, unit)], unit)
+    val node = parseFuncWithName(false, "myFn", [], [arg], retType, body, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "name_declaration")
+    assertEqual(exprDeclName(result), "myFn")
+    assertFalse(exprIsPublic(result))
+
+    // Should have registered symbol
+    val sym = ctGetLocalSymbol(ctx.tables, "myFn")
+    assertTrue(sym != unit)
+}
+
+test("convert ParseFuncWithName - public") {
+    val ctx = makeTestContext()
+    val arg = newFormalArgument("s", typeNameRef("", "", "string", unit), unit, unit)
+    val retType = typeNameRef("", "", "string", unit)
+    val body = parseBlock([parseVariableRead("s", unit)], unit)
+    val node = parseFuncWithName(true, "pubFn", [], [arg], retType, body, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "name_declaration")
+    assertTrue(exprIsPublic(result))
+}
+
+// --- FnCall conversion ---
+
+test("convert ParseFnCall") {
+    val ctx = makeTestContext()
+    val sym = newSymbol("test", "main", "foo", unit, false, false)
+    ctDefineSymbol(ctx.tables, sym)
+    val callee = parseVariableRead("foo", unit)
+    val arg = parseLongValue(1, unit)
+    val node = parseFnCall(callee, [], [arg], unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "fn_call")
+    val callParams = exprCallParams(result)
+    assertEqual(callParams.size(), 1)
+}
+
+// --- NameDeclaration conversion ---
+
+test("convert ParseNameDeclaration - val") {
+    val ctx = makeTestContext()
+    val valNode = parseLongValue(42, unit)
+    val node = parseNameDeclaration(false, "x", false, unit, valNode, unit, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "name_declaration")
+    assertEqual(exprDeclName(result), "x")
+    assertFalse(exprIsMutable(result))
+
+    // Should register in symbol table
+    val sym = ctGetLocalSymbol(ctx.tables, "x")
+    assertTrue(sym != unit)
+}
+
+test("convert ParseNameDeclaration - var mutable") {
+    val ctx = makeTestContext()
+    val valNode = parseLongValue(0, unit)
+    val node = parseNameDeclaration(false, "counter", true, unit, valNode, unit, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "name_declaration")
+    assertTrue(exprIsMutable(result))
+}
+
+// --- Index operations ---
+
+test("convert ParseIndexOperator") {
+    val ctx = makeTestContext()
+    val sym = newSymbol("test", "main", "arr", unit, false, false)
+    ctDefineSymbol(ctx.tables, sym)
+    val var_ = parseVariableRead("arr", unit)
+    val idx = parseLongValue(1, unit)
+    val node = parseIndexOperator(var_, idx, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "index_op")
+}
+
+test("convert ParseIndexedAssignment") {
+    val ctx = makeTestContext()
+    val sym = newSymbol("test", "main", "arr", unit, false, true)
+    ctDefineSymbol(ctx.tables, sym)
+    val var_ = parseVariableRead("arr", unit)
+    val idx = parseLongValue(1, unit)
+    val val_ = parseLongValue(99, unit)
+    val node = parseIndexedAssignment(var_, idx, val_, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "indexed_assignment")
+}
+
+// --- Cast and Is ---
+
+test("convert ParseCast") {
+    val ctx = makeTestContext()
+    val inner = parseLongValue(42, unit)
+    val tRef = typeNameRef("", "", "string", unit)
+    val node = parseCast(inner, tRef, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "cast")
+}
+
+test("convert ParseIs") {
+    val ctx = makeTestContext()
+    val inner = parseLongValue(42, unit)
+    val tRef = typeNameRef("", "", "int", unit)
+    val node = parseIs(inner, tRef, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "is")
+}
+
+// --- Collections ---
+
+test("convert ParseCreateArray") {
+    val ctx = makeTestContext()
+    val v1 = parseLongValue(1, unit)
+    val v2 = parseLongValue(2, unit)
+    val node = parseCreateArray([v1, v2], unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "create_array")
+    val vals = exprArrayValues(result)
+    assertEqual(vals.size(), 2)
+}
+
+test("convert ParseCreateRecord") {
+    val ctx = makeTestContext()
+    val f1 = newParseRecordField("name", parseStringValue("Alice", unit))
+    val f2 = newParseRecordField("age", parseLongValue(30, unit))
+    val node = parseCreateRecord([f1, f2], unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "create_record")
+    val fields = exprRecordFields(result)
+    assertEqual(fields.size(), 2)
+}
+
+// --- Field access ---
+
+test("convert ParseFieldAccess - regular") {
+    val ctx = makeTestContext()
+    val sym = newSymbol("test", "main", "obj", unit, false, false)
+    ctDefineSymbol(ctx.tables, sym)
+    val recv = parseVariableRead("obj", unit)
+    val node = parseFieldAccess("obj", "name", recv, unit, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "field_access")
+    assertEqual(exprFieldName(result), "name")
+}
+
+test("convert ParseFieldAssignment") {
+    val ctx = makeTestContext()
+    val sym = newSymbol("test", "main", "obj", unit, false, true)
+    ctDefineSymbol(ctx.tables, sym)
+    val recv = parseVariableRead("obj", unit)
+    val val_ = parseStringValue("Bob", unit)
+    val node = parseFieldAssignment("obj", "name", recv, val_, unit, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "field_assignment")
+    assertEqual(exprFieldName(result), "name")
+}
+
+// --- For loop ---
+
+test("convert ParseFor") {
+    val ctx = makeTestContext()
+    val sym = newSymbol("test", "main", "items", unit, false, false)
+    ctDefineSymbol(ctx.tables, sym)
+    val iter = parseVariableRead("items", unit)
+    val body = parseLongValue(1, unit)
+    val node = parseFor(["item"], iter, unit, unit, body, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "for_loop")
+    val vars = exprForVars(result)
+    assertEqual(vars.size(), 1)
+    assertEqual(vars[1], "item")
+}
+
+// --- Weave ---
+
+test("convert ParseWeave") {
+    val ctx = makeTestContext()
+    val valNode = parseLongValue(42, unit)
+    val template = parseWeavePlaceholder(unit)
+    val node = parseWeave(valNode, template, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "block")
+    val body = exprBlockBody(result)
+    assertEqual(body.size(), 2)
+    // First should be name_declaration (temp var)
+    assertEqual(exprKind(body[1]), "name_declaration")
+    // Second should be the placeholder resolved to variable_access
+    assertEqual(exprKind(body[2]), "variable_access")
+}
+
+// --- Effect definition ---
+
+test("convert ParseEffectDefinition") {
+    val ctx = makeTestContext()
+    val arg = newFormalArgument("msg", typeNameRef("", "", "string", unit), unit, unit)
+    val retType = typeNameRef("", "", "unit", unit)
+    val node = parseEffectDefinition(false, "log", [], [arg], retType, unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "effect_definition")
+    assertEqual(exprEffectName(result), "log")
+    assertEqual(exprEffectModuleName(result), "test")
+    assertEqual(exprEffectPackageName(result), "main")
+
+    // Should register the effect in the symbol table
+    val sym = ctGetLocalSymbol(ctx.tables, "log")
+    assertTrue(sym != unit)
+}
+
+// --- Handle ---
+
+test("convert ParseHandle") {
+    val ctx = makeTestContext()
+
+    // Register the effect in the symbol table
+    val effType = functionType([tString, tUnit], [], 0)
+    val effSym = newSymbol("test", "main", "log", effType, false, false)
+    ctDefineSymbol(ctx.tables, effSym)
+
+    val bodyNode = parseLongValue(42, unit)
+    val caseBody = parseLongValue(0, unit)
+    val hc = newParseHandleCase("log", ["msg"], caseBody, unit)
+    val node = parseHandle(bodyNode, [hc], unit)
+    val result: any = convert(node, ctx.pkg, ctx.tables)
+    assertEqual(exprKind(result), "handle")
+    val cases = exprHandleCases(result)
+    assertEqual(cases.size(), 1)
+}
+
+// --- getSymbol ---
+
+test("getSymbol - from compileTables") {
+    val ctx = makeTestContext()
+    val sym = newSymbol("test", "main", "myVar", tInt, false, false)
+    ctDefineSymbol(ctx.tables, sym)
+    val tgt: any = getSymbol("myVar", ctx.tables)
+    val tgtTag: string = luaExpr("tgt.tag")
+    assertEqual(tgtTag, "package")
+    val tgtName: string = luaExpr("tgt.name")
+    assertEqual(tgtName, "myVar")
+}
+
+test("getSymbol - not found returns local target") {
+    val ctx = makeTestContext()
+    val tgt: any = getSymbol("unknown", ctx.tables)
+    val tgtTag: string = luaExpr("tgt.tag")
+    assertEqual(tgtTag, "local")
+}
+
+summary()

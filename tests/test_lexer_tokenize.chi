@@ -1,0 +1,293 @@
+import user/test_util { test, assertEqual, summary }
+import user/lexer { tokenize }
+import user/token { TK_INT, TK_FLOAT, TK_STRING, TK_ID, TK_EOF, TK_NEWLINE, TK_VAL, TK_VAR, TK_FN, TK_IF, TK_ELSE, TK_PUB, TK_PLUS, TK_MINUS, TK_STAR, TK_EQ, TK_EQEQ, TK_LPAREN, TK_RPAREN, TK_LBRACE, TK_RBRACE, TK_LBRACKET, TK_RBRACKET, TK_COLON, TK_COMMA, TK_INTERP_START, TK_INTERP_TEXT, TK_INTERP_EXPR_START, TK_INTERP_EXPR_END, TK_INTERP_END }
+import std/lang.array { size }
+import std/lang { luaExpr }
+
+// --- 1. Empty source ---
+
+test("tokenize: empty source") {
+    val tokens = tokenize("")
+    assertEqual(tokens.size(), 1)
+    assertEqual(tokens[1].kind, TK_EOF)
+}
+
+// --- 2. Single integer ---
+
+test("tokenize: single integer") {
+    val tokens = tokenize("42")
+    assertEqual(tokens.size(), 2)
+    assertEqual(tokens[1].kind, TK_INT)
+    assertEqual(tokens[1].value, "42")
+    assertEqual(tokens[2].kind, TK_EOF)
+}
+
+// --- 3. Single float ---
+
+test("tokenize: single float") {
+    val tokens = tokenize("3.14")
+    assertEqual(tokens.size(), 2)
+    assertEqual(tokens[1].kind, TK_FLOAT)
+    assertEqual(tokens[1].value, "3.14")
+    assertEqual(tokens[2].kind, TK_EOF)
+}
+
+// --- 4. Simple identifier ---
+
+test("tokenize: simple identifier") {
+    val tokens = tokenize("foo")
+    assertEqual(tokens.size(), 2)
+    assertEqual(tokens[1].kind, TK_ID)
+    assertEqual(tokens[1].value, "foo")
+    assertEqual(tokens[2].kind, TK_EOF)
+}
+
+// --- 5. Keyword ---
+
+test("tokenize: keyword val") {
+    val tokens = tokenize("val")
+    assertEqual(tokens.size(), 2)
+    assertEqual(tokens[1].kind, TK_VAL)
+    assertEqual(tokens[1].value, "val")
+    assertEqual(tokens[2].kind, TK_EOF)
+}
+
+test("tokenize: keyword fn") {
+    val tokens = tokenize("fn")
+    assertEqual(tokens.size(), 2)
+    assertEqual(tokens[1].kind, TK_FN)
+    assertEqual(tokens[1].value, "fn")
+    assertEqual(tokens[2].kind, TK_EOF)
+}
+
+// --- 6. Simple string ---
+
+test("tokenize: simple string") {
+    val tokens = tokenize("\"hello\"")
+    assertEqual(tokens.size(), 2)
+    assertEqual(tokens[1].kind, TK_STRING)
+    assertEqual(tokens[1].value, "hello")
+    assertEqual(tokens[2].kind, TK_EOF)
+}
+
+// --- 7. Multiple tokens: val x = 42 ---
+
+test("tokenize: val x = 42") {
+    val tokens = tokenize("val x = 42")
+    assertEqual(tokens[1].kind, TK_VAL)
+    assertEqual(tokens[1].value, "val")
+    assertEqual(tokens[2].kind, TK_ID)
+    assertEqual(tokens[2].value, "x")
+    assertEqual(tokens[3].kind, TK_EQ)
+    assertEqual(tokens[3].value, "=")
+    assertEqual(tokens[4].kind, TK_INT)
+    assertEqual(tokens[4].value, "42")
+    assertEqual(tokens[5].kind, TK_EOF)
+    assertEqual(tokens.size(), 5)
+}
+
+// --- 8. Operators: a + b ---
+
+test("tokenize: a + b") {
+    val tokens = tokenize("a + b")
+    assertEqual(tokens[1].kind, TK_ID)
+    assertEqual(tokens[1].value, "a")
+    assertEqual(tokens[2].kind, TK_PLUS)
+    assertEqual(tokens[3].kind, TK_ID)
+    assertEqual(tokens[3].value, "b")
+    assertEqual(tokens[4].kind, TK_EOF)
+    assertEqual(tokens.size(), 4)
+}
+
+// --- 9. Newlines preserved ---
+
+test("tokenize: newlines preserved") {
+    val src: string = luaExpr("'a\\nb'")
+    val tokens = tokenize(src)
+    assertEqual(tokens[1].kind, TK_ID)
+    assertEqual(tokens[1].value, "a")
+    assertEqual(tokens[2].kind, TK_NEWLINE)
+    assertEqual(tokens[3].kind, TK_ID)
+    assertEqual(tokens[3].value, "b")
+    assertEqual(tokens[4].kind, TK_EOF)
+    assertEqual(tokens.size(), 4)
+}
+
+// --- 10. Line comments skipped ---
+
+test("tokenize: line comment skipped") {
+    val src: string = luaExpr("'a // comment\\nb'")
+    val tokens = tokenize(src)
+    assertEqual(tokens[1].kind, TK_ID)
+    assertEqual(tokens[1].value, "a")
+    assertEqual(tokens[2].kind, TK_NEWLINE)
+    assertEqual(tokens[3].kind, TK_ID)
+    assertEqual(tokens[3].value, "b")
+    assertEqual(tokens[4].kind, TK_EOF)
+    assertEqual(tokens.size(), 4)
+}
+
+// --- 11. Block comments skipped ---
+
+test("tokenize: block comment skipped") {
+    val tokens = tokenize("a /* comment */ b")
+    assertEqual(tokens[1].kind, TK_ID)
+    assertEqual(tokens[1].value, "a")
+    assertEqual(tokens[2].kind, TK_ID)
+    assertEqual(tokens[2].value, "b")
+    assertEqual(tokens[3].kind, TK_EOF)
+    assertEqual(tokens.size(), 3)
+}
+
+// --- 12. Function declaration ---
+
+test("tokenize: fn add(a: int, b: int): int") {
+    val tokens = tokenize("fn add(a: int, b: int): int")
+    assertEqual(tokens[1].kind, TK_FN)
+    assertEqual(tokens[2].kind, TK_ID)
+    assertEqual(tokens[2].value, "add")
+    assertEqual(tokens[3].kind, TK_LPAREN)
+    assertEqual(tokens[4].kind, TK_ID)
+    assertEqual(tokens[4].value, "a")
+    assertEqual(tokens[5].kind, TK_COLON)
+    assertEqual(tokens[6].kind, TK_ID)
+    assertEqual(tokens[6].value, "int")
+    assertEqual(tokens[7].kind, TK_COMMA)
+    assertEqual(tokens[8].kind, TK_ID)
+    assertEqual(tokens[8].value, "b")
+    assertEqual(tokens[9].kind, TK_COLON)
+    assertEqual(tokens[10].kind, TK_ID)
+    assertEqual(tokens[10].value, "int")
+    assertEqual(tokens[11].kind, TK_RPAREN)
+    assertEqual(tokens[12].kind, TK_COLON)
+    assertEqual(tokens[13].kind, TK_ID)
+    assertEqual(tokens[13].value, "int")
+    assertEqual(tokens[14].kind, TK_EOF)
+}
+
+// --- 13. String interpolation ---
+
+test("tokenize: string with interpolation") {
+    // Build a source: "hello $name"
+    val src: string = luaExpr("'\"hello ' .. string.char(36) .. 'name\"'")
+    val tokens = tokenize(src)
+    assertEqual(tokens[1].kind, TK_INTERP_START)
+    assertEqual(tokens[2].kind, TK_INTERP_TEXT)
+    assertEqual(tokens[2].value, "hello ")
+    assertEqual(tokens[3].kind, TK_INTERP_EXPR_START)
+    assertEqual(tokens[4].kind, TK_ID)
+    assertEqual(tokens[4].value, "name")
+    assertEqual(tokens[5].kind, TK_INTERP_EXPR_END)
+    assertEqual(tokens[6].kind, TK_INTERP_END)
+    assertEqual(tokens[7].kind, TK_EOF)
+}
+
+// --- 14. Array access ---
+
+test("tokenize: arr[1]") {
+    val tokens = tokenize("arr[1]")
+    assertEqual(tokens[1].kind, TK_ID)
+    assertEqual(tokens[1].value, "arr")
+    assertEqual(tokens[2].kind, TK_LBRACKET)
+    assertEqual(tokens[3].kind, TK_INT)
+    assertEqual(tokens[3].value, "1")
+    assertEqual(tokens[4].kind, TK_RBRACKET)
+    assertEqual(tokens[5].kind, TK_EOF)
+    assertEqual(tokens.size(), 5)
+}
+
+// --- Additional tests ---
+
+test("tokenize: whitespace only") {
+    val tokens = tokenize("   ")
+    assertEqual(tokens.size(), 1)
+    assertEqual(tokens[1].kind, TK_EOF)
+}
+
+test("tokenize: var x = a + b") {
+    val tokens = tokenize("var x = a + b")
+    assertEqual(tokens[1].kind, TK_VAR)
+    assertEqual(tokens[2].kind, TK_ID)
+    assertEqual(tokens[2].value, "x")
+    assertEqual(tokens[3].kind, TK_EQ)
+    assertEqual(tokens[4].kind, TK_ID)
+    assertEqual(tokens[4].value, "a")
+    assertEqual(tokens[5].kind, TK_PLUS)
+    assertEqual(tokens[6].kind, TK_ID)
+    assertEqual(tokens[6].value, "b")
+    assertEqual(tokens[7].kind, TK_EOF)
+}
+
+test("tokenize: comparison ==") {
+    val tokens = tokenize("a == b")
+    assertEqual(tokens[1].kind, TK_ID)
+    assertEqual(tokens[2].kind, TK_EQEQ)
+    assertEqual(tokens[3].kind, TK_ID)
+    assertEqual(tokens[4].kind, TK_EOF)
+}
+
+test("tokenize: braces") {
+    val tokens = tokenize("{ }")
+    assertEqual(tokens[1].kind, TK_LBRACE)
+    assertEqual(tokens[2].kind, TK_RBRACE)
+    assertEqual(tokens[3].kind, TK_EOF)
+}
+
+test("tokenize: multiple lines") {
+    val src: string = luaExpr("'val x = 1\\nval y = 2'")
+    val tokens = tokenize(src)
+    assertEqual(tokens[1].kind, TK_VAL)
+    assertEqual(tokens[2].kind, TK_ID)
+    assertEqual(tokens[2].value, "x")
+    assertEqual(tokens[3].kind, TK_EQ)
+    assertEqual(tokens[4].kind, TK_INT)
+    assertEqual(tokens[4].value, "1")
+    assertEqual(tokens[5].kind, TK_NEWLINE)
+    assertEqual(tokens[6].kind, TK_VAL)
+    assertEqual(tokens[7].kind, TK_ID)
+    assertEqual(tokens[7].value, "y")
+    assertEqual(tokens[8].kind, TK_EQ)
+    assertEqual(tokens[9].kind, TK_INT)
+    assertEqual(tokens[9].value, "2")
+    assertEqual(tokens[10].kind, TK_EOF)
+}
+
+test("tokenize: if else") {
+    val tokens = tokenize("if x else y")
+    assertEqual(tokens[1].kind, TK_IF)
+    assertEqual(tokens[2].kind, TK_ID)
+    assertEqual(tokens[2].value, "x")
+    assertEqual(tokens[3].kind, TK_ELSE)
+    assertEqual(tokens[4].kind, TK_ID)
+    assertEqual(tokens[4].value, "y")
+    assertEqual(tokens[5].kind, TK_EOF)
+}
+
+test("tokenize: pub fn") {
+    val tokens = tokenize("pub fn foo()")
+    assertEqual(tokens[1].kind, TK_PUB)
+    assertEqual(tokens[2].kind, TK_FN)
+    assertEqual(tokens[3].kind, TK_ID)
+    assertEqual(tokens[3].value, "foo")
+    assertEqual(tokens[4].kind, TK_LPAREN)
+    assertEqual(tokens[5].kind, TK_RPAREN)
+    assertEqual(tokens[6].kind, TK_EOF)
+}
+
+test("tokenize: subtraction a - b") {
+    val tokens = tokenize("a - b")
+    assertEqual(tokens[1].kind, TK_ID)
+    assertEqual(tokens[2].kind, TK_MINUS)
+    assertEqual(tokens[3].kind, TK_ID)
+    assertEqual(tokens[4].kind, TK_EOF)
+}
+
+test("tokenize: multiplication a * b") {
+    val tokens = tokenize("a * b")
+    assertEqual(tokens[1].kind, TK_ID)
+    assertEqual(tokens[2].kind, TK_STAR)
+    assertEqual(tokens[3].kind, TK_ID)
+    assertEqual(tokens[4].kind, TK_EOF)
+}
+
+summary()

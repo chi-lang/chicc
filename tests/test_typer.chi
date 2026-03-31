@@ -1,0 +1,467 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/types { Type, TypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, polyType, typeTag, typeName, typeLevel, typeEquals, isVariable, isPrimitive, isFunction, isRecord, isSum, isArray, typeTypes, typeFields, typeElementType, intTypeId, stringTypeId, boolTypeId, optionTypeId, sumCreate, typeTypesCount, typeFieldsCount, mapType }
+import user/unification { Constraint, newConstraint, unify }
+import user/ast { Target, DotTarget, localTarget, packageTarget, fieldDotTarget, localFnDotTarget, packageFnDotTarget, atomExpr, variableAccessExpr, fieldAccessExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, nameDeclarationExpr, assignmentExpr, blockExpr, fnExpr, createRecordExpr, createArrayExpr, interpolatedStringExpr, castExpr_, whileLoopExpr, breakExpr, continueExpr, isExpr, returnExpr, indexOpExpr, indexedAssignmentExpr, fieldAssignmentExpr, newFnParam, newExprField, exprExprType, exprKind, setExprType }
+import user/symbols { newSymbol, newCompileTables, ctDefineSymbol }
+import user/source { newSection }
+import std/lang { luaExpr, embedLua }
+import std/lang.array { size, push }
+
+val testSection = newSection(1, 1, 1, 10)
+
+fn initTestCtx() {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+}
+
+fn newConstraints(): any {
+    luaExpr("{}")
+}
+
+// --- typeTerm: atom ---
+
+test("typeTerm: atom int returns int type") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val expr = atomExpr("42", tInt, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tInt))
+}
+
+test("typeTerm: atom string returns string type") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val expr = atomExpr("hello", tString, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tString))
+}
+
+test("typeTerm: atom bool returns bool type") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val expr = atomExpr("true", tBool, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tBool))
+}
+
+test("typeTerm: atom sets exprType") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val expr = atomExpr("42", tInt, testSection)
+    typeTerm(expr, 0, constraints)
+    val exprType: any = luaExpr("expr.exprType")
+    assertTrue(typeEquals(exprType, tInt))
+}
+
+// --- typeTerm: variable_access ---
+
+test("typeTerm: variable_access returns defined type") {
+    initTestCtx()
+    icDefineLocalSymbol("x", tInt)
+    val constraints = newConstraints()
+    val expr = variableAccessExpr(localTarget("x"), testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tInt))
+}
+
+test("typeTerm: variable_access instantiates poly type") {
+    initTestCtx()
+    val v = variableType("a1", 1)
+    val fnT = functionType([v, v], [], 0)
+    val poly = polyType(0, fnT)
+    icDefineLocalSymbol("id", poly)
+    val constraints = newConstraints()
+    val expr = variableAccessExpr(localTarget("id"), testSection)
+    val result = typeTerm(expr, 0, constraints)
+    val resultTag: string = luaExpr("result.tag")
+    assertEqual(resultTag, "fn")
+}
+
+// --- typeTerm: fn ---
+
+test("typeTerm: fn with typed params") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val body = atomExpr("42", tInt, testSection)
+    val params: any = luaExpr("{}")
+    val p = newFnParam("x", tInt, testSection)
+    embedLua("table.insert(params, p)")
+    val expr = fnExpr(params, unit, body, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    val resultTag: string = luaExpr("result.tag")
+    assertEqual(resultTag, "fn")
+    // Should be fn(int, returnVar) with returnVar constrained to int
+    val types: any = luaExpr("result.types")
+    val count: int = luaExpr("#types")
+    assertEqual(count, 2)
+    val firstParam: any = luaExpr("types[1]")
+    assertTrue(typeEquals(firstParam, tInt))
+}
+
+test("typeTerm: fn with untyped params infers fresh vars") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val body = atomExpr("true", tBool, testSection)
+    val params: any = luaExpr("{}")
+    val p = newFnParam("x", unit, testSection)
+    embedLua("table.insert(params, p)")
+    val expr = fnExpr(params, unit, body, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    val resultTag: string = luaExpr("result.tag")
+    assertEqual(resultTag, "fn")
+    val types: any = luaExpr("result.types")
+    val firstParam: any = luaExpr("types[1]")
+    // First param should be a variable type
+    val fpTag: string = luaExpr("firstParam.tag")
+    assertEqual(fpTag, "var")
+}
+
+// --- typeTerm: fn_call ---
+
+test("typeTerm: fn_call generates constraints") {
+    initTestCtx()
+    val fnType = functionType([tInt, tString], [], 0)
+    icDefineLocalSymbol("f", fnType)
+    val constraints = newConstraints()
+    val callee = variableAccessExpr(localTarget("f"), testSection)
+    val arg = atomExpr("42", tInt, testSection)
+    val callParams: any = luaExpr("{}")
+    embedLua("table.insert(callParams, arg)")
+    val expr = fnCallExpr(callee, callParams, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    // Result should be a fresh variable, and constraints should link fn types
+    val resultTag: string = luaExpr("result.tag")
+    assertEqual(resultTag, "var")
+    val cCount: int = luaExpr("#constraints")
+    assertTrue(cCount >= 1)
+}
+
+// --- typeTerm: if_else ---
+
+test("typeTerm: if_else with else branch creates sum type") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val cond = atomExpr("true", tBool, testSection)
+    val thenB = atomExpr("42", tInt, testSection)
+    val elseB = atomExpr("hello", tString, testSection)
+    val expr = ifElseExpr(cond, thenB, elseB, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    // Result should be sum of int and string
+    // But first, constraints contain bool condition check
+    val cCount: int = luaExpr("#constraints")
+    assertTrue(cCount >= 1)
+}
+
+test("typeTerm: if_else without else branch creates sum with unit") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val cond = atomExpr("true", tBool, testSection)
+    val thenB = atomExpr("42", tInt, testSection)
+    val expr = ifElseExpr(cond, thenB, unit, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    // Result should be sum of int and unit (option-like)
+    val resultTag: string = luaExpr("result.tag")
+    assertEqual(resultTag, "sum")
+}
+
+// --- typeTerm: infix_op ---
+
+test("typeTerm: infix_op logical returns bool") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val left = atomExpr("true", tBool, testSection)
+    val right = atomExpr("false", tBool, testSection)
+    val expr = infixOpExpr("&&", left, right, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tBool))
+}
+
+test("typeTerm: infix_op comparison returns bool") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val left = atomExpr("1", tInt, testSection)
+    val right = atomExpr("2", tInt, testSection)
+    val expr = infixOpExpr("<", left, right, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tBool))
+}
+
+test("typeTerm: infix_op arithmetic returns fresh var") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val left = atomExpr("1", tInt, testSection)
+    val right = atomExpr("2", tInt, testSection)
+    val expr = infixOpExpr("+", left, right, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    val resultTag: string = luaExpr("result.tag")
+    assertEqual(resultTag, "var")
+    // Should have constraints linking result to both operands
+    val cCount: int = luaExpr("#constraints")
+    assertEqual(cCount, 2)
+}
+
+// --- typeTerm: name_declaration ---
+
+test("typeTerm: name_declaration defines symbol") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val value = atomExpr("42", tInt, testSection)
+    val expr = nameDeclarationExpr(false, "x", false, unit, value, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    // x should now be defined
+    val sym = icGetLocalSymbol("x")
+    assertTrue(sym != unit)
+}
+
+test("typeTerm: name_declaration with type annotation") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val value = atomExpr("42", tInt, testSection)
+    val expr = nameDeclarationExpr(false, "x", false, tInt, value, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tInt))
+}
+
+// --- typeTerm: block ---
+
+test("typeTerm: empty block returns unit") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val bodyExprs: any = luaExpr("{}")
+    val expr = blockExpr(bodyExprs, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tUnit))
+}
+
+test("typeTerm: block returns last expr type") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val e1 = atomExpr("true", tBool, testSection)
+    val e2 = atomExpr("42", tInt, testSection)
+    val bodyExprs: any = luaExpr("{}")
+    embedLua("table.insert(bodyExprs, e1)")
+    embedLua("table.insert(bodyExprs, e2)")
+    val expr = blockExpr(bodyExprs, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tInt))
+}
+
+// --- typeTerm: prefix_op ---
+
+test("typeTerm: prefix_op returns bool") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val inner = atomExpr("true", tBool, testSection)
+    val expr = prefixOpExpr("!", inner, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tBool))
+}
+
+// --- typeTerm: break, continue ---
+
+test("typeTerm: break returns unit") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val expr = breakExpr(testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tUnit))
+}
+
+test("typeTerm: continue returns unit") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val expr = continueExpr(testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tUnit))
+}
+
+// --- typeTerm: return ---
+
+test("typeTerm: return with value returns value type") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val value = atomExpr("42", tInt, testSection)
+    val expr = returnExpr(value, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tInt))
+}
+
+test("typeTerm: return without value returns unit") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val expr = returnExpr(unit, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tUnit))
+}
+
+// --- typeTerm: cast ---
+
+test("typeTerm: cast returns target type") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val inner = atomExpr("42", tInt, testSection)
+    val expr = castExpr_(inner, tString, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tString))
+}
+
+// --- typeTerm: is ---
+
+test("typeTerm: is returns bool") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val inner = atomExpr("42", tInt, testSection)
+    val expr = isExpr(inner, tString, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tBool))
+}
+
+// --- typeTerm: interpolated_string ---
+
+test("typeTerm: interpolated_string returns string") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val parts: any = luaExpr("{}")
+    val part1 = atomExpr("hello", tString, testSection)
+    embedLua("table.insert(parts, part1)")
+    val expr = interpolatedStringExpr(parts, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tString))
+}
+
+// --- typeTerm: while_loop ---
+
+test("typeTerm: while_loop returns unit") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val cond = atomExpr("true", tBool, testSection)
+    val body = atomExpr("unit", tUnit, testSection)
+    val expr = whileLoopExpr(cond, body, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tUnit))
+    // Should have a constraint that condition is bool
+    val cCount: int = luaExpr("#constraints")
+    assertTrue(cCount >= 1)
+}
+
+// --- typeTerm: create_record ---
+
+test("typeTerm: create_record builds record type") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val val1 = atomExpr("42", tInt, testSection)
+    val val2 = atomExpr("hello", tString, testSection)
+    val fields: any = luaExpr("{}")
+    val f1 = newExprField("x", val1)
+    val f2 = newExprField("y", val2)
+    embedLua("table.insert(fields, f1)")
+    embedLua("table.insert(fields, f2)")
+    val expr = createRecordExpr(fields, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    val resultTag: string = luaExpr("result.tag")
+    assertEqual(resultTag, "record")
+    val resultFields: any = luaExpr("result.fields")
+    val fCount: int = luaExpr("#resultFields")
+    assertEqual(fCount, 2)
+}
+
+// --- typeTerm: create_array ---
+
+test("typeTerm: create_array builds array type") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val val1 = atomExpr("1", tInt, testSection)
+    val val2 = atomExpr("2", tInt, testSection)
+    val values: any = luaExpr("{}")
+    embedLua("table.insert(values, val1)")
+    embedLua("table.insert(values, val2)")
+    val expr = createArrayExpr(values, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    val resultTag: string = luaExpr("result.tag")
+    assertEqual(resultTag, "array")
+}
+
+// --- typeTerm: assignment ---
+
+test("typeTerm: assignment returns variable type") {
+    initTestCtx()
+    icDefineLocalSymbol("x", tInt)
+    val constraints = newConstraints()
+    val value = atomExpr("42", tInt, testSection)
+    val expr = assignmentExpr(localTarget("x"), value, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    assertTrue(typeEquals(result, tInt))
+}
+
+// --- typeTerm: index_op ---
+
+test("typeTerm: index_op returns element type") {
+    initTestCtx()
+    val elemType = arrayType(tInt, luaExpr("{}"))
+    icDefineLocalSymbol("arr", elemType)
+    val constraints = newConstraints()
+    val variable = variableAccessExpr(localTarget("arr"), testSection)
+    val index = atomExpr("1", tInt, testSection)
+    val expr = indexOpExpr(variable, index, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    // Result should be a fresh variable linked to element type via constraint
+    val resultTag: string = luaExpr("result.tag")
+    assertEqual(resultTag, "var")
+    val cCount: int = luaExpr("#constraints")
+    assertTrue(cCount >= 2)
+}
+
+// --- typeTerm: indexed_assignment ---
+
+test("typeTerm: indexed_assignment returns element type") {
+    initTestCtx()
+    val elemType = arrayType(tInt, luaExpr("{}"))
+    icDefineLocalSymbol("arr", elemType)
+    val constraints = newConstraints()
+    val variable = variableAccessExpr(localTarget("arr"), testSection)
+    val index = atomExpr("1", tInt, testSection)
+    val value = atomExpr("42", tInt, testSection)
+    val expr = indexedAssignmentExpr(variable, index, value, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    val resultTag: string = luaExpr("result.tag")
+    assertEqual(resultTag, "var")
+    val cCount: int = luaExpr("#constraints")
+    assertTrue(cCount >= 3)
+}
+
+// --- typeTerms ---
+
+test("typeTerms: maps over expressions") {
+    initTestCtx()
+    val constraints = newConstraints()
+    val terms: any = luaExpr("{}")
+    val e1 = atomExpr("42", tInt, testSection)
+    val e2 = atomExpr("hello", tString, testSection)
+    embedLua("table.insert(terms, e1)")
+    embedLua("table.insert(terms, e2)")
+    val results = typeTerms(terms, constraints, 0)
+    val count: int = luaExpr("#results")
+    assertEqual(count, 2)
+    val t1: any = luaExpr("results[1]")
+    val t2: any = luaExpr("results[2]")
+    assertTrue(typeEquals(t1, tInt))
+    assertTrue(typeEquals(t2, tString))
+}
+
+// --- typeTerm: field_assignment ---
+
+test("typeTerm: field_assignment returns fresh var") {
+    initTestCtx()
+    val recType = recordType(luaExpr("{}"), luaExpr("{  { name = 'x', fieldType = tInt } }"), luaExpr("{}"))
+    icDefineLocalSymbol("r", recType)
+    val constraints = newConstraints()
+    val receiver = variableAccessExpr(localTarget("r"), testSection)
+    val value = atomExpr("99", tInt, testSection)
+    // Build field_assignment expr manually
+    val expr: any = luaExpr("(function() local e = { kind = 'field_assignment', exprType = nil, used = false, section = testSection, atomValue = '', parts = {}, recordFields = {}, arrayValues = {}, target = nil, receiver = receiver, fieldName = 'x', memberSection = nil, dotTarget = nil, value = value, isPublic = false, declName = '', isMutable = false, expectedType = nil, parameters = {}, defaultValues = nil, body = nil, callee = nil, callParams = {}, condition = nil, thenBranch = nil, elseBranch = nil, op = '', left = nil, right = nil, prefixExpr = nil, castExpr = nil, targetType = nil, checkedType = nil, loopCondition = nil, loopBody = nil, forVars = {}, iterable = nil, forState = nil, forInit = nil, forBody = nil, indexVariable = nil, indexExpr = nil, indexValue = nil, effectModuleName = '', effectPackageName = '', effectName = '', effectParams = {}, handleBody = nil, handleCases = {}, returnValue = nil, blockBody = {} }; return e end)()")
+    val result = typeTerm(expr, 0, constraints)
+    val resultTag: string = luaExpr("result.tag")
+    assertEqual(resultTag, "var")
+}
+
+summary()

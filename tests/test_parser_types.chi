@@ -1,0 +1,479 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/lexer { tokenize }
+import user/token { TK_EOF }
+import user/parser { newParser, parseTypeRefImpl, parseTypeAliasImpl, parseVariantTypeDef, peek }
+import user/parse_ast { trTag, trName, trModuleName, trPackageName, trTypeParameters, trArgumentTypeRefs, trReturnType, trFields, trLhs, trRhs, trBaseType }
+import std/lang.array { size }
+import std/lang { luaExpr }
+
+// Helper to get field name from TypeRefField
+fn trfName(f: any): string { luaExpr("f.name") }
+fn trfTypeRef(f: any): any { luaExpr("f.typeRef") }
+
+// === parseTypeRefImpl tests ===
+
+// -- Simple type names --
+
+test("parseTypeRef - simple type name") {
+    val src = "int\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "TypeNameRef")
+    assertEqual(trName(tr), "int")
+    assertEqual(trModuleName(tr), "")
+    assertEqual(trPackageName(tr), "")
+}
+
+test("parseTypeRef - string type") {
+    val src = "string\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "TypeNameRef")
+    assertEqual(trName(tr), "string")
+}
+
+test("parseTypeRef - bool type") {
+    val src = "bool\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "TypeNameRef")
+    assertEqual(trName(tr), "bool")
+}
+
+test("parseTypeRef - custom type name") {
+    val src = "MyType\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "TypeNameRef")
+    assertEqual(trName(tr), "MyType")
+}
+
+// -- unit type --
+
+test("parseTypeRef - unit") {
+    val src = "unit\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "TypeNameRef")
+    assertEqual(trName(tr), "unit")
+}
+
+// -- Generic types --
+
+test("parseTypeRef - generic single param") {
+    val src = "array[int]\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "TypeConstructorRef")
+    val base = trBaseType(tr)
+    assertEqual(trTag(base), "TypeNameRef")
+    assertEqual(trName(base), "array")
+    val tps = trTypeParameters(tr)
+    assertEqual(tps.size(), 1)
+    assertEqual(trTag(tps[1]), "TypeNameRef")
+    assertEqual(trName(tps[1]), "int")
+}
+
+test("parseTypeRef - generic multiple params") {
+    val src = "Map[string, int]\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "TypeConstructorRef")
+    val base = trBaseType(tr)
+    assertEqual(trName(base), "Map")
+    val tps = trTypeParameters(tr)
+    assertEqual(tps.size(), 2)
+    assertEqual(trName(tps[1]), "string")
+    assertEqual(trName(tps[2]), "int")
+}
+
+test("parseTypeRef - nested generic") {
+    val src = "array[array[int]]\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "TypeConstructorRef")
+    assertEqual(trName(trBaseType(tr)), "array")
+    val inner = trTypeParameters(tr)[1]
+    assertEqual(trTag(inner), "TypeConstructorRef")
+    assertEqual(trName(trBaseType(inner)), "array")
+    val innerParam = trTypeParameters(inner)[1]
+    assertEqual(trName(innerParam), "int")
+}
+
+// -- Function types --
+
+test("parseTypeRef - function type no args") {
+    val src = "() -> int\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "FunctionTypeRef")
+    assertEqual(trArgumentTypeRefs(tr).size(), 0)
+    assertEqual(trTag(trReturnType(tr)), "TypeNameRef")
+    assertEqual(trName(trReturnType(tr)), "int")
+}
+
+test("parseTypeRef - function type single arg") {
+    val src = "(int) -> string\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "FunctionTypeRef")
+    val args = trArgumentTypeRefs(tr)
+    assertEqual(args.size(), 1)
+    assertEqual(trName(args[1]), "int")
+    assertEqual(trName(trReturnType(tr)), "string")
+}
+
+test("parseTypeRef - function type multiple args") {
+    val src = "(int, string) -> bool\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "FunctionTypeRef")
+    val args = trArgumentTypeRefs(tr)
+    assertEqual(args.size(), 2)
+    assertEqual(trName(args[1]), "int")
+    assertEqual(trName(args[2]), "string")
+    assertEqual(trName(trReturnType(tr)), "bool")
+}
+
+test("parseTypeRef - function type unit return") {
+    val src = "(int) -> unit\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "FunctionTypeRef")
+    assertEqual(trName(trReturnType(tr)), "unit")
+}
+
+// -- Record types --
+
+test("parseTypeRef - record type single field") {
+    val src = "{ name: string }\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "RecordTypeRef")
+    val fields = trFields(tr)
+    assertEqual(fields.size(), 1)
+    assertEqual(trfName(fields[1]), "name")
+    assertEqual(trName(trfTypeRef(fields[1])), "string")
+}
+
+test("parseTypeRef - record type multiple fields") {
+    val src = "{ name: string, age: int }\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "RecordTypeRef")
+    val fields = trFields(tr)
+    assertEqual(fields.size(), 2)
+    assertEqual(trfName(fields[1]), "name")
+    assertEqual(trName(trfTypeRef(fields[1])), "string")
+    assertEqual(trfName(fields[2]), "age")
+    assertEqual(trName(trfTypeRef(fields[2])), "int")
+}
+
+// -- Sum types --
+
+test("parseTypeRef - sum type two options") {
+    val src = "int | string\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "SumTypeRef")
+    assertEqual(trName(trLhs(tr)), "int")
+    assertEqual(trName(trRhs(tr)), "string")
+}
+
+test("parseTypeRef - sum type three options") {
+    val src = "int | string | bool\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    // Should be left-associative: (int | string) | bool
+    assertEqual(trTag(tr), "SumTypeRef")
+    assertEqual(trTag(trLhs(tr)), "SumTypeRef")
+    assertEqual(trName(trRhs(tr)), "bool")
+    val inner = trLhs(tr)
+    assertEqual(trName(trLhs(inner)), "int")
+    assertEqual(trName(trRhs(inner)), "string")
+}
+
+test("parseTypeRef - sum with unit") {
+    val src = "int | unit\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "SumTypeRef")
+    assertEqual(trName(trLhs(tr)), "int")
+    assertEqual(trName(trRhs(tr)), "unit")
+}
+
+// -- Complex/nested types --
+
+test("parseTypeRef - generic with sum type param") {
+    val src = "array[int | string]\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "TypeConstructorRef")
+    assertEqual(trName(trBaseType(tr)), "array")
+    val param = trTypeParameters(tr)[1]
+    assertEqual(trTag(param), "SumTypeRef")
+    assertEqual(trName(trLhs(param)), "int")
+    assertEqual(trName(trRhs(param)), "string")
+}
+
+test("parseTypeRef - function type with generic args") {
+    val src = "(array[int]) -> string\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "FunctionTypeRef")
+    val args = trArgumentTypeRefs(tr)
+    assertEqual(args.size(), 1)
+    assertEqual(trTag(args[1]), "TypeConstructorRef")
+    assertEqual(trName(trBaseType(args[1])), "array")
+}
+
+test("parseTypeRef - record type with generic field") {
+    val src = "{ items: array[int], name: string }\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p)
+    assertEqual(trTag(tr), "RecordTypeRef")
+    val fields = trFields(tr)
+    assertEqual(fields.size(), 2)
+    assertEqual(trfName(fields[1]), "items")
+    assertEqual(trTag(trfTypeRef(fields[1])), "TypeConstructorRef")
+    assertEqual(trfName(fields[2]), "name")
+    assertEqual(trName(trfTypeRef(fields[2])), "string")
+}
+
+// === parseTypeAliasImpl tests ===
+
+// Helper accessors for ParseTypeAlias
+fn ptaName(a: any): string { luaExpr("a.name") }
+fn ptaTypeRef(a: any): any { luaExpr("a.typeRef") }
+fn ptaTypeParams(a: any): array[any] { luaExpr("a.typeParameters") }
+
+test("parseTypeAlias - simple alias") {
+    val src = "type Name = string\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val alias = parseTypeAliasImpl(p)
+    assertEqual(ptaName(alias), "Name")
+    assertEqual(trTag(ptaTypeRef(alias)), "TypeNameRef")
+    assertEqual(trName(ptaTypeRef(alias)), "string")
+    assertEqual(ptaTypeParams(alias).size(), 0)
+}
+
+test("parseTypeAlias - record alias") {
+    val src = "type Point = { x: int, y: int }\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val alias = parseTypeAliasImpl(p)
+    assertEqual(ptaName(alias), "Point")
+    assertEqual(trTag(ptaTypeRef(alias)), "RecordTypeRef")
+    val fields = trFields(ptaTypeRef(alias))
+    assertEqual(fields.size(), 2)
+}
+
+test("parseTypeAlias - function type alias") {
+    val src = "type Callback = (int) -> string\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val alias = parseTypeAliasImpl(p)
+    assertEqual(ptaName(alias), "Callback")
+    assertEqual(trTag(ptaTypeRef(alias)), "FunctionTypeRef")
+}
+
+test("parseTypeAlias - generic alias") {
+    val src = "type Option[T] = T | unit\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val alias = parseTypeAliasImpl(p)
+    assertEqual(ptaName(alias), "Option")
+    assertEqual(ptaTypeParams(alias).size(), 1)
+    assertEqual(trTag(ptaTypeRef(alias)), "SumTypeRef")
+}
+
+test("parseTypeAlias - multiple type params") {
+    val src = "type Pair[A, B] = { first: A, second: B }\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val alias = parseTypeAliasImpl(p)
+    assertEqual(ptaName(alias), "Pair")
+    assertEqual(ptaTypeParams(alias).size(), 2)
+    assertEqual(trTag(ptaTypeRef(alias)), "RecordTypeRef")
+}
+
+// === parseVariantTypeDef tests ===
+
+// Helper accessors for ParseVariantTypeDefinition
+fn pvtName(v: any): string { luaExpr("v.typeName") }
+fn pvtTypeParams(v: any): array[any] { luaExpr("v.typeParameters") }
+fn pvtCtors(v: any): array[any] { luaExpr("v.constructors") }
+
+// Helper accessors for VariantConstructor
+fn vcIsPub(c: any): bool { luaExpr("c.isPublic") }
+fn vcName(c: any): string { luaExpr("c.name") }
+fn vcFields(c: any): array[any] { luaExpr("c.fields") }
+
+// Helper accessors for FormalField
+fn ffIsPub(f: any): bool { luaExpr("f.isPublic") }
+fn ffName(f: any): string { luaExpr("f.name") }
+fn ffTypeRef(f: any): any { luaExpr("f.typeRef") }
+
+test("parseVariantType - simplified form") {
+    val src = "data Node(value: int)\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val vt = parseVariantTypeDef(p)
+    assertEqual(pvtName(vt), "Node")
+    assertEqual(pvtTypeParams(vt).size(), 0)
+    val ctors = pvtCtors(vt)
+    assertEqual(ctors.size(), 1)
+    assertEqual(vcName(ctors[1]), "Node")
+    val fields = vcFields(ctors[1])
+    assertEqual(fields.size(), 1)
+    assertEqual(ffName(fields[1]), "value")
+    assertEqual(trName(ffTypeRef(fields[1])), "int")
+}
+
+test("parseVariantType - simplified form with pub") {
+    val src = "data pub Node(value: int)\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val vt = parseVariantTypeDef(p)
+    assertEqual(pvtName(vt), "Node")
+    assertTrue(vcIsPub(pvtCtors(vt)[1]))
+}
+
+test("parseVariantType - full form single ctor") {
+    val src = "data Shape = Circle(radius: float)\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val vt = parseVariantTypeDef(p)
+    assertEqual(pvtName(vt), "Shape")
+    val ctors = pvtCtors(vt)
+    assertEqual(ctors.size(), 1)
+    assertEqual(vcName(ctors[1]), "Circle")
+    assertEqual(ffName(vcFields(ctors[1])[1]), "radius")
+}
+
+test("parseVariantType - full form multiple ctors") {
+    val src = "data Shape = Circle(radius: float) | Rectangle(width: float, height: float)\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val vt = parseVariantTypeDef(p)
+    assertEqual(pvtName(vt), "Shape")
+    val ctors = pvtCtors(vt)
+    assertEqual(ctors.size(), 2)
+    assertEqual(vcName(ctors[1]), "Circle")
+    assertEqual(vcFields(ctors[1]).size(), 1)
+    assertEqual(vcName(ctors[2]), "Rectangle")
+    assertEqual(vcFields(ctors[2]).size(), 2)
+    assertEqual(ffName(vcFields(ctors[2])[1]), "width")
+    assertEqual(ffName(vcFields(ctors[2])[2]), "height")
+}
+
+test("parseVariantType - with type params") {
+    val src = "data Option[T] = Some(value: T) | None\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val vt = parseVariantTypeDef(p)
+    assertEqual(pvtName(vt), "Option")
+    assertEqual(pvtTypeParams(vt).size(), 1)
+    val ctors = pvtCtors(vt)
+    assertEqual(ctors.size(), 2)
+    assertEqual(vcName(ctors[1]), "Some")
+    assertEqual(vcFields(ctors[1]).size(), 1)
+    assertEqual(vcName(ctors[2]), "None")
+    assertEqual(vcFields(ctors[2]).size(), 0)
+}
+
+test("parseVariantType - pub constructors") {
+    val src = "data Result = pub Ok(value: int) | pub Err(msg: string)\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val vt = parseVariantTypeDef(p)
+    assertEqual(pvtName(vt), "Result")
+    val ctors = pvtCtors(vt)
+    assertEqual(ctors.size(), 2)
+    assertTrue(vcIsPub(ctors[1]))
+    assertEqual(vcName(ctors[1]), "Ok")
+    assertTrue(vcIsPub(ctors[2]))
+    assertEqual(vcName(ctors[2]), "Err")
+}
+
+test("parseVariantType - simplified form multiple fields") {
+    val src = "data Pair(first: int, second: string)\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val vt = parseVariantTypeDef(p)
+    assertEqual(pvtName(vt), "Pair")
+    val ctors = pvtCtors(vt)
+    assertEqual(ctors.size(), 1)
+    val fields = vcFields(ctors[1])
+    assertEqual(fields.size(), 2)
+    assertEqual(ffName(fields[1]), "first")
+    assertEqual(ffName(fields[2]), "second")
+}
+
+test("parseVariantType - ctor with complex field types") {
+    val src = "data Container[T] = Box(items: array[T], name: string)\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val vt = parseVariantTypeDef(p)
+    assertEqual(pvtName(vt), "Container")
+    assertEqual(pvtTypeParams(vt).size(), 1)
+    val fields = vcFields(pvtCtors(vt)[1])
+    assertEqual(fields.size(), 2)
+    assertEqual(ffName(fields[1]), "items")
+    assertEqual(trTag(ffTypeRef(fields[1])), "TypeConstructorRef")
+    assertEqual(ffName(fields[2]), "name")
+    assertEqual(trName(ffTypeRef(fields[2])), "string")
+}
+
+// === Integration: parseProgram with type aliases and variant types ===
+
+test("parseProgram with type alias") {
+    val src = "package user/test\ntype Name = string\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val prog = parseProgram(p)
+    assertEqual(prog.typeAliases.size(), 1)
+    assertEqual(ptaName(prog.typeAliases[1]), "Name")
+}
+
+test("parseProgram with variant type") {
+    val src = "package user/test\ndata Shape = Circle(radius: float) | Rect(w: float, h: float)\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val prog = parseProgram(p)
+    assertEqual(prog.variantTypes.size(), 1)
+    assertEqual(pvtName(prog.variantTypes[1]), "Shape")
+}
+
+test("parseProgram with types and code") {
+    val src = "package user/test\ntype Name = string\ndata Shape = Circle(r: float)\nval x = 1\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val prog = parseProgram(p)
+    assertEqual(prog.typeAliases.size(), 1)
+    assertEqual(prog.variantTypes.size(), 1)
+    assertTrue(prog.code.size() > 0)
+}
+
+summary()

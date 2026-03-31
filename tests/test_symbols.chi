@@ -1,0 +1,299 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/symbols { newSymbol, newFnSymbol, newSymbolTable, stAdd, stAddAlias, stGet, stRemove, stHas, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newTypeTable, ttAdd, ttAddByName, ttGet, newCompileTables, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, ctDefineTypeAlias }
+
+// --- Symbol tests ---
+
+test("newSymbol - creation and fields") {
+    val sym = newSymbol("mymod", "mypkg", "foo", unit, true, false)
+    assertEqual(sym.moduleName, "mymod")
+    assertEqual(sym.packageName, "mypkg")
+    assertEqual(sym.name, "foo")
+    assertTrue(sym.isPublic)
+    assertFalse(sym.isMutable)
+}
+
+test("newSymbol - with type") {
+    val sym = newSymbol("m", "p", "bar", "someType", false, true)
+    assertEqual(sym.name, "bar")
+    assertFalse(sym.isPublic)
+    assertTrue(sym.isMutable)
+}
+
+// --- FnSymbol tests ---
+
+test("newFnSymbol - creation") {
+    val fs = newFnSymbol("x", "intType", true)
+    assertEqual(fs.name, "x")
+    assertTrue(fs.isMutable)
+}
+
+test("newFnSymbol - immutable") {
+    val fs = newFnSymbol("y", unit, false)
+    assertEqual(fs.name, "y")
+    assertFalse(fs.isMutable)
+}
+
+// --- SymbolTable tests ---
+
+test("stAdd and stGet") {
+    val st = newSymbolTable()
+    val sym = newSymbol("m", "p", "foo", unit, true, false)
+    stAdd(st, sym)
+    val result = stGet(st, "foo")
+    assertTrue(result != unit)
+    val s = result as Symbol
+    assertEqual(s.name, "foo")
+    assertEqual(s.moduleName, "m")
+}
+
+test("stGet - not found") {
+    val st = newSymbolTable()
+    val result = stGet(st, "missing")
+    assertTrue(result == unit)
+}
+
+test("stRemove") {
+    val st = newSymbolTable()
+    val sym = newSymbol("m", "p", "foo", unit, true, false)
+    stAdd(st, sym)
+    assertTrue(stHas(st, "foo"))
+    stRemove(st, "foo")
+    assertFalse(stHas(st, "foo"))
+    val result = stGet(st, "foo")
+    assertTrue(result == unit)
+}
+
+test("stHas") {
+    val st = newSymbolTable()
+    assertFalse(stHas(st, "bar"))
+    val sym = newSymbol("m", "p", "bar", unit, false, false)
+    stAdd(st, sym)
+    assertTrue(stHas(st, "bar"))
+}
+
+test("stAddAlias") {
+    val st = newSymbolTable()
+    val sym = newSymbol("m", "p", "originalName", unit, true, false)
+    stAddAlias(st, "alias", sym)
+    assertTrue(stHas(st, "alias"))
+    val result = stGet(st, "alias")
+    assertTrue(result != unit)
+    val s = result as Symbol
+    assertEqual(s.name, "originalName")
+}
+
+// --- FnSymbolTable tests ---
+
+test("fstAddLocal and fstGet") {
+    val fst = newFnSymbolTable(unit)
+    fstAddLocal(fst, "x", "intType", true)
+    val result = fstGet(fst, "x")
+    assertTrue(result != unit)
+    val fs = result as FnSymbol
+    assertEqual(fs.name, "x")
+    assertTrue(fs.isMutable)
+}
+
+test("fstAddArgument") {
+    val fst = newFnSymbolTable(unit)
+    fstAddArgument(fst, "arg1", "stringType")
+    val result = fstGet(fst, "arg1")
+    assertTrue(result != unit)
+    val fs = result as FnSymbol
+    assertEqual(fs.name, "arg1")
+    assertFalse(fs.isMutable)
+}
+
+test("fstGet - not found") {
+    val fst = newFnSymbolTable(unit)
+    val result = fstGet(fst, "missing")
+    assertTrue(result == unit)
+}
+
+test("fstGet - from parent chain") {
+    val parent = newFnSymbolTable(unit)
+    fstAddLocal(parent, "x", "intType", false)
+    val child = newFnSymbolTable(parent)
+    fstAddLocal(child, "y", "stringType", true)
+
+    // Can find local
+    val yResult = fstGet(child, "y")
+    assertTrue(yResult != unit)
+
+    // Can find from parent
+    val xResult = fstGet(child, "x")
+    assertTrue(xResult != unit)
+    val fs = xResult as FnSymbol
+    assertEqual(fs.name, "x")
+}
+
+test("fstGet - deep parent chain") {
+    val grandparent = newFnSymbolTable(unit)
+    fstAddLocal(grandparent, "a", "type1", false)
+    val parent = newFnSymbolTable(grandparent)
+    fstAddLocal(parent, "b", "type2", false)
+    val child = newFnSymbolTable(parent)
+    fstAddLocal(child, "c", "type3", false)
+
+    val aResult = fstGet(child, "a")
+    assertTrue(aResult != unit)
+    val fs = aResult as FnSymbol
+    assertEqual(fs.name, "a")
+}
+
+test("fstRemove") {
+    val fst = newFnSymbolTable(unit)
+    fstAddLocal(fst, "x", "intType", true)
+    assertTrue(fstGet(fst, "x") != unit)
+    fstRemove(fst, "x")
+    assertTrue(fstGet(fst, "x") == unit)
+}
+
+// --- TypeTable tests ---
+
+test("ttAdd and ttGet") {
+    val tt = newTypeTable(unit)
+    // Create a mock TypeAlias with typeId.name
+    val alias: any = { typeId: { name: "MyType", moduleName: "m", packageName: "p" }, aliasType: unit }
+    ttAdd(tt, alias)
+    val result = ttGet(tt, "MyType")
+    assertTrue(result != unit)
+}
+
+test("ttGet - not found") {
+    val tt = newTypeTable(unit)
+    val result = ttGet(tt, "Missing")
+    assertTrue(result == unit)
+}
+
+test("ttAddByName") {
+    val tt = newTypeTable(unit)
+    val alias: any = { typeId: { name: "Original", moduleName: "m", packageName: "p" }, aliasType: unit }
+    ttAddByName(tt, "CustomName", alias)
+    val result = ttGet(tt, "CustomName")
+    assertTrue(result != unit)
+    // Should NOT be findable by original name
+    val notFound = ttGet(tt, "Original")
+    assertTrue(notFound == unit)
+}
+
+// --- CompileTables tests ---
+
+test("newCompileTables - empty imports") {
+    val pkg: any = { moduleName: "mymod", packageName: "mypkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    assertTrue(ct.localSymbolTable != unit)
+    assertTrue(ct.localTypeTable != unit)
+}
+
+test("newCompileTables - with imports") {
+    val pkg: any = { moduleName: "mymod", packageName: "mypkg" }
+    val entry1: any = { name: "foo", alias: unit, section: unit }
+    val entry2: any = { name: "bar", alias: "baz", section: unit }
+    val imp: any = { moduleName: "std", packageName: "lang", packageAlias: unit, entries: [entry1, entry2], section: unit }
+    val ct = newCompileTables(pkg, unit, [imp])
+    // importedSymbols should have "foo" and "baz" (aliased from "bar")
+    val importedSymbols = ct.importedSymbols
+    val fooImport: any = luaExpr("importedSymbols['foo']")
+    assertTrue(fooImport != unit)
+    val fooMod: string = luaExpr("fooImport.moduleName")
+    assertEqual(fooMod, "std")
+    val fooPkg: string = luaExpr("fooImport.packageName")
+    assertEqual(fooPkg, "lang")
+    val fooOrig: string = luaExpr("fooImport.originalName")
+    assertEqual(fooOrig, "foo")
+
+    val bazImport: any = luaExpr("importedSymbols['baz']")
+    assertTrue(bazImport != unit)
+    val bazOrig: string = luaExpr("bazImport.originalName")
+    assertEqual(bazOrig, "bar")
+}
+
+test("newCompileTables - with package alias") {
+    val pkg: any = { moduleName: "mymod", packageName: "mypkg" }
+    val imp: any = { moduleName: "std", packageName: "math", packageAlias: "m", entries: [], section: unit }
+    val ct = newCompileTables(pkg, unit, [imp])
+    val result = ctGetAliasedPackage(ct, "m")
+    assertTrue(result != unit)
+    val rMod: string = luaExpr("result.moduleName")
+    val rPkg: string = luaExpr("result.packageName")
+    assertEqual(rMod, "std")
+    assertEqual(rPkg, "math")
+}
+
+test("ctDefineSymbol and ctGetLocalSymbol") {
+    val pkg: any = { moduleName: "mymod", packageName: "mypkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val sym = newSymbol("mymod", "mypkg", "myVar", unit, true, false)
+    ctDefineSymbol(ct, sym)
+    val result = ctGetLocalSymbol(ct, "myVar")
+    assertTrue(result != unit)
+    val s = result as Symbol
+    assertEqual(s.name, "myVar")
+}
+
+test("ctRemoveSymbol") {
+    val pkg: any = { moduleName: "mymod", packageName: "mypkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val sym = newSymbol("mymod", "mypkg", "myVar", unit, true, false)
+    ctDefineSymbol(ct, sym)
+    assertTrue(ctGetLocalSymbol(ct, "myVar") != unit)
+    ctRemoveSymbol(ct, "myVar")
+    assertTrue(ctGetLocalSymbol(ct, "myVar") == unit)
+}
+
+test("ctGetLocalSymbol - from imported") {
+    // Create a mock ns that has getSymbol
+    val ns: any = luaExpr("{}")
+    embedLua("ns.getSymbol = function(mod, pkg, name) return { moduleName = mod, packageName = pkg, name = name, symbolType = nil, isPublic = true, isMutable = false } end")
+
+    val pkg: any = { moduleName: "mymod", packageName: "mypkg" }
+    val entry: any = { name: "println", alias: unit, section: unit }
+    val imp: any = { moduleName: "std", packageName: "lang", packageAlias: unit, entries: [entry], section: unit }
+    val ct = newCompileTables(pkg, ns, [imp])
+
+    val result = ctGetLocalSymbol(ct, "println")
+    assertTrue(result != unit)
+    val s = result as Symbol
+    assertEqual(s.name, "println")
+    assertEqual(s.moduleName, "std")
+    assertEqual(s.packageName, "lang")
+}
+
+test("ctGetLocalSymbol - from current package via ns") {
+    val ns: any = luaExpr("{}")
+    embedLua("ns.getSymbol = function(mod, pkg, name) if mod == 'mymod' and pkg == 'mypkg' and name == 'helper' then return { moduleName = mod, packageName = pkg, name = name, symbolType = nil, isPublic = false, isMutable = false } end; return nil end")
+
+    val pkg: any = { moduleName: "mymod", packageName: "mypkg" }
+    val ct = newCompileTables(pkg, ns, [])
+
+    val result = ctGetLocalSymbol(ct, "helper")
+    assertTrue(result != unit)
+    val s = result as Symbol
+    assertEqual(s.name, "helper")
+}
+
+test("ctGetLocalSymbol - not found anywhere") {
+    val pkg: any = { moduleName: "mymod", packageName: "mypkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val result = ctGetLocalSymbol(ct, "nonexistent")
+    assertTrue(result == unit)
+}
+
+test("ctGetAliasedPackage - not found") {
+    val pkg: any = { moduleName: "mymod", packageName: "mypkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val result = ctGetAliasedPackage(ct, "noalias")
+    assertTrue(result == unit)
+}
+
+test("ctDefineTypeAlias") {
+    val pkg: any = { moduleName: "mymod", packageName: "mypkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val alias: any = { typeId: { name: "Foo", moduleName: "mymod", packageName: "mypkg" }, aliasType: unit }
+    ctDefineTypeAlias(ct, alias)
+    val result = ttGet(ct.localTypeTable, "Foo")
+    assertTrue(result != unit)
+}
+
+summary()

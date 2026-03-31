@@ -1,0 +1,25 @@
+// chicc/chicc/source.chi
+package user/source
+
+// Represents a section of source code (for error reporting)
+type Section = {
+    startLine: int,
+    startCol: int,
+    endLine: int,
+    endCol: int
+}
+
+pub fn newSection(startLine: int, startCol: int, endLine: int, endCol: int): Section {
+    { startLine: startLine, startCol: startCol, endLine: endLine, endCol: endCol }
+}
+
+pub fn merge(a: Section, b: Section): Section {
+    newSection(a.startLine, a.startCol, b.endLine, b.endCol)
+}
+
+// CodePoint for error messages (line + column)
+type CodePoint = { line: int, column: int }
+
+pub fn toCodePoint(s: Section): CodePoint {
+    { line: s.startLine, column: s.startCol }
+}

@@ -1,0 +1,288 @@
+// chicc/chicc/inference_context.chi
+package user/inference_context
+import std/lang { luaExpr, embedLua }
+import std/lang.array { size, push }
+
+// --- Module-level state ---
+
+var icNextVariableId: int = 1
+var icPkg: any = unit
+var icNs: any = unit
+var icCompileTables: any = unit
+var icLocalSymbols: any = unit
+var icPackageSymbols: any = unit
+
+// --- LocalSymbols: linked-list scope chain ---
+// Each node is a Lua table: { parent: node|nil, compileTables: ct|nil, symbols: luaTable }
+
+fn icNewLocalSymbols(parent: any, ct: any): any {
+    val symbols: any = luaExpr("{}")
+    luaExpr("{ parent = parent, compileTables = ct, symbols = symbols }")
+}
+
+fn icLocalSymbolsGet(ls: any, name: string): any {
+    val ct: any = luaExpr("ls.compileTables")
+    val symbols: any = luaExpr("ls.symbols")
+    val existing: any = luaExpr("symbols[name]")
+    if ct != unit && existing == unit {
+        // Fall back to compileTables
+        val sym: any = luaExpr("ctGetLocalSymbol(ct, name)")
+        if sym != unit {
+            val symType: any = luaExpr("sym.symbolType")
+            if symType != unit {
+                embedLua("symbols[name] = symType")
+                symType
+            } else { unit }
+        } else { unit }
+    } else if existing != unit {
+        existing
+    } else {
+        // Check parent
+        val parent: any = luaExpr("ls.parent")
+        if parent != unit {
+            icLocalSymbolsGet(parent, name)
+        } else {
+            unit
+        }
+    }
+}
+
+fn icLocalSymbolsDefine(ls: any, name: string, typeScheme: any) {
+    val symbols: any = luaExpr("ls.symbols")
+    embedLua("symbols[name] = typeScheme")
+}
+
+// Iterate all symbols in a scope node (not parents) — calls visitor(name, typeScheme)
+fn icLocalSymbolsForEach(ls: any, visitor: (string, any) -> unit) {
+    val symbols: any = luaExpr("ls.symbols")
+    embedLua("for k, v in pairs(symbols) do visitor(k, v) end")
+}
+
+// --- Public API ---
+
+pub fn icInit(pkg: any, ns: any, compileTables: any) {
+    icNextVariableId = 1
+    icPkg = pkg
+    icNs = ns
+    icCompileTables = compileTables
+    icPackageSymbols = icNewLocalSymbols(unit, compileTables)
+    icLocalSymbols = icPackageSymbols
+}
+
+pub fn icFreshVariable(level: int): any {
+    val id = icNextVariableId
+    icNextVariableId = id + 1
+    variableType("a$id", level)
+}
+
+pub fn icDefineLocalSymbol(name: string, typeScheme: any) {
+    icLocalSymbolsDefine(icLocalSymbols, name, typeScheme)
+}
+
+pub fn icUpdateSymbolType(tgt: any, typeScheme: any) {
+    val tag: string = luaExpr("tgt.tag")
+    if tag == "local" {
+        val name: string = luaExpr("tgt.name")
+        icLocalSymbolsDefine(icLocalSymbols, name, typeScheme)
+    } else if tag == "package" {
+        val tgtMod: string = luaExpr("tgt.moduleName")
+        val tgtPkg: string = luaExpr("tgt.packageName")
+        val pkgMod: string = luaExpr("icPkg.moduleName")
+        val pkgPkg: string = luaExpr("icPkg.packageName")
+        if tgtMod == pkgMod && tgtPkg == pkgPkg {
+            val name: string = luaExpr("tgt.name")
+            icLocalSymbolsDefine(icPackageSymbols, name, typeScheme)
+        }
+    }
+}
+
+pub fn icWithNewLocalScope(f: () -> any): any {
+    val prev = icLocalSymbols
+    icLocalSymbols = icNewLocalSymbols(prev, unit)
+    embedLua("local __scope_ok, __scope_result = pcall(f)")
+    val ok = luaExpr("__scope_ok") as bool
+    icLocalSymbols = prev
+    if ok {
+        luaExpr("__scope_result")
+    } else {
+        // Re-throw the error
+        embedLua("error(__scope_result)")
+        unit // unreachable
+    }
+}
+
+pub fn icGetLocalSymbol(name: string): any {
+    icLocalSymbolsGet(icLocalSymbols, name)
+}
+
+pub fn icGetTargetType(tgt: any, level: int, section: any): any {
+    val tag = luaExpr("tgt.tag") as string
+    if tag == "local" {
+        val name = luaExpr("tgt.name") as string
+        val scheme = icLocalSymbolsGet(icLocalSymbols, name)
+        if scheme == unit {
+            embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Identifier ' .. tgt.name .. ' not found!' })")
+            unit // unreachable
+        } else {
+            instantiate(scheme as Type, level, icFreshVariable as (int) -> Type)
+        }
+    } else if tag == "package" {
+        val tgtMod = luaExpr("tgt.moduleName") as string
+        val tgtPkg = luaExpr("tgt.packageName") as string
+        val pkgMod = luaExpr("icPkg.moduleName") as string
+        val pkgPkg = luaExpr("icPkg.packageName") as string
+        val name = luaExpr("tgt.name") as string
+        if tgtMod == pkgMod && tgtPkg == pkgPkg {
+            // Same package — look up in package symbols
+            val scheme = icLocalSymbolsGet(icPackageSymbols, name)
+            if scheme == unit {
+                embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Identifier ' .. tgt.name .. ' not found!' })")
+                unit // unreachable
+            } else {
+                instantiate(scheme as Type, level, icFreshVariable as (int) -> Type)
+            }
+        } else {
+            // Different package — look up via ns
+            val sym: any = luaExpr("icNs and icNs.getSymbol and icNs.getSymbol(tgtMod, tgtPkg, name) or nil")
+            if sym == unit {
+                embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Identifier ' .. tgt.name .. ' not found!' })")
+                unit // unreachable
+            } else {
+                val symType: any = luaExpr("sym.symbolType")
+                if symType == unit {
+                    embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Type not found for identifier ' .. tgt.name })")
+                    unit // unreachable
+                } else {
+                    instantiate(symType as Type, level, icFreshVariable as (int) -> Type)
+                }
+            }
+        }
+    } else {
+        embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Unknown target tag: ' .. tag })")
+        unit // unreachable
+    }
+}
+
+// --- UFCS function resolution ---
+
+// Helper: check if a type scheme's first parameter matches receiver type via trial unification
+fn icTrialUnify(typeScheme: any, receiverType: any): bool {
+    val schemeTag = luaExpr("typeScheme.tag or ''") as string
+    // Get the actual body type (unwrap poly if needed)
+    var bodyType: any = typeScheme
+    if schemeTag == "poly" {
+        bodyType = luaExpr("typeScheme.body")
+    }
+    val bodyTag = luaExpr("bodyType.tag or ''") as string
+    if bodyTag != "fn" {
+        return false
+    }
+    val types: any = luaExpr("bodyType.types")
+    val count = luaExpr("#types") as int
+    if count < 2 {
+        return false
+    }
+    val firstParam: any = luaExpr("types[1]")
+    // Use pcall to try unification
+    embedLua("local __trial_ok = pcall(function() unify({newConstraint(firstParam, receiverType, nil, {})}) end)")
+    val trialOk = luaExpr("__trial_ok") as bool
+    trialOk
+}
+
+// List local scope functions matching a UFCS call
+pub fn icListLocalFunctionsForType(name: string, receiverType: any): any {
+    val results: any = luaExpr("{}")
+    // Walk the scope chain
+    var scope = icLocalSymbols
+    while scope != unit {
+        val sym = icLocalSymbolsGet(scope, name)
+        if sym != unit {
+            if icTrialUnify(sym, receiverType) {
+                // Determine the correct dot target: check if this is an imported symbol
+                val dotTarget: any = if icCompileTables != unit {
+                    val ct = icCompileTables
+                    val fullSym: any = luaExpr("ctGetLocalSymbol(ct, name)")
+                    if fullSym != unit {
+                        val symMod = luaExpr("fullSym.moduleName") as string
+                        val symPkg = luaExpr("fullSym.packageName") as string
+                        val pkgMod = luaExpr("icPkg.moduleName") as string
+                        val pkgPkg = luaExpr("icPkg.packageName") as string
+                        if symMod == pkgMod && symPkg == pkgPkg {
+                            luaExpr("localFnDotTarget(name)")
+                        } else {
+                            luaExpr("packageFnDotTarget(symMod, symPkg, name)")
+                        }
+                    } else {
+                        luaExpr("localFnDotTarget(name)")
+                    }
+                } else {
+                    luaExpr("localFnDotTarget(name)")
+                }
+                val entry: any = luaExpr("{ dotTarget = dotTarget, typeScheme = sym }")
+                embedLua("table.insert(results, entry)")
+            }
+        }
+        scope = luaExpr("scope.parent")
+    }
+    results
+}
+
+// List current package functions matching a UFCS call
+pub fn icListCurrentPackageFunctionsForType(name: string, receiverType: any): any {
+    val results: any = luaExpr("{}")
+    if icCompileTables == unit { return results }
+    val ct = icCompileTables
+    val sym: any = luaExpr("ctGetLocalSymbol(ct, name)")
+    if sym != unit {
+        val symType: any = luaExpr("sym.symbolType")
+        if symType != unit {
+            if icTrialUnify(symType, receiverType) {
+                // Use the symbol's own module/package for the dot target
+                // (it may be imported from a different package)
+                val symMod = luaExpr("sym.moduleName") as string
+                val symPkg = luaExpr("sym.packageName") as string
+                val pkgMod = luaExpr("icPkg.moduleName") as string
+                val pkgPkg = luaExpr("icPkg.packageName") as string
+                val entry: any = if symMod == pkgMod && symPkg == pkgPkg {
+                    luaExpr("{ dotTarget = localFnDotTarget(name), typeScheme = symType }")
+                } else {
+                    luaExpr("{ dotTarget = packageFnDotTarget(symMod, symPkg, name), typeScheme = symType }")
+                }
+                embedLua("table.insert(results, entry)")
+            }
+        }
+    }
+    results
+}
+
+// List functions from the type's own package matching a UFCS call
+pub fn icListTypesPackageFunctionsForType(name: string, receiverType: any): any {
+    val results: any = luaExpr("{}")
+    if icNs == unit { return results }
+    // Get type IDs from the receiver type
+    val recTag = luaExpr("receiverType.tag or ''") as string
+    var typeIds: any = luaExpr("{}")
+    if recTag == "primitive" || recTag == "record" || recTag == "sum" || recTag == "array" {
+        embedLua("typeIds = receiverType.ids or {}")
+    }
+    val idCount = luaExpr("#typeIds") as int
+    var i = 1
+    while i <= idCount {
+        val typeId: any = luaExpr("typeIds[i]")
+        val idMod = luaExpr("typeId.moduleName") as string
+        val idPkg = luaExpr("typeId.packageName") as string
+        // Look up the function in that package via ns
+        val sym: any = luaExpr("icNs.getSymbol and icNs.getSymbol(idMod, idPkg, name) or nil")
+        if sym != unit {
+            val symType: any = luaExpr("sym.symbolType")
+            if symType != unit {
+                if icTrialUnify(symType, receiverType) {
+                    val entry: any = luaExpr("{ dotTarget = packageFnDotTarget(idMod, idPkg, name), typeScheme = symType }")
+                    embedLua("table.insert(results, entry)")
+                }
+            }
+        }
+        i = i + 1
+    }
+    results
+}

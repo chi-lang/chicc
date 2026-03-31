@@ -1,0 +1,157 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/util { newStringBuilder, StringBuilder, toString }
+import user/ast { Program, Package, newPackage, newProgram, atomExpr, interpolatedStringExpr }
+import user/types { tInt, tFloat, tBool, tString, tUnit }
+import user/emitter { EmitterState, newState, emit, nextTmpName, escapeLuaString, emitAtom, emitInterpolatedString, emitExpr }
+
+fn freshState(): EmitterState {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    newState(prog)
+}
+
+// --- escapeLuaString tests ---
+
+test("escapeLuaString - plain text") {
+    assertEqual(escapeLuaString("hello"), "hello")
+}
+
+test("escapeLuaString - empty string") {
+    assertEqual(escapeLuaString(""), "")
+}
+
+test("escapeLuaString - backslash") {
+    assertEqual(escapeLuaString("a\\b"), "a\\\\b")
+}
+
+test("escapeLuaString - single quote") {
+    assertEqual(escapeLuaString("it's"), "it\\'s")
+}
+
+test("escapeLuaString - newline") {
+    assertEqual(escapeLuaString("a\nb"), "a\\nb")
+}
+
+test("escapeLuaString - tab") {
+    assertEqual(escapeLuaString("a\tb"), "a\\tb")
+}
+
+test("escapeLuaString - carriage return") {
+    assertEqual(escapeLuaString("a\rb"), "a\\rb")
+}
+
+test("escapeLuaString - mixed special chars") {
+    assertEqual(escapeLuaString("a\\b\nc"), "a\\\\b\\nc")
+}
+
+// --- emitAtom tests ---
+
+test("emitAtom - integer") {
+    val st = freshState()
+    val expr = atomExpr("42", tInt, unit)
+    val result = emitAtom(st, expr)
+    assertEqual(result, "(42)")
+    assertEqual(st.sb.toString(), "")
+}
+
+test("emitAtom - float") {
+    val st = freshState()
+    val expr = atomExpr("3.14", tFloat, unit)
+    val result = emitAtom(st, expr)
+    assertEqual(result, "(3.14)")
+    assertEqual(st.sb.toString(), "")
+}
+
+test("emitAtom - bool true") {
+    val st = freshState()
+    val expr = atomExpr("true", tBool, unit)
+    val result = emitAtom(st, expr)
+    assertEqual(result, "(true)")
+    assertEqual(st.sb.toString(), "")
+}
+
+test("emitAtom - bool false") {
+    val st = freshState()
+    val expr = atomExpr("false", tBool, unit)
+    val result = emitAtom(st, expr)
+    assertEqual(result, "(false)")
+}
+
+test("emitAtom - string") {
+    val st = freshState()
+    val expr = atomExpr("hello", tString, unit)
+    val result = emitAtom(st, expr)
+    assertEqual(result, "(tmp0)")
+    assertEqual(st.sb.toString(), "local tmp0 = 'hello';")
+}
+
+test("emitAtom - string with special chars") {
+    val st = freshState()
+    val expr = atomExpr("it's a\ntest", tString, unit)
+    val result = emitAtom(st, expr)
+    assertEqual(result, "(tmp0)")
+    assertEqual(st.sb.toString(), "local tmp0 = 'it\\'s a\\ntest';")
+}
+
+test("emitAtom - unit type") {
+    val st = freshState()
+    val expr = atomExpr("", tUnit, unit)
+    val result = emitAtom(st, expr)
+    assertEqual(result, "(nil)")
+    assertEqual(st.sb.toString(), "")
+}
+
+test("emitAtom - no type (unit expr type)") {
+    val st = freshState()
+    val expr = atomExpr("42", unit, unit)
+    val result = emitAtom(st, expr)
+    // When exprType is unit (nil), typName defaults to "unknown", falls to else
+    assertEqual(result, "(42)")
+}
+
+test("emitAtom - sequential tmp names") {
+    val st = freshState()
+    val e1 = atomExpr("hello", tString, unit)
+    val e2 = atomExpr("world", tString, unit)
+    val r1 = emitAtom(st, e1)
+    val r2 = emitAtom(st, e2)
+    assertEqual(r1, "(tmp0)")
+    assertEqual(r2, "(tmp1)")
+    assertEqual(st.sb.toString(), "local tmp0 = 'hello';local tmp1 = 'world';")
+}
+
+// --- emitInterpolatedString tests ---
+
+test("emitInterpolatedString - single part") {
+    val st = freshState()
+    // Wire emitExpr to use emitAtom for atoms
+    emitExpr = { s, e -> emitAtom(s, e) }
+    val part1 = atomExpr("hello", tString, unit)
+    val expr = interpolatedStringExpr([part1], unit)
+    val result = emitInterpolatedString(st, expr)
+    assertEqual(result, "tmp1")
+    // tmp0 is used by emitAtom for the string, tmp1 is the interpolation result
+    assertEqual(st.sb.toString(), "local tmp0 = 'hello';local tmp1=chi_tostring((tmp0));")
+}
+
+test("emitInterpolatedString - multiple parts") {
+    val st = freshState()
+    emitExpr = { s, e -> emitAtom(s, e) }
+    val part1 = atomExpr("hello ", tString, unit)
+    val part2 = atomExpr("42", tInt, unit)
+    val expr = interpolatedStringExpr([part1, part2], unit)
+    val result = emitInterpolatedString(st, expr)
+    assertEqual(result, "tmp1")
+    assertEqual(st.sb.toString(), "local tmp0 = 'hello ';local tmp1=chi_tostring((tmp0)) .. chi_tostring((42));")
+}
+
+test("emitInterpolatedString - empty parts") {
+    val st = freshState()
+    emitExpr = { s, e -> emitAtom(s, e) }
+    val expr = interpolatedStringExpr([], unit)
+    val result = emitInterpolatedString(st, expr)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0=;")
+}
+
+summary()

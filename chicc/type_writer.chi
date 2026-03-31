@@ -1,0 +1,341 @@
+// chicc/chicc/type_writer.chi
+package user/type_writer
+import std/lang { luaExpr, embedLua }
+import std/lang.array { size, push }
+import std/lang.string { len }
+import user/types { Type, TypeId, RecordField, newTypeId, typeTag, typeIds, typeTypes, typeTypeParams, typeDefaults, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeVariable, typeInnerType, typeBody, typeTypesCount, typeFieldsCount, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, polyType, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, tAny, tUnit, tBool, tInt, tFloat, tString, typeIdEquals }
+import user/util { StringBuilder, newStringBuilder, append, toString }
+
+fn escapeLua(s: string): string {
+    luaExpr("s:gsub('\\\\', '\\\\\\\\'):gsub('\"', '\\\\\"')")
+}
+
+fn primitiveTag(t: Type): string {
+    val ids = typeIds(t)
+    val firstId = ids[1]
+    if typeIdEquals(firstId, intTypeId) { "int" }
+    else if typeIdEquals(firstId, floatTypeId) { "float" }
+    else if typeIdEquals(firstId, boolTypeId) { "bool" }
+    else if typeIdEquals(firstId, stringTypeId) { "string" }
+    else if typeIdEquals(firstId, unitTypeId) { "unit" }
+    else if typeIdEquals(firstId, anyTypeId) { "any" }
+    else { "" }
+}
+
+fn writeTypeIdList(sb: StringBuilder, ids: array[TypeId], startIdx: int) {
+    sb.append("{")
+    var i = startIdx
+    var first = true
+    val count = ids.size()
+    while i <= count {
+        if first { first = false } else { sb.append(",") }
+        val tid = ids[i]
+        sb.append("{\"")
+        sb.append(escapeLua(tid.moduleName))
+        sb.append("\",\"")
+        sb.append(escapeLua(tid.packageName))
+        sb.append("\",\"")
+        sb.append(escapeLua(tid.name))
+        sb.append("\"}")
+        i = i + 1
+    }
+    sb.append("}")
+}
+
+var writeLuaType: (StringBuilder, Type) -> unit = { sb, t -> }
+
+fn writeTypeList(sb: StringBuilder, types: array[any]) {
+    sb.append("{")
+    val count = luaExpr("#types") as int
+    var i = 1
+    while i <= count {
+        if i > 1 { sb.append(",") }
+        val t = luaExpr("types[i]") as Type
+        writeLuaType(sb, t)
+        i = i + 1
+    }
+    sb.append("}")
+}
+
+fn writeStringList(sb: StringBuilder, strings: array[string]) {
+    sb.append("{")
+    val count = strings.size()
+    var i = 1
+    while i <= count {
+        if i > 1 { sb.append(",") }
+        sb.append("\"")
+        sb.append(escapeLua(strings[i]))
+        sb.append("\"")
+        i = i + 1
+    }
+    sb.append("}")
+}
+
+fn writeFieldList(sb: StringBuilder, fields: array[any]) {
+    sb.append("{")
+    val count = luaExpr("#fields") as int
+    var i = 1
+    while i <= count {
+        if i > 1 { sb.append(",") }
+        val f = luaExpr("fields[i]") as RecordField
+        sb.append("{\"")
+        sb.append(escapeLua(f.name))
+        sb.append("\",")
+        val ft = luaExpr("f.fieldType") as Type
+        writeLuaType(sb, ft)
+        sb.append("}")
+        i = i + 1
+    }
+    sb.append("}")
+}
+
+fn writeLuaTypeImpl(sb: StringBuilder, t: Type) {
+    val tag = typeTag(t)
+    if tag == "primitive" {
+        val ptag = primitiveTag(t)
+        sb.append("{tag=\"")
+        sb.append(ptag)
+        sb.append("\"")
+        val ids = typeIds(t)
+        val idCount = ids.size()
+        if idCount > 1 {
+            sb.append(",ids=")
+            writeTypeIdList(sb, ids, 2)
+        }
+        sb.append("}")
+    } else if tag == "fn" {
+        sb.append("{tag=\"fn\",types=")
+        val types = typeTypes(t)
+        writeTypeList(sb, types)
+        sb.append(",typeParams=")
+        val tps = typeTypeParams(t)
+        writeStringList(sb, tps)
+        sb.append(",defaults=")
+        val defs = typeDefaults(t)
+        val defsStr = luaExpr("tostring(defs)") as string
+        sb.append(defsStr)
+        sb.append("}")
+    } else if tag == "record" {
+        sb.append("{tag=\"record\",ids=")
+        val ids = typeIds(t)
+        writeTypeIdList(sb, ids, 1)
+        sb.append(",fields=")
+        val fields = typeFields(t)
+        writeFieldList(sb, fields)
+        sb.append(",typeParams=")
+        val tps = typeTypeParams(t)
+        writeStringList(sb, tps)
+        sb.append("}")
+    } else if tag == "sum" {
+        sb.append("{tag=\"sum\",ids=")
+        val ids = typeIds(t)
+        writeTypeIdList(sb, ids, 1)
+        sb.append(",lhs=")
+        val lhs = luaExpr("t.lhs") as Type
+        writeLuaType(sb, lhs)
+        sb.append(",rhs=")
+        val rhs = luaExpr("t.rhs") as Type
+        writeLuaType(sb, rhs)
+        sb.append(",typeParams=")
+        val tps = typeTypeParams(t)
+        writeStringList(sb, tps)
+        sb.append("}")
+    } else if tag == "var" {
+        sb.append("{tag=\"var\",name=\"")
+        sb.append(escapeLua(typeName(t)))
+        sb.append("\",level=")
+        val lvl = typeLevel(t)
+        val lvlStr = luaExpr("tostring(lvl)") as string
+        sb.append(lvlStr)
+        sb.append("}")
+    } else if tag == "array" {
+        sb.append("{tag=\"array\",elem=")
+        val elem = luaExpr("t.elementType") as Type
+        writeLuaType(sb, elem)
+        sb.append(",typeParams=")
+        val tps = typeTypeParams(t)
+        writeStringList(sb, tps)
+        sb.append(",ids=")
+        val ids = typeIds(t)
+        writeTypeIdList(sb, ids, 1)
+        sb.append("}")
+    } else if tag == "poly" {
+        sb.append("{tag=\"scheme\",level=")
+        val lvl = typeLevel(t)
+        val lvlStr = luaExpr("tostring(lvl)") as string
+        sb.append(lvlStr)
+        sb.append(",body=")
+        val b = luaExpr("t.body") as Type
+        writeLuaType(sb, b)
+        sb.append("}")
+    } else if tag == "recursive" {
+        sb.append("{tag=\"rec\",var=")
+        val v = luaExpr("t.variable") as Type
+        writeLuaType(sb, v)
+        sb.append(",type=")
+        val inner = luaExpr("t.innerType") as Type
+        writeLuaType(sb, inner)
+        sb.append("}")
+    } else {
+        embedLua("error('Unsupported type tag: ' .. tag)")
+    }
+}
+writeLuaType = writeLuaTypeImpl
+
+pub fn encodeType(t: Type): string {
+    val sb = newStringBuilder()
+    writeLuaType(sb, t)
+    sb.toString()
+}
+
+fn decodeLuaTypeIds(tbl: any, field: string): array[TypeId] {
+    val result = luaExpr("{}") as array[TypeId]
+    val count = luaExpr("tbl[field] and #tbl[field] or 0") as int
+    var i = 1
+    while i <= count {
+        val m = luaExpr("tbl[field][i][1]") as string
+        val p = luaExpr("tbl[field][i][2]") as string
+        val n = luaExpr("tbl[field][i][3]") as string
+        result.push(newTypeId(m, p, n))
+        i = i + 1
+    }
+    result
+}
+
+fn decodeLuaStringList(tbl: any, field: string): array[string] {
+    val result = luaExpr("{}") as array[string]
+    val count = luaExpr("tbl[field] and #tbl[field] or 0") as int
+    var i = 1
+    while i <= count {
+        val s = luaExpr("tbl[field][i]") as string
+        result.push(s)
+        i = i + 1
+    }
+    result
+}
+
+fn decodeWithExtraIds(tbl: any, base: Type): Type {
+    val hasIds = luaExpr("tbl.ids ~= nil and #tbl.ids > 0") as bool
+    var result: any = base
+    if hasIds {
+        val extraIds = decodeLuaTypeIds(tbl, "ids")
+        val baseIds = typeIds(base)
+        val combined = luaExpr("{}") as array[TypeId]
+        var i = 1
+        val baseCount = baseIds.size()
+        while i <= baseCount {
+            combined.push(baseIds[i])
+            i = i + 1
+        }
+        var j = 1
+        val extraCount = extraIds.size()
+        while j <= extraCount {
+            combined.push(extraIds[j])
+            j = j + 1
+        }
+        result = primitiveType(combined)
+    }
+    result as Type
+}
+
+var decodeTable: (any) -> Type = { tbl -> tUnit }
+
+fn decodeLuaTypeList(tbl: any): array[Type] {
+    val result = luaExpr("{}") as array[any]
+    val count = luaExpr("tbl.types and #tbl.types or 0") as int
+    var i = 1
+    while i <= count {
+        val sub = luaExpr("tbl.types[i]") as any
+        val decoded = decodeTable(sub)
+        embedLua("table.insert(result, decoded)")
+        i = i + 1
+    }
+    luaExpr("result") as array[Type]
+}
+
+fn decodeLuaFields(tbl: any): array[RecordField] {
+    val result = luaExpr("{}") as array[any]
+    val count = luaExpr("tbl.fields and #tbl.fields or 0") as int
+    var i = 1
+    while i <= count {
+        val fieldName = luaExpr("tbl.fields[i][1]") as string
+        val fieldTypeTbl = luaExpr("tbl.fields[i][2]") as any
+        val ft = decodeTable(fieldTypeTbl)
+        val rf = { name: fieldName, fieldType: ft }
+        embedLua("table.insert(result, rf)")
+        i = i + 1
+    }
+    luaExpr("result") as array[RecordField]
+}
+
+fn decodeTableImpl(tbl: any): Type {
+    val tag = luaExpr("tbl.tag") as string
+    if tag == "int" {
+        decodeWithExtraIds(tbl, tInt)
+    } else if tag == "float" {
+        decodeWithExtraIds(tbl, tFloat)
+    } else if tag == "bool" {
+        decodeWithExtraIds(tbl, tBool)
+    } else if tag == "string" {
+        decodeWithExtraIds(tbl, tString)
+    } else if tag == "unit" {
+        decodeWithExtraIds(tbl, tUnit)
+    } else if tag == "any" {
+        decodeWithExtraIds(tbl, tAny)
+    } else if tag == "fn" {
+        val types = decodeLuaTypeList(tbl)
+        val tps = decodeLuaStringList(tbl, "typeParams")
+        val defs = luaExpr("tbl.defaults") as int
+        functionType(types, tps, defs)
+    } else if tag == "record" {
+        val ids = decodeLuaTypeIds(tbl, "ids")
+        val fields = decodeLuaFields(tbl)
+        val tps = decodeLuaStringList(tbl, "typeParams")
+        recordType(ids, fields, tps)
+    } else if tag == "sum" {
+        val ids = decodeLuaTypeIds(tbl, "ids")
+        val lhsTbl = luaExpr("tbl.lhs") as any
+        val lhs = decodeTable(lhsTbl)
+        val rhsTbl = luaExpr("tbl.rhs") as any
+        val rhs = decodeTable(rhsTbl)
+        val tps = decodeLuaStringList(tbl, "typeParams")
+        sumType(ids, lhs, rhs, tps)
+    } else if tag == "var" {
+        val n = luaExpr("tbl.name") as string
+        val lvl = luaExpr("tbl.level") as int
+        variableType(n, lvl)
+    } else if tag == "array" {
+        val elemTbl = luaExpr("tbl.elem") as any
+        val elem = decodeTable(elemTbl)
+        val tps = decodeLuaStringList(tbl, "typeParams")
+        val result = arrayType(elem, tps)
+        val hasIds = luaExpr("tbl.ids ~= nil and #tbl.ids > 0") as bool
+        if hasIds {
+            val decodedIds = decodeLuaTypeIds(tbl, "ids")
+            embedLua("result.ids = decodedIds")
+            result
+        } else {
+            result
+        }
+    } else if tag == "scheme" {
+        val lvl = luaExpr("tbl.level") as int
+        val bodyTbl = luaExpr("tbl.body") as any
+        val b = decodeTable(bodyTbl)
+        polyType(lvl, b)
+    } else if tag == "rec" {
+        val varTbl = luaExpr("tbl['var']") as any
+        val v = decodeTable(varTbl)
+        val innerTbl = luaExpr("tbl['type']") as any
+        val inner = decodeTable(innerTbl)
+        recursiveType(v, inner)
+    } else {
+        embedLua("error('Unknown type tag: ' .. tostring(tag))")
+        tUnit
+    }
+}
+decodeTable = decodeTableImpl
+
+pub fn decodeType(spec: string): Type {
+    val tbl: any = luaExpr("loadstring('return ' .. spec)()")
+    decodeTable(tbl)
+}

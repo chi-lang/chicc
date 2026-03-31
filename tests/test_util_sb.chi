@@ -1,0 +1,25 @@
+// tests/test_util_sb.chi
+import user/test_util { test, assertEqual, summary }
+import user/util { newStringBuilder }
+
+test("empty sb") {
+    val sb = newStringBuilder()
+    assertEqual(sb.toString(), "")
+}
+
+test("append and toString") {
+    val sb = newStringBuilder()
+    sb.append("hello")
+    sb.append(" ")
+    sb.append("world")
+    assertEqual(sb.toString(), "hello world")
+}
+
+test("sb length") {
+    val sb = newStringBuilder()
+    sb.append("abc")
+    sb.append("def")
+    assertEqual(sb.len(), 6)
+}
+
+summary()

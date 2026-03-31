@@ -1,0 +1,51 @@
+// chicc/compile.chi
+// Task 4I.2: Build Script for the Chi self-hosting compiler
+// Compiles all chicc modules into a single Lua file (chicc.lua)
+// that can be run with: luajit chicc.lua <command> [options] <file>
+//
+// Usage: chi chicc/compile.chi
+//
+// This script reads all source modules from chicc/chicc/ in dependency order,
+// concatenates them (stripping package/import lines, deduplicating
+// import std/* lines), writes a temp concatenated file, compiles it,
+// and appends a CLI entry point.
+package user/default
+import std/lang { luaExpr, embedLua, compileConcat }
+import std/io.file { readString, writeString }
+
+// Lua helper that concatenates all source files, stripping package/import
+// lines and deduplicating import std/* lines (mirrors run_tests.sh logic)
+embedLua("function __chicc_concat_sources(files) local imports = {}; local seenImports = {}; local code = {}; for _, fileName in ipairs(files) do local f = io.open(fileName, 'r'); if not f then error('Cannot open: ' .. fileName) end; local content = f:read('a'); f:close(); for line in content:gmatch('[^\\n]+') do if line:match('^import std/') then if not seenImports[line] then seenImports[line] = true; imports[#imports+1] = line end elseif not line:match('^package ') and not line:match('^import ') then code[#code+1] = line end end; code[#code+1] = '' end; local result = table.concat(imports, '\\n') .. '\\n\\n' .. table.concat(code, '\\n'); return result end")
+
+fn build(): int {
+    // Module list in dependency order (must match .build_order)
+    embedLua("local moduleFiles = {'chicc/messages.chi','chicc/source.chi','chicc/token.chi','chicc/types.chi','chicc/util.chi','chicc/ast.chi','chicc/parse_ast.chi','chicc/type_writer.chi','chicc/emitter.chi','chicc/lexer.chi','chicc/parser.chi','chicc/symbols.chi','chicc/ast_converter.chi','chicc/unification.chi','chicc/inference_context.chi','chicc/typer.chi','chicc/checks.chi','chicc/compiler.chi','chicc/cli.chi'}")
+
+    println("Building chicc self-hosting compiler...")
+
+    // Step 1: Concatenate all source files and write to temp file
+    val concatenated: string = luaExpr("__chicc_concat_sources(moduleFiles)")
+    val tmpPath = "/tmp/chicc_build_concat.chi"
+    writeString(tmpPath, concatenated)
+
+    // Step 2: Compile using compileConcat
+    val tmpFiles: array[string] = [tmpPath]
+    val luaCode = compileConcat(tmpFiles, { loadCompiledModules: false, verbose: false })
+
+    // Step 3: Append CLI entry point
+    val entry = "\n-- chicc CLI entry point\nif arg then\n  local exitCode = cliMain(arg)\n  if exitCode and exitCode ~= 0 then os.exit(exitCode) end\nend\n"
+    val finalCode: string = luaExpr("luaCode .. entry")
+
+    // Step 4: Write output
+    val outputPath = "chicc.lua"
+    writeString(outputPath, finalCode)
+
+    // Cleanup
+    embedLua("os.remove('/tmp/chicc_build_concat.chi')")
+
+    println("Built: $outputPath")
+    println("Run with: luajit $outputPath <command> [options] <file>")
+    0
+}
+
+build()

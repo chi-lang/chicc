@@ -1,0 +1,651 @@
+// chicc/chicc/lexer.chi
+package user/lexer
+import user/token { Token, newToken, lookupKeyword, TK_INT, TK_FLOAT, TK_STRING, TK_INTERP_START, TK_INTERP_TEXT, TK_INTERP_EXPR_START, TK_INTERP_EXPR_END, TK_INTERP_END, TK_ID, TK_PLUS, TK_MINUS, TK_STAR, TK_SLASH, TK_PERCENT, TK_EQ, TK_EQEQ, TK_NEQ, TK_LT, TK_LTEQ, TK_GT, TK_GTEQ, TK_NOT, TK_AND, TK_OR, TK_AMP, TK_PIPE, TK_LSHIFT, TK_RSHIFT, TK_ARROW, TK_WEAVE, TK_UNDERSCORE, TK_DOT, TK_COMMA, TK_COLON, TK_PLUSEQ, TK_MINUSEQ, TK_STAREQ, TK_SLASHEQ, TK_LPAREN, TK_RPAREN, TK_LBRACE, TK_RBRACE, TK_LBRACKET, TK_RBRACKET, TK_NEWLINE, TK_EOF }
+import user/source { newSection }
+import std/lang { luaExpr }
+import std/lang.array { push }
+
+type Lexer = {
+    source: string,
+    pos: int,
+    line: int,
+    col: int,
+    length: int,
+    tokens: array[Token]
+}
+
+pub fn newLexer(source: string): Lexer {
+    val len: int = luaExpr("#source")
+    { source: source, pos: 1, line: 1, col: 1, length: len, tokens: [] }
+}
+
+// Peek at current character (returns byte value, 0 for EOF)
+pub fn lexPeek(lex: Lexer): int {
+    if lex.pos > lex.length { return 0 }
+    luaExpr("string.byte(lex.source, lex.pos)")
+}
+
+// Peek at character at offset from current position (0 is current)
+pub fn lexPeekAt(lex: Lexer, offset: int): int {
+    val p = lex.pos + offset
+    if p > lex.length { return 0 }
+    if p < 1 { return 0 }
+    luaExpr("string.byte(lex.source, p)")
+}
+
+// Advance by one byte, tracking line and column
+pub fn lexAdvance(lex: Lexer) {
+    val ch = lexPeek(lex)
+    if ch != 0 {
+        lex.pos = lex.pos + 1
+        if ch == 10 {
+            lex.line = lex.line + 1
+            lex.col = 1
+        } else {
+            lex.col = lex.col + 1
+        }
+    }
+}
+
+// Extract substring from source (byte positions, 1-based, inclusive)
+pub fn substringFrom(lex: Lexer, from: int, to: int): string {
+    luaExpr("lex.source:sub(from, to)")
+}
+
+// --- Character classification helpers ---
+
+pub fn isDigit(ch: int): bool {
+    ch >= 48 && ch <= 57
+}
+
+pub fn isLetter(ch: int): bool {
+    (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || ch == 95
+}
+
+pub fn isAlphaNum(ch: int): bool {
+    isDigit(ch) || isLetter(ch)
+}
+
+// --- Number lexing ---
+// Reads an integer or float token. Expects current char to be a digit.
+// Float format: DIGITS.DIGITS (dot only consumed if followed by a digit)
+pub fn readNumber(lex: Lexer) {
+    val startLine = lex.line
+    val startCol = lex.col
+    val startPos = lex.pos
+
+    // Read integer part
+    while isDigit(lexPeek(lex)) {
+        lexAdvance(lex)
+    }
+
+    // Check for decimal point followed by digit
+    var isFloat = false
+    if lexPeek(lex) == 46 && isDigit(lexPeekAt(lex, 1)) {
+        isFloat = true
+        lexAdvance(lex) // consume '.'
+        while isDigit(lexPeek(lex)) {
+            lexAdvance(lex)
+        }
+    }
+
+    val text = substringFrom(lex, startPos, lex.pos - 1)
+    val section = newSection(startLine, startCol, lex.line, lex.col - 1)
+    val kind = if isFloat { TK_FLOAT } else { TK_INT }
+    lex.tokens.push(newToken(kind, text, section))
+}
+
+// --- Identifier / keyword lexing ---
+// Reads an identifier or keyword. Expects current char to be a letter or underscore.
+pub fn readIdentOrKeyword(lex: Lexer) {
+    val startLine = lex.line
+    val startCol = lex.col
+    val startPos = lex.pos
+
+    // Read identifier characters
+    while isAlphaNum(lexPeek(lex)) {
+        lexAdvance(lex)
+    }
+
+    val text = substringFrom(lex, startPos, lex.pos - 1)
+    val section = newSection(startLine, startCol, lex.line, lex.col - 1)
+    val kind = lookupKeyword(text)
+    lex.tokens.push(newToken(kind, text, section))
+}
+
+// --- Comment and whitespace skipping ---
+
+// Skip a line comment (after detecting '//').
+// Consumes all characters until end of line but does NOT consume the newline.
+pub fn skipLineComment(lex: Lexer) {
+    // Consume the two '/' characters
+    lexAdvance(lex)
+    lexAdvance(lex)
+    // Skip until newline or EOF
+    while lexPeek(lex) != 0 && lexPeek(lex) != 10 {
+        lexAdvance(lex)
+    }
+}
+
+// Skip a block comment (after detecting '/*').
+// Consumes all characters until '*/' or EOF. Tracks line/col properly.
+pub fn skipBlockComment(lex: Lexer) {
+    // Consume '/' and '*'
+    lexAdvance(lex)
+    lexAdvance(lex)
+    // Skip until '*/' or EOF
+    while lexPeek(lex) != 0 {
+        if lexPeek(lex) == 42 && lexPeekAt(lex, 1) == 47 {
+            // Found '*/'
+            lexAdvance(lex) // consume '*'
+            lexAdvance(lex) // consume '/'
+            return unit
+        }
+        lexAdvance(lex)
+    }
+}
+
+// Skip whitespace (spaces and tabs) and comments (// and /* */).
+// Does NOT skip newlines - they are significant tokens.
+pub fn skipWhitespaceAndComments(lex: Lexer) {
+    while lexPeek(lex) != 0 {
+        val ch = lexPeek(lex)
+        if ch == 32 || ch == 9 {
+            // Space or tab
+            lexAdvance(lex)
+        } else if ch == 47 && lexPeekAt(lex, 1) == 47 {
+            // '//' line comment
+            skipLineComment(lex)
+        } else if ch == 47 && lexPeekAt(lex, 1) == 42 {
+            // '/*' block comment
+            skipBlockComment(lex)
+        } else {
+            return unit
+        }
+    }
+}
+
+// --- Operator, delimiter, and newline lexing ---
+pub fn readOperatorOrDelimiter(lex: Lexer) {
+    val startLine = lex.line
+    val startCol = lex.col
+    val ch = lexPeek(lex)
+    val next = lexPeekAt(lex, 1)
+
+    // Two-character operators (check before single-character)
+    if ch == 61 && next == 61 {
+        // ==
+        lexAdvance(lex)
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_EQEQ, "==", sec))
+    } else if ch == 33 && next == 61 {
+        // !=
+        lexAdvance(lex)
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_NEQ, "!=", sec))
+    } else if ch == 60 && next == 61 {
+        // <=
+        lexAdvance(lex)
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_LTEQ, "<=", sec))
+    } else if ch == 60 && next == 60 {
+        // <<
+        lexAdvance(lex)
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_LSHIFT, "<<", sec))
+    } else if ch == 62 && next == 61 {
+        // >=
+        lexAdvance(lex)
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_GTEQ, ">=", sec))
+    } else if ch == 62 && next == 62 {
+        // >>
+        lexAdvance(lex)
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_RSHIFT, ">>", sec))
+    } else if ch == 45 && next == 62 {
+        // ->
+        lexAdvance(lex)
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_ARROW, "->", sec))
+    } else if ch == 126 && next == 62 {
+        // ~>
+        lexAdvance(lex)
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_WEAVE, "~>", sec))
+    } else if ch == 43 && next == 61 {
+        // +=
+        lexAdvance(lex)
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_PLUSEQ, "+=", sec))
+    } else if ch == 45 && next == 61 {
+        // -=
+        lexAdvance(lex)
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_MINUSEQ, "-=", sec))
+    } else if ch == 42 && next == 61 {
+        // *=
+        lexAdvance(lex)
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_STAREQ, "*=", sec))
+    } else if ch == 47 && next == 61 {
+        // /=
+        lexAdvance(lex)
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_SLASHEQ, "/=", sec))
+    } else if ch == 38 && next == 38 {
+        // &&
+        lexAdvance(lex)
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_AND, "&&", sec))
+    } else if ch == 124 && next == 124 {
+        // ||
+        lexAdvance(lex)
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_OR, "||", sec))
+    }
+    // Single-character operators
+    else if ch == 43 {
+        // +
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_PLUS, "+", sec))
+    } else if ch == 45 {
+        // -
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_MINUS, "-", sec))
+    } else if ch == 42 {
+        // *
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_STAR, "*", sec))
+    } else if ch == 47 {
+        // /
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_SLASH, "/", sec))
+    } else if ch == 37 {
+        // %
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_PERCENT, "%", sec))
+    } else if ch == 61 {
+        // =
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_EQ, "=", sec))
+    } else if ch == 33 {
+        // !
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_NOT, "!", sec))
+    } else if ch == 60 {
+        // <
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_LT, "<", sec))
+    } else if ch == 62 {
+        // >
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_GT, ">", sec))
+    } else if ch == 38 {
+        // &
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_AMP, "&", sec))
+    } else if ch == 124 {
+        // |
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_PIPE, "|", sec))
+    } else if ch == 46 {
+        // .
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_DOT, ".", sec))
+    } else if ch == 44 {
+        // ,
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_COMMA, ",", sec))
+    } else if ch == 58 {
+        // :
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_COLON, ":", sec))
+    } else if ch == 95 {
+        // _ (standalone underscore, not part of identifier)
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_UNDERSCORE, "_", sec))
+    }
+    // Delimiters
+    else if ch == 40 {
+        // (
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_LPAREN, "(", sec))
+    } else if ch == 41 {
+        // )
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_RPAREN, ")", sec))
+    } else if ch == 123 {
+        // {
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_LBRACE, "{", sec))
+    } else if ch == 125 {
+        // }
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_RBRACE, "}", sec))
+    } else if ch == 91 {
+        // [
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_LBRACKET, "[", sec))
+    } else if ch == 93 {
+        // ]
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_RBRACKET, "]", sec))
+    }
+    // Newline
+    else if ch == 10 {
+        // \n
+        lexAdvance(lex)
+        val sec = newSection(startLine, startCol, startLine, startCol)
+        lex.tokens.push(newToken(TK_NEWLINE, "\n", sec))
+    } else if ch == 13 {
+        // \r - skip carriage return (handle \r\n as just newline)
+        lexAdvance(lex)
+        if lexPeek(lex) == 10 {
+            lexAdvance(lex)
+        }
+        val sec = newSection(startLine, startCol, startLine, startCol)
+        lex.tokens.push(newToken(TK_NEWLINE, "\n", sec))
+    } else {
+        // Unrecognized character - skip it
+        println("Warning: unrecognized character at line $startLine col $startCol")
+        lexAdvance(lex)
+    }
+}
+
+// --- Helper: convert escape character code to the actual character string ---
+fn escapeChar(ch: int): string {
+    if ch == 110 { // 'n'
+        luaExpr("'\\n'")
+    } else if ch == 114 { // 'r'
+        luaExpr("'\\r'")
+    } else if ch == 116 { // 't'
+        luaExpr("'\\t'")
+    } else if ch == 48 { // '0'
+        luaExpr("'\\0'")
+    } else if ch == 34 { // '"'
+        luaExpr("'\"'")
+    } else if ch == 92 { // '\'
+        luaExpr("'\\\\'")
+    } else if ch == 36 { // dollar sign
+        luaExpr("string.char(36)")
+    } else {
+        // Unknown escape - return the backslash + char as-is
+        val c: string = luaExpr("string.char(ch)")
+        val result: string = luaExpr("'\\\\' .. c")
+        result
+    }
+}
+
+// --- Helper: read an escape sequence after consuming the backslash ---
+// Returns the string representation of the escaped character
+fn readEscape(lex: Lexer): string {
+    // Current char is the one after '\'
+    val ch = lexPeek(lex)
+    if ch == 0 {
+        // Backslash at end of string - just return backslash
+        return luaExpr("'\\\\'")
+    }
+    lexAdvance(lex) // consume the escape character
+    escapeChar(ch)
+}
+
+// --- Helper: scan ahead to check if string body contains unescaped '$' ---
+fn stringHasDollar(lex: Lexer): bool {
+    var scanPos = lex.pos
+    while scanPos <= lex.length {
+        val ch: int = luaExpr("string.byte(lex.source, scanPos)")
+        if ch == 34 { // '"' - end of string
+            return false
+        }
+        if ch == 92 { // '\' - skip escape sequence
+            scanPos = scanPos + 2
+        } else if ch == 36 { // '$'
+            return true
+        } else {
+            scanPos = scanPos + 1
+        }
+    }
+    false
+}
+
+// --- Helper: read text segment into a StringBuilder until we hit $, ", or EOF ---
+// Returns the accumulated text. Does NOT consume the terminating $, ", or EOF.
+fn readTextSegment(lex: Lexer, sb: { parts: array[string], length: int }) {
+    while lexPeek(lex) != 0 {
+        val ch = lexPeek(lex)
+        if ch == 34 { // '"' - end of string
+            return unit
+        }
+        if ch == 36 { // '$' - interpolation
+            return unit
+        }
+        if ch == 92 { // '\' - escape sequence
+            lexAdvance(lex) // consume '\'
+            val escaped = readEscape(lex)
+            sb.append(escaped)
+        } else {
+            val c: string = luaExpr("string.char(ch)")
+            sb.append(c)
+            lexAdvance(lex)
+        }
+    }
+}
+
+// --- Mutual recursion: readExpressionTokens <-> lexReadString ---
+// Using var pattern because readExpressionTokens calls lexReadString and vice versa.
+var readExpressionTokensImpl: (Lexer) -> unit = { lex -> unit }
+
+// --- String lexing ---
+// Reads a string literal starting at the opening `"`.
+// Simple strings (no interpolation) produce TK_STRING.
+// Interpolated strings produce TK_INTERP_START, TK_INTERP_TEXT, TK_INTERP_EXPR_START,
+// ..., TK_INTERP_EXPR_END, TK_INTERP_END.
+pub fn lexReadString(lex: Lexer) {
+    val startLine = lex.line
+    val startCol = lex.col
+
+    lexAdvance(lex) // consume opening '"'
+
+    val hasInterp = stringHasDollar(lex)
+
+    if !hasInterp {
+        // Simple string - no interpolation
+        val sb = newStringBuilder()
+        while lexPeek(lex) != 0 && lexPeek(lex) != 34 {
+            val ch = lexPeek(lex)
+            if ch == 92 { // '\'
+                lexAdvance(lex) // consume '\'
+                val escaped = readEscape(lex)
+                sb.append(escaped)
+            } else {
+                val c: string = luaExpr("string.char(ch)")
+                sb.append(c)
+                lexAdvance(lex)
+            }
+        }
+        // Consume closing '"' (if present)
+        if lexPeek(lex) == 34 {
+            lexAdvance(lex)
+        }
+        val text = sb.toString()
+        val section = newSection(startLine, startCol, lex.line, lex.col - 1)
+        lex.tokens.push(newToken(TK_STRING, text, section))
+    } else {
+        // Interpolated string
+        // Emit TK_INTERP_START for the opening quote
+        val openSec = newSection(startLine, startCol, startLine, startCol)
+        lex.tokens.push(newToken(TK_INTERP_START, "\"", openSec))
+
+        while lexPeek(lex) != 0 && lexPeek(lex) != 34 {
+            val ch = lexPeek(lex)
+            if ch == 36 { // '$' - interpolation
+                val dollarLine = lex.line
+                val dollarCol = lex.col
+                lexAdvance(lex) // consume '$'
+                val nextCh = lexPeek(lex)
+                if nextCh == 123 { // '{' - expression interpolation
+                    lexAdvance(lex) // consume '{'
+                    val exprStartSec = newSection(dollarLine, dollarCol, lex.line, lex.col - 1)
+                    val exprStartStr: string = luaExpr("string.char(36) .. '{'")
+                    lex.tokens.push(newToken(TK_INTERP_EXPR_START, exprStartStr, exprStartSec))
+                    // Lex expression tokens until matching '}'
+                    readExpressionTokensImpl(lex)
+                    // Consume closing '}'
+                    val endLine = lex.line
+                    val endCol = lex.col
+                    if lexPeek(lex) == 125 {
+                        lexAdvance(lex) // consume '}'
+                    }
+                    val exprEndSec = newSection(endLine, endCol, endLine, endCol)
+                    lex.tokens.push(newToken(TK_INTERP_EXPR_END, "}", exprEndSec))
+                } else if isLetter(nextCh) { // $identifier
+                    // Read identifier
+                    val idStartLine = lex.line
+                    val idStartCol = lex.col
+                    val idStartPos = lex.pos
+                    while isAlphaNum(lexPeek(lex)) {
+                        lexAdvance(lex)
+                    }
+                    val idText = substringFrom(lex, idStartPos, lex.pos - 1)
+                    val dollarStr: string = luaExpr("string.char(36)")
+                    val exprStartSec = newSection(dollarLine, dollarCol, dollarLine, dollarCol)
+                    lex.tokens.push(newToken(TK_INTERP_EXPR_START, dollarStr, exprStartSec))
+                    val idSec = newSection(idStartLine, idStartCol, lex.line, lex.col - 1)
+                    lex.tokens.push(newToken(TK_ID, idText, idSec))
+                    val exprEndSec = newSection(lex.line, lex.col, lex.line, lex.col)
+                    lex.tokens.push(newToken(TK_INTERP_EXPR_END, "", exprEndSec))
+                } else {
+                    // dollar not followed by brace or letter - treat as literal
+                    // Already consumed the dollar, so push it as text
+                    val dollarText: string = luaExpr("string.char(36)")
+                    val textSec = newSection(dollarLine, dollarCol, dollarLine, dollarCol)
+                    lex.tokens.push(newToken(TK_INTERP_TEXT, dollarText, textSec))
+                }
+            } else {
+                // Text segment
+                val textStartLine = lex.line
+                val textStartCol = lex.col
+                val sb = newStringBuilder()
+                readTextSegment(lex, sb)
+                val text = sb.toString()
+                if text != "" {
+                    val textSec = newSection(textStartLine, textStartCol, lex.line, lex.col - 1)
+                    lex.tokens.push(newToken(TK_INTERP_TEXT, text, textSec))
+                }
+            }
+        }
+
+        // Consume closing quote and emit TK_INTERP_END
+        val closeLine = lex.line
+        val closeCol = lex.col
+        if lexPeek(lex) == 34 {
+            lexAdvance(lex)
+        }
+        val closeSec = newSection(closeLine, closeCol, closeLine, closeCol)
+        lex.tokens.push(newToken(TK_INTERP_END, "\"", closeSec))
+    }
+}
+
+// --- Now wire up readExpressionTokensImpl to use lexReadString ---
+readExpressionTokensImpl = { lex: Lexer ->
+    var braceDepth = 1
+    while lexPeek(lex) != 0 && braceDepth > 0 {
+        val ch = lexPeek(lex)
+        // Skip whitespace (but not newlines, those are tokens)
+        if ch == 32 || ch == 9 { // space or tab
+            lexAdvance(lex)
+        } else if ch == 125 { // '}'
+            braceDepth = braceDepth - 1
+            if braceDepth == 0 {
+                // This is the closing brace of the interpolation - don't consume it
+                // break out of loop
+            } else {
+                // It's a nested brace - emit it as a regular RBRACE
+                readOperatorOrDelimiter(lex)
+            }
+        } else if ch == 123 { // '{'
+            braceDepth = braceDepth + 1
+            readOperatorOrDelimiter(lex)
+        } else if isDigit(ch) {
+            readNumber(lex)
+        } else if isLetter(ch) {
+            readIdentOrKeyword(lex)
+        } else if ch == 34 { // '"' - nested string
+            lexReadString(lex)
+        } else if ch == 10 || ch == 13 { // newline
+            readOperatorOrDelimiter(lex)
+        } else {
+            readOperatorOrDelimiter(lex)
+        }
+    }
+}
+
+// --- Token dispatch ---
+// Dispatches to the appropriate reader based on the current character.
+pub fn readToken(lex: Lexer) {
+    val ch = lexPeek(lex)
+    if isDigit(ch) {
+        readNumber(lex)
+    } else if isLetter(ch) {
+        readIdentOrKeyword(lex)
+    } else if ch == 34 {
+        // '"' - string literal
+        lexReadString(lex)
+    } else {
+        readOperatorOrDelimiter(lex)
+    }
+}
+
+// --- Main tokenize entry point ---
+// Tokenizes the entire source string and returns an array of tokens.
+pub fn tokenize(source: string): array[Token] {
+    val lex = newLexer(source)
+    while true {
+        skipWhitespaceAndComments(lex)
+        if lexPeek(lex) == 0 {
+            // EOF reached
+            val eofSection = newSection(lex.line, lex.col, lex.line, lex.col)
+            lex.tokens.push(newToken(TK_EOF, "", eofSection))
+            return lex.tokens
+        }
+        readToken(lex)
+    }
+    // Unreachable, but satisfies type checker
+    lex.tokens
+}

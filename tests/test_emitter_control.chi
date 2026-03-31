@@ -1,0 +1,258 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/util { newStringBuilder, StringBuilder, toString }
+import user/ast { Program, Package, newPackage, newProgram, atomExpr, blockExpr, ifElseExpr, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, returnExpr, infixOpExpr }
+import user/types { tInt, tString, tBool, tUnit, tFloat, arrayType, functionType, recordType, primitiveType, intTypeId, stringTypeId }
+import user/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitBlock, emitIfElse, emitWhile, emitForLoop, emitBreak, emitContinue, emitReturn, mapInfixOperation }
+import std/lang { luaExpr, embedLua }
+
+fn freshState(): EmitterState {
+    val pkg = newPackage("mymod", "mypkg")
+    val prog = newProgram(pkg, [], [], [], unit)
+    newState(prog)
+}
+
+// Wire emitExpr for tests
+emitExpr = { st, expr ->
+    val kind: string = luaExpr("expr.kind")
+    if kind == "atom" { emitAtom(st, expr) }
+    else if kind == "block" { emitBlock(st, expr) }
+    else if kind == "if_else" { emitIfElse(st, expr) }
+    else if kind == "while_loop" { emitWhile(st, expr) }
+    else if kind == "for_loop" { emitForLoop(st, expr) }
+    else if kind == "break" { emitBreak(st, expr) }
+    else if kind == "continue" { emitContinue(st, expr) }
+    else if kind == "return" { emitReturn(st, expr) }
+    else { "nil" }
+}
+
+// ===== emitBreak tests =====
+
+test("emitBreak - emits break statement") {
+    val st = freshState()
+    embedLua("test_brk = {kind='break'}")
+    val e: any = luaExpr("test_brk")
+    val result = emitBreak(st, e)
+    assertEqual(result, "nil")
+    assertEqual(st.sb.toString(), "break;")
+}
+
+// ===== emitContinue tests =====
+
+test("emitContinue - emits goto continue label") {
+    val st = freshState()
+    st.currentLoopId = 3
+    embedLua("test_cont = {kind='continue'}")
+    val e: any = luaExpr("test_cont")
+    val result = emitContinue(st, e)
+    assertEqual(result, "nil")
+    assertEqual(st.sb.toString(), "goto __continue_3;")
+}
+
+// ===== emitReturn tests =====
+
+test("emitReturn - with value") {
+    val st = freshState()
+    embedLua("test_ret = {kind='return', returnValue={kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='int'}}}}}")
+    val e: any = luaExpr("test_ret")
+    val result = emitReturn(st, e)
+    assertEqual(result, "nil")
+    assertEqual(st.sb.toString(), "return (42);")
+}
+
+test("emitReturn - without value") {
+    val st = freshState()
+    embedLua("test_ret_nv = {kind='return', returnValue=nil}")
+    val e: any = luaExpr("test_ret_nv")
+    val result = emitReturn(st, e)
+    assertEqual(result, "nil")
+    assertEqual(st.sb.toString(), "return;")
+}
+
+// ===== mapInfixOperation tests =====
+
+test("mapInfixOperation - != maps to ~=") {
+    assertEqual(mapInfixOperation("a", "b", "!=", "int"), "(a ~= b)")
+}
+
+test("mapInfixOperation - && maps to and") {
+    assertEqual(mapInfixOperation("a", "b", "&&", "bool"), "(a and b)")
+}
+
+test("mapInfixOperation - || maps to or") {
+    assertEqual(mapInfixOperation("a", "b", "||", "bool"), "(a or b)")
+}
+
+test("mapInfixOperation - + on string maps to ..") {
+    assertEqual(mapInfixOperation("a", "b", "+", "string"), "(a .. b)")
+}
+
+test("mapInfixOperation - + on int stays +") {
+    assertEqual(mapInfixOperation("a", "b", "+", "int"), "(a + b)")
+}
+
+test("mapInfixOperation - == on string stays ==") {
+    assertEqual(mapInfixOperation("a", "b", "==", "string"), "(a == b)")
+}
+
+test("mapInfixOperation - > passes through") {
+    assertEqual(mapInfixOperation("a", "b", ">", "int"), "(a > b)")
+}
+
+test("mapInfixOperation - * passes through") {
+    assertEqual(mapInfixOperation("a", "b", "*", "int"), "(a * b)")
+}
+
+// ===== emitIfElse tests =====
+
+test("emitIfElse - simple if-then-else with blocks") {
+    val st = freshState()
+    st.inFunction = true
+    embedLua("test_if1 = {kind='if_else', condition={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}, thenBranch={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}, elseBranch={kind='block', blockBody={{kind='atom', atomValue='2', exprType={tag='primitive',ids={{name='int'}}}}}}}")
+    val e: any = luaExpr("test_if1")
+    val result = emitIfElse(st, e)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0;if (true) then tmp0=(1) else tmp0=(2) end;")
+}
+
+test("emitIfElse - if without else") {
+    val st = freshState()
+    st.inFunction = true
+    embedLua("test_if2 = {kind='if_else', condition={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}, thenBranch={kind='block', blockBody={{kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='int'}}}}}}, elseBranch=nil}")
+    val e: any = luaExpr("test_if2")
+    val result = emitIfElse(st, e)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0;if (true) then tmp0=(42) end;")
+}
+
+test("emitIfElse - then branch ends with return skips assignment") {
+    val st = freshState()
+    st.inFunction = true
+    embedLua("test_if3 = {kind='if_else', condition={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}, thenBranch={kind='block', blockBody={{kind='return', returnValue={kind='atom', atomValue='7', exprType={tag='primitive',ids={{name='int'}}}}}}}, elseBranch={kind='block', blockBody={{kind='atom', atomValue='0', exprType={tag='primitive',ids={{name='int'}}}}}}}")
+    val e: any = luaExpr("test_if3")
+    val result = emitIfElse(st, e)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0;if (true) then return (7); else tmp0=(0) end;")
+}
+
+test("emitIfElse - else branch ends with break skips assignment") {
+    val st = freshState()
+    st.inFunction = true
+    embedLua("test_if4 = {kind='if_else', condition={kind='atom', atomValue='false', exprType={tag='primitive',ids={{name='bool'}}}}, thenBranch={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}, elseBranch={kind='block', blockBody={{kind='break'}}}}")
+    val e: any = luaExpr("test_if4")
+    val result = emitIfElse(st, e)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0;if (false) then tmp0=(1) else break; end;")
+}
+
+// ===== emitWhile tests =====
+
+test("emitWhile - simple while loop with atom condition") {
+    val st = freshState()
+    st.inFunction = true
+    embedLua("test_wh1 = {kind='while_loop', loopCondition={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}, loopBody={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
+    val e: any = luaExpr("test_wh1")
+    val result = emitWhile(st, e)
+    assertEqual(result, "nil")
+    val output = st.sb.toString()
+    embedLua("__wh_hasThunk = string.find(output, 'local function tmp0', 1, true) ~= nil")
+    assertTrue(luaExpr("__wh_hasThunk") as bool)
+    embedLua("__wh_hasWhile = string.find(output, 'while tmp0() do', 1, true) ~= nil")
+    assertTrue(luaExpr("__wh_hasWhile") as bool)
+    embedLua("__wh_hasCont = string.find(output, '::__continue_0::', 1, true) ~= nil")
+    assertTrue(luaExpr("__wh_hasCont") as bool)
+    embedLua("__wh_hasEnd = string.find(output, 'end;', 1, true) ~= nil")
+    assertTrue(luaExpr("__wh_hasEnd") as bool)
+}
+
+test("emitWhile - increments and restores loop id") {
+    val st = freshState()
+    st.inFunction = true
+    st.nextLoopId = 5
+    st.currentLoopId = 2
+    embedLua("test_wh2 = {kind='while_loop', loopCondition={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}, loopBody={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
+    val e: any = luaExpr("test_wh2")
+    emitWhile(st, e)
+    assertEqual(st.currentLoopId, 2)
+    assertEqual(st.nextLoopId, 6)
+}
+
+// ===== emitForLoop tests =====
+
+test("emitForLoop - array iteration with single var") {
+    val st = freshState()
+    st.inFunction = true
+    embedLua("test_fl1 = {kind='for_loop', forVars={'item'}, iterable={kind='atom', atomValue='myArr', exprType={tag='array', ids={{name='array'}}, elementType={tag='primitive',ids={{name='int'}}}}}, forState=nil, forInit=nil, forBody={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
+    val e: any = luaExpr("test_fl1")
+    val result = emitForLoop(st, e)
+    assertEqual(result, "nil")
+    val output = st.sb.toString()
+    embedLua("__fl1_a = string.find(output, 'ipairs', 1, true) ~= nil")
+    assertTrue(luaExpr("__fl1_a") as bool)
+    embedLua("__fl1_b = string.find(output, '_,item', 1, true) ~= nil")
+    assertTrue(luaExpr("__fl1_b") as bool)
+}
+
+test("emitForLoop - array iteration with two vars") {
+    val st = freshState()
+    st.inFunction = true
+    embedLua("test_fl2 = {kind='for_loop', forVars={'idx','val'}, iterable={kind='atom', atomValue='myArr', exprType={tag='array', ids={{name='array'}}, elementType={tag='primitive',ids={{name='int'}}}}}, forState=nil, forInit=nil, forBody={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
+    val e: any = luaExpr("test_fl2")
+    val result = emitForLoop(st, e)
+    assertEqual(result, "nil")
+    val output = st.sb.toString()
+    embedLua("__fl2_a = string.find(output, 'idx,val', 1, true) ~= nil")
+    assertTrue(luaExpr("__fl2_a") as bool)
+    embedLua("__fl2_b = string.find(output, 'ipairs', 1, true) ~= nil")
+    assertTrue(luaExpr("__fl2_b") as bool)
+}
+
+test("emitForLoop - record iteration") {
+    val st = freshState()
+    st.inFunction = true
+    embedLua("test_fl3 = {kind='for_loop', forVars={'k','v'}, iterable={kind='atom', atomValue='myRec', exprType={tag='record', ids={}, fields={}}}, forState=nil, forInit=nil, forBody={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
+    val e: any = luaExpr("test_fl3")
+    val result = emitForLoop(st, e)
+    assertEqual(result, "nil")
+    val output = st.sb.toString()
+    embedLua("__fl3_a = string.find(output, 'chi_record_pairs', 1, true) ~= nil")
+    assertTrue(luaExpr("__fl3_a") as bool)
+}
+
+test("emitForLoop - generator (function) iteration") {
+    val st = freshState()
+    st.inFunction = true
+    embedLua("test_fl4 = {kind='for_loop', forVars={'x'}, iterable={kind='atom', atomValue='myGen', exprType={tag='fn', types={}, typeParams={}, defaults=0}}, forState=nil, forInit=nil, forBody={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
+    val e: any = luaExpr("test_fl4")
+    val result = emitForLoop(st, e)
+    assertEqual(result, "nil")
+    val output = st.sb.toString()
+    embedLua("__fl4_a = string.find(output, 'for x in (myGen)', 1, true) ~= nil")
+    assertTrue(luaExpr("__fl4_a") as bool)
+}
+
+test("emitForLoop - generator with state and init") {
+    val st = freshState()
+    st.inFunction = true
+    embedLua("test_fl5 = {kind='for_loop', forVars={'x'}, iterable={kind='atom', atomValue='myGen', exprType={tag='fn', types={}, typeParams={}, defaults=0}}, forState={kind='atom', atomValue='st0', exprType={tag='primitive',ids={{name='int'}}}}, forInit={kind='atom', atomValue='0', exprType={tag='primitive',ids={{name='int'}}}}, forBody={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
+    val e: any = luaExpr("test_fl5")
+    val result = emitForLoop(st, e)
+    assertEqual(result, "nil")
+    val output = st.sb.toString()
+    embedLua("__fl5_a = string.find(output, '(myGen),(st0),(0)', 1, true) ~= nil")
+    assertTrue(luaExpr("__fl5_a") as bool)
+}
+
+test("emitForLoop - continue label uses current loop id") {
+    val st = freshState()
+    st.inFunction = true
+    st.nextLoopId = 7
+    embedLua("test_fl6 = {kind='for_loop', forVars={'x'}, iterable={kind='atom', atomValue='arr', exprType={tag='array', ids={{name='array'}}, elementType={tag='primitive',ids={{name='int'}}}}}, forState=nil, forInit=nil, forBody={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
+    val e: any = luaExpr("test_fl6")
+    emitForLoop(st, e)
+    val output = st.sb.toString()
+    embedLua("__fl6_a = string.find(output, '::__continue_7::', 1, true) ~= nil")
+    assertTrue(luaExpr("__fl6_a") as bool)
+    assertEqual(st.nextLoopId, 8)
+}
+
+summary()

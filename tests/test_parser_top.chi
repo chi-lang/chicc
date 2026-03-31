@@ -1,0 +1,241 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/lexer { tokenize }
+import user/token { TK_EOF }
+import user/parser { newParser, parseProgram, parsePackageDefinition, parseSingleImport, parseImports, parseImportEntries, parseImportEntry, peek }
+import user/parse_ast { PackageDefinition, ImportEntry, ParseImport, ParseProgram }
+import std/lang.array { size }
+
+// --- parsePackageDefinition ---
+
+test("parsePackageDefinition - simple package") {
+    val src = "package user/mymod\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val pkg = parsePackageDefinition(p)
+    assertEqual(pkg.moduleName, "user")
+    assertEqual(pkg.packageName, "mymod")
+}
+
+test("parsePackageDefinition - dotted package name") {
+    val src = "package std/lang.option\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val pkg = parsePackageDefinition(p)
+    assertEqual(pkg.moduleName, "std")
+    assertEqual(pkg.packageName, "lang.option")
+}
+
+test("parsePackageDefinition - deeply dotted package name") {
+    val src = "package std/lang.option.deep\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val pkg = parsePackageDefinition(p)
+    assertEqual(pkg.moduleName, "std")
+    assertEqual(pkg.packageName, "lang.option.deep")
+}
+
+// --- parseImportEntry ---
+
+test("parseImportEntry - simple name") {
+    val src = "map }"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val entry = parseImportEntry(p)
+    assertEqual(entry.name, "map")
+    assertEqual(entry.alias, "")
+}
+
+test("parseImportEntry - name with alias") {
+    val src = "foo as bar }"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val entry = parseImportEntry(p)
+    assertEqual(entry.name, "foo")
+    assertEqual(entry.alias, "bar")
+}
+
+// --- parseImportEntries ---
+
+test("parseImportEntries - single entry") {
+    val src = "{ map }"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val entries = parseImportEntries(p)
+    assertEqual(entries.size(), 1)
+    assertEqual(entries[1].name, "map")
+}
+
+test("parseImportEntries - multiple entries") {
+    val src = "{ map, fold, size }"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val entries = parseImportEntries(p)
+    assertEqual(entries.size(), 3)
+    assertEqual(entries[1].name, "map")
+    assertEqual(entries[2].name, "fold")
+    assertEqual(entries[3].name, "size")
+}
+
+test("parseImportEntries - entry with alias") {
+    val src = "{ foo as bar, baz }"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val entries = parseImportEntries(p)
+    assertEqual(entries.size(), 2)
+    assertEqual(entries[1].name, "foo")
+    assertEqual(entries[1].alias, "bar")
+    assertEqual(entries[2].name, "baz")
+    assertEqual(entries[2].alias, "")
+}
+
+test("parseImportEntries - empty braces") {
+    val src = "{ }"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val entries = parseImportEntries(p)
+    assertEqual(entries.size(), 0)
+}
+
+// --- parseSingleImport ---
+
+test("parseSingleImport - simple import") {
+    val src = "import std/io\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val imp = parseSingleImport(p)
+    assertEqual(imp.moduleName, "std")
+    assertEqual(imp.packageName, "io")
+    assertEqual(imp.packageAlias, "")
+    assertEqual(imp.entries.size(), 0)
+}
+
+test("parseSingleImport - import with entries") {
+    val src = "import std/lang.array { map, fold }\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val imp = parseSingleImport(p)
+    assertEqual(imp.moduleName, "std")
+    assertEqual(imp.packageName, "lang.array")
+    assertEqual(imp.entries.size(), 2)
+    assertEqual(imp.entries[1].name, "map")
+    assertEqual(imp.entries[2].name, "fold")
+}
+
+test("parseSingleImport - import with alias") {
+    val src = "import mod/pkg as p\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val imp = parseSingleImport(p)
+    assertEqual(imp.moduleName, "mod")
+    assertEqual(imp.packageName, "pkg")
+    assertEqual(imp.packageAlias, "p")
+    assertEqual(imp.entries.size(), 0)
+}
+
+test("parseSingleImport - import with entry alias") {
+    val src = "import mod/pkg { foo as bar }\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val imp = parseSingleImport(p)
+    assertEqual(imp.moduleName, "mod")
+    assertEqual(imp.packageName, "pkg")
+    assertEqual(imp.entries.size(), 1)
+    assertEqual(imp.entries[1].name, "foo")
+    assertEqual(imp.entries[1].alias, "bar")
+}
+
+// --- parseImports ---
+
+test("parseImports - no imports") {
+    val src = "val x = 1\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val imports = parseImports(p)
+    assertEqual(imports.size(), 0)
+}
+
+test("parseImports - multiple imports") {
+    val src = "import std/io { readLine }\nimport std/lang.array { map }\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val imports = parseImports(p)
+    assertEqual(imports.size(), 2)
+    assertEqual(imports[1].moduleName, "std")
+    assertEqual(imports[1].packageName, "io")
+    assertEqual(imports[2].packageName, "lang.array")
+}
+
+// --- parseProgram ---
+
+test("parseProgram - empty source") {
+    val src = ""
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val prog = parseProgram(p)
+    assertTrue(prog.packageDefinition is unit)
+    assertEqual(prog.imports.size(), 0)
+    assertEqual(prog.code.size(), 0)
+}
+
+test("parseProgram - package only") {
+    val src = "package user/mymod\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val prog = parseProgram(p)
+    assertTrue(prog.packageDefinition is PackageDefinition)
+    val pkg = prog.packageDefinition as PackageDefinition
+    assertEqual(pkg.moduleName, "user")
+    assertEqual(pkg.packageName, "mymod")
+    assertEqual(prog.imports.size(), 0)
+    assertEqual(prog.code.size(), 0)
+}
+
+test("parseProgram - package and imports") {
+    val src = "package user/mymod\nimport std/io { readLine }\nimport std/lang.array { map, fold }\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val prog = parseProgram(p)
+    assertTrue(prog.packageDefinition is PackageDefinition)
+    val pkg = prog.packageDefinition as PackageDefinition
+    assertEqual(pkg.moduleName, "user")
+    assertEqual(pkg.packageName, "mymod")
+    assertEqual(prog.imports.size(), 2)
+    assertEqual(prog.imports[1].packageName, "io")
+    assertEqual(prog.imports[1].entries.size(), 1)
+    assertEqual(prog.imports[2].packageName, "lang.array")
+    assertEqual(prog.imports[2].entries.size(), 2)
+}
+
+test("parseProgram - imports only (no package)") {
+    val src = "import std/io { readLine }\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val prog = parseProgram(p)
+    assertTrue(prog.packageDefinition is unit)
+    assertEqual(prog.imports.size(), 1)
+    assertEqual(prog.imports[1].packageName, "io")
+}
+
+test("parseProgram - package, imports, and code") {
+    val src = "package user/mymod\nimport std/io { readLine }\nval x = 1\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val prog = parseProgram(p)
+    assertTrue(prog.packageDefinition is PackageDefinition)
+    assertEqual(prog.imports.size(), 1)
+    // The code should have consumed tokens via the placeholder parseExpression
+    // Each call to forward-declared parseExpression just calls advance(p)
+    // "val x = 1" tokenizes to: TK_VAL, TK_ID, TK_EQ, TK_INT, TK_NEWLINE
+    // The placeholder will advance once per call, so we'll get multiple code entries
+    assertTrue(prog.code.size() > 0)
+}
+
+test("parseProgram - consumed all tokens") {
+    val src = "package user/mymod\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val prog = parseProgram(p)
+    assertEqual(peek(p), TK_EOF)
+}
+
+summary()

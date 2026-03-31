@@ -1,0 +1,612 @@
+// chicc/chicc/checks.chi
+package user/checks
+import std/lang { luaExpr, embedLua }
+import std/lang.array { size, push }
+
+// --- Module-level state for checkNames ---
+
+var cnDefinedNames: any = unit
+var cnMessages: any = unit
+var cnCtRef: any = unit
+
+fn cnInit(ct: any, messages: any) {
+    cnDefinedNames = luaExpr("{}")
+    cnMessages = messages
+    cnCtRef = ct
+}
+
+fn cnHasName(name: string): bool {
+    val names = cnDefinedNames
+    val result: bool = luaExpr("names[name] == true")
+    result
+}
+
+fn cnAddName(name: string) {
+    val names = cnDefinedNames
+    embedLua("names[name] = true")
+}
+
+fn cnWithNewScope(f: () -> unit) {
+    // Copy current scope into a new Lua table
+    val prevNames = cnDefinedNames
+    val newNames: any = luaExpr("{}")
+    embedLua("for k, v in pairs(prevNames) do newNames[k] = v end")
+    cnDefinedNames = newNames
+    f()
+    cnDefinedNames = prevNames
+}
+
+fn cnAddMessage(msg: any) {
+    val msgs = cnMessages
+    embedLua("table.insert(msgs, msg)")
+}
+
+fn cnSectionToCp(sec: any): any {
+    if sec == unit { unit }
+    else {
+        val line: int = luaExpr("sec.startLine")
+        val col: int = luaExpr("sec.startCol")
+        { line: line, column: col }
+    }
+}
+
+fn cnWalkParseAst(node: any) {
+    val tag = luaExpr("node.tag") as string
+
+    if tag == "ParseNameDeclaration" {
+        // Walk value first, then define the name
+        val value = luaExpr("node.value") as any
+        if value != unit {
+            cnWalkParseAst(value)
+        }
+        val symName = luaExpr("node.symbolName") as string
+        cnAddName(symName)
+    } else if tag == "ParseVariableRead" {
+        val varName = luaExpr("node.variableName") as string
+        if cnHasName(varName) == false {
+            val ct = cnCtRef
+            val aliased = luaExpr("ct ~= nil and ctGetAliasedPackage(ct, varName) or nil") as any
+            if aliased == unit {
+                val localSym = luaExpr("ct ~= nil and ctGetLocalSymbol(ct, varName) or nil") as any
+                if localSym == unit {
+                    val sec = luaExpr("node.section") as any
+                    val cp = cnSectionToCp(sec)
+                    cnAddMessage(unrecognizedName(varName, cp))
+                }
+            }
+        }
+    } else if tag == "ParseLambda" {
+        cnWithNewScope({
+            val args = luaExpr("node.formalArguments") as any
+            val argCount = luaExpr("#args") as int
+            var i = 1
+            while i <= argCount {
+                val arg = luaExpr("args[i]") as any
+                val argName = luaExpr("arg.name") as string
+                cnAddName(argName)
+                i = i + 1
+            }
+            val body = luaExpr("node.body") as any
+            val bodyCount = luaExpr("#body") as int
+            var j = 1
+            while j <= bodyCount {
+                val item = luaExpr("body[j]") as any
+                cnWalkParseAst(item)
+                j = j + 1
+            }
+        })
+    } else if tag == "ParseFor" {
+        cnWithNewScope({
+            val vars = luaExpr("node.forVars") as any
+            val varCount = luaExpr("#vars") as int
+            var i = 1
+            while i <= varCount {
+                val varName = luaExpr("vars[i]") as string
+                cnAddName(varName)
+                i = i + 1
+            }
+            val iter = luaExpr("node.iterable") as any
+            if iter != unit {
+                cnWalkParseAst(iter)
+            }
+            val forBody = luaExpr("node.forBody") as any
+            if forBody != unit {
+                cnWalkParseAst(forBody)
+            }
+        })
+    } else if tag == "ParseFuncWithName" {
+        // Add function name to current scope first (allows recursion)
+        val fnName = luaExpr("node.name") as string
+        cnAddName(fnName)
+        cnWithNewScope({
+            val args = luaExpr("node.formalArguments") as any
+            val argCount = luaExpr("#args") as int
+            var i = 1
+            while i <= argCount {
+                val arg = luaExpr("args[i]") as any
+                val argName = luaExpr("arg.name") as string
+                cnAddName(argName)
+                i = i + 1
+            }
+            val funcBody = luaExpr("node.funcBody") as any
+            if funcBody != unit {
+                cnWalkParseAst(funcBody)
+            }
+        })
+    } else if tag == "ParseEffectDefinition" {
+        val effName = luaExpr("node.name") as string
+        cnAddName(effName)
+    } else if tag == "ParseHandle" {
+        val hBody = luaExpr("node.handleBody") as any
+        if hBody != unit {
+            cnWalkParseAst(hBody)
+        }
+        val cases = luaExpr("node.effectCases") as any
+        val caseCount = luaExpr("#cases") as int
+        var ci = 1
+        while ci <= caseCount {
+            val case_ = luaExpr("cases[ci]") as any
+            cnWithNewScope({
+                cnAddName("resume")
+                val argNames = luaExpr("case_.argumentNames") as any
+                val anCount = luaExpr("#argNames") as int
+                var ai = 1
+                while ai <= anCount {
+                    val aName = luaExpr("argNames[ai]") as string
+                    cnAddName(aName)
+                    ai = ai + 1
+                }
+                val caseBody = luaExpr("case_.body") as any
+                if caseBody != unit {
+                    cnWalkParseAst(caseBody)
+                }
+            })
+            ci = ci + 1
+        }
+    } else if tag == "ParseFnCall" {
+        val callee = luaExpr("node.callee") as any
+        if callee != unit {
+            cnWalkParseAst(callee)
+        }
+        val callArgs = luaExpr("node.arguments") as any
+        val argCount = luaExpr("#callArgs") as int
+        var i = 1
+        while i <= argCount {
+            val arg = luaExpr("callArgs[i]") as any
+            cnWalkParseAst(arg)
+            i = i + 1
+        }
+    } else if tag == "ParseBlock" {
+        val body = luaExpr("node.body") as any
+        val bodyCount = luaExpr("#body") as int
+        var i = 1
+        while i <= bodyCount {
+            val item = luaExpr("body[i]") as any
+            cnWalkParseAst(item)
+            i = i + 1
+        }
+    } else if tag == "ParseGroup" {
+        val value = luaExpr("node.value") as any
+        if value != unit { cnWalkParseAst(value) }
+    } else if tag == "ParseIfElse" {
+        val cond = luaExpr("node.condition") as any
+        if cond != unit { cnWalkParseAst(cond) }
+        val thenB = luaExpr("node.thenBody") as any
+        if thenB != unit { cnWalkParseAst(thenB) }
+        val elseB = luaExpr("node.elseBody") as any
+        if elseB != unit { cnWalkParseAst(elseB) }
+    } else if tag == "ParseWhile" {
+        val cond = luaExpr("node.condition") as any
+        if cond != unit { cnWalkParseAst(cond) }
+        val loopBody = luaExpr("node.loopBody") as any
+        if loopBody != unit { cnWalkParseAst(loopBody) }
+    } else if tag == "ParseWhen" {
+        val cases = luaExpr("node.whenCases") as any
+        val caseCount = luaExpr("#cases") as int
+        var i = 1
+        while i <= caseCount {
+            val c = luaExpr("cases[i]") as any
+            val cc = luaExpr("c.condition") as any
+            if cc != unit { cnWalkParseAst(cc) }
+            val cb = luaExpr("c.body") as any
+            if cb != unit { cnWalkParseAst(cb) }
+            i = i + 1
+        }
+        val elseCase = luaExpr("node.elseCase") as any
+        if elseCase != unit {
+            val ecBody = luaExpr("elseCase.body") as any
+            if ecBody != unit { cnWalkParseAst(ecBody) }
+        }
+    } else if tag == "ParseReturn" {
+        val retVal = luaExpr("node.returnValue") as any
+        if retVal != unit { cnWalkParseAst(retVal) }
+    } else if tag == "ParseNot" {
+        val val_ = luaExpr("node.value") as any
+        if val_ != unit { cnWalkParseAst(val_) }
+    } else if tag == "ParseBinaryOp" {
+        val left = luaExpr("node.left") as any
+        if left != unit { cnWalkParseAst(left) }
+        val right = luaExpr("node.right") as any
+        if right != unit { cnWalkParseAst(right) }
+    } else if tag == "ParseCast" {
+        val val_ = luaExpr("node.value") as any
+        if val_ != unit { cnWalkParseAst(val_) }
+    } else if tag == "ParseIs" {
+        val val_ = luaExpr("node.value") as any
+        if val_ != unit { cnWalkParseAst(val_) }
+    } else if tag == "ParseFieldAccess" {
+        val recv = luaExpr("node.receiver") as any
+        if recv != unit { cnWalkParseAst(recv) }
+    } else if tag == "ParseFieldAssignment" {
+        val recv = luaExpr("node.receiver") as any
+        if recv != unit { cnWalkParseAst(recv) }
+        val val_ = luaExpr("node.value") as any
+        if val_ != unit { cnWalkParseAst(val_) }
+    } else if tag == "ParseAssignment" {
+        val val_ = luaExpr("node.value") as any
+        if val_ != unit { cnWalkParseAst(val_) }
+    } else if tag == "ParseIndexOperator" {
+        val var_ = luaExpr("node.variable") as any
+        if var_ != unit { cnWalkParseAst(var_) }
+        val idx = luaExpr("node.indexExpr") as any
+        if idx != unit { cnWalkParseAst(idx) }
+    } else if tag == "ParseIndexedAssignment" {
+        val var_ = luaExpr("node.variable") as any
+        if var_ != unit { cnWalkParseAst(var_) }
+        val idx = luaExpr("node.indexExpr") as any
+        if idx != unit { cnWalkParseAst(idx) }
+        val idxVal = luaExpr("node.indexValue") as any
+        if idxVal != unit { cnWalkParseAst(idxVal) }
+    } else if tag == "ParseWeave" {
+        val val_ = luaExpr("node.value") as any
+        if val_ != unit { cnWalkParseAst(val_) }
+        val tmpl = luaExpr("node.opTemplate") as any
+        if tmpl != unit { cnWalkParseAst(tmpl) }
+    } else if tag == "ParseInterpolatedString" {
+        val parts = luaExpr("node.parts") as any
+        val partCount = luaExpr("#parts") as int
+        var i = 1
+        while i <= partCount {
+            val part = luaExpr("parts[i]") as any
+            cnWalkParseAst(part)
+            i = i + 1
+        }
+    } else if tag == "ParseInterpolation" {
+        val interpVal = luaExpr("node.interpValue") as any
+        if interpVal != unit { cnWalkParseAst(interpVal) }
+    } else if tag == "ParseCreateArray" {
+        val values = luaExpr("node.arrayValues") as any
+        val valCount = luaExpr("#values") as int
+        var i = 1
+        while i <= valCount {
+            val v = luaExpr("values[i]") as any
+            cnWalkParseAst(v)
+            i = i + 1
+        }
+    } else if tag == "ParseCreateRecord" {
+        val fields = luaExpr("node.recordFields") as any
+        val fieldCount = luaExpr("#fields") as int
+        var i = 1
+        while i <= fieldCount {
+            val f = luaExpr("fields[i]") as any
+            val fVal = luaExpr("f.value") as any
+            if fVal != unit { cnWalkParseAst(fVal) }
+            i = i + 1
+        }
+    } else {
+        // Leaf nodes (UnitValue, LongValue, FloatValue, BoolValue, StringValue,
+        // StringText, ParseBreak, ParseContinue, ParseWeavePlaceholder) — no children
+    }
+}
+
+// --- Public API: checkNames ---
+// nodes: array of ParseAst (the code field from ParseProgram)
+// ct: CompileTables
+// messages: array[any] (output parameter)
+
+pub fn checkNames(nodes: any, ct: any, messages: any): unit {
+    cnInit(ct, messages)
+    val count = luaExpr("#nodes") as int
+    var i = 1
+    while i <= count {
+        val node = luaExpr("nodes[i]") as any
+        cnWalkParseAst(node)
+        i = i + 1
+    }
+}
+
+// =================================================================
+// Expression AST walkers for post-typing checks
+// =================================================================
+
+// Generic recursive walk for Expression AST.
+// walkExpr calls visitFn for each node. visitFn returns true if it handled
+// children itself, false to let the walker descend.
+
+fn walkExpr(expr: any, visitFn: (any) -> bool) {
+    if expr == unit { return unit }
+    val handled = visitFn(expr)
+    if handled == false {
+        val children = exprChildren(expr)
+        val count = luaExpr("#children") as int
+        var i = 1
+        while i <= count {
+            val child = luaExpr("children[i]") as any
+            walkExpr(child, visitFn)
+            i = i + 1
+        }
+    }
+}
+
+fn walkExprList(exprs: any, visitFn: (any) -> bool) {
+    val count = luaExpr("#exprs") as int
+    var i = 1
+    while i <= count {
+        val expr = luaExpr("exprs[i]") as any
+        walkExpr(expr, visitFn)
+        i = i + 1
+    }
+}
+
+fn exprSectionToCp(expr: any): any {
+    val sec = luaExpr("expr.section") as any
+    if sec == unit { unit }
+    else {
+        val line = luaExpr("sec.startLine") as int
+        val col = luaExpr("sec.startCol") as int
+        { line: line, column: col }
+    }
+}
+
+// --- visibilityCheck ---
+
+pub fn visibilityCheck(exprs: any, currentModule: string, ns: any, messages: any): unit {
+    walkExprList(exprs, { expr: any ->
+        val kind = luaExpr("expr.kind") as string
+        if kind == "variable_access" {
+            val target = luaExpr("expr.target") as any
+            if target != unit {
+                val tTag = luaExpr("target.tag") as string
+                if tTag == "package" {
+                    val tMod = luaExpr("target.moduleName") as string
+                    if tMod != currentModule {
+                        val tPkg = luaExpr("target.packageName") as string
+                        val tName = luaExpr("target.name") as string
+                        val sym = luaExpr("ns ~= nil and ns.getSymbol and ns.getSymbol(tMod, tPkg, tName) or nil") as any
+                        if sym != unit {
+                            val isPublic = luaExpr("sym.isPublic") as bool
+                            if isPublic == false {
+                                val targetStr: string = "$tMod/$tPkg.$tName"
+                                val cp = exprSectionToCp(expr)
+                                val msg = cannotAccessInternalName(targetStr, cp)
+                                embedLua("table.insert(messages, msg)")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        false
+    })
+}
+
+// --- fnCallCheck ---
+
+pub fn fnCallCheck(exprs: any, messages: any): unit {
+    walkExprList(exprs, { expr: any ->
+        val kind = luaExpr("expr.kind") as string
+        if kind == "fn_call" {
+            val callee = luaExpr("expr.callee") as any
+            if callee != unit {
+                val calleeType = luaExpr("callee.exprType") as any
+                if calleeType != unit {
+                    val ctTag = luaExpr("calleeType.tag") as string
+                    if ctTag != "fn" {
+                        val cp = exprSectionToCp(callee)
+                        val msg = notAFunction(cp)
+                        embedLua("table.insert(messages, msg)")
+                    }
+                }
+            }
+        }
+        false
+    })
+}
+
+// --- immutabilityCheck ---
+
+pub fn immutabilityCheck(exprs: any, currentModule: string, currentPackage: string, ct: any, ns: any, messages: any): unit {
+    walkExprList(exprs, { expr: any ->
+        val kind = luaExpr("expr.kind") as string
+        if kind == "assignment" {
+            val target = luaExpr("expr.target") as any
+            if target != unit {
+                val tTag = luaExpr("target.tag") as string
+                var isMutable: any = unit
+                if tTag == "local" {
+                    val tName = luaExpr("target.name") as string
+                    val sym = luaExpr("ct ~= nil and ctGetLocalSymbol(ct, tName) or nil") as any
+                    if sym != unit {
+                         isMutable = luaExpr("sym.isMutable") as any
+                    }
+                } else if tTag == "package" {
+                    val tMod = luaExpr("target.moduleName") as string
+                    val tPkg = luaExpr("target.packageName") as string
+                    val tName = luaExpr("target.name") as string
+                    if tMod == currentModule && tPkg == currentPackage {
+                        val sym = luaExpr("ct ~= nil and ctGetLocalSymbol(ct, tName) or nil") as any
+                        if sym != unit {
+                            isMutable = luaExpr("sym.isMutable") as any
+                        }
+                    } else {
+                        val sym = luaExpr("ns ~= nil and ns.getSymbol and ns.getSymbol(tMod, tPkg, tName) or nil") as any
+                        if sym != unit {
+                            isMutable = luaExpr("sym.isMutable") as any
+                        }
+                    }
+                }
+                if isMutable != unit {
+                    val mutBool = luaExpr("isMutable == true") as bool
+                    if mutBool == false {
+                        val cp = exprSectionToCp(expr)
+                        val msg = cannotChangeImmutableVariable(cp)
+                        embedLua("table.insert(messages, msg)")
+                    }
+                }
+            }
+        }
+        false
+    })
+}
+
+// --- returnTypeCheck ---
+// Module-level state for expected return type tracking
+
+var rtExpectedReturnType: any = unit
+
+fn rtSectionToCp(sec: any): any {
+    if sec == unit { unit }
+    else {
+        val line: int = luaExpr("sec.startLine")
+        val col: int = luaExpr("sec.startCol")
+        { line: line, column: col }
+    }
+}
+
+// --- Forward declaration for rtWalkExpr (needed before returnTypeCheck references it) ---
+var rtWalkExpr: (any, any) -> unit = { expr: any, messages: any -> }
+
+pub fn returnTypeCheck(exprs: any, messages: any): unit {
+    rtExpectedReturnType = unit
+    val count = luaExpr("#exprs") as int
+    var i = 1
+    while i <= count {
+        val expr = luaExpr("exprs[i]") as any
+        rtWalkExpr(expr, messages)
+        i = i + 1
+    }
+}
+
+fn rtWalkExprImpl(expr: any, messages: any) {
+    if expr == unit { return unit }
+    val kind = luaExpr("expr.kind") as string
+
+    if kind == "name_declaration" {
+        // Check if the value has a function type — sets expected return type
+        val value = luaExpr("expr.value") as any
+        val exprType = luaExpr("expr.value and expr.value.exprType or expr.exprType") as any
+        val prevExpectedReturnType = rtExpectedReturnType
+        if exprType != unit {
+            val etTag = luaExpr("exprType.tag") as string
+            if etTag == "fn" {
+                val types = luaExpr("exprType.types") as any
+                val typesCount = luaExpr("#types") as int
+                if typesCount > 0 {
+                    val lastType = luaExpr("types[#types]") as any
+                    rtExpectedReturnType = lastType
+                }
+            }
+        }
+        // Walk children of the value
+        if value != unit {
+            val valueChildren = exprChildren(value)
+            val childCount = luaExpr("#valueChildren") as int
+            var i = 1
+            while i <= childCount {
+                val child = luaExpr("valueChildren[i]") as any
+                rtWalkExpr(child, messages)
+                i = i + 1
+            }
+        }
+        rtExpectedReturnType = prevExpectedReturnType
+    } else if kind == "fn" {
+        val fnType = luaExpr("expr.exprType") as any
+        val prevReturnType = rtExpectedReturnType
+        if fnType != unit {
+            val ftTag = luaExpr("fnType.tag") as string
+            if ftTag == "fn" {
+                val types = luaExpr("fnType.types") as any
+                val typesCount = luaExpr("#types") as int
+                if typesCount > 0 {
+                    val lastType = luaExpr("types[#types]") as any
+                    rtExpectedReturnType = lastType
+                }
+            }
+        }
+        // Walk children
+        val children = exprChildren(expr)
+        val childCount = luaExpr("#children") as int
+        var i = 1
+        while i <= childCount {
+            val child = luaExpr("children[i]") as any
+            rtWalkExpr(child, messages)
+            i = i + 1
+        }
+        rtExpectedReturnType = prevReturnType
+    } else if kind == "return" {
+        val expRet = rtExpectedReturnType
+        if expRet == unit {
+            val sec = luaExpr("expr.section") as any
+            val cp = rtSectionToCp(sec)
+            val msg = genericError("Return used outside of function body.", cp)
+            embedLua("table.insert(messages, msg)")
+        } else {
+            val retVal = luaExpr("expr.returnValue") as any
+            var actualType: any = unit
+            if retVal != unit {
+                actualType = luaExpr("retVal.exprType") as any
+            }
+            if actualType == unit {
+                actualType = tUnit
+            }
+            if typeEquals(actualType as Type, expRet as Type) == false {
+                // Try unification to see if types are compatible
+                val constraint = newConstraint(expRet, actualType, luaExpr("expr.section") as any, luaExpr("{}") as array[any])
+                val testConstraints = luaExpr("{}") as any
+                embedLua("table.insert(testConstraints, constraint)")
+                embedLua("local __rt_ok = pcall(unify, testConstraints)")
+                val unifyOk = luaExpr("__rt_ok") as bool
+                if unifyOk == false {
+                    val expTag = luaExpr("expRet.tag") as string
+                    val actTag = luaExpr("actualType.tag") as string
+                    var expDescr: string = expTag
+                    var actDescr: string = actTag
+                    if expTag == "primitive" {
+                        val expIds = luaExpr("expRet.ids") as any
+                        val expIdCount = luaExpr("#expIds") as int
+                        if expIdCount > 0 {
+                            expDescr = luaExpr("expIds[1].name") as string
+                        }
+                    }
+                    if actTag == "primitive" {
+                        val actIds = luaExpr("actualType.ids") as any
+                        val actIdCount = luaExpr("#actIds") as int
+                        if actIdCount > 0 {
+                            actDescr = luaExpr("actIds[1].name") as string
+                        }
+                    }
+                    val sec = luaExpr("expr.section") as any
+                    val cp = rtSectionToCp(sec)
+                    val msg = typeMismatch(expDescr, actDescr, cp)
+                    embedLua("table.insert(messages, msg)")
+                }
+            }
+        }
+        // Also walk children of return (the return value)
+        val retVal2 = luaExpr("expr.returnValue") as any
+        if retVal2 != unit {
+            rtWalkExpr(retVal2, messages)
+        }
+    } else {
+        // Default: walk all children
+        val children = exprChildren(expr)
+        val childCount = luaExpr("#children") as int
+        var i = 1
+        while i <= childCount {
+            val child = luaExpr("children[i]") as any
+            rtWalkExpr(child, messages)
+            i = i + 1
+        }
+    }
+}
+rtWalkExpr = rtWalkExprImpl

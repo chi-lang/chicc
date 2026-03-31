@@ -1,0 +1,55 @@
+import user/test_util { test, assertEqual, assertTrue, summary }
+import user/source { newSection }
+import user/types { tInt, tString, newTypeId }
+import user/ast { newPackage, newTypeAlias, newImportEntry, newImport, newProgram, atomExpr }
+import std/lang.array { size }
+
+test("newPackage") {
+    val pkg = newPackage("std", "lang")
+    assertEqual(pkg.moduleName, "std")
+    assertEqual(pkg.packageName, "lang")
+}
+
+test("newImportEntry with alias") {
+    val sec = newSection(1, 1, 1, 10)
+    val entry = newImportEntry("map", "m", sec)
+    assertEqual(entry.name, "map")
+    assertEqual(entry.alias, "m")
+    assertTrue(entry.section != unit)
+}
+
+test("newImportEntry without alias") {
+    val entry = newImportEntry("fold", unit, unit)
+    assertEqual(entry.name, "fold")
+    assertEqual(entry.alias, unit)
+    assertEqual(entry.section, unit)
+}
+
+test("newImport") {
+    val e1 = newImportEntry("map", unit, unit)
+    val e2 = newImportEntry("fold", "f", unit)
+    val imp = newImport("std", "lang.array", "arr", [e1, e2], unit)
+    assertEqual(imp.moduleName, "std")
+    assertEqual(imp.packageName, "lang.array")
+    assertEqual(imp.packageAlias, "arr")
+    assertEqual(imp.entries.size(), 2)
+}
+
+test("newProgram") {
+    val pkg = newPackage("user", "main")
+    val entry = newImportEntry("println", unit, unit)
+    val imp = newImport("std", "io", unit, [entry], unit)
+    val tid = newTypeId("user", "main", "MyType")
+    val alias = newTypeAlias(tid, tInt)
+    val expr = atomExpr("42", tInt, unit)
+    val sec = newSection(1, 1, 10, 1)
+    val prog = newProgram(pkg, [imp], [alias], [expr], sec)
+    assertEqual(prog.packageDef.moduleName, "user")
+    assertEqual(prog.packageDef.packageName, "main")
+    assertEqual(prog.imports.size(), 1)
+    assertEqual(prog.typeAliases.size(), 1)
+    assertEqual(prog.expressions.size(), 1)
+    assertTrue(prog.section != unit)
+}
+
+summary()

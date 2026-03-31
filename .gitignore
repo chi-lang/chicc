@@ -1,0 +1,10 @@
+# Compiled Lua modules (generated from .chi sources)
+chicc/*.lua
+
+# Build artifacts
+chicc_gen1.lua
+compile.lua
+
+# Generated scripts
+run_chicc.sh
+test_golden.sh

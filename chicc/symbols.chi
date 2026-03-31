@@ -1,0 +1,403 @@
+package user/symbols
+import std/lang { luaExpr, embedLua }
+import std/lang.array { size, push }
+import user/types { Type, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType }
+import user/parse_ast { trTag, trName, trTypeParameters, trArgumentTypeRefs, trReturnType, trFields, trLhs, trRhs, trBaseType }
+
+// --- Symbol: package-level symbol ---
+
+type Symbol = {
+    moduleName: string,
+    packageName: string,
+    name: string,
+    symbolType: any,
+    isPublic: bool,
+    isMutable: bool
+}
+
+pub fn newSymbol(mod: string, pkg: string, name: string, symType: any, isPub: bool, isMut: bool): Symbol {
+    { moduleName: mod, packageName: pkg, name: name, symbolType: symType, isPublic: isPub, isMutable: isMut }
+}
+
+// --- FnSymbol: function-scoped symbol ---
+
+type FnSymbol = { name: string, symbolType: any, isMutable: bool }
+
+pub fn newFnSymbol(name: string, symType: any, isMut: bool): FnSymbol {
+    { name: name, symbolType: symType, isMutable: isMut }
+}
+
+// --- SymbolTable: package-level symbol storage (lua table map) ---
+
+type SymbolTable = { symbols: any }
+
+pub fn newSymbolTable(): SymbolTable {
+    val symbols: any = luaExpr("{}")
+    { symbols: symbols }
+}
+
+pub fn stAdd(st: SymbolTable, sym: Symbol): unit {
+    val symbols = st.symbols
+    val name = sym.name
+    embedLua("symbols[name] = sym")
+}
+
+pub fn stAddAlias(st: SymbolTable, alias: string, sym: Symbol): unit {
+    val symbols = st.symbols
+    embedLua("symbols[alias] = sym")
+}
+
+pub fn stGet(st: SymbolTable, name: string): Symbol | unit {
+    val symbols = st.symbols
+    val result: Symbol | unit = luaExpr("symbols[name]")
+    result
+}
+
+pub fn stRemove(st: SymbolTable, name: string): unit {
+    val symbols = st.symbols
+    embedLua("symbols[name] = nil")
+}
+
+pub fn stHas(st: SymbolTable, name: string): bool {
+    val symbols = st.symbols
+    val exists: bool = luaExpr("symbols[name] ~= nil")
+    exists
+}
+
+// --- FnSymbolTable: function-scoped symbol stack with parent chain ---
+
+type FnSymbolTable = { parent: any, locals: any }
+
+pub fn newFnSymbolTable(parent: any): FnSymbolTable {
+    val locals: any = luaExpr("{}")
+    { parent: parent, locals: locals }
+}
+
+pub fn fstAddLocal(fst: FnSymbolTable, name: string, symType: any, isMut: bool): unit {
+    val locals = fst.locals
+    val sym = newFnSymbol(name, symType, isMut)
+    embedLua("locals[name] = sym")
+}
+
+pub fn fstAddArgument(fst: FnSymbolTable, name: string, symType: any): unit {
+    fstAddLocal(fst, name, symType, false)
+}
+
+pub fn fstGet(fst: FnSymbolTable, name: string): FnSymbol | unit {
+    val locals = fst.locals
+    val found = luaExpr("locals[name]") as FnSymbol | unit
+    if found != unit {
+        found
+    } else {
+        val parent = luaExpr("fst.parent") as any
+        if parent == unit {
+            unit
+        } else {
+            fstGet(parent as FnSymbolTable, name)
+        }
+    }
+}
+
+pub fn fstRemove(fst: FnSymbolTable, name: string): unit {
+    val locals = fst.locals
+    embedLua("locals[name] = nil")
+}
+
+// --- TypeTable: type alias storage ---
+
+type TypeTable = { aliases: any, parentPkg: any }
+
+pub fn newTypeTable(parentPkg: any): TypeTable {
+    val aliases: any = luaExpr("{}")
+    { aliases: aliases, parentPkg: parentPkg }
+}
+
+pub fn ttAdd(tt: TypeTable, alias: any): unit {
+    val aliases = tt.aliases
+    val name: string = luaExpr("alias.typeId.name")
+    embedLua("aliases[name] = alias")
+}
+
+pub fn ttAddByName(tt: TypeTable, name: string, alias: any): unit {
+    val aliases = tt.aliases
+    embedLua("aliases[name] = alias")
+}
+
+pub fn ttGet(tt: TypeTable, name: string): any {
+    val aliases = tt.aliases
+    val found: any = luaExpr("aliases[name]")
+    if found != unit {
+        found
+    } else {
+        val parentPkg = tt.parentPkg
+        if parentPkg == unit {
+            unit
+        } else {
+            val parentResult: any = luaExpr("parentPkg.getTypeAlias and parentPkg.getTypeAlias(name) or nil")
+            parentResult
+        }
+    }
+}
+
+// --- CompileTables: top-level compilation context ---
+
+type CompileTables = {
+    currentPackage: any,
+    ns: any,
+    packageAliasTable: any,
+    importedSymbols: any,
+    localSymbolTable: SymbolTable,
+    localTypeTable: TypeTable
+}
+
+pub fn newCompileTables(pkg: any, ns: any, imports: any): CompileTables {
+    val localST = newSymbolTable()
+    val localTT = newTypeTable(unit)
+    val packageAliasTable = luaExpr("{}") as any
+    val importedSymbols = luaExpr("{}") as any
+
+    // Process imports
+    val importCount = luaExpr("#imports") as int
+    var i = 1
+    while i <= importCount {
+        val imp = luaExpr("imports[i]") as any
+        val impModuleName = luaExpr("imp.moduleName") as string
+        val impPackageName = luaExpr("imp.packageName") as string
+        val pkgAlias = luaExpr("imp.packageAlias") as any
+
+        if pkgAlias != unit && luaExpr("pkgAlias ~= ''") as bool {
+            embedLua("packageAliasTable[pkgAlias] = { moduleName = impModuleName, packageName = impPackageName }")
+        }
+
+        val entries = luaExpr("imp.entries") as any
+        val entryCount = luaExpr("#entries") as int
+        var j = 1
+        while j <= entryCount {
+            val entry = luaExpr("entries[j]") as any
+            val entryName = luaExpr("entry.name") as string
+            val entryAlias = luaExpr("entry.alias") as any
+            val importedName: string = if entryAlias != unit && luaExpr("entryAlias ~= ''") as bool {
+                luaExpr("entryAlias") as string
+            } else {
+                entryName
+            }
+            embedLua("importedSymbols[importedName] = { moduleName = impModuleName, packageName = impPackageName, originalName = entryName }")
+            // Also register imported type aliases in the local type table
+            val typeAlias = luaExpr("ns and ns.getTypeAlias and ns.getTypeAlias(impModuleName, impPackageName, entryName) or nil") as any
+            if typeAlias != unit {
+                ttAdd(localTT, typeAlias)
+                // If imported with an alias, also register under the alias name
+                if importedName != entryName {
+                    val aliasType = luaExpr("typeAlias.aliasType") as any
+                    ttAddByName(localTT, importedName, typeAlias)
+                }
+            }
+            j = j + 1
+        }
+        i = i + 1
+    }
+
+    { currentPackage: pkg, ns: ns, packageAliasTable: packageAliasTable,
+      importedSymbols: importedSymbols, localSymbolTable: localST,
+      localTypeTable: localTT }
+}
+
+pub fn ctGetLocalSymbol(ct: CompileTables, name: string): Symbol | unit {
+    // 1. Check local symbol table
+    val localResult = stGet(ct.localSymbolTable, name)
+    if localResult != unit {
+        localResult
+    } else {
+        // 2. Check imported symbols
+        val importedSymbols = ct.importedSymbols
+        val imported = luaExpr("importedSymbols[name]") as any
+        if imported != unit {
+            val impMod = luaExpr("imported.moduleName") as string
+            val impPkg = luaExpr("imported.packageName") as string
+            val origName = luaExpr("imported.originalName") as string
+            val ns = ct.ns
+            // Look up via compilation environment
+            val resolved = luaExpr("ns and ns.getSymbol and ns.getSymbol(impMod, impPkg, origName) or nil") as Symbol | unit
+            resolved
+        } else {
+            // 3. Check current package via ns
+            val ns = ct.ns
+            val pkg = ct.currentPackage
+            val pkgMod = luaExpr("pkg.moduleName") as string
+            val pkgPkg = luaExpr("pkg.packageName") as string
+            val fromPkg = luaExpr("ns and ns.getSymbol and ns.getSymbol(pkgMod, pkgPkg, name) or nil") as Symbol | unit
+            fromPkg
+        }
+    }
+}
+
+pub fn ctDefineSymbol(ct: CompileTables, sym: Symbol): unit {
+    stAdd(ct.localSymbolTable, sym)
+}
+
+pub fn ctRemoveSymbol(ct: CompileTables, name: string): unit {
+    stRemove(ct.localSymbolTable, name)
+}
+
+pub fn ctGetAliasedPackage(ct: CompileTables, name: string): any {
+    val pat = ct.packageAliasTable
+    val result: any = luaExpr("pat[name]")
+    result
+}
+
+pub fn ctDefineTypeAlias(ct: CompileTables, alias: any): unit {
+    ttAdd(ct.localTypeTable, alias)
+}
+
+// --- Type resolution ---
+
+pub fn arrayContains(arr: array[string], name: string): bool {
+    var i = 1
+    val len = arr.size()
+    while i <= len {
+        if arr[i] == name {
+            return true
+        }
+        i = i + 1
+    }
+    false
+}
+
+pub fn resolveType(typeTable: TypeTable, typeSchemeVars: array[string], ref: any, level: int): any {
+    val tag = trTag(ref)
+
+    if tag == "TypeParameterRef" {
+        variableType(trName(ref), level)
+    } else if tag == "TypeNameRef" {
+        val name = trName(ref)
+        if arrayContains(typeSchemeVars, name) {
+            variableType(name, level)
+        } else if name == "any" {
+            tAny
+        } else if name == "string" {
+            tString
+        } else if name == "bool" {
+            tBool
+        } else if name == "int" {
+            tInt
+        } else if name == "float" {
+            tFloat
+        } else if name == "unit" {
+            tUnit
+        } else {
+            val alias = ttGet(typeTable, name)
+            if alias != unit {
+                val aliasType = luaExpr("alias.aliasType") as any
+                aliasType
+            } else {
+                println("ERROR: Unknown type '$name'")
+                tAny
+            }
+        }
+    } else if tag == "TypeConstructorRef" {
+        val baseRef = trBaseType(ref)
+        val baseTag = trTag(baseRef)
+        val typeParams = trTypeParameters(ref)
+        // Special case: array[T]
+        if baseTag == "TypeNameRef" && trName(baseRef) == "array" {
+            val elemRef = typeParams[1]
+            val elemType = resolveType(typeTable, typeSchemeVars, elemRef, level)
+            arrayType(elemType, [])
+        } else {
+            // General type constructor: resolve base type alias and substitute type params
+            val baseName = if baseTag == "TypeNameRef" { trName(baseRef) } else { "" }
+            val alias: any = if baseName != "" { ttGet(typeTable, baseName) } else { unit }
+            if alias != unit {
+                val aliasType: any = luaExpr("alias.aliasType")
+                val paramCount = luaExpr("alias.aliasType and alias.aliasType.typeParams and #alias.aliasType.typeParams or 0") as int
+                val actualCount = luaExpr("#typeParams") as int
+                val replacements: any = luaExpr("{}")
+                var pi = 1
+                while pi <= paramCount && pi <= actualCount {
+                    val paramName = luaExpr("alias.aliasType.typeParams[pi]") as string
+                    val actualRef: any = luaExpr("typeParams[pi]")
+                    val actualType = resolveType(typeTable, typeSchemeVars, actualRef, level)
+                    val varType = variableType(paramName, 1)
+                    embedLua("table.insert(replacements, { variable = varType, replacement = actualType })")
+                    pi = pi + 1
+                }
+                if paramCount > 0 {
+                    luaExpr("mapType(aliasType, replacements)")
+                } else {
+                    aliasType
+                }
+            } else {
+                // Fallback: resolve base type without substitution
+                val baseType = resolveType(typeTable, typeSchemeVars, baseRef, level)
+                baseType
+            }
+        }
+    } else if tag == "FunctionTypeRef" {
+        val retRef = trReturnType(ref)
+        val argRefs = trArgumentTypeRefs(ref)
+        val resolvedReturnType = resolveType(typeTable, typeSchemeVars, retRef, level)
+        var resolvedTypes: array[any] = []
+        var i = 1
+        val argCount = argRefs.size()
+        while i <= argCount {
+            val argRef = argRefs[i]
+            val resolved = resolveType(typeTable, typeSchemeVars, argRef, level)
+            resolvedTypes.push(resolved)
+            i = i + 1
+        }
+        resolvedTypes.push(resolvedReturnType)
+        functionType(resolvedTypes as array[Type], typeSchemeVars, 0)
+    } else if tag == "SumTypeRef" {
+        val lhsRef = trLhs(ref)
+        val rhsRef = trRhs(ref)
+        val lhsType = resolveType(typeTable, typeSchemeVars, lhsRef, level)
+        val rhsType = resolveType(typeTable, typeSchemeVars, rhsRef, level)
+        sumType([], lhsType, rhsType, typeSchemeVars)
+    } else if tag == "RecordTypeRef" {
+        val fieldRefs = trFields(ref)
+        var resolvedFields: array[any] = []
+        var i = 1
+        val fieldCount = fieldRefs.size()
+        while i <= fieldCount {
+            val fieldRef = fieldRefs[i]
+            val fieldName = luaExpr("fieldRef.name") as string
+            val fieldTypeRef = luaExpr("fieldRef.typeRef") as any
+            val resolvedFieldType = resolveType(typeTable, typeSchemeVars, fieldTypeRef, level)
+            val field = luaExpr("{ name = fieldName, fieldType = resolvedFieldType }") as any
+            resolvedFields.push(field)
+            i = i + 1
+        }
+        recordType([], resolvedFields as array[RecordField], typeSchemeVars)
+    } else {
+        println("ERROR: Unknown TypeRef tag '$tag'")
+        tAny
+    }
+}
+
+pub fn resolveTypeAndWrapRecursive(typeTable: TypeTable, typeSchemeVars: array[string], ref: any, typeId: any, level: int): any {
+    // Create a self-referencing type variable for this type name
+    val qualifiedName = luaExpr("typeId.moduleName .. '::' .. typeId.packageName .. '::' .. typeId.name") as string
+    val selfRefVar = variableType(qualifiedName, 0 - 1)
+
+    // Temporarily register self-ref in type table so self-references resolve
+    val tempAlias = luaExpr("{ typeId = typeId, aliasType = selfRefVar }") as any
+    val aliasName = luaExpr("typeId.name") as string
+    embedLua("typeTable.aliases[aliasName] = tempAlias")
+
+    // Resolve the type (self-references will find selfRefVar)
+    val resolved = resolveType(typeTable, typeSchemeVars, ref, level)
+
+    // Check if the resolved type references itself
+    val isSelfRef = occursIn(selfRefVar, resolved)
+    val finalType = if isSelfRef {
+        recursiveType(selfRefVar, resolved)
+    } else {
+        resolved
+    }
+
+    // Register final resolved alias
+    val finalAlias = luaExpr("{ typeId = typeId, aliasType = finalType }") as any
+    embedLua("typeTable.aliases[aliasName] = finalAlias")
+
+    finalType
+}

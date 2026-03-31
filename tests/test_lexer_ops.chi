@@ -1,0 +1,344 @@
+import user/test_util { test, assertEqual, summary }
+import user/lexer { newLexer, readOperatorOrDelimiter, advance }
+import user/token { TK_PLUS, TK_MINUS, TK_STAR, TK_SLASH, TK_PERCENT, TK_EQ, TK_EQEQ, TK_NEQ, TK_LT, TK_LTEQ, TK_GT, TK_GTEQ, TK_NOT, TK_AND, TK_OR, TK_AMP, TK_PIPE, TK_LSHIFT, TK_RSHIFT, TK_ARROW, TK_WEAVE, TK_UNDERSCORE, TK_DOT, TK_COMMA, TK_COLON, TK_PLUSEQ, TK_MINUSEQ, TK_STAREQ, TK_SLASHEQ, TK_LPAREN, TK_RPAREN, TK_LBRACE, TK_RBRACE, TK_LBRACKET, TK_RBRACKET, TK_NEWLINE }
+import std/lang.array { size }
+
+// --- Single-character operators ---
+
+test("op: plus") {
+    val lex = newLexer("+")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens.size(), 1)
+    assertEqual(lex.tokens[1].kind, TK_PLUS)
+    assertEqual(lex.tokens[1].value, "+")
+}
+
+test("op: minus") {
+    val lex = newLexer("-")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_MINUS)
+    assertEqual(lex.tokens[1].value, "-")
+}
+
+test("op: star") {
+    val lex = newLexer("*")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_STAR)
+    assertEqual(lex.tokens[1].value, "*")
+}
+
+test("op: slash") {
+    val lex = newLexer("/")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_SLASH)
+    assertEqual(lex.tokens[1].value, "/")
+}
+
+test("op: percent") {
+    val lex = newLexer("%")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_PERCENT)
+    assertEqual(lex.tokens[1].value, "%")
+}
+
+test("op: equals") {
+    val lex = newLexer("=")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_EQ)
+    assertEqual(lex.tokens[1].value, "=")
+}
+
+test("op: not") {
+    val lex = newLexer("!")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_NOT)
+    assertEqual(lex.tokens[1].value, "!")
+}
+
+test("op: less than") {
+    val lex = newLexer("<")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_LT)
+    assertEqual(lex.tokens[1].value, "<")
+}
+
+test("op: greater than") {
+    val lex = newLexer(">")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_GT)
+    assertEqual(lex.tokens[1].value, ">")
+}
+
+test("op: ampersand") {
+    val lex = newLexer("&")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_AMP)
+    assertEqual(lex.tokens[1].value, "&")
+}
+
+test("op: pipe") {
+    val lex = newLexer("|")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_PIPE)
+    assertEqual(lex.tokens[1].value, "|")
+}
+
+test("op: dot") {
+    val lex = newLexer(".")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_DOT)
+    assertEqual(lex.tokens[1].value, ".")
+}
+
+test("op: comma") {
+    val lex = newLexer(",")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_COMMA)
+    assertEqual(lex.tokens[1].value, ",")
+}
+
+test("op: colon") {
+    val lex = newLexer(":")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_COLON)
+    assertEqual(lex.tokens[1].value, ":")
+}
+
+test("op: underscore") {
+    val lex = newLexer("_")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_UNDERSCORE)
+    assertEqual(lex.tokens[1].value, "_")
+}
+
+// --- Multi-character operators ---
+
+test("op: double equals") {
+    val lex = newLexer("==")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens.size(), 1)
+    assertEqual(lex.tokens[1].kind, TK_EQEQ)
+    assertEqual(lex.tokens[1].value, "==")
+}
+
+test("op: not equals") {
+    val lex = newLexer("!=")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_NEQ)
+    assertEqual(lex.tokens[1].value, "!=")
+}
+
+test("op: less than or equal") {
+    val lex = newLexer("<=")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_LTEQ)
+    assertEqual(lex.tokens[1].value, "<=")
+}
+
+test("op: greater than or equal") {
+    val lex = newLexer(">=")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_GTEQ)
+    assertEqual(lex.tokens[1].value, ">=")
+}
+
+test("op: arrow") {
+    val lex = newLexer("->")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_ARROW)
+    assertEqual(lex.tokens[1].value, "->")
+}
+
+test("op: weave") {
+    val lex = newLexer("~>")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_WEAVE)
+    assertEqual(lex.tokens[1].value, "~>")
+}
+
+test("op: plus equals") {
+    val lex = newLexer("+=")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_PLUSEQ)
+    assertEqual(lex.tokens[1].value, "+=")
+}
+
+test("op: minus equals") {
+    val lex = newLexer("-=")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_MINUSEQ)
+    assertEqual(lex.tokens[1].value, "-=")
+}
+
+test("op: star equals") {
+    val lex = newLexer("*=")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_STAREQ)
+    assertEqual(lex.tokens[1].value, "*=")
+}
+
+test("op: slash equals") {
+    val lex = newLexer("/=")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_SLASHEQ)
+    assertEqual(lex.tokens[1].value, "/=")
+}
+
+test("op: left shift") {
+    val lex = newLexer("<<")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_LSHIFT)
+    assertEqual(lex.tokens[1].value, "<<")
+}
+
+test("op: right shift") {
+    val lex = newLexer(">>")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_RSHIFT)
+    assertEqual(lex.tokens[1].value, ">>")
+}
+
+test("op: logical and") {
+    val lex = newLexer("&&")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_AND)
+    assertEqual(lex.tokens[1].value, "&&")
+}
+
+test("op: logical or") {
+    val lex = newLexer("||")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_OR)
+    assertEqual(lex.tokens[1].value, "||")
+}
+
+// --- Delimiters ---
+
+test("delim: left paren") {
+    val lex = newLexer("(")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_LPAREN)
+    assertEqual(lex.tokens[1].value, "(")
+}
+
+test("delim: right paren") {
+    val lex = newLexer(")")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_RPAREN)
+    assertEqual(lex.tokens[1].value, ")")
+}
+
+test("delim: left brace") {
+    val lex = newLexer("{")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_LBRACE)
+    assertEqual(lex.tokens[1].value, "{")
+}
+
+test("delim: right brace") {
+    val lex = newLexer("}")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_RBRACE)
+    assertEqual(lex.tokens[1].value, "}")
+}
+
+test("delim: left bracket") {
+    val lex = newLexer("[")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_LBRACKET)
+    assertEqual(lex.tokens[1].value, "[")
+}
+
+test("delim: right bracket") {
+    val lex = newLexer("]")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_RBRACKET)
+    assertEqual(lex.tokens[1].value, "]")
+}
+
+// --- Newline ---
+
+test("op: newline") {
+    val lex = newLexer("\n")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens.size(), 1)
+    assertEqual(lex.tokens[1].kind, TK_NEWLINE)
+}
+
+// --- Section tracking ---
+
+test("op: single-char section at col 1") {
+    val lex = newLexer("+")
+    readOperatorOrDelimiter(lex)
+    val sec = lex.tokens[1].section
+    assertEqual(sec.startLine, 1)
+    assertEqual(sec.startCol, 1)
+    assertEqual(sec.endLine, 1)
+    assertEqual(sec.endCol, 1)
+}
+
+test("op: two-char section spans 2 cols") {
+    val lex = newLexer("==")
+    readOperatorOrDelimiter(lex)
+    val sec = lex.tokens[1].section
+    assertEqual(sec.startLine, 1)
+    assertEqual(sec.startCol, 1)
+    assertEqual(sec.endLine, 1)
+    assertEqual(sec.endCol, 2)
+}
+
+test("op: section after advancing") {
+    val lex = newLexer("  >=")
+    advance(lex)
+    advance(lex)
+    readOperatorOrDelimiter(lex)
+    val sec = lex.tokens[1].section
+    assertEqual(sec.startCol, 3)
+    assertEqual(sec.endCol, 4)
+}
+
+// --- Multi-char vs single-char disambiguation ---
+
+test("op: = followed by non-= is single EQ") {
+    val lex = newLexer("=x")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_EQ)
+    assertEqual(lex.tokens[1].value, "=")
+}
+
+test("op: ! followed by non-= is NOT") {
+    val lex = newLexer("!x")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_NOT)
+    assertEqual(lex.tokens[1].value, "!")
+}
+
+test("op: < followed by non-= non-< is LT") {
+    val lex = newLexer("<x")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_LT)
+    assertEqual(lex.tokens[1].value, "<")
+}
+
+test("op: > followed by non-= non-> is GT") {
+    val lex = newLexer(">x")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_GT)
+    assertEqual(lex.tokens[1].value, ">")
+}
+
+test("op: - followed by non-> non-= is MINUS") {
+    val lex = newLexer("-x")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_MINUS)
+    assertEqual(lex.tokens[1].value, "-")
+}
+
+test("op: + followed by non-= is PLUS") {
+    val lex = newLexer("+x")
+    readOperatorOrDelimiter(lex)
+    assertEqual(lex.tokens[1].kind, TK_PLUS)
+    assertEqual(lex.tokens[1].value, "+")
+}
+
+summary()

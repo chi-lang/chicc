@@ -1,0 +1,263 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/lexer { newLexer, peek, advance, isDigit, isLetter, isAlphaNum, readNumber, readIdentOrKeyword }
+import user/token { TK_INT, TK_FLOAT, TK_ID, TK_VAL, TK_FN, TK_IF, TK_PUB, TK_RETURN, TK_TRUE, TK_FALSE, TK_UNIT }
+import std/lang.array { size }
+
+// --- isDigit tests ---
+
+test("isDigit: 0-9 are digits") {
+    assertTrue(isDigit(48))  // '0'
+    assertTrue(isDigit(57))  // '9'
+    assertTrue(isDigit(53))  // '5'
+}
+
+test("isDigit: non-digits") {
+    assertFalse(isDigit(47))  // '/' (just below '0')
+    assertFalse(isDigit(58))  // ':' (just above '9')
+    assertFalse(isDigit(65))  // 'A'
+    assertFalse(isDigit(0))   // EOF
+}
+
+// --- isLetter tests ---
+
+test("isLetter: a-z") {
+    assertTrue(isLetter(97))   // 'a'
+    assertTrue(isLetter(122))  // 'z'
+}
+
+test("isLetter: A-Z") {
+    assertTrue(isLetter(65))   // 'A'
+    assertTrue(isLetter(90))   // 'Z'
+}
+
+test("isLetter: underscore") {
+    assertTrue(isLetter(95))  // '_'
+}
+
+test("isLetter: non-letters") {
+    assertFalse(isLetter(48))   // '0'
+    assertFalse(isLetter(32))   // space
+    assertFalse(isLetter(0))    // EOF
+}
+
+// --- isAlphaNum tests ---
+
+test("isAlphaNum: letters and digits") {
+    assertTrue(isAlphaNum(65))   // 'A'
+    assertTrue(isAlphaNum(48))   // '0'
+    assertTrue(isAlphaNum(95))   // '_'
+    assertFalse(isAlphaNum(32))  // space
+}
+
+// --- readNumber: integers ---
+
+test("readNumber: single digit") {
+    val lex = newLexer("5")
+    readNumber(lex)
+    assertEqual(lex.tokens.size(), 1)
+    assertEqual(lex.tokens[1].kind, TK_INT)
+    assertEqual(lex.tokens[1].value, "5")
+}
+
+test("readNumber: multi-digit integer") {
+    val lex = newLexer("12345")
+    readNumber(lex)
+    assertEqual(lex.tokens.size(), 1)
+    assertEqual(lex.tokens[1].kind, TK_INT)
+    assertEqual(lex.tokens[1].value, "12345")
+}
+
+test("readNumber: integer stops at non-digit") {
+    val lex = newLexer("42abc")
+    readNumber(lex)
+    assertEqual(lex.tokens[1].kind, TK_INT)
+    assertEqual(lex.tokens[1].value, "42")
+    // pos should be right after '2', pointing at 'a'
+    assertEqual(peek(lex), 97) // 'a'
+}
+
+// --- readNumber: floats ---
+
+test("readNumber: float with decimal") {
+    val lex = newLexer("3.14")
+    readNumber(lex)
+    assertEqual(lex.tokens.size(), 1)
+    assertEqual(lex.tokens[1].kind, TK_FLOAT)
+    assertEqual(lex.tokens[1].value, "3.14")
+}
+
+test("readNumber: float with many decimals") {
+    val lex = newLexer("100.005")
+    readNumber(lex)
+    assertEqual(lex.tokens[1].kind, TK_FLOAT)
+    assertEqual(lex.tokens[1].value, "100.005")
+}
+
+// --- readNumber: trailing dot without digit ---
+
+test("readNumber: trailing dot not followed by digit") {
+    val lex = newLexer("42.x")
+    readNumber(lex)
+    assertEqual(lex.tokens[1].kind, TK_INT)
+    assertEqual(lex.tokens[1].value, "42")
+    // pos should point at '.', not consumed
+    assertEqual(peek(lex), 46) // '.'
+}
+
+test("readNumber: trailing dot at EOF") {
+    val lex = newLexer("42.")
+    readNumber(lex)
+    assertEqual(lex.tokens[1].kind, TK_INT)
+    assertEqual(lex.tokens[1].value, "42")
+    assertEqual(peek(lex), 46) // '.'
+}
+
+// --- readIdentOrKeyword: identifiers ---
+
+test("readIdentOrKeyword: simple name") {
+    val lex = newLexer("foo")
+    readIdentOrKeyword(lex)
+    assertEqual(lex.tokens.size(), 1)
+    assertEqual(lex.tokens[1].kind, TK_ID)
+    assertEqual(lex.tokens[1].value, "foo")
+}
+
+test("readIdentOrKeyword: name with underscore") {
+    val lex = newLexer("my_var")
+    readIdentOrKeyword(lex)
+    assertEqual(lex.tokens[1].kind, TK_ID)
+    assertEqual(lex.tokens[1].value, "my_var")
+}
+
+test("readIdentOrKeyword: name starting with underscore") {
+    val lex = newLexer("_private")
+    readIdentOrKeyword(lex)
+    assertEqual(lex.tokens[1].kind, TK_ID)
+    assertEqual(lex.tokens[1].value, "_private")
+}
+
+test("readIdentOrKeyword: name with digits") {
+    val lex = newLexer("x2y3")
+    readIdentOrKeyword(lex)
+    assertEqual(lex.tokens[1].kind, TK_ID)
+    assertEqual(lex.tokens[1].value, "x2y3")
+}
+
+test("readIdentOrKeyword: stops at non-alphanum") {
+    val lex = newLexer("abc+def")
+    readIdentOrKeyword(lex)
+    assertEqual(lex.tokens[1].value, "abc")
+    assertEqual(peek(lex), 43) // '+'
+}
+
+// --- readIdentOrKeyword: keywords ---
+
+test("readIdentOrKeyword: val keyword") {
+    val lex = newLexer("val")
+    readIdentOrKeyword(lex)
+    assertEqual(lex.tokens[1].kind, TK_VAL)
+    assertEqual(lex.tokens[1].value, "val")
+}
+
+test("readIdentOrKeyword: fn keyword") {
+    val lex = newLexer("fn")
+    readIdentOrKeyword(lex)
+    assertEqual(lex.tokens[1].kind, TK_FN)
+    assertEqual(lex.tokens[1].value, "fn")
+}
+
+test("readIdentOrKeyword: if keyword") {
+    val lex = newLexer("if")
+    readIdentOrKeyword(lex)
+    assertEqual(lex.tokens[1].kind, TK_IF)
+    assertEqual(lex.tokens[1].value, "if")
+}
+
+test("readIdentOrKeyword: pub keyword") {
+    val lex = newLexer("pub")
+    readIdentOrKeyword(lex)
+    assertEqual(lex.tokens[1].kind, TK_PUB)
+    assertEqual(lex.tokens[1].value, "pub")
+}
+
+test("readIdentOrKeyword: return keyword") {
+    val lex = newLexer("return")
+    readIdentOrKeyword(lex)
+    assertEqual(lex.tokens[1].kind, TK_RETURN)
+    assertEqual(lex.tokens[1].value, "return")
+}
+
+test("readIdentOrKeyword: true keyword") {
+    val lex = newLexer("true")
+    readIdentOrKeyword(lex)
+    assertEqual(lex.tokens[1].kind, TK_TRUE)
+    assertEqual(lex.tokens[1].value, "true")
+}
+
+test("readIdentOrKeyword: false keyword") {
+    val lex = newLexer("false")
+    readIdentOrKeyword(lex)
+    assertEqual(lex.tokens[1].kind, TK_FALSE)
+    assertEqual(lex.tokens[1].value, "false")
+}
+
+test("readIdentOrKeyword: unit keyword") {
+    val lex = newLexer("unit")
+    readIdentOrKeyword(lex)
+    assertEqual(lex.tokens[1].kind, TK_UNIT)
+    assertEqual(lex.tokens[1].value, "unit")
+}
+
+test("readIdentOrKeyword: keyword prefix is identifier") {
+    // "valx" is not the keyword "val", it's an identifier
+    val lex = newLexer("valx")
+    readIdentOrKeyword(lex)
+    assertEqual(lex.tokens[1].kind, TK_ID)
+    assertEqual(lex.tokens[1].value, "valx")
+}
+
+// --- Section tracking ---
+
+test("readNumber: section at start of source") {
+    val lex = newLexer("42")
+    readNumber(lex)
+    val sec = lex.tokens[1].section
+    assertEqual(sec.startLine, 1)
+    assertEqual(sec.startCol, 1)
+    assertEqual(sec.endLine, 1)
+    assertEqual(sec.endCol, 2)
+}
+
+test("readNumber: section after advancing") {
+    // "   99" -- advance 3 spaces first, number starts at col 4
+    val lex = newLexer("   99")
+    advance(lex) // col 2
+    advance(lex) // col 3
+    advance(lex) // col 4
+    readNumber(lex)
+    val sec = lex.tokens[1].section
+    assertEqual(sec.startCol, 4)
+    assertEqual(sec.endCol, 5)
+}
+
+test("readIdentOrKeyword: section tracking") {
+    val lex = newLexer("  foo")
+    advance(lex) // col 2
+    advance(lex) // col 3
+    readIdentOrKeyword(lex)
+    val sec = lex.tokens[1].section
+    assertEqual(sec.startLine, 1)
+    assertEqual(sec.startCol, 3)
+    assertEqual(sec.endLine, 1)
+    assertEqual(sec.endCol, 5)
+}
+
+test("readNumber: float section spans full number") {
+    val lex = newLexer("3.14")
+    readNumber(lex)
+    val sec = lex.tokens[1].section
+    assertEqual(sec.startCol, 1)
+    assertEqual(sec.endCol, 4)
+}
+
+summary()

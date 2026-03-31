@@ -1,0 +1,110 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/lexer { newLexer, peek, peekAt, advance, skipLineComment, skipBlockComment, skipWhitespaceAndComments }
+
+// --- skipLineComment tests ---
+
+test("skipLineComment skips to end of line") {
+    val lex = newLexer("// this is a comment\nhello")
+    skipLineComment(lex)
+    // Should stop at the newline, not consume it
+    assertEqual(peek(lex), 10) // newline
+}
+
+test("skipLineComment preserves newline") {
+    val lex = newLexer("// comment\ncode")
+    skipLineComment(lex)
+    assertEqual(peek(lex), 10) // newline is still there
+    assertEqual(lex.line, 1) // still on line 1 (newline not consumed)
+    advance(lex) // consume newline
+    assertEqual(lex.line, 2)
+    assertEqual(peek(lex), 99) // 'c'
+}
+
+test("skipLineComment at EOF") {
+    val lex = newLexer("// comment with no newline")
+    skipLineComment(lex)
+    assertEqual(peek(lex), 0) // EOF
+}
+
+// --- skipBlockComment tests ---
+
+test("skipBlockComment skips simple block comment") {
+    val lex = newLexer("/* comment */hello")
+    skipBlockComment(lex)
+    assertEqual(peek(lex), 104) // 'h'
+}
+
+test("skipBlockComment spanning multiple lines") {
+    val lex = newLexer("/* line1\nline2\nline3 */after")
+    skipBlockComment(lex)
+    assertEqual(peek(lex), 97) // 'a'
+    assertEqual(lex.line, 3) // should have tracked line changes
+}
+
+test("skipBlockComment with no closing - skips to EOF") {
+    val lex = newLexer("/* unclosed comment")
+    skipBlockComment(lex)
+    assertEqual(peek(lex), 0) // EOF
+}
+
+test("skipBlockComment empty block comment") {
+    val lex = newLexer("/**/rest")
+    skipBlockComment(lex)
+    assertEqual(peek(lex), 114) // 'r'
+}
+
+// --- skipWhitespaceAndComments tests ---
+
+test("skipWhitespaceAndComments skips spaces") {
+    val lex = newLexer("   hello")
+    skipWhitespaceAndComments(lex)
+    assertEqual(peek(lex), 104) // 'h'
+}
+
+test("skipWhitespaceAndComments skips tabs") {
+    val lex = newLexer("\t\thello")
+    skipWhitespaceAndComments(lex)
+    assertEqual(peek(lex), 104) // 'h'
+}
+
+test("skipWhitespaceAndComments does NOT skip newlines") {
+    val lex = newLexer("\n hello")
+    skipWhitespaceAndComments(lex)
+    assertEqual(peek(lex), 10) // newline still there
+}
+
+test("skipWhitespaceAndComments skips line comment") {
+    val lex = newLexer("  // comment\nhello")
+    skipWhitespaceAndComments(lex)
+    // Should stop at the newline (comments stop before newline, then loop checks newline and breaks)
+    assertEqual(peek(lex), 10) // newline
+}
+
+test("skipWhitespaceAndComments skips block comment") {
+    val lex = newLexer("  /* comment */  hello")
+    skipWhitespaceAndComments(lex)
+    assertEqual(peek(lex), 104) // 'h'
+}
+
+test("skipWhitespaceAndComments mixed whitespace and comments") {
+    val lex = newLexer("  /* block */  // line\nhello")
+    skipWhitespaceAndComments(lex)
+    // After spaces, block comment, spaces, line comment -> stops at newline
+    assertEqual(peek(lex), 10) // newline
+    advance(lex) // consume newline
+    assertEqual(peek(lex), 104) // 'h'
+}
+
+test("skipWhitespaceAndComments at EOF") {
+    val lex = newLexer("   ")
+    skipWhitespaceAndComments(lex)
+    assertEqual(peek(lex), 0) // EOF
+}
+
+test("skipWhitespaceAndComments no whitespace") {
+    val lex = newLexer("hello")
+    skipWhitespaceAndComments(lex)
+    assertEqual(peek(lex), 104) // 'h' - nothing skipped
+}
+
+summary()

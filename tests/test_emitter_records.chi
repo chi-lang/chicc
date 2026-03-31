@@ -1,0 +1,146 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/util { newStringBuilder, StringBuilder, toString }
+import user/ast { Program, Package, newPackage, newProgram }
+import user/types { tInt, tString }
+import user/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitCreateArray, emitCreateRecord, emitIndexOperator, emitIndexAssignment, emitFieldAccess, emitFieldAssignment }
+import std/lang { luaExpr, embedLua }
+
+fn freshState(): EmitterState {
+    val pkg = newPackage("mymod", "mypkg")
+    val prog = newProgram(pkg, [], [], [], unit)
+    newState(prog)
+}
+
+// Wire emitExpr to handle atom and variable_access for tests
+emitExpr = { st, expr ->
+    val kind: string = luaExpr("expr.kind")
+    if kind == "atom" { emitAtom(st, expr) }
+    else if kind == "create_array" { emitCreateArray(st, expr) }
+    else if kind == "create_record" { emitCreateRecord(st, expr) }
+    else if kind == "index_op" { emitIndexOperator(st, expr) }
+    else if kind == "indexed_assignment" { emitIndexAssignment(st, expr) }
+    else if kind == "field_access" { emitFieldAccess(st, expr) }
+    else if kind == "field_assignment" { emitFieldAssignment(st, expr) }
+    else { "nil" }
+}
+
+// ===== emitCreateArray tests =====
+
+test("emitCreateArray - empty array") {
+    val st = freshState()
+    embedLua("test_arr_empty = {kind='create_array', arrayValues={}}")
+    val e: any = luaExpr("test_arr_empty")
+    val result = emitCreateArray(st, e)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0={};setmetatable(tmp0, array_meta_table);")
+}
+
+test("emitCreateArray - single element") {
+    val st = freshState()
+    embedLua("test_arr1 = {kind='create_array', arrayValues={{kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='int'}}}}}}")
+    val e: any = luaExpr("test_arr1")
+    val result = emitCreateArray(st, e)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0={(42)};setmetatable(tmp0, array_meta_table);")
+}
+
+test("emitCreateArray - multiple elements") {
+    val st = freshState()
+    embedLua("test_arr2 = {kind='create_array', arrayValues={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}, {kind='atom', atomValue='2', exprType={tag='primitive',ids={{name='int'}}}}, {kind='atom', atomValue='3', exprType={tag='primitive',ids={{name='int'}}}}}}")
+    val e: any = luaExpr("test_arr2")
+    val result = emitCreateArray(st, e)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0={(1),(2),(3)};setmetatable(tmp0, array_meta_table);")
+}
+
+// ===== emitCreateRecord tests =====
+
+test("emitCreateRecord - empty record") {
+    val st = freshState()
+    embedLua("test_rec_empty = {kind='create_record', recordFields={}}")
+    val e: any = luaExpr("test_rec_empty")
+    val result = emitCreateRecord(st, e)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0={};setmetatable(tmp0, record_meta_table);")
+}
+
+test("emitCreateRecord - single field") {
+    val st = freshState()
+    embedLua("test_rec1 = {kind='create_record', recordFields={{name='x', value={kind='atom', atomValue='10', exprType={tag='primitive',ids={{name='int'}}}}}}}")
+    val e: any = luaExpr("test_rec1")
+    val result = emitCreateRecord(st, e)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0={x=(10)};setmetatable(tmp0, record_meta_table);")
+}
+
+test("emitCreateRecord - multiple fields") {
+    val st = freshState()
+    embedLua("test_rec2 = {kind='create_record', recordFields={{name='x', value={kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}, {name='y', value={kind='atom', atomValue='2', exprType={tag='primitive',ids={{name='int'}}}}}}}")
+    val e: any = luaExpr("test_rec2")
+    val result = emitCreateRecord(st, e)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0={x=(1),y=(2)};setmetatable(tmp0, record_meta_table);")
+}
+
+// ===== emitIndexOperator tests =====
+
+test("emitIndexOperator - basic index") {
+    val st = freshState()
+    embedLua("test_idx1 = {kind='index_op', indexVariable={kind='atom', atomValue='arr', exprType={tag='primitive',ids={{name='int'}}}}, indexExpr={kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}")
+    val e: any = luaExpr("test_idx1")
+    val result = emitIndexOperator(st, e)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0=(arr)[(1)];")
+}
+
+// ===== emitIndexAssignment tests =====
+
+test("emitIndexAssignment - basic assignment") {
+    val st = freshState()
+    embedLua("test_idxa1 = {kind='indexed_assignment', indexVariable={kind='atom', atomValue='arr', exprType={tag='primitive',ids={{name='int'}}}}, indexExpr={kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}, indexValue={kind='atom', atomValue='99', exprType={tag='primitive',ids={{name='int'}}}}}")
+    val e: any = luaExpr("test_idxa1")
+    val result = emitIndexAssignment(st, e)
+    assertEqual(result, "(99)")
+    assertEqual(st.sb.toString(), "(arr)[(1)]=(99);")
+}
+
+// ===== emitFieldAccess tests =====
+
+test("emitFieldAccess - field target") {
+    val st = freshState()
+    embedLua("test_fa1 = {kind='field_access', receiver={kind='atom', atomValue='obj', exprType={tag='primitive',ids={{name='int'}}}}, fieldName='name', dotTarget={tag='field'}}")
+    val e: any = luaExpr("test_fa1")
+    val result = emitFieldAccess(st, e)
+    assertEqual(result, "(obj).name")
+    assertEqual(st.sb.toString(), "")
+}
+
+test("emitFieldAccess - nil dotTarget defaults to field") {
+    val st = freshState()
+    embedLua("test_fa2 = {kind='field_access', receiver={kind='atom', atomValue='rec', exprType={tag='primitive',ids={{name='int'}}}}, fieldName='x', dotTarget=nil}")
+    val e: any = luaExpr("test_fa2")
+    val result = emitFieldAccess(st, e)
+    assertEqual(result, "(rec).x")
+}
+
+// ===== emitFieldAssignment tests =====
+
+test("emitFieldAssignment - basic assignment") {
+    val st = freshState()
+    embedLua("test_faa1 = {kind='field_assignment', receiver={kind='atom', atomValue='obj', exprType={tag='primitive',ids={{name='int'}}}}, fieldName='x', value={kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='int'}}}}}")
+    val e: any = luaExpr("test_faa1")
+    val result = emitFieldAssignment(st, e)
+    assertEqual(result, "(42)")
+    assertEqual(st.sb.toString(), "(obj).x=(42);")
+}
+
+test("emitFieldAssignment - string value") {
+    val st = freshState()
+    embedLua("test_faa2 = {kind='field_assignment', receiver={kind='atom', atomValue='rec', exprType={tag='primitive',ids={{name='int'}}}}, fieldName='name', value={kind='atom', atomValue='hello', exprType={tag='primitive',ids={{name='string'}}}}}")
+    val e: any = luaExpr("test_faa2")
+    val result = emitFieldAssignment(st, e)
+    assertEqual(result, "(tmp0)")
+    assertEqual(st.sb.toString(), "local tmp0 = 'hello';(rec).name=(tmp0);")
+}
+
+summary()

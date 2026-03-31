@@ -1,0 +1,191 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/token { Token, newToken, TK_INT, TK_ID, TK_PLUS, TK_EOF, TK_NEWLINE }
+import user/parser { newParser, current, peek, advance, expect, matchToken, skipNewlines }
+import std/lang.array { size }
+
+// Helper to create a simple token list for tests
+fn makeTokens(kind1: int, val1: string, kind2: int, val2: string): array[Token] {
+    [newToken(kind1, val1, unit), newToken(kind2, val2, unit), newToken(TK_EOF, "", unit)]
+}
+
+// --- newParser ---
+
+test("newParser: initial pos is 1") {
+    val tokens = [newToken(TK_EOF, "", unit)]
+    val p = newParser(tokens, "")
+    assertEqual(p.pos, 1)
+    assertEqual(p.source, "")
+}
+
+test("newParser: stores tokens and source") {
+    val tokens = [newToken(TK_INT, "42", unit), newToken(TK_EOF, "", unit)]
+    val p = newParser(tokens, "42")
+    assertEqual(p.tokens.size(), 2)
+    assertEqual(p.source, "42")
+}
+
+// --- current ---
+
+test("current: returns token at pos") {
+    val tokens = [newToken(TK_INT, "42", unit), newToken(TK_EOF, "", unit)]
+    val p = newParser(tokens, "42")
+    val tok = current(p)
+    assertEqual(tok.kind, TK_INT)
+    assertEqual(tok.value, "42")
+}
+
+test("current: does not advance pos") {
+    val tokens = [newToken(TK_INT, "42", unit), newToken(TK_EOF, "", unit)]
+    val p = newParser(tokens, "42")
+    current(p)
+    current(p)
+    assertEqual(p.pos, 1)
+}
+
+// --- peek ---
+
+test("peek: returns kind of current token") {
+    val tokens = [newToken(TK_INT, "42", unit), newToken(TK_EOF, "", unit)]
+    val p = newParser(tokens, "42")
+    assertEqual(peek(p), TK_INT)
+}
+
+test("peek: returns TK_EOF at end") {
+    val tokens = [newToken(TK_EOF, "", unit)]
+    val p = newParser(tokens, "")
+    assertEqual(peek(p), TK_EOF)
+}
+
+// --- advance ---
+
+test("advance: returns current token and moves forward") {
+    val tokens = [newToken(TK_INT, "1", unit), newToken(TK_PLUS, "+", unit), newToken(TK_EOF, "", unit)]
+    val p = newParser(tokens, "1+")
+    val tok1 = advance(p)
+    assertEqual(tok1.kind, TK_INT)
+    assertEqual(tok1.value, "1")
+    assertEqual(p.pos, 2)
+    val tok2 = advance(p)
+    assertEqual(tok2.kind, TK_PLUS)
+    assertEqual(tok2.value, "+")
+    assertEqual(p.pos, 3)
+}
+
+test("advance: successive calls walk through tokens") {
+    val tokens = makeTokens(TK_ID, "x", TK_PLUS, "+")
+    val p = newParser(tokens, "x+")
+    advance(p)
+    advance(p)
+    assertEqual(peek(p), TK_EOF)
+}
+
+// --- expect ---
+
+test("expect: advances when kind matches") {
+    val tokens = [newToken(TK_INT, "42", unit), newToken(TK_EOF, "", unit)]
+    val p = newParser(tokens, "42")
+    val tok = expect(p, TK_INT)
+    assertEqual(tok.kind, TK_INT)
+    assertEqual(tok.value, "42")
+    assertEqual(p.pos, 2)
+}
+
+test("expect: does not advance when kind mismatches") {
+    val tokens = [newToken(TK_INT, "42", unit), newToken(TK_EOF, "", unit)]
+    val p = newParser(tokens, "42")
+    val tok = expect(p, TK_ID)
+    assertEqual(tok.kind, TK_INT)
+    assertEqual(p.pos, 1)
+}
+
+test("expect: returns current token on mismatch") {
+    val tokens = [newToken(TK_PLUS, "+", unit), newToken(TK_EOF, "", unit)]
+    val p = newParser(tokens, "+")
+    val tok = expect(p, TK_INT)
+    assertEqual(tok.kind, TK_PLUS)
+    assertEqual(tok.value, "+")
+}
+
+// --- matchToken ---
+
+test("matchToken: returns true and advances on match") {
+    val tokens = [newToken(TK_INT, "42", unit), newToken(TK_EOF, "", unit)]
+    val p = newParser(tokens, "42")
+    val result = matchToken(p, TK_INT)
+    assertTrue(result)
+    assertEqual(p.pos, 2)
+}
+
+test("matchToken: returns false and stays on mismatch") {
+    val tokens = [newToken(TK_INT, "42", unit), newToken(TK_EOF, "", unit)]
+    val p = newParser(tokens, "42")
+    val result = matchToken(p, TK_ID)
+    assertFalse(result)
+    assertEqual(p.pos, 1)
+}
+
+test("matchToken: works with EOF") {
+    val tokens = [newToken(TK_EOF, "", unit)]
+    val p = newParser(tokens, "")
+    assertFalse(matchToken(p, TK_INT))
+    assertTrue(matchToken(p, TK_EOF))
+}
+
+// --- skipNewlines ---
+
+test("skipNewlines: skips multiple newlines") {
+    val tokens = [
+        newToken(TK_NEWLINE, "\n", unit),
+        newToken(TK_NEWLINE, "\n", unit),
+        newToken(TK_NEWLINE, "\n", unit),
+        newToken(TK_INT, "42", unit),
+        newToken(TK_EOF, "", unit)
+    ]
+    val p = newParser(tokens, "\n\n\n42")
+    skipNewlines(p)
+    assertEqual(p.pos, 4)
+    assertEqual(peek(p), TK_INT)
+}
+
+test("skipNewlines: no-op when no newlines") {
+    val tokens = [newToken(TK_INT, "42", unit), newToken(TK_EOF, "", unit)]
+    val p = newParser(tokens, "42")
+    skipNewlines(p)
+    assertEqual(p.pos, 1)
+    assertEqual(peek(p), TK_INT)
+}
+
+test("skipNewlines: skips to EOF if all newlines") {
+    val tokens = [
+        newToken(TK_NEWLINE, "\n", unit),
+        newToken(TK_NEWLINE, "\n", unit),
+        newToken(TK_EOF, "", unit)
+    ]
+    val p = newParser(tokens, "\n\n")
+    skipNewlines(p)
+    assertEqual(peek(p), TK_EOF)
+}
+
+// --- Integration: parser with tokenize ---
+
+test("parser with real tokenized input") {
+    val tokens = [
+        newToken(TK_ID, "x", unit),
+        newToken(TK_PLUS, "+", unit),
+        newToken(TK_INT, "1", unit),
+        newToken(TK_EOF, "", unit)
+    ]
+    val p = newParser(tokens, "x + 1")
+    assertEqual(peek(p), TK_ID)
+    val id = advance(p)
+    assertEqual(id.value, "x")
+    assertEqual(peek(p), TK_PLUS)
+    val plus = advance(p)
+    assertEqual(plus.value, "+")
+    assertEqual(peek(p), TK_INT)
+    val num = advance(p)
+    assertEqual(num.value, "1")
+    assertEqual(peek(p), TK_EOF)
+}
+
+summary()

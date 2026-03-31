@@ -1,0 +1,130 @@
+// chicc/chicc/token.chi
+package user/token
+import user/source { Section }
+
+// -- Literals --
+pub val TK_INT = 1
+pub val TK_FLOAT = 2
+pub val TK_STRING = 3
+pub val TK_INTERP_START = 4
+pub val TK_INTERP_TEXT = 5
+pub val TK_INTERP_EXPR_START = 6
+pub val TK_INTERP_EXPR_END = 7
+pub val TK_INTERP_END = 8
+
+// -- Identifiers and Keywords --
+pub val TK_ID = 10
+pub val TK_PUB = 11
+pub val TK_VAL = 12
+pub val TK_VAR = 13
+pub val TK_FN = 14
+pub val TK_IF = 15
+pub val TK_ELSE = 16
+pub val TK_AS = 17
+pub val TK_WHILE = 18
+pub val TK_FOR = 19
+pub val TK_IN = 20
+pub val TK_PACKAGE = 21
+pub val TK_IMPORT = 22
+pub val TK_DATA = 23
+pub val TK_WHEN = 24
+pub val TK_MATCH = 25
+pub val TK_IS = 26
+pub val TK_BREAK = 27
+pub val TK_CONTINUE = 28
+pub val TK_EFFECT = 29
+pub val TK_HANDLE = 30
+pub val TK_WITH = 31
+pub val TK_RETURN = 32
+pub val TK_TRAIT = 33
+pub val TK_TYPE = 34
+pub val TK_TRUE = 35
+pub val TK_FALSE = 36
+pub val TK_UNIT = 37
+
+// -- Operators --
+pub val TK_PLUS = 40
+pub val TK_MINUS = 41
+pub val TK_STAR = 42
+pub val TK_SLASH = 43
+pub val TK_PERCENT = 44
+pub val TK_EQ = 45
+pub val TK_EQEQ = 46
+pub val TK_NEQ = 47
+pub val TK_LT = 48
+pub val TK_LTEQ = 49
+pub val TK_GT = 50
+pub val TK_GTEQ = 51
+pub val TK_NOT = 52
+pub val TK_AND = 53
+pub val TK_OR = 54
+pub val TK_AMP = 55
+pub val TK_PIPE = 56
+pub val TK_LSHIFT = 57
+pub val TK_RSHIFT = 58
+pub val TK_ARROW = 59
+pub val TK_WEAVE = 60
+pub val TK_UNDERSCORE = 61
+pub val TK_DOT = 62
+pub val TK_COMMA = 63
+pub val TK_COLON = 64
+pub val TK_PLUSEQ = 65
+pub val TK_MINUSEQ = 66
+pub val TK_STAREQ = 67
+pub val TK_SLASHEQ = 68
+
+// -- Delimiters --
+pub val TK_LPAREN = 70
+pub val TK_RPAREN = 71
+pub val TK_LBRACE = 72
+pub val TK_RBRACE = 73
+pub val TK_LBRACKET = 74
+pub val TK_RBRACKET = 75
+
+// -- Special --
+pub val TK_EOF = 99
+pub val TK_NEWLINE = 100
+
+// Token record
+type Token = {
+    kind: int,
+    value: string,
+    section: Section | unit
+}
+
+pub fn newToken(kind: int, value: string, section: Section | unit): Token {
+    { kind: kind, value: value, section: section }
+}
+
+// Keyword lookup - maps identifier strings to keyword token kinds
+// Returns TK_ID if not a keyword
+pub fn lookupKeyword(name: string): int {
+    if name == "pub" { TK_PUB }
+    else if name == "val" { TK_VAL }
+    else if name == "var" { TK_VAR }
+    else if name == "fn" { TK_FN }
+    else if name == "if" { TK_IF }
+    else if name == "else" { TK_ELSE }
+    else if name == "as" { TK_AS }
+    else if name == "while" { TK_WHILE }
+    else if name == "for" { TK_FOR }
+    else if name == "in" { TK_IN }
+    else if name == "package" { TK_PACKAGE }
+    else if name == "import" { TK_IMPORT }
+    else if name == "data" { TK_DATA }
+    else if name == "when" { TK_WHEN }
+    else if name == "match" { TK_MATCH }
+    else if name == "is" { TK_IS }
+    else if name == "break" { TK_BREAK }
+    else if name == "continue" { TK_CONTINUE }
+    else if name == "effect" { TK_EFFECT }
+    else if name == "handle" { TK_HANDLE }
+    else if name == "with" { TK_WITH }
+    else if name == "return" { TK_RETURN }
+    else if name == "trait" { TK_TRAIT }
+    else if name == "type" { TK_TYPE }
+    else if name == "true" { TK_TRUE }
+    else if name == "false" { TK_FALSE }
+    else if name == "unit" { TK_UNIT }
+    else { TK_ID }
+}

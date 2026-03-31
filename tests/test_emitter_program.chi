@@ -1,0 +1,302 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/util { newStringBuilder, StringBuilder, toString }
+import user/ast { Program, Package, newPackage, newProgram, newTypeAlias, atomExpr, blockExpr, nameDeclarationExpr, variableAccessExpr, localTarget, packageTarget, infixOpExpr, returnExpr, effectDefinitionExpr, newFnParam }
+import user/types { tInt, tFloat, tBool, tString, tUnit, newTypeId, primitiveType }
+import user/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitProgram }
+import std/lang { luaExpr, embedLua }
+
+// ===== emitExpr dispatcher tests =====
+
+test("emitExpr dispatches atom") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    val expr = atomExpr("42", tInt, unit)
+    val result = emitExpr(st, expr)
+    assertEqual(result, "(42)")
+}
+
+test("emitExpr dispatches interpolated_string") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    val part1 = atomExpr("hello", tString, unit)
+    embedLua("__ip_expr = {kind='interpolated_string', parts={part1}}")
+    val expr: any = luaExpr("__ip_expr")
+    val result = emitExpr(st, expr)
+    // result should be a tmp name for the interpolated string
+    assertEqual(result, "tmp1")
+}
+
+test("emitExpr dispatches variable_access") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    val expr = variableAccessExpr(localTarget("x"), unit)
+    // At top level, local var becomes __P_.x
+    val result = emitExpr(st, expr)
+    assertEqual(result, "__P_.x")
+}
+
+test("emitExpr dispatches name_declaration") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    val valExpr = atomExpr("42", tInt, unit)
+    val expr = nameDeclarationExpr(false, "x", false, unit, valExpr, unit)
+    val result = emitExpr(st, expr)
+    assertEqual(result, "__P_.x")
+    assertEqual(st.sb.toString(), "__P_.x=(42);")
+}
+
+test("emitExpr dispatches block") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    val body = blockExpr([atomExpr("99", tInt, unit)], unit)
+    val result = emitExpr(st, body)
+    assertEqual(result, "(99)")
+}
+
+test("emitExpr dispatches infix_op") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    embedLua("__inf_expr = {kind='infix_op', op='+', left={kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}, right={kind='atom', atomValue='2', exprType={tag='primitive',ids={{name='int'}}}}}")
+    val expr: any = luaExpr("__inf_expr")
+    val result = emitExpr(st, expr)
+    assertEqual(result, "((1) + (2))")
+}
+
+test("emitExpr dispatches prefix_op") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    embedLua("__pre_expr = {kind='prefix_op', op='!', prefixExpr={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}}")
+    val expr: any = luaExpr("__pre_expr")
+    val result = emitExpr(st, expr)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0=not (true);")
+}
+
+test("emitExpr dispatches break") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    embedLua("__brk_expr = {kind='break'}")
+    val expr: any = luaExpr("__brk_expr")
+    val result = emitExpr(st, expr)
+    assertEqual(result, "nil")
+    assertEqual(st.sb.toString(), "break;")
+}
+
+test("emitExpr dispatches continue") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    st.currentLoopId = 5
+    embedLua("__cnt_expr = {kind='continue'}")
+    val expr: any = luaExpr("__cnt_expr")
+    val result = emitExpr(st, expr)
+    assertEqual(result, "nil")
+    assertEqual(st.sb.toString(), "goto __continue_5;")
+}
+
+test("emitExpr dispatches return") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    val retVal = atomExpr("42", tInt, unit)
+    val expr = returnExpr(retVal, unit)
+    val result = emitExpr(st, expr)
+    assertEqual(result, "nil")
+    assertEqual(st.sb.toString(), "return (42);")
+}
+
+test("emitExpr dispatches cast") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    embedLua("__cast_expr = {kind='cast', castExpr={kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='string'}}}}, targetType={tag='primitive',ids={{name='int'}}}}")
+    val expr: any = luaExpr("__cast_expr")
+    val result = emitExpr(st, expr)
+    val output = st.sb.toString()
+    embedLua("__cast_ok = string.find(output, 'tonumber', 1, true) ~= nil")
+    assertTrue(luaExpr("__cast_ok") as bool)
+}
+
+test("emitExpr dispatches is") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    embedLua("__is_expr = {kind='is', isValue={kind='atom', atomValue='x', exprType={tag='primitive',ids={{name='int'}}}}, isType={tag='primitive',ids={{name='int'}}}}")
+    val expr: any = luaExpr("__is_expr")
+    val result = emitExpr(st, expr)
+    assertEqual(result, "true")
+}
+
+test("emitExpr dispatches create_array") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    embedLua("__arr_expr = {kind='create_array', arrayValues={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}")
+    val expr: any = luaExpr("__arr_expr")
+    val result = emitExpr(st, expr)
+    assertEqual(result, "tmp0")
+    val output = st.sb.toString()
+    embedLua("__arr_ok = string.find(output, 'setmetatable', 1, true) ~= nil")
+    assertTrue(luaExpr("__arr_ok") as bool)
+}
+
+test("emitExpr dispatches create_record") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    embedLua("__rec_expr = {kind='create_record', recordFields={{name='x', value={kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
+    val expr: any = luaExpr("__rec_expr")
+    val result = emitExpr(st, expr)
+    val output = st.sb.toString()
+    embedLua("__rec_ok = string.find(output, 'x=(1)', 1, true) ~= nil")
+    assertTrue(luaExpr("__rec_ok") as bool)
+}
+
+test("emitExpr dispatches field_access") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    st.inFunction = true
+    embedLua("__fa_expr = {kind='field_access', receiver={kind='variable_access', target={tag='local', name='obj'}}, fieldName='x', dotTarget={tag='field'}}")
+    val expr: any = luaExpr("__fa_expr")
+    val result = emitExpr(st, expr)
+    assertEqual(result, "obj.x")
+}
+
+test("emitExpr dispatches effect_definition") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    val expr = effectDefinitionExpr("m", "p", "ask", [], unit)
+    val result = emitExpr(st, expr)
+    assertEqual(result, "nil")
+    val output = st.sb.toString()
+    embedLua("__eff_ok = string.find(output, 'function __P_.ask', 1, true) ~= nil")
+    assertTrue(luaExpr("__eff_ok") as bool)
+}
+
+test("emitExpr dispatches fn") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    embedLua("__fn_expr = {kind='fn', parameters={{name='x'}}, defaultValues=nil, body={kind='block', blockBody={{kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='int'}}}}}}}")
+    val expr: any = luaExpr("__fn_expr")
+    val result = emitExpr(st, expr)
+    // Should be a local function with auto-generated name
+    assertEqual(result, "tmp0")
+    val output = st.sb.toString()
+    embedLua("__fn_ok = string.find(output, 'local function tmp0(x)', 1, true) ~= nil")
+    assertTrue(luaExpr("__fn_ok") as bool)
+}
+
+test("emitExpr returns nil for unknown kind") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    embedLua("__unk_expr = {kind='totally_unknown_kind'}")
+    val expr: any = luaExpr("__unk_expr")
+    val result = emitExpr(st, expr)
+    assertEqual(result, "nil")
+}
+
+// ===== emitProgram tests =====
+
+test("emitProgram - empty program with emitModule=true") {
+    val pkg = newPackage("mymod", "mypkg")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val output = emitProgram(prog, true)
+    // Should contain package preamble
+    embedLua("__ep1_hasPkg = string.find(output, \"package.loaded['mymod/mypkg']\", 1, true) ~= nil")
+    assertTrue(luaExpr("__ep1_hasPkg") as bool)
+    embedLua("__ep1_hasP = string.find(output, 'local __P_', 1, true) ~= nil")
+    assertTrue(luaExpr("__ep1_hasP") as bool)
+    embedLua("__ep1_hasS = string.find(output, 'local __S_ = __P_._package', 1, true) ~= nil")
+    assertTrue(luaExpr("__ep1_hasS") as bool)
+    embedLua("__ep1_hasT = string.find(output, 'local __T_ = __P_._types', 1, true) ~= nil")
+    assertTrue(luaExpr("__ep1_hasT") as bool)
+    // No expressions, so no return
+    embedLua("__ep1_noRet = string.find(output, 'return', 1, true) == nil")
+    assertTrue(luaExpr("__ep1_noRet") as bool)
+}
+
+test("emitProgram - single expression with emitModule=true returns __P_") {
+    val pkg = newPackage("mymod", "mypkg")
+    val expr = atomExpr("42", tInt, unit)
+    val prog = newProgram(pkg, [], [], [expr], unit)
+    val output = emitProgram(prog, true)
+    embedLua("__ep2_hasReturn = string.find(output, 'return __P_', 1, true) ~= nil")
+    assertTrue(luaExpr("__ep2_hasReturn") as bool)
+}
+
+test("emitProgram - single expression with emitModule=false returns result") {
+    val pkg = newPackage("mymod", "mypkg")
+    val expr = atomExpr("42", tInt, unit)
+    val prog = newProgram(pkg, [], [], [expr], unit)
+    val output = emitProgram(prog, false)
+    embedLua("__ep3_hasReturn = string.find(output, 'return (42)', 1, true) ~= nil")
+    assertTrue(luaExpr("__ep3_hasReturn") as bool)
+    // Should NOT have return __P_
+    embedLua("__ep3_noModRet = string.find(output, 'return __P_', 1, true) == nil")
+    assertTrue(luaExpr("__ep3_noModRet") as bool)
+}
+
+test("emitProgram - multiple expressions returns at end") {
+    val pkg = newPackage("mymod", "mypkg")
+    val e1 = atomExpr("1", tInt, unit)
+    val e2 = atomExpr("2", tInt, unit)
+    val prog = newProgram(pkg, [], [], [e1, e2], unit)
+    val output = emitProgram(prog, true)
+    // Return should be at the end with return __P_
+    embedLua("__ep4_hasReturn = string.find(output, 'return __P_', 1, true) ~= nil")
+    assertTrue(luaExpr("__ep4_hasReturn") as bool)
+}
+
+test("emitProgram - name declarations emit package info") {
+    val pkg = newPackage("mymod", "mypkg")
+    val valExpr = atomExpr("42", tInt, unit)
+    val decl = nameDeclarationExpr(true, "x", false, unit, valExpr, unit)
+    embedLua("decl.exprType = {tag='primitive', ids={{moduleName='std',packageName='lang.int',name='int'}}}")
+    val prog = newProgram(pkg, [], [], [decl], unit)
+    val output = emitProgram(prog, true)
+    // Should contain package info for x
+    embedLua("__ep5_hasInfo = string.find(output, '__S_.x={', 1, true) ~= nil")
+    assertTrue(luaExpr("__ep5_hasInfo") as bool)
+    embedLua("__ep5_hasPub = string.find(output, 'public=true', 1, true) ~= nil")
+    assertTrue(luaExpr("__ep5_hasPub") as bool)
+}
+
+test("emitProgram - type aliases are emitted") {
+    val pkg = newPackage("mymod", "mypkg")
+    val alias = newTypeAlias(newTypeId("mymod", "mypkg", "MyInt"), tInt)
+    val prog = newProgram(pkg, [], [alias], [], unit)
+    val output = emitProgram(prog, true)
+    embedLua("__ep6_hasAlias = string.find(output, '__T_.MyInt=', 1, true) ~= nil")
+    assertTrue(luaExpr("__ep6_hasAlias") as bool)
+}
+
+test("emitProgram - cross-package reference emits require") {
+    val pkg = newPackage("mymod", "mypkg")
+    val expr = variableAccessExpr(packageTarget("other", "utils", "foo"), unit)
+    val prog = newProgram(pkg, [], [], [expr], unit)
+    val output = emitProgram(prog, true)
+    embedLua("__ep7_hasReq = string.find(output, 'require(\"other/utils\")', 1, true) ~= nil")
+    assertTrue(luaExpr("__ep7_hasReq") as bool)
+}
+
+test("emitProgram - package qualifier uses module and package name") {
+    val pkg = newPackage("std", "lang.string")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val output = emitProgram(prog, true)
+    embedLua("__ep8_hasPkg = string.find(output, \"package.loaded['std/lang.string']\", 1, true) ~= nil")
+    assertTrue(luaExpr("__ep8_hasPkg") as bool)
+}
+
+summary()

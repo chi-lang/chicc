@@ -1,0 +1,341 @@
+import user/test_util { test, assertEqual, assertTrue, summary }
+import user/types { Type, TypeId, RecordField, newTypeId, typeIdEquals, typeTag, typeIds, typeTypes, typeTypeParams, typeDefaults, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeVariable, typeInnerType, typeBody, typeTypesCount, typeFieldsCount, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, polyType, tAny, tUnit, tBool, tInt, tFloat, tString, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, arrayTypeId }
+import user/type_writer { encodeType, decodeType }
+import std/lang { luaExpr }
+
+fn typesEqual(a: Type, b: Type): bool {
+    luaExpr("encodeType(a) == encodeType(b)")
+}
+
+test("encode primitive int") {
+    assertEqual(encodeType(tInt), "{tag=\"int\"}")
+}
+
+test("encode primitive float") {
+    assertEqual(encodeType(tFloat), "{tag=\"float\"}")
+}
+
+test("encode primitive bool") {
+    assertEqual(encodeType(tBool), "{tag=\"bool\"}")
+}
+
+test("encode primitive string") {
+    assertEqual(encodeType(tString), "{tag=\"string\"}")
+}
+
+test("encode primitive unit") {
+    assertEqual(encodeType(tUnit), "{tag=\"unit\"}")
+}
+
+test("encode primitive any") {
+    assertEqual(encodeType(tAny), "{tag=\"any\"}")
+}
+
+test("encode primitive with extra ids") {
+    val extraId = newTypeId("mymod", "mypkg", "MyAlias")
+    val aliased = primitiveType([intTypeId, extraId])
+    val encoded = encodeType(aliased)
+    assertEqual(encoded, "{tag=\"int\",ids={{\"mymod\",\"mypkg\",\"MyAlias\"}}}")
+}
+
+test("encode function type") {
+    val ft = functionType([tInt, tString], [], 0)
+    val encoded = encodeType(ft)
+    assertEqual(encoded, "{tag=\"fn\",types={{tag=\"int\"},{tag=\"string\"}},typeParams={},defaults=0}")
+}
+
+test("encode function with defaults") {
+    val ft = functionType([tInt, tInt, tInt], [], 2)
+    val encoded = encodeType(ft)
+    assertEqual(encoded, "{tag=\"fn\",types={{tag=\"int\"},{tag=\"int\"},{tag=\"int\"}},typeParams={},defaults=2}")
+}
+
+test("encode function with type params") {
+    val v = variableType("T", 0)
+    val ft = functionType([v, v], ["T"], 0)
+    val encoded = encodeType(ft)
+    assertEqual(encoded, "{tag=\"fn\",types={{tag=\"var\",name=\"T\",level=0},{tag=\"var\",name=\"T\",level=0}},typeParams={\"T\"},defaults=0}")
+}
+
+test("encode record type") {
+    val r = recordType([newTypeId("std", "lang.map", "Map")], [{ name: "name", fieldType: tString }, { name: "age", fieldType: tInt }], [])
+    val encoded = encodeType(r)
+    assertEqual(encoded, "{tag=\"record\",ids={{\"std\",\"lang.map\",\"Map\"}},fields={{\"name\",{tag=\"string\"}},{\"age\",{tag=\"int\"}}},typeParams={}}")
+}
+
+test("encode empty record") {
+    val r = recordType([], [], [])
+    val encoded = encodeType(r)
+    assertEqual(encoded, "{tag=\"record\",ids={},fields={},typeParams={}}")
+}
+
+test("encode record with type params") {
+    val r = recordType([newTypeId("std", "lang.map", "Map")], [{ name: "key", fieldType: variableType("K", 0) }], ["K", "V"])
+    val encoded = encodeType(r)
+    assertEqual(encoded, "{tag=\"record\",ids={{\"std\",\"lang.map\",\"Map\"}},fields={{\"key\",{tag=\"var\",name=\"K\",level=0}}},typeParams={\"K\",\"V\"}}")
+}
+
+test("encode sum type") {
+    val s = sumType([newTypeId("test", "pkg", "Either")], tString, tInt, [])
+    val encoded = encodeType(s)
+    assertEqual(encoded, "{tag=\"sum\",ids={{\"test\",\"pkg\",\"Either\"}},lhs={tag=\"string\"},rhs={tag=\"int\"},typeParams={}}")
+}
+
+test("encode variable type") {
+    val v = variableType("T", 0)
+    val encoded = encodeType(v)
+    assertEqual(encoded, "{tag=\"var\",name=\"T\",level=0}")
+}
+
+test("encode variable with level") {
+    val v = variableType("a42", 3)
+    val encoded = encodeType(v)
+    assertEqual(encoded, "{tag=\"var\",name=\"a42\",level=3}")
+}
+
+test("encode array type") {
+    val a = arrayType(tInt, [])
+    val encoded = encodeType(a)
+    assertEqual(encoded, "{tag=\"array\",elem={tag=\"int\"},typeParams={},ids={{\"std\",\"lang.array\",\"array\"}}}")
+}
+
+test("encode poly type") {
+    val v = variableType("T", 0)
+    val ft = functionType([v, v], ["T"], 0)
+    val p = polyType(1, ft)
+    val encoded = encodeType(p)
+    assertEqual(encoded, "{tag=\"scheme\",level=1,body={tag=\"fn\",types={{tag=\"var\",name=\"T\",level=0},{tag=\"var\",name=\"T\",level=0}},typeParams={\"T\"},defaults=0}}")
+}
+
+test("encode recursive type") {
+    val v = variableType("X", 0)
+    val r = recordType([newTypeId("test", "pkg", "List")], [{ name: "head", fieldType: tInt }, { name: "tail", fieldType: v }], [])
+    val rec = recursiveType(v, r)
+    val encoded = encodeType(rec)
+    assertEqual(encoded, "{tag=\"rec\",var={tag=\"var\",name=\"X\",level=0},type={tag=\"record\",ids={{\"test\",\"pkg\",\"List\"}},fields={{\"head\",{tag=\"int\"}},{\"tail\",{tag=\"var\",name=\"X\",level=0}}},typeParams={}}}")
+}
+
+test("decode primitive int") {
+    val decoded = decodeType("{tag=\"int\"}")
+    assertTrue(typesEqual(decoded, tInt))
+}
+
+test("decode primitive float") {
+    val decoded = decodeType("{tag=\"float\"}")
+    assertTrue(typesEqual(decoded, tFloat))
+}
+
+test("decode primitive bool") {
+    val decoded = decodeType("{tag=\"bool\"}")
+    assertTrue(typesEqual(decoded, tBool))
+}
+
+test("decode primitive string") {
+    val decoded = decodeType("{tag=\"string\"}")
+    assertTrue(typesEqual(decoded, tString))
+}
+
+test("decode primitive unit") {
+    val decoded = decodeType("{tag=\"unit\"}")
+    assertTrue(typesEqual(decoded, tUnit))
+}
+
+test("decode primitive any") {
+    val decoded = decodeType("{tag=\"any\"}")
+    assertTrue(typesEqual(decoded, tAny))
+}
+
+test("decode primitive with extra ids") {
+    val input = "{tag=\"int\",ids={{\"mymod\",\"mypkg\",\"MyAlias\"}}}"
+    val decoded = decodeType(input)
+    val expected = primitiveType([intTypeId, newTypeId("mymod", "mypkg", "MyAlias")])
+    assertTrue(typesEqual(decoded, expected))
+}
+
+test("decode function type") {
+    val input = "{tag=\"fn\",types={{tag=\"int\"},{tag=\"string\"}},typeParams={},defaults=0}"
+    val decoded = decodeType(input)
+    val expected = functionType([tInt, tString], [], 0)
+    assertTrue(typesEqual(decoded, expected))
+}
+
+test("decode function with defaults") {
+    val input = "{tag=\"fn\",types={{tag=\"int\"},{tag=\"int\"},{tag=\"int\"}},typeParams={},defaults=2}"
+    val decoded = decodeType(input)
+    val expected = functionType([tInt, tInt, tInt], [], 2)
+    assertTrue(typesEqual(decoded, expected))
+}
+
+test("decode record type") {
+    val input = "{tag=\"record\",ids={{\"std\",\"lang.map\",\"Map\"}},fields={{\"name\",{tag=\"string\"}},{\"age\",{tag=\"int\"}}},typeParams={}}"
+    val decoded = decodeType(input)
+    val expected = recordType([newTypeId("std", "lang.map", "Map")], [{ name: "name", fieldType: tString }, { name: "age", fieldType: tInt }], [])
+    assertTrue(typesEqual(decoded, expected))
+}
+
+test("decode empty record") {
+    val input = "{tag=\"record\",ids={},fields={},typeParams={}}"
+    val decoded = decodeType(input)
+    val expected = recordType([], [], [])
+    assertTrue(typesEqual(decoded, expected))
+}
+
+test("decode sum type") {
+    val input = "{tag=\"sum\",ids={{\"test\",\"pkg\",\"Either\"}},lhs={tag=\"string\"},rhs={tag=\"int\"},typeParams={}}"
+    val decoded = decodeType(input)
+    val expected = sumType([newTypeId("test", "pkg", "Either")], tString, tInt, [])
+    assertTrue(typesEqual(decoded, expected))
+}
+
+test("decode variable type") {
+    val input = "{tag=\"var\",name=\"T\",level=0}"
+    val decoded = decodeType(input)
+    val expected = variableType("T", 0)
+    assertTrue(typesEqual(decoded, expected))
+}
+
+test("decode variable with level") {
+    val input = "{tag=\"var\",name=\"a42\",level=3}"
+    val decoded = decodeType(input)
+    val expected = variableType("a42", 3)
+    assertTrue(typesEqual(decoded, expected))
+}
+
+test("decode array type") {
+    val input = "{tag=\"array\",elem={tag=\"int\"},typeParams={},ids={{\"std\",\"lang.array\",\"array\"}}}"
+    val decoded = decodeType(input)
+    val expected = arrayType(tInt, [])
+    assertTrue(typesEqual(decoded, expected))
+}
+
+test("decode poly type") {
+    val v = variableType("T", 0)
+    val ft = functionType([v, v], ["T"], 0)
+    val input = "{tag=\"scheme\",level=1,body={tag=\"fn\",types={{tag=\"var\",name=\"T\",level=0},{tag=\"var\",name=\"T\",level=0}},typeParams={\"T\"},defaults=0}}"
+    val decoded = decodeType(input)
+    val expected = polyType(1, ft)
+    assertTrue(typesEqual(decoded, expected))
+}
+
+test("decode recursive type") {
+    val v = variableType("X", 0)
+    val r = recordType([newTypeId("test", "pkg", "List")], [{ name: "head", fieldType: tInt }, { name: "tail", fieldType: v }], [])
+    val expected = recursiveType(v, r)
+    val input = "{tag=\"rec\",var={tag=\"var\",name=\"X\",level=0},type={tag=\"record\",ids={{\"test\",\"pkg\",\"List\"}},fields={{\"head\",{tag=\"int\"}},{\"tail\",{tag=\"var\",name=\"X\",level=0}}},typeParams={}}}"
+    val decoded = decodeType(input)
+    assertTrue(typesEqual(decoded, expected))
+}
+
+test("roundtrip int") {
+    val encoded = encodeType(tInt)
+    val decoded = decodeType(encoded)
+    assertTrue(typesEqual(decoded, tInt))
+}
+
+test("roundtrip float") {
+    val encoded = encodeType(tFloat)
+    val decoded = decodeType(encoded)
+    assertTrue(typesEqual(decoded, tFloat))
+}
+
+test("roundtrip bool") {
+    val encoded = encodeType(tBool)
+    val decoded = decodeType(encoded)
+    assertTrue(typesEqual(decoded, tBool))
+}
+
+test("roundtrip string") {
+    val encoded = encodeType(tString)
+    val decoded = decodeType(encoded)
+    assertTrue(typesEqual(decoded, tString))
+}
+
+test("roundtrip unit") {
+    val encoded = encodeType(tUnit)
+    val decoded = decodeType(encoded)
+    assertTrue(typesEqual(decoded, tUnit))
+}
+
+test("roundtrip any") {
+    val encoded = encodeType(tAny)
+    val decoded = decodeType(encoded)
+    assertTrue(typesEqual(decoded, tAny))
+}
+
+test("roundtrip primitive with extra ids") {
+    val original = primitiveType([intTypeId, newTypeId("mymod", "mypkg", "MyAlias")])
+    val encoded = encodeType(original)
+    val decoded = decodeType(encoded)
+    assertTrue(typesEqual(decoded, original))
+}
+
+test("roundtrip function") {
+    val original = functionType([tInt, tString, tBool], ["T"], 1)
+    val encoded = encodeType(original)
+    val decoded = decodeType(encoded)
+    assertTrue(typesEqual(decoded, original))
+}
+
+test("roundtrip record") {
+    val original = recordType([newTypeId("std", "lang.map", "Map")], [{ name: "name", fieldType: tString }, { name: "age", fieldType: tInt }], [])
+    val encoded = encodeType(original)
+    val decoded = decodeType(encoded)
+    assertTrue(typesEqual(decoded, original))
+}
+
+test("roundtrip sum") {
+    val original = sumType([newTypeId("test", "pkg", "Either")], tString, tInt, [])
+    val encoded = encodeType(original)
+    val decoded = decodeType(encoded)
+    assertTrue(typesEqual(decoded, original))
+}
+
+test("roundtrip variable") {
+    val original = variableType("T", 0)
+    val encoded = encodeType(original)
+    val decoded = decodeType(encoded)
+    assertTrue(typesEqual(decoded, original))
+}
+
+test("roundtrip array") {
+    val original = arrayType(tInt, [])
+    val encoded = encodeType(original)
+    val decoded = decodeType(encoded)
+    assertTrue(typesEqual(decoded, original))
+}
+
+test("roundtrip poly") {
+    val v = variableType("T", 0)
+    val ft = functionType([v, v], ["T"], 0)
+    val original = polyType(1, ft)
+    val encoded = encodeType(original)
+    val decoded = decodeType(encoded)
+    assertTrue(typesEqual(decoded, original))
+}
+
+test("roundtrip recursive") {
+    val v = variableType("X", 0)
+    val r = recordType([newTypeId("test", "pkg", "List")], [{ name: "head", fieldType: tInt }, { name: "tail", fieldType: v }], [])
+    val original = recursiveType(v, r)
+    val encoded = encodeType(original)
+    val decoded = decodeType(encoded)
+    assertTrue(typesEqual(decoded, original))
+}
+
+test("roundtrip higher-order function") {
+    val inner = functionType([tInt, tBool], [], 0)
+    val outer = functionType([inner, tString], [], 0)
+    val encoded = encodeType(outer)
+    val decoded = decodeType(encoded)
+    assertTrue(typesEqual(decoded, outer))
+}
+
+test("roundtrip array of records") {
+    val rec = recordType([newTypeId("m", "p", "Point")], [{ name: "x", fieldType: tFloat }, { name: "y", fieldType: tFloat }], [])
+    val original = arrayType(rec, [])
+    val encoded = encodeType(original)
+    val decoded = decodeType(encoded)
+    assertTrue(typesEqual(decoded, original))
+}
+
+summary()

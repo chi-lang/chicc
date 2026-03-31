@@ -1,0 +1,144 @@
+// Test cli.chi functions
+// Tests for the CLI entry point module
+
+// ============================================================================
+// Tests for defaultOutputPath (via compileFile / internal logic)
+// ============================================================================
+
+// We test the public API functions that don't require file I/O
+
+// ============================================================================
+// Tests for hasErrors integration
+// ============================================================================
+
+test("cliMain with no args returns 1") {
+    val args: any = luaExpr("{}")
+    val result = cliMain(args)
+    assertEqual(result, 1)
+}
+
+test("cliMain with -h returns 0") {
+    val args: any = luaExpr("{'-h'}")
+    val result = cliMain(args)
+    assertEqual(result, 0)
+}
+
+test("cliMain with --help returns 0") {
+    val args: any = luaExpr("{'--help'}")
+    val result = cliMain(args)
+    assertEqual(result, 0)
+}
+
+test("cliMain compile without file returns 1") {
+    val args: any = luaExpr("{'compile'}")
+    val result = cliMain(args)
+    assertEqual(result, 1)
+}
+
+test("cliMain compile with non-chi file returns 1") {
+    val args: any = luaExpr("{'compile', 'file.txt'}")
+    val result = cliMain(args)
+    assertEqual(result, 1)
+}
+
+test("cliMain run without file returns 1") {
+    val args: any = luaExpr("{'run'}")
+    val result = cliMain(args)
+    assertEqual(result, 1)
+}
+
+test("cliMain run with non-chi file returns 1") {
+    val args: any = luaExpr("{'run', 'file.txt'}")
+    val result = cliMain(args)
+    assertEqual(result, 1)
+}
+
+test("cliMain unknown command returns 1") {
+    val args: any = luaExpr("{'foobar'}")
+    val result = cliMain(args)
+    assertEqual(result, 1)
+}
+
+// ============================================================================
+// Tests for compileFile with valid source
+// ============================================================================
+
+test("compileFile compiles simple source") {
+    // Write a temp file
+    embedLua("local f = io.open('/tmp/test_chicc_input.chi', 'w')")
+    embedLua("f:write('val x = 42\\n')")
+    embedLua("f:close()")
+
+    loadStdlib()
+    val result = compileFile("/tmp/test_chicc_input.chi", "/tmp/test_chicc_output.lua")
+    assertEqual(result, 0)
+
+    // Verify output file exists and contains Lua
+    val output: string = luaExpr("(function() local f = io.open('/tmp/test_chicc_output.lua', 'r'); if f then local s = f:read('a'); f:close(); return s end; return '' end)()")
+    val hasContent: bool = luaExpr("string.len(output) > 0")
+    assertTrue(hasContent)
+
+    // Clean up
+    embedLua("os.remove('/tmp/test_chicc_input.chi')")
+    embedLua("os.remove('/tmp/test_chicc_output.lua')")
+}
+
+test("compileFile returns 1 for invalid source") {
+    // Write a temp file with invalid syntax
+    embedLua("local f = io.open('/tmp/test_chicc_bad.chi', 'w')")
+    embedLua("f:write('fn {')")
+    embedLua("f:close()")
+
+    loadStdlib()
+    val result = compileFile("/tmp/test_chicc_bad.chi", "/tmp/test_chicc_bad.lua")
+    assertEqual(result, 1)
+
+    // Clean up
+    embedLua("os.remove('/tmp/test_chicc_bad.chi')")
+    embedLua("os.remove('/tmp/test_chicc_bad.lua')")
+}
+
+// ============================================================================
+// Tests for runFile
+// ============================================================================
+
+test("runFile executes simple source") {
+    embedLua("local f = io.open('/tmp/test_chicc_run.chi', 'w')")
+    embedLua("f:write('val x = 42\\n')")
+    embedLua("f:close()")
+
+    loadStdlib()
+    val result = runFile("/tmp/test_chicc_run.chi")
+    assertEqual(result, 0)
+
+    embedLua("os.remove('/tmp/test_chicc_run.chi')")
+}
+
+test("runFile returns 1 for invalid source") {
+    embedLua("local f = io.open('/tmp/test_chicc_runbad.chi', 'w')")
+    embedLua("f:write('fn {')")
+    embedLua("f:close()")
+
+    loadStdlib()
+    val result = runFile("/tmp/test_chicc_runbad.chi")
+    assertEqual(result, 1)
+
+    embedLua("os.remove('/tmp/test_chicc_runbad.chi')")
+}
+
+// ============================================================================
+// Tests for loadStdlib
+// ============================================================================
+
+test("loadStdlib returns true when CHI_HOME is set") {
+    val hasHome: bool = luaExpr("os.getenv('CHI_HOME') ~= nil")
+    if hasHome {
+        val result = loadStdlib()
+        assertTrue(result)
+    } else {
+        // Skip test if CHI_HOME not set
+        assertTrue(true)
+    }
+}
+
+summary()

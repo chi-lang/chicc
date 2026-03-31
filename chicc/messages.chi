@@ -1,0 +1,75 @@
+// chicc/chicc/messages.chi
+package user/messages
+import std/lang { embedLua }
+
+// In concatenated builds, pub fn compiles to __P_.fnName.
+// embedLua/luaExpr code uses bare names. This metatable fallback
+// makes bare name lookups resolve to __P_ entries.
+embedLua("setmetatable(_G, { __index = __P_ })")
+
+// A compiler message (error or warning)
+// Uses inline structural type instead of CodePoint to avoid
+// inlining order dependency with source.chi
+type Message = {
+    code: string,
+    text: string,
+    codePoint: { line: int, column: int } | unit
+}
+
+pub fn newMessage(code: string, text: string, cp: { line: int, column: int } | unit): Message {
+    { code: code, text: text, codePoint: cp }
+}
+
+// Message constructors — one per error type from Analyzer.kt
+
+pub fn genericError(msg: string, cp: { line: int, column: int } | unit): Message {
+    newMessage("ERROR", msg, cp)
+}
+
+pub fn invalidModuleName(moduleName: string, cp: { line: int, column: int } | unit): Message {
+    newMessage("INVALID_MODULE_NAME", "Invalid module name '$moduleName'", cp)
+}
+
+pub fn invalidPackageName(packageName: string, cp: { line: int, column: int } | unit): Message {
+    newMessage("INVALID_PACKAGE_NAME", "Invalid package name '$packageName'", cp)
+}
+
+pub fn syntaxError(msg: string, cp: { line: int, column: int } | unit): Message {
+    newMessage("SYNTAX_ERROR", "Syntax error: $msg", cp)
+}
+
+pub fn typeMismatch(expected: string, actual: string, cp: { line: int, column: int } | unit): Message {
+    newMessage("TYPE_MISMATCH", "Expected type is '$expected' but got '$actual'", cp)
+}
+
+pub fn notAFunction(cp: { line: int, column: int } | unit): Message {
+    newMessage("NOT_A_FUNCTION", "This is not a function", cp)
+}
+
+pub fn functionArityError(expectedCount: int, actualCount: int, cp: { line: int, column: int } | unit): Message {
+    newMessage("FUNCTION_ARITY_ERROR", "Function requires $expectedCount parameters, but was called with $actualCount", cp)
+}
+
+pub fn unrecognizedName(name: string, cp: { line: int, column: int } | unit): Message {
+    newMessage("UNRECOGNIZED_NAME", "Name '$name' was not recognized", cp)
+}
+
+pub fn cannotAccessInternalName(name: string, cp: { line: int, column: int } | unit): Message {
+    newMessage("CANNOT_ACCESS_INTERNAL", "$name is not public and is not from this module", cp)
+}
+
+pub fn typeIsNotIndexable(typeDesc: string, cp: { line: int, column: int } | unit): Message {
+    newMessage("TYPE_NOT_INDEXABLE", "Type '$typeDesc' cannot be indexed", cp)
+}
+
+pub fn cannotChangeImmutableVariable(cp: { line: int, column: int } | unit): Message {
+    newMessage("CANNOT_CHANGE_IMMUTABLE", "Cannot change immutable variable", cp)
+}
+
+pub fn memberDoesNotExist(typeDesc: string, member: string, cp: { line: int, column: int } | unit): Message {
+    newMessage("MEMBER_NOT_FOUND", "Type $typeDesc does not have field '$member'", cp)
+}
+
+pub fn infiniteType(varName: string, typeDesc: string, cp: { line: int, column: int } | unit): Message {
+    newMessage("INFINITE_TYPE", "Infinite type: cannot construct the infinite type '$varName' = '$typeDesc'", cp)
+}

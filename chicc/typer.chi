@@ -1,0 +1,697 @@
+// chicc/chicc/typer.chi
+package user/typer
+import std/lang { luaExpr, embedLua }
+import std/lang.array { size, push }
+
+// --- Helper: throw a typer error ---
+
+fn typerErr(message: any, section: any) {
+    val isNil: bool = luaExpr("section == nil")
+    if isNil {
+        embedLua("error({ code = 'ERROR', text = message })")
+    } else {
+        val cp = toCodePoint(section as Section)
+        embedLua("error({ code = 'ERROR', text = message, codePoint = cp })")
+    }
+}
+
+// --- Helper: remove a type from a sum type ---
+// Flatten sum via sumListTypes, filter out matching type, fold remaining back
+
+fn sumRemoveType(sumT: any, toRemove: any): any {
+    val allTypes = sumListTypes(sumT as Type)
+    val count = luaExpr("#allTypes") as int
+    val filtered = luaExpr("{}") as any
+    var i = 1
+    while i <= count {
+        val item = luaExpr("allTypes[i]") as Type
+        if typeEquals(item, toRemove as Type) == false {
+            embedLua("table.insert(filtered, item)")
+        }
+        i = i + 1
+    }
+    val filteredCount = luaExpr("#filtered") as int
+    if filteredCount == 0 {
+        return tUnit
+    }
+    val first = luaExpr("filtered[1]") as Type
+    var result: Type = first
+    var j = 2
+    while j <= filteredCount {
+        val next = luaExpr("filtered[j]") as Type
+        result = sumCreate(luaExpr("{}") as array[TypeId], result, next, luaExpr("{}") as array[string])
+        j = j + 1
+    }
+    result
+}
+
+// --- Helper: fill default arguments for UFCS calls ---
+
+fn fillDefaultArgs(callParams: any, symbol: any) {
+    if symbol == unit { return unit }
+    val symType = luaExpr("symbol.symbolType") as any
+    if symType == unit { return unit }
+    val symTag = luaExpr("symType.tag or ''") as string
+    // Unwrap poly if needed
+    var bodyType: any = symType
+    if symTag == "poly" {
+        bodyType = luaExpr("symType.body") as any
+    }
+    val bodyTag = luaExpr("bodyType.tag or ''") as string
+    if bodyTag != "fn" { return unit }
+    val defs = luaExpr("bodyType.defaults or 0") as int
+    if defs <= 0 { return unit }
+    val types = luaExpr("bodyType.types") as any
+    val typesCount = luaExpr("#types") as int
+    // paramCount is typesCount - 1 (last is return type)
+    val paramCount = typesCount - 1
+    val callParamsCount = luaExpr("#callParams") as int
+    if callParamsCount >= paramCount { return unit }
+    // Fill missing params with atom exprs that have variable types
+    var idx = callParamsCount + 1
+    while idx <= paramCount {
+        val paramType = luaExpr("types[idx]") as any
+        val filler = atomExpr("unit", paramType as Type, unit)
+        embedLua("table.insert(callParams, filler)")
+        idx = idx + 1
+    }
+    unit
+}
+
+// --- Helper: add a constraint to constraints list ---
+
+fn addConstraint(constraints: any, expected: any, actual: any, section: any) {
+    val c = newConstraint(expected, actual, section, luaExpr("{}") as array[any])
+    embedLua("table.insert(constraints, c)")
+}
+
+// --- Shared '@' placeholder type variable for default-arg type inference ---
+// All '@' atoms within one type-check batch share this variable so that
+// constraints from different calls (e.g. greet("x") and repeatStr("y")) are
+// linked, replicating real chi compiler's behavior that causes TYPE_MISMATCH.
+var typerDefaultPlaceholder: any = unit
+
+pub fn typerResetDefaultPlaceholder() {
+    typerDefaultPlaceholder = unit
+}
+
+// --- Forward declaration for typeTerm (needed before typeTerms references it) ---
+pub var typeTerm: (any, int, any) -> any = { term: any, level: int, constraints: any -> unit }
+
+// --- Main API ---
+
+pub fn typeTerms(terms: any, constraints: any, level: int): any {
+    val count = luaExpr("#terms") as int
+    val results = luaExpr("{}") as any
+    var i = 1
+    while i <= count {
+        val term = luaExpr("terms[i]") as any
+        val t = typeTerm(term, level, constraints)
+        embedLua("table.insert(results, t)")
+        i = i + 1
+    }
+    results
+}
+
+fn typeTermImpl(term: any, level: int, constraints: any): any {
+    val kind = luaExpr("term.kind") as string
+
+    val result: any = if kind == "atom" {
+        // 1. atom: return pre-set type
+        val t = luaExpr("term.exprType") as any
+        // If type is nil (e.g. '@' default placeholder), use shared placeholder
+        // variable so all '@' atoms in the same constraint batch share one type.
+        if t == unit {
+            if typerDefaultPlaceholder == unit {
+                typerDefaultPlaceholder = icFreshVariable(level)
+            }
+            typerDefaultPlaceholder
+        } else {
+            t
+        }
+    } else if kind == "variable_access" {
+        // 2. variable_access: get target type, instantiate
+        val target = luaExpr("term.target") as any
+        val section = luaExpr("term.section") as any
+        val rawType = icGetTargetType(target, level, section)
+        rawType
+    } else if kind == "create_record" {
+        // 3. create_record: build record type from field values
+        val fields = luaExpr("term.recordFields") as any
+        val fieldCount = luaExpr("#fields") as int
+        val newFields = luaExpr("{}") as any
+        var i = 1
+        while i <= fieldCount {
+            val f = luaExpr("fields[i]") as any
+            val fName = luaExpr("f.name") as string
+            val fValue = luaExpr("f.value") as any
+            val fType = typeTerm(fValue, level, constraints)
+            val rf = luaExpr("{ name = fName, fieldType = fType }") as any
+            embedLua("table.insert(newFields, rf)")
+            i = i + 1
+        }
+        recordType(luaExpr("{}") as array[TypeId], newFields as array[RecordField], luaExpr("{}") as array[string])
+    } else if kind == "create_array" {
+        // 4. create_array: fresh elementType, constrain all values
+        val elementType = icFreshVariable(level)
+        val values = luaExpr("term.arrayValues") as any
+        val valueTypes = typeTerms(values, constraints, level)
+        val vtCount = luaExpr("#valueTypes") as int
+        var i = 1
+        while i <= vtCount {
+            val vt = luaExpr("valueTypes[i]") as any
+            val section = luaExpr("term.section") as any
+            addConstraint(constraints, elementType, vt, section)
+            i = i + 1
+        }
+        arrayType(elementType as Type, luaExpr("{}") as array[string])
+    } else if kind == "fn" {
+        // 5. fn: process params, type body in new scope
+        val fnResult: any = icWithNewLocalScope({
+            val returnType = icFreshVariable(level)
+            val params = luaExpr("term.parameters") as any
+            val paramCount = luaExpr("#params") as int
+            val paramTypes = luaExpr("{}") as any
+            var i = 1
+            while i <= paramCount {
+                val p = luaExpr("params[i]") as any
+                val pName = luaExpr("p.name") as string
+                val pType = luaExpr("p.paramType") as any
+                val paramType: any = if pType != unit {
+                    pType
+                } else {
+                    icFreshVariable(level)
+                }
+                // Handle default values
+                val defaultValues = luaExpr("term.defaultValues") as any
+                if defaultValues != unit {
+                    val defaultVal = luaExpr("defaultValues[pName]") as any
+                    if defaultVal != unit {
+                        val dvType = typeTerm(defaultVal, level, constraints)
+                        val dvSection = luaExpr("defaultVal.section") as any
+                        addConstraint(constraints, paramType, dvType, dvSection)
+                    }
+                }
+                icDefineLocalSymbol(pName, paramType)
+                embedLua("table.insert(paramTypes, paramType)")
+                i = i + 1
+            }
+            val body = luaExpr("term.body") as any
+            val bodyType = typeTerm(body, level, constraints)
+            embedLua("table.insert(paramTypes, returnType)")
+            val fnType = functionType(paramTypes as array[Type], luaExpr("{}") as array[string], 0)
+            val bodySection = luaExpr("body.section") as any
+            addConstraint(constraints, returnType, bodyType, bodySection)
+            fnType
+        })
+        fnResult
+    } else if kind == "block" {
+        // 6. block: type each body expr at level+1, return last type
+        val bodyExprs = luaExpr("term.blockBody") as any
+        val bodyCount = luaExpr("#bodyExprs") as int
+        if bodyCount == 0 {
+            tUnit
+        } else {
+            val types = typeTerms(bodyExprs, constraints, level + 1)
+            val lastType = luaExpr("types[#types]") as any
+            lastType
+        }
+    } else if kind == "fn_call" {
+        // 7. fn_call: type callee, handle UFCS, build call type
+        val callee = luaExpr("term.callee") as any
+        val definedFunctionType = typeTerm(callee, level, constraints)
+        val fnCallResult = icFreshVariable(level)
+
+        // Check if callee was field_access and handle UFCS rewriting
+        val calleeKind = luaExpr("term.callee.kind") as string
+        if calleeKind == "field_access" {
+            val dotOp = luaExpr("term.callee") as any
+            val dotTarget = luaExpr("dotOp.dotTarget") as any
+            if dotTarget != unit {
+                val dtTag = luaExpr("dotTarget.tag") as string
+                if dtTag == "field" {
+                    // field: leave callee as-is
+                } else if dtTag == "local_fn" {
+                    // local_fn: prepend receiver, look up symbol, fill defaults
+                    val dotOp_receiver = luaExpr("dotOp.receiver") as any
+                    embedLua("table.insert(term.callParams, 1, dotOp_receiver)")
+                    val dtName = luaExpr("dotTarget.name") as string
+                    val symbol = luaExpr("ctGetLocalSymbol(icCompileTables, dtName)") as any
+                    fillDefaultArgs(luaExpr("term.callParams") as any, symbol)
+                    val memberSec = luaExpr("dotOp.memberSection") as Section | unit
+                    val newCallee = variableAccessExpr(localTarget(dtName), memberSec)
+                    val calleeType = luaExpr("dotOp.exprType") as Type | unit
+                    setExprType(newCallee, calleeType)
+                    embedLua("term.callee = newCallee")
+                } else if dtTag == "package_fn" {
+                    // package_fn: prepend receiver, look up via ns, fill defaults
+                    val dotOp_receiver = luaExpr("dotOp.receiver") as any
+                    embedLua("table.insert(term.callParams, 1, dotOp_receiver)")
+                    val dtMod = luaExpr("dotTarget.moduleName") as string
+                    val dtPkg = luaExpr("dotTarget.packageName") as string
+                    val dtName = luaExpr("dotTarget.name") as string
+                    val tgt = packageTarget(dtMod, dtPkg, dtName)
+                    val symbol = luaExpr("icNs and icNs.getSymbol and icNs.getSymbol(dtMod, dtPkg, dtName) or nil") as any
+                    fillDefaultArgs(luaExpr("term.callParams") as any, symbol)
+                    val memberSec = luaExpr("dotOp.memberSection") as Section | unit
+                    val newCallee = variableAccessExpr(tgt, memberSec)
+                    val calleeType = luaExpr("dotOp.exprType") as Type | unit
+                    setExprType(newCallee, calleeType)
+                    embedLua("term.callee = newCallee")
+                }
+            }
+        }
+
+        // Fill default args for direct function calls (variable_access callee)
+        if calleeKind == "variable_access" {
+            val calleeName = luaExpr("term.callee.target.name") as string
+            val symbol = luaExpr("ctGetLocalSymbol(icCompileTables, calleeName)") as any
+            fillDefaultArgs(luaExpr("term.callParams") as any, symbol)
+        }
+
+        // Type all call params and build callType
+        val callParams = luaExpr("term.callParams") as any
+        val callParamTypes = typeTerms(callParams, constraints, level)
+        embedLua("table.insert(callParamTypes, fnCallResult)")
+        val callType = functionType(callParamTypes as array[Type], luaExpr("{}") as array[string], 0)
+        val termSection = luaExpr("term.section") as any
+        addConstraint(constraints, definedFunctionType, callType, termSection)
+        fnCallResult
+    } else if kind == "field_access" {
+        // 8. field_access: type receiver, solve constraints, check field or UFCS
+        val receiver = luaExpr("term.receiver") as any
+        val receiverType = typeTerm(receiver, level, constraints)
+        val solutions = unify(constraints as array[any])
+        val finalReceiverType = mapType(receiverType as Type, solutions)
+        val fieldName = luaExpr("term.fieldName") as string
+        val memberSection = luaExpr("term.memberSection") as any
+
+        val isRec = luaExpr("finalReceiverType.tag == 'record'") as bool
+        var foundField = false
+        if isRec {
+            // Check if record has the field
+            val recFields = luaExpr("finalReceiverType.fields") as any
+            val recFieldCount = luaExpr("#recFields") as int
+            var fi = 1
+            while fi <= recFieldCount {
+                val f = luaExpr("recFields[fi]") as any
+                val fName = luaExpr("f.name") as string
+                if fName == fieldName {
+                    foundField = true
+                }
+                fi = fi + 1
+            }
+        }
+
+        if foundField {
+            // It's a record field access
+            val faResult = icFreshVariable(level)
+            setExprDotTarget(term as Expr, fieldDotTarget(fieldName))
+            // Create constraint: record({fieldName: faResult}) = receiverType
+            val rf = luaExpr("{ name = fieldName, fieldType = faResult }") as RecordField
+            val rfields = luaExpr("{}") as array[RecordField]
+            embedLua("table.insert(rfields, rf)")
+            val expectedRecType = recordType(luaExpr("{}") as array[TypeId], rfields, luaExpr("{}") as array[string])
+            addConstraint(constraints, expectedRecType, receiverType, memberSection)
+            faResult
+        } else {
+            // UFCS: look for functions
+            val localFns = icListLocalFunctionsForType(fieldName, finalReceiverType)
+            val localCount = luaExpr("#localFns") as int
+            val fn_: any = if localCount == 1 {
+                luaExpr("localFns[1]") as any
+            } else {
+                val pkgFns = icListCurrentPackageFunctionsForType(fieldName, finalReceiverType)
+                val pkgCount = luaExpr("#pkgFns") as int
+                if pkgCount == 1 {
+                    luaExpr("pkgFns[1]") as any
+                } else {
+                    val typePkgFns = icListTypesPackageFunctionsForType(fieldName, finalReceiverType)
+                    val typePkgCount = luaExpr("#typePkgFns") as int
+                    if typePkgCount == 1 {
+                        luaExpr("typePkgFns[1]") as any
+                    } else {
+                        unit
+                    }
+                }
+            }
+            if fn_ != unit {
+                val dotTarget = luaExpr("fn_.dotTarget") as DotTarget | unit
+                val fnType = luaExpr("fn_.typeScheme") as any
+                setExprDotTarget(term as Expr, dotTarget)
+                instantiate(fnType as Type, level, icFreshVariable as (int) -> Type)
+            } else {
+                // No function found
+                val cp = luaExpr("memberSection and toCodePoint(memberSection) or nil") as any
+                embedLua("error(memberDoesNotExist(finalReceiverType.tag or 'unknown', fieldName, cp))")
+                unit // unreachable
+            }
+        }
+    } else if kind == "name_declaration" {
+        // 9. name_declaration: type value, create poly type, define symbol
+        val expType = luaExpr("term.expectedType") as any
+        val expectedType: any = if expType != unit {
+            expType
+        } else {
+            icFreshVariable(level + 1)
+        }
+        val value = luaExpr("term.value") as any
+        val valueType = typeTerm(value, level + 1, constraints)
+        val valueSection = luaExpr("value.section") as any
+        addConstraint(constraints, expectedType, valueType, valueSection)
+        val solution = unify(constraints as array[any])
+        val mappedType = mapType(expectedType as Type, solution)
+        val polymorphicType = polyType(level, mappedType)
+        val declName = luaExpr("term.declName") as string
+        icDefineLocalSymbol(declName, polymorphicType)
+        expectedType
+    } else if kind == "assignment" {
+        // 10. assignment: get target type, type value, constrain
+        val target = luaExpr("term.target") as any
+        val section = luaExpr("term.section") as any
+        val variableT = icGetTargetType(target, level, section)
+        val value = luaExpr("term.value") as any
+        val valueType = typeTerm(value, level, constraints)
+        val valueSection = luaExpr("value.section") as any
+        addConstraint(constraints, variableT, valueType, valueSection)
+        variableT
+    } else if kind == "if_else" {
+        // 11. if_else: type condition (constrain=bool), type branches
+        val condition = luaExpr("term.condition") as any
+        val conditionType = typeTerm(condition, level, constraints)
+        val condSection = luaExpr("condition.section") as any
+        addConstraint(constraints, tBool, conditionType, condSection)
+        val thenBranch = luaExpr("term.thenBranch") as any
+        val thenBranchType = typeTerm(thenBranch, level, constraints)
+        val elseBranch = luaExpr("term.elseBranch") as any
+        if elseBranch != unit {
+            val elseBranchType = typeTerm(elseBranch, level, constraints)
+            sumCreate(luaExpr("{}") as array[TypeId], thenBranchType, elseBranchType, luaExpr("{}") as array[string])
+        } else {
+            sumCreate(luaExpr("{}") as array[TypeId], thenBranchType, tUnit, luaExpr("{}") as array[string])
+        }
+    } else if kind == "interpolated_string" {
+        // 12. interpolated_string: type parts, return string
+        val parts = luaExpr("term.parts") as any
+        typeTerms(parts, constraints, level)
+        tString
+    } else if kind == "cast" {
+        // 13. cast: type expression, return targetType
+        val castExpr_ = luaExpr("term.castExpr") as any
+        typeTerm(castExpr_, level, constraints)
+        val targetType = luaExpr("term.targetType") as any
+        targetType
+    } else if kind == "break" {
+        // 14. break: return unit
+        tUnit
+    } else if kind == "continue" {
+        // 15. continue: return unit
+        tUnit
+    } else if kind == "while_loop" {
+        // 16. while_loop: type condition (constrain=bool), type body
+        val condition = luaExpr("term.loopCondition") as any
+        val conditionType = typeTerm(condition, level, constraints)
+        val condSection = luaExpr("condition.section") as any
+        addConstraint(constraints, tBool, conditionType, condSection)
+        val loopBody = luaExpr("term.loopBody") as any
+        typeTerm(loopBody, level, constraints)
+        tUnit
+    } else if kind == "for_loop" {
+        // 17. for_loop: complex iteration typing
+        val iterable = luaExpr("term.iterable") as any
+        val iterableType = typeTerm(iterable, level, constraints)
+        val forState = luaExpr("term.forState") as any
+        val forInit = luaExpr("term.forInit") as any
+        var stateType: any = unit
+        var initType: any = unit
+        if forState != unit {
+            stateType = typeTerm(forState, level, constraints)
+        }
+        if forInit != unit {
+            initType = typeTerm(forInit, level, constraints)
+        }
+        val solution = unify(constraints as array[any])
+        val finalIterableType = mapType(iterableType as Type, solution)
+        val forVars = luaExpr("term.forVars") as any
+        val varCount = luaExpr("#forVars") as int
+        val varTypes = luaExpr("{}") as any
+        var vi = 1
+        while vi <= varCount {
+            val varName = luaExpr("forVars[vi]") as string
+            val varType = icFreshVariable(level)
+            val entry = luaExpr("{ name = varName, varType = varType }") as any
+            embedLua("table.insert(varTypes, entry)")
+            vi = vi + 1
+        }
+
+        val fitTag = luaExpr("finalIterableType.tag") as string
+        val termSection = luaExpr("term.section") as any
+
+        if fitTag == "array" {
+            // Array iteration
+            val elemType = luaExpr("finalIterableType.elementType") as any
+            if varCount == 1 {
+                val vt1 = luaExpr("varTypes[1].varType") as any
+                addConstraint(constraints, elemType, vt1, termSection)
+            } else if varCount == 2 {
+                val vt1 = luaExpr("varTypes[1].varType") as any
+                val vt2 = luaExpr("varTypes[2].varType") as any
+                addConstraint(constraints, tInt, vt1, termSection)
+                addConstraint(constraints, elemType, vt2, termSection)
+            } else {
+                typerErr("Too many variable names!", termSection)
+            }
+        } else if fitTag == "record" {
+            // Record iteration
+            if varCount != 2 {
+                typerErr("Iteration through record should have two variables", termSection)
+            }
+            val vt1 = luaExpr("varTypes[1].varType") as any
+            val vt2 = luaExpr("varTypes[2].varType") as any
+            addConstraint(constraints, tString, vt1, termSection)
+            addConstraint(constraints, tAny, vt2, termSection)
+        } else if fitTag == "fn" {
+            // Generator function iteration
+            if varCount != 1 {
+                typerErr("Generator function requires only one variable", termSection)
+            }
+            val fnTypes = luaExpr("finalIterableType.types") as any
+            val fnTypesCount = luaExpr("#fnTypes") as int
+
+            if stateType != unit && initType != unit {
+                // Stateful generator
+                if fnTypesCount != 3 {
+                    typerErr("Stateful generator function should have two arguments", termSection)
+                }
+                val stateArgType = luaExpr("fnTypes[1]") as any
+                val lastArgType = luaExpr("fnTypes[2]") as any
+                val vt1 = luaExpr("varTypes[1].varType") as any
+                addConstraint(constraints, lastArgType, vt1, termSection)
+                addConstraint(constraints, initType, lastArgType, termSection)
+                addConstraint(constraints, stateType, stateArgType, termSection)
+            } else {
+                // Basic generator: no arguments, returns optional value
+                if fnTypesCount != 1 {
+                    typerErr("Generator function should have no arguments", termSection)
+                }
+            }
+
+            // Verify return type is an option (has optionTypeId)
+            val returnValue = luaExpr("fnTypes[#fnTypes]") as any
+            val returnIds = luaExpr("returnValue.ids or {}") as any
+            val returnIdsCount = luaExpr("#returnIds") as int
+            var hasOptionId = false
+            var ri = 1
+            while ri <= returnIdsCount {
+                val rid = luaExpr("returnIds[ri]") as TypeId
+                if typeIdEquals(rid, optionTypeId) {
+                    hasOptionId = true
+                }
+                ri = ri + 1
+            }
+            if hasOptionId {
+                val optionalType = sumRemoveType(returnValue, tUnit)
+                val vt1 = luaExpr("varTypes[1].varType") as any
+                addConstraint(constraints, optionalType, vt1, termSection)
+            } else {
+                typerErr("Generator function should return optional value (value or unit)", termSection)
+            }
+        } else {
+            typerErr("Unsupported iterable type in for loop", termSection)
+        }
+
+        // Define loop variables in new scope and type body
+        icWithNewLocalScope({
+            val vtCount = luaExpr("#varTypes") as int
+            var vti = 1
+            while vti <= vtCount {
+                val vte = luaExpr("varTypes[vti]") as any
+                val vteName = luaExpr("vte.name") as string
+                val vteType = luaExpr("vte.varType") as any
+                icDefineLocalSymbol(vteName, vteType)
+                vti = vti + 1
+            }
+            val forBody = luaExpr("term.forBody") as any
+            typeTerm(forBody, level, constraints)
+            unit
+        })
+        tUnit
+    } else if kind == "field_assignment" {
+        // 18. field_assignment: type receiver, type value, constrain
+        val receiver = luaExpr("term.receiver") as any
+        val receiverType = typeTerm(receiver, level, constraints)
+        val value = luaExpr("term.value") as any
+        val valueType = typeTerm(value, level, constraints)
+        val fieldName = luaExpr("term.fieldName") as string
+        // Build expected record type
+        val rf = luaExpr("{ name = fieldName, fieldType = valueType }") as RecordField
+        val rfields = luaExpr("{}") as array[RecordField]
+        embedLua("table.insert(rfields, rf)")
+        val expectedRecType = recordType(luaExpr("{}") as array[TypeId], rfields, luaExpr("{}") as array[string])
+
+        val faResult = icFreshVariable(level)
+        val valueSection = luaExpr("value.section") as any
+        val receiverSection = luaExpr("receiver.section") as any
+        addConstraint(constraints, valueType, faResult, valueSection)
+        addConstraint(constraints, expectedRecType, receiverType, receiverSection)
+        faResult
+    } else if kind == "effect_definition" {
+        // 19. effect_definition: return pre-set type
+        val t = luaExpr("term.exprType") as any
+        t
+    } else if kind == "handle" {
+        // 20. handle: fresh result, type body, handle cases
+        val handleResult = icFreshVariable(level)
+        val handleBody = luaExpr("term.handleBody") as any
+        val bodyType = typeTerm(handleBody, level, constraints)
+        val bodySection = luaExpr("handleBody.section") as any
+        addConstraint(constraints, handleResult, bodyType, bodySection)
+
+        val cases = luaExpr("term.handleCases") as any
+        val caseCount = luaExpr("#cases") as int
+        var ci = 1
+        while ci <= caseCount {
+            val case_ = luaExpr("cases[ci]") as any
+            val caseMod = luaExpr("case_.moduleName") as string
+            val casePkg = luaExpr("case_.packageName") as string
+            val caseEffName = luaExpr("case_.effectName") as string
+            val caseTgt = packageTarget(caseMod, casePkg, caseEffName)
+            val termSection = luaExpr("term.section") as any
+            val effectType = icGetTargetType(caseTgt, level, termSection)
+
+            val etTag = luaExpr("effectType.tag") as string
+            if etTag == "fn" {
+                icWithNewLocalScope({
+                    val argNames = luaExpr("case_.argumentNames") as any
+                    val etTypes = luaExpr("effectType.types") as any
+                    val etTypesCount = luaExpr("#etTypes") as int
+                    // params are types[1..n-1], return is types[n]
+                    val argCount = luaExpr("#argNames") as int
+                    var ai = 1
+                    while ai <= argCount {
+                        val argName = luaExpr("argNames[ai]") as string
+                        val argType = luaExpr("etTypes[ai]") as any
+                        icDefineLocalSymbol(argName, argType)
+                        ai = ai + 1
+                    }
+                    // Define "resume" function
+                    val effectReturnType = luaExpr("etTypes[#etTypes]") as any
+                    val resumeRetType = icFreshVariable(level)
+                    val resumeTypes = luaExpr("{}") as any
+                    embedLua("table.insert(resumeTypes, effectReturnType)")
+                    embedLua("table.insert(resumeTypes, resumeRetType)")
+                    val resumeType = functionType(resumeTypes as array[Type], luaExpr("{}") as array[string], 0)
+                    icDefineLocalSymbol("resume", resumeType)
+                    val caseBody = luaExpr("case_.body") as any
+                    val caseBodyType = typeTerm(caseBody, level, constraints)
+                    val caseBodySection = luaExpr("case_.body.section") as any
+                    addConstraint(constraints, handleResult, caseBodyType, caseBodySection)
+                    unit
+                })
+            } else {
+                val caseSection = luaExpr("case_.section") as any
+                typerErr("Effect has non-function type", caseSection)
+            }
+            ci = ci + 1
+        }
+        handleResult
+    } else if kind == "index_op" {
+        // 21. index_op: fresh elementType, constrain variable=array(elem), index=int
+        val elementType = icFreshVariable(level)
+        val variable = luaExpr("term.indexVariable") as any
+        val variableType_ = typeTerm(variable, level, constraints)
+        val index = luaExpr("term.indexExpr") as any
+        val indexType = typeTerm(index, level, constraints)
+        val variableSection = luaExpr("variable.section") as any
+        val indexSection = luaExpr("index.section") as any
+        addConstraint(constraints, variableType_, arrayType(elementType as Type, luaExpr("{}") as array[string]), variableSection)
+        addConstraint(constraints, tInt, indexType, indexSection)
+        elementType
+    } else if kind == "indexed_assignment" {
+        // 22. indexed_assignment: fresh elementType, constrain all parts
+        val elementType = icFreshVariable(level)
+        val variable = luaExpr("term.indexVariable") as any
+        val variableType_ = typeTerm(variable, level, constraints)
+        val value = luaExpr("term.indexValue") as any
+        val valueType = typeTerm(value, level, constraints)
+        val index = luaExpr("term.indexExpr") as any
+        val indexType = typeTerm(index, level, constraints)
+        val valueSection = luaExpr("value.section") as any
+        val variableSection = luaExpr("variable.section") as any
+        val indexSection = luaExpr("index.section") as any
+        addConstraint(constraints, elementType, valueType, valueSection)
+        addConstraint(constraints, variableType_, arrayType(elementType as Type, luaExpr("{}") as array[string]), variableSection)
+        addConstraint(constraints, tInt, indexType, indexSection)
+        elementType
+    } else if kind == "infix_op" {
+        // 23. infix_op: dispatch on operator
+        val op = luaExpr("term.op") as string
+        val left = luaExpr("term.left") as any
+        val right = luaExpr("term.right") as any
+        val lhsType = typeTerm(left, level, constraints)
+        val rhsType = typeTerm(right, level, constraints)
+        val leftSection = luaExpr("left.section") as any
+        val rightSection = luaExpr("right.section") as any
+        if op == "&&" || op == "||" {
+            addConstraint(constraints, tBool, lhsType, leftSection)
+            addConstraint(constraints, tBool, rhsType, rightSection)
+            tBool
+        } else if op == "<" || op == "<=" || op == ">" || op == ">=" || op == "==" || op == "!=" {
+            addConstraint(constraints, lhsType, rhsType, rightSection)
+            tBool
+        } else {
+            val infixResult = icFreshVariable(level)
+            addConstraint(constraints, infixResult, lhsType, leftSection)
+            addConstraint(constraints, infixResult, rhsType, rightSection)
+            infixResult
+        }
+    } else if kind == "is" {
+        // 24. is: type value, return bool
+        val isExpr_ = luaExpr("term.castExpr") as any
+        typeTerm(isExpr_, level, constraints)
+        tBool
+    } else if kind == "prefix_op" {
+        // 25. prefix_op: type expr (constrain=bool), return bool
+        val prefixExpr_ = luaExpr("term.prefixExpr") as any
+        val valueType = typeTerm(prefixExpr_, level, constraints)
+        val exprSection = luaExpr("prefixExpr_.section") as any
+        addConstraint(constraints, tBool, valueType, exprSection)
+        tBool
+    } else if kind == "return" {
+        // 26. return: type value or return unit
+        val returnValue = luaExpr("term.returnValue") as any
+        if returnValue != unit {
+            typeTerm(returnValue, level, constraints)
+        } else {
+            tUnit
+        }
+    } else {
+        typerErr("Unknown expression kind: $kind", luaExpr("term.section") as any)
+        tUnit // unreachable
+    }
+
+    // Set type on expression
+    setExprType(term as Expr, result as Type | unit)
+    result
+}
+typeTerm = typeTermImpl

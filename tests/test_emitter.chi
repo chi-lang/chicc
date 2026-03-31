@@ -1,0 +1,84 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/util { newStringBuilder, StringBuilder, toString }
+import user/ast { Program, Package, newPackage, newProgram }
+import user/emitter { EmitterState, newState, emit, nextTmpName, topLevelName, modName, pkgName, packagePath, localPackagePath, localQualifiedName, normaliseEffectName }
+
+test("newState initialises fields") {
+    val pkg = newPackage("mymod", "mypkg")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    assertFalse(st.inFunction)
+    assertEqual(st.nextTmpId, 0)
+    assertEqual(st.nextLoopId, 0)
+    assertEqual(st.currentLoopId, 0)
+    assertEqual(st.sb.toString(), "")
+}
+
+test("emit appends to string builder") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    emit(st, "hello")
+    assertEqual(st.sb.toString(), "hello")
+    emit(st, " world")
+    assertEqual(st.sb.toString(), "hello world")
+}
+
+test("nextTmpName sequential") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    assertEqual(nextTmpName(st), "tmp0")
+    assertEqual(nextTmpName(st), "tmp1")
+    assertEqual(nextTmpName(st), "tmp2")
+}
+
+test("nextTmpName increments nextTmpId") {
+    val pkg = newPackage("m", "p")
+    val prog = newProgram(pkg, [], [], [], unit)
+    val st = newState(prog)
+    nextTmpName(st)
+    assertEqual(st.nextTmpId, 1)
+    nextTmpName(st)
+    assertEqual(st.nextTmpId, 2)
+}
+
+test("topLevelName format") {
+    assertEqual(topLevelName("foo"), "__P_.foo")
+    assertEqual(topLevelName("myFunc"), "__P_.myFunc")
+}
+
+test("modName replaces dots") {
+    assertEqual(modName("std"), "std")
+    assertEqual(modName("my.module"), "my_module")
+    assertEqual(modName("a.b.c"), "a_b_c")
+}
+
+test("pkgName replaces dots") {
+    assertEqual(pkgName("lang"), "lang")
+    assertEqual(pkgName("lang.string"), "lang_string")
+    assertEqual(pkgName("a.b.c"), "a_b_c")
+}
+
+test("packagePath combines mod and pkg") {
+    assertEqual(packagePath("std", "lang"), "std__lang")
+    assertEqual(packagePath("my.mod", "my.pkg"), "my_mod__my_pkg")
+}
+
+test("localPackagePath adds prefix") {
+    assertEqual(localPackagePath("std", "lang"), "__std__lang")
+    assertEqual(localPackagePath("my.mod", "my.pkg"), "__my_mod__my_pkg")
+}
+
+test("localQualifiedName full path") {
+    assertEqual(localQualifiedName("std", "lang", "println"), "__std__lang.println")
+    assertEqual(localQualifiedName("my.mod", "my.pkg", "foo"), "__my_mod__my_pkg.foo")
+}
+
+test("normaliseEffectName replaces dots") {
+    assertEqual(normaliseEffectName("myEffect"), "myEffect")
+    assertEqual(normaliseEffectName("io.read"), "io_read")
+    assertEqual(normaliseEffectName("a.b.c"), "a_b_c")
+}
+
+summary()

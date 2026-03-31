@@ -1,0 +1,192 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/util { newStringBuilder, StringBuilder, toString }
+import user/ast { Program, Package, newPackage, newProgram, atomExpr, blockExpr, fnExpr, fnCallExpr, variableAccessExpr, nameDeclarationExpr, returnExpr, localTarget, packageTarget, newFnParam }
+import user/types { tInt, tString, tUnit }
+import user/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitBlock, emitFn, emitFnCall, emitNameDeclaration, emitVariableAccess }
+import std/lang { luaExpr, embedLua }
+
+fn freshState(): EmitterState {
+    val pkg = newPackage("mymod", "mypkg")
+    val prog = newProgram(pkg, [], [], [], unit)
+    newState(prog)
+}
+
+// Wire emitExpr to dispatch based on kind
+emitExpr = { st, expr ->
+    val kind: string = luaExpr("expr.kind")
+    if kind == "atom" { emitAtom(st, expr) }
+    else if kind == "block" { emitBlock(st, expr) }
+    else if kind == "fn" { emitFn(st, expr, "", false) }
+    else if kind == "fn_call" { emitFnCall(st, expr) }
+    else if kind == "variable_access" { emitVariableAccess(st, expr) }
+    else if kind == "name_declaration" { emitNameDeclaration(st, expr) }
+    else if kind == "return" {
+        val retVal: any = luaExpr("expr.returnValue")
+        if retVal != unit {
+            val result = emitExpr(st, retVal)
+            emit(st, "return $result;")
+        } else {
+            emit(st, "return;")
+        }
+        "nil"
+    }
+    else { "nil" }
+}
+
+// --- emitBlock tests ---
+
+test("emitBlock - empty block returns nil") {
+    val st = freshState()
+    val block = blockExpr([], unit)
+    val result = emitBlock(st, block)
+    assertEqual(result, "nil")
+    assertEqual(st.sb.toString(), "")
+}
+
+test("emitBlock - block with one atom expr") {
+    val st = freshState()
+    val a = atomExpr("42", tInt, unit)
+    val block = blockExpr([a], unit)
+    val result = emitBlock(st, block)
+    assertEqual(result, "(42)")
+    assertEqual(st.sb.toString(), "")
+}
+
+test("emitBlock - block with multiple exprs returns last") {
+    val st = freshState()
+    val a1 = atomExpr("1", tInt, unit)
+    val a2 = atomExpr("2", tInt, unit)
+    val a3 = atomExpr("99", tInt, unit)
+    val block = blockExpr([a1, a2, a3], unit)
+    val result = emitBlock(st, block)
+    assertEqual(result, "(99)")
+}
+
+test("emitBlock - stops at return") {
+    val st = freshState()
+    val a1 = atomExpr("1", tInt, unit)
+    val ret = returnExpr(atomExpr("42", tInt, unit), unit)
+    val a2 = atomExpr("99", tInt, unit)
+    val block = blockExpr([a1, ret, a2], unit)
+    val result = emitBlock(st, block)
+    // Should have emitted a1 and ret, but not a2
+    assertEqual(st.sb.toString(), "return (42);")
+}
+
+// --- emitFn tests ---
+
+test("emitFn - simple function no params") {
+    val st = freshState()
+    val body = blockExpr([atomExpr("42", tInt, unit)], unit)
+    val fnE = fnExpr([], unit, body, unit)
+    val result = emitFn(st, fnE, "", false)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local function tmp0() return (42) end;")
+}
+
+test("emitFn - function with params") {
+    val st = freshState()
+    val body = blockExpr([atomExpr("0", tInt, unit)], unit)
+    val params = [newFnParam("a", tInt, unit), newFnParam("b", tInt, unit)]
+    val fnE = fnExpr(params, unit, body, unit)
+    val result = emitFn(st, fnE, "", false)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local function tmp0(a,b) return (0) end;")
+}
+
+test("emitFn - top-level function") {
+    val st = freshState()
+    val body = blockExpr([atomExpr("1", tInt, unit)], unit)
+    val fnE = fnExpr([], unit, body, unit)
+    val result = emitFn(st, fnE, "myFunc", true)
+    assertEqual(result, "myFunc")
+    assertEqual(st.sb.toString(), "function __P_.myFunc() return (1) end;")
+}
+
+test("emitFn - body ends with return no duplicate") {
+    val st = freshState()
+    val ret = returnExpr(atomExpr("7", tInt, unit), unit)
+    val body = blockExpr([ret], unit)
+    val fnE = fnExpr([], unit, body, unit)
+    val result = emitFn(st, fnE, "", false)
+    assertEqual(result, "tmp0")
+    // Body has return so no extra "return" should be emitted
+    assertEqual(st.sb.toString(), "local function tmp0() return (7); end;")
+}
+
+// --- emitFnCall tests ---
+
+test("emitFnCall - normal call") {
+    val st = freshState()
+    val callee = variableAccessExpr(localTarget("foo"), unit)
+    val arg1 = atomExpr("42", tInt, unit)
+    val call = fnCallExpr(callee, [arg1], unit)
+    // We're not in a function, so callee resolves to __P_.foo
+    val result = emitFnCall(st, call)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0=__P_.foo((42));")
+}
+
+test("emitFnCall - embedLua special case") {
+    val st = freshState()
+    val callee = variableAccessExpr(packageTarget("std", "lang", "embedLua"), unit)
+    val codeArg = atomExpr("print('hi')", tString, unit)
+    val call = fnCallExpr(callee, [codeArg], unit)
+    val result = emitFnCall(st, call)
+    assertEqual(result, "nil")
+    assertEqual(st.sb.toString(), "print('hi')")
+}
+
+test("emitFnCall - luaExpr special case") {
+    val st = freshState()
+    val callee = variableAccessExpr(packageTarget("std", "lang", "luaExpr"), unit)
+    val codeArg = atomExpr("os.time()", tString, unit)
+    val call = fnCallExpr(callee, [codeArg], unit)
+    val result = emitFnCall(st, call)
+    assertEqual(result, "tmp0")
+    assertEqual(st.sb.toString(), "local tmp0=os.time();")
+}
+
+test("emitFnCall - call with default param @ placeholder") {
+    val st = freshState()
+    val callee = variableAccessExpr(localTarget("bar"), unit)
+    val arg1 = atomExpr("1", tInt, unit)
+    // "@" can't be passed as a string literal - it's intercepted as default param marker by the Chi compiler.
+    // Build the placeholder directly via embedLua.
+    embedLua("__placeholder = {kind='atom', atomValue='@', exprType=nil, used=false}")
+    val placeholder: any = luaExpr("__placeholder")
+    val arg2 = atomExpr("3", tInt, unit)
+    val call = fnCallExpr(callee, [arg1, placeholder, arg2], unit)
+    val result = emitFnCall(st, call)
+    assertEqual(result, "tmp0")
+    // Should skip the "@" placeholder
+    assertEqual(st.sb.toString(), "local tmp0=__P_.bar((1),(3));")
+}
+
+// --- emitNameDeclaration with fn shortcut ---
+
+test("emitNameDeclaration - top-level fn declaration uses emitFn") {
+    val st = freshState()
+    val body = blockExpr([atomExpr("10", tInt, unit)], unit)
+    val fnE = fnExpr([], unit, body, unit)
+    val decl = nameDeclarationExpr(false, "myFn", false, unit, fnE, unit)
+    val result = emitNameDeclaration(st, decl)
+    assertEqual(result, "myFn")
+    assertEqual(st.sb.toString(), "function __P_.myFn() return (10) end;")
+}
+
+test("emitNameDeclaration - fn inside function does NOT use shortcut") {
+    val st = freshState()
+    st.inFunction = true
+    val body = blockExpr([atomExpr("5", tInt, unit)], unit)
+    val fnE = fnExpr([], unit, body, unit)
+    val decl = nameDeclarationExpr(false, "inner", false, unit, fnE, unit)
+    val result = emitNameDeclaration(st, decl)
+    // Inside a function, it should NOT use the top-level shortcut
+    // It should emitExpr on the fn (which calls emitFn with empty name, non-topLevel)
+    // then do local inner=tmp0;
+    assertEqual(result, "inner")
+    assertEqual(st.sb.toString(), "local function tmp0() return (5) end;local inner=tmp0;")
+}
+
+summary()

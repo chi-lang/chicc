@@ -1,0 +1,52 @@
+import user/test_util { test, assertEqual, summary }
+import user/source { CodePoint }
+import user/messages { newMessage, genericError, typeMismatch, unrecognizedName, notAFunction, functionArityError, cannotChangeImmutableVariable, syntaxError }
+
+test("newMessage") {
+    val cp: CodePoint = { line: 1, column: 5 }
+    val m = newMessage("TEST", "test message", cp)
+    assertEqual(m.code, "TEST")
+    assertEqual(m.text, "test message")
+}
+
+test("genericError") {
+    val m = genericError("something went wrong", unit)
+    assertEqual(m.code, "ERROR")
+    assertEqual(m.text, "something went wrong")
+}
+
+test("typeMismatch") {
+    val cp: CodePoint = { line: 3, column: 10 }
+    val m = typeMismatch("int", "string", cp)
+    assertEqual(m.code, "TYPE_MISMATCH")
+    assertEqual(m.text, "Expected type is 'int' but got 'string'")
+}
+
+test("unrecognizedName") {
+    val m = unrecognizedName("foo", unit)
+    assertEqual(m.code, "UNRECOGNIZED_NAME")
+    assertEqual(m.text, "Name 'foo' was not recognized")
+}
+
+test("notAFunction") {
+    val m = notAFunction(unit)
+    assertEqual(m.code, "NOT_A_FUNCTION")
+}
+
+test("functionArityError") {
+    val m = functionArityError(2, 3, unit)
+    assertEqual(m.code, "FUNCTION_ARITY_ERROR")
+}
+
+test("cannotChangeImmutableVariable") {
+    val m = cannotChangeImmutableVariable(unit)
+    assertEqual(m.code, "CANNOT_CHANGE_IMMUTABLE")
+}
+
+test("syntaxError") {
+    val m = syntaxError("unexpected token", unit)
+    assertEqual(m.code, "SYNTAX_ERROR")
+    assertEqual(m.text, "Syntax error: unexpected token")
+}
+
+summary()

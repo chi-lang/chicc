@@ -1,0 +1,83 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/source { newSection }
+import user/types { tInt, tString }
+import user/ast { localTarget, packageTarget, atomExpr, blockExpr, fnCallExpr, variableAccessExpr, breakExpr, continueExpr, returnExpr, infixOpExpr, ifElseExpr, isTerminator, exprKind, exprAtomValue, exprChildren }
+
+test("localTarget") {
+    val t = localTarget("x")
+    assertEqual(t.tag, "local")
+    assertEqual(t.name, "x")
+    assertEqual(t.moduleName, "")
+    assertEqual(t.packageName, "")
+}
+
+test("packageTarget") {
+    val t = packageTarget("std", "lang", "println")
+    assertEqual(t.tag, "package")
+    assertEqual(t.name, "println")
+    assertEqual(t.moduleName, "std")
+    assertEqual(t.packageName, "lang")
+}
+
+test("atomExpr") {
+    val sec = newSection(1, 1, 1, 5)
+    val e = atomExpr("42", tInt, sec)
+    assertEqual(exprKind(e), "atom")
+    assertEqual(exprAtomValue(e), "42")
+}
+
+test("blockExpr") {
+    val a1 = atomExpr("1", tInt, unit)
+    val a2 = atomExpr("2", tInt, unit)
+    val b = blockExpr([a1, a2], unit)
+    assertEqual(exprKind(b), "block")
+}
+
+test("fnCallExpr") {
+    val func = variableAccessExpr(localTarget("foo"), unit)
+    val arg = atomExpr("1", tInt, unit)
+    val call = fnCallExpr(func, [arg], unit)
+    assertEqual(exprKind(call), "fn_call")
+}
+
+test("exprChildren - atom") {
+    val e = atomExpr("42", tInt, unit)
+    val children = exprChildren(e)
+    assertEqual(children.size(), 0)
+}
+
+test("exprChildren - block") {
+    val a1 = atomExpr("1", tInt, unit)
+    val a2 = atomExpr("2", tInt, unit)
+    val b = blockExpr([a1, a2], unit)
+    val children = exprChildren(b)
+    assertEqual(children.size(), 2)
+}
+
+test("exprChildren - fnCall") {
+    val func = variableAccessExpr(localTarget("foo"), unit)
+    val arg1 = atomExpr("1", tInt, unit)
+    val arg2 = atomExpr("2", tInt, unit)
+    val call = fnCallExpr(func, [arg1, arg2], unit)
+    val children = exprChildren(call)
+    assertEqual(children.size(), 3)
+}
+
+test("isTerminator - break") {
+    assertTrue(isTerminator(breakExpr(unit)))
+}
+
+test("isTerminator - continue") {
+    assertTrue(isTerminator(continueExpr(unit)))
+}
+
+test("isTerminator - return") {
+    val rv = atomExpr("0", tInt, unit)
+    assertTrue(isTerminator(returnExpr(rv, unit)))
+}
+
+test("isTerminator - atom") {
+    assertFalse(isTerminator(atomExpr("42", tInt, unit)))
+}
+
+summary()

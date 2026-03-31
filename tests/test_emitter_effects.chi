@@ -1,0 +1,252 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/util { newStringBuilder, StringBuilder, toString }
+import user/ast { Program, Package, newPackage, newProgram, atomExpr, blockExpr, effectDefinitionExpr, handleExpr, newHandleCase, nameDeclarationExpr, variableAccessExpr, localTarget, packageTarget, newFnParam }
+import user/types { tInt, tString, tBool, tUnit }
+import user/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitBlock, emitEffectDefinition, emitHandle, emitPackageInfo, collectRequires, topLevelName, normaliseEffectName, localQualifiedName, localPackagePath }
+import std/lang { luaExpr, embedLua }
+
+fn freshState(): EmitterState {
+    val pkg = newPackage("mymod", "mypkg")
+    val prog = newProgram(pkg, [], [], [], unit)
+    newState(prog)
+}
+
+// Wire emitExpr for tests
+emitExpr = { st, expr ->
+    val kind: string = luaExpr("expr.kind")
+    if kind == "atom" { emitAtom(st, expr) }
+    else if kind == "block" { emitBlock(st, expr) }
+    else if kind == "effect_definition" { emitEffectDefinition(st, expr) }
+    else if kind == "handle" { emitHandle(st, expr) }
+    else { "nil" }
+}
+
+// ===== emitEffectDefinition tests =====
+
+test("emitEffectDefinition - basic effect") {
+    val st = freshState()
+    val expr = effectDefinitionExpr("mymod", "mypkg", "ask", [newFnParam("prompt", tString, unit)], unit)
+    val result = emitEffectDefinition(st, expr)
+    assertEqual(result, "nil")
+    val output = st.sb.toString()
+    // Should emit: function __P_.ask(...) return coroutine.yield("__mymod__mypkg_ask", {...}) end;
+    embedLua("__ed_hasFn = string.find(output, 'function __P_.ask(', 1, true) ~= nil")
+    assertTrue(luaExpr("__ed_hasFn") as bool)
+    embedLua("__ed_hasYield = string.find(output, 'coroutine.yield', 1, true) ~= nil")
+    assertTrue(luaExpr("__ed_hasYield") as bool)
+    embedLua("__ed_hasKey = string.find(output, '__mymod__mypkg_ask', 1, true) ~= nil")
+    assertTrue(luaExpr("__ed_hasKey") as bool)
+}
+
+test("emitEffectDefinition - effect with dotted package name") {
+    val st = freshState()
+    val expr = effectDefinitionExpr("std", "io.console", "readLine", [], unit)
+    val result = emitEffectDefinition(st, expr)
+    assertEqual(result, "nil")
+    val output = st.sb.toString()
+    // normaliseEffectName replaces . with _ in the qualified name
+    embedLua("__ed2_hasKey = string.find(output, '__std__io_console_readLine', 1, true) ~= nil")
+    assertTrue(luaExpr("__ed2_hasKey") as bool)
+}
+
+// ===== emitHandle tests =====
+
+test("emitHandle - single case no args") {
+    val st = freshState()
+    val caseBody = blockExpr([atomExpr("42", tInt, unit)], unit)
+    val cases = [newHandleCase("mymod", "mypkg", "ask", [], caseBody, unit)]
+    val handleBody = blockExpr([atomExpr("1", tInt, unit)], unit)
+    val expr = handleExpr(handleBody, cases, unit)
+    val result = emitHandle(st, expr)
+    assertEqual(result, "tmp0")
+    val output = st.sb.toString()
+    // Check handlers table
+    embedLua("__eh1_hasHandlers = string.find(output, 'local tmp0_handlers={', 1, true) ~= nil")
+    assertTrue(luaExpr("__eh1_hasHandlers") as bool)
+    // Check handler key
+    embedLua("__eh1_hasKey = string.find(output, '__mymod__mypkg_ask=function(args)', 1, true) ~= nil")
+    assertTrue(luaExpr("__eh1_hasKey") as bool)
+    // Check resume function
+    embedLua("__eh1_hasResume = string.find(output, 'local function resume(x) return x end', 1, true) ~= nil")
+    assertTrue(luaExpr("__eh1_hasResume") as bool)
+    // Check coroutine body
+    embedLua("__eh1_hasBody = string.find(output, 'local tmp0_body=coroutine.create(function()', 1, true) ~= nil")
+    assertTrue(luaExpr("__eh1_hasBody") as bool)
+    // Check chi_handle_effect call
+    embedLua("__eh1_hasHandle = string.find(output, 'local tmp0=chi_handle_effect(tmp0_body,nil,tmp0_handlers)', 1, true) ~= nil")
+    assertTrue(luaExpr("__eh1_hasHandle") as bool)
+}
+
+test("emitHandle - case with arguments") {
+    val st = freshState()
+    val caseBody = blockExpr([atomExpr("99", tInt, unit)], unit)
+    val cases = [newHandleCase("mymod", "mypkg", "ask", ["prompt", "extra"], caseBody, unit)]
+    val handleBody = blockExpr([atomExpr("0", tInt, unit)], unit)
+    val expr = handleExpr(handleBody, cases, unit)
+    val result = emitHandle(st, expr)
+    val output = st.sb.toString()
+    // Check argument unpacking
+    embedLua("__eh2_hasArg1 = string.find(output, 'local prompt=args[1]', 1, true) ~= nil")
+    assertTrue(luaExpr("__eh2_hasArg1") as bool)
+    embedLua("__eh2_hasArg2 = string.find(output, 'local extra=args[2]', 1, true) ~= nil")
+    assertTrue(luaExpr("__eh2_hasArg2") as bool)
+}
+
+test("emitHandle - multiple cases have comma separator") {
+    val st = freshState()
+    val case1Body = blockExpr([atomExpr("1", tInt, unit)], unit)
+    val case2Body = blockExpr([atomExpr("2", tInt, unit)], unit)
+    val case1 = newHandleCase("mymod", "mypkg", "ask", [], case1Body, unit)
+    val case2 = newHandleCase("mymod", "mypkg", "log", [], case2Body, unit)
+    val handleBody = blockExpr([atomExpr("0", tInt, unit)], unit)
+    val expr = handleExpr(handleBody, [case1, case2], unit)
+    val result = emitHandle(st, expr)
+    val output = st.sb.toString()
+    // Both handler keys should appear
+    embedLua("__eh3_hasAsk = string.find(output, '__mymod__mypkg_ask=function', 1, true) ~= nil")
+    assertTrue(luaExpr("__eh3_hasAsk") as bool)
+    embedLua("__eh3_hasLog = string.find(output, '__mymod__mypkg_log=function', 1, true) ~= nil")
+    assertTrue(luaExpr("__eh3_hasLog") as bool)
+    // There should be a comma between cases
+    embedLua("__eh3_hasComma = string.find(output, 'end,__mymod__mypkg_log', 1, true) ~= nil")
+    assertTrue(luaExpr("__eh3_hasComma") as bool)
+}
+
+// ===== emitPackageInfo tests =====
+
+test("emitPackageInfo - name_declaration with type") {
+    val st = freshState()
+    val valExpr = atomExpr("42", tInt, unit)
+    val decl = nameDeclarationExpr(true, "x", false, unit, valExpr, unit)
+    embedLua("decl.exprType = {tag='primitive', ids={{moduleName='std',packageName='lang.int',name='int'}}}")
+    val prog = newProgram(newPackage("m", "p"), [], [], [decl], unit)
+    st.program = prog
+    emitPackageInfo(st)
+    val output = st.sb.toString()
+    embedLua("__pi1_hasName = string.find(output, '__S_.x={', 1, true) ~= nil")
+    assertTrue(luaExpr("__pi1_hasName") as bool)
+    embedLua("__pi1_hasPub = string.find(output, 'public=true', 1, true) ~= nil")
+    assertTrue(luaExpr("__pi1_hasPub") as bool)
+    embedLua("__pi1_hasMut = string.find(output, 'mutable=false', 1, true) ~= nil")
+    assertTrue(luaExpr("__pi1_hasMut") as bool)
+    embedLua("__pi1_hasType = string.find(output, \"type='\", 1, true) ~= nil")
+    assertTrue(luaExpr("__pi1_hasType") as bool)
+}
+
+test("emitPackageInfo - mutable name_declaration") {
+    val st = freshState()
+    val valExpr = atomExpr("0", tInt, unit)
+    val decl = nameDeclarationExpr(false, "counter", true, unit, valExpr, unit)
+    val prog = newProgram(newPackage("m", "p"), [], [], [decl], unit)
+    st.program = prog
+    emitPackageInfo(st)
+    val output = st.sb.toString()
+    embedLua("__pi2_hasMut = string.find(output, 'mutable=true', 1, true) ~= nil")
+    assertTrue(luaExpr("__pi2_hasMut") as bool)
+    embedLua("__pi2_hasPub = string.find(output, 'public=false', 1, true) ~= nil")
+    assertTrue(luaExpr("__pi2_hasPub") as bool)
+}
+
+test("emitPackageInfo - effect_definition entry") {
+    val st = freshState()
+    val effExpr = effectDefinitionExpr("m", "p", "myEffect", [], unit)
+    embedLua("effExpr.isPublic = true")
+    embedLua("effExpr.exprType = {tag='primitive', ids={{moduleName='std',packageName='lang.int',name='int'}}}")
+    val prog = newProgram(newPackage("m", "p"), [], [], [effExpr], unit)
+    st.program = prog
+    emitPackageInfo(st)
+    val output = st.sb.toString()
+    embedLua("__pi3_hasName = string.find(output, '__S_.myEffect={', 1, true) ~= nil")
+    assertTrue(luaExpr("__pi3_hasName") as bool)
+    embedLua("__pi3_hasPub = string.find(output, 'public=true', 1, true) ~= nil")
+    assertTrue(luaExpr("__pi3_hasPub") as bool)
+    embedLua("__pi3_hasMut = string.find(output, 'mutable=false', 1, true) ~= nil")
+    assertTrue(luaExpr("__pi3_hasMut") as bool)
+}
+
+test("emitPackageInfo - no type on declaration") {
+    val st = freshState()
+    val valExpr = atomExpr("42", tInt, unit)
+    val decl = nameDeclarationExpr(true, "y", false, unit, valExpr, unit)
+    // exprType is unit (nil) by default from constructor
+    val prog = newProgram(newPackage("m", "p"), [], [], [decl], unit)
+    st.program = prog
+    emitPackageInfo(st)
+    val output = st.sb.toString()
+    // Should NOT have type= field
+    embedLua("__pi4_noType = string.find(output, \"type='\", 1, true) == nil")
+    assertTrue(luaExpr("__pi4_noType") as bool)
+    // But should still have public and mutable
+    embedLua("__pi4_hasPub = string.find(output, 'public=true', 1, true) ~= nil")
+    assertTrue(luaExpr("__pi4_hasPub") as bool)
+}
+
+test("emitPackageInfo - skips other kinds") {
+    val st = freshState()
+    val atom = atomExpr("42", tInt, unit)
+    val prog = newProgram(newPackage("m", "p"), [], [], [atom], unit)
+    st.program = prog
+    emitPackageInfo(st)
+    val output = st.sb.toString()
+    assertEqual(output, "")
+}
+
+// ===== collectRequires tests =====
+
+test("collectRequires - no cross-package refs emits nothing") {
+    val st = freshState()
+    val expr = variableAccessExpr(localTarget("x"), unit)
+    val prog = newProgram(newPackage("mymod", "mypkg"), [], [], [expr], unit)
+    st.program = prog
+    collectRequires(st)
+    assertEqual(st.sb.toString(), "")
+}
+
+test("collectRequires - cross-package ref emits require") {
+    val st = freshState()
+    val expr = variableAccessExpr(packageTarget("other", "utils", "foo"), unit)
+    val prog = newProgram(newPackage("mymod", "mypkg"), [], [], [expr], unit)
+    st.program = prog
+    collectRequires(st)
+    val output = st.sb.toString()
+    embedLua("__cr1_hasReq = string.find(output, 'require(\"other/utils\")', 1, true) ~= nil")
+    assertTrue(luaExpr("__cr1_hasReq") as bool)
+    embedLua("__cr1_hasLocal = string.find(output, 'local __other__utils', 1, true) ~= nil")
+    assertTrue(luaExpr("__cr1_hasLocal") as bool)
+}
+
+test("collectRequires - same package ref does not emit require") {
+    val st = freshState()
+    val expr = variableAccessExpr(packageTarget("mymod", "mypkg", "bar"), unit)
+    val prog = newProgram(newPackage("mymod", "mypkg"), [], [], [expr], unit)
+    st.program = prog
+    collectRequires(st)
+    assertEqual(st.sb.toString(), "")
+}
+
+test("collectRequires - deduplicates refs") {
+    val st = freshState()
+    val expr1 = variableAccessExpr(packageTarget("other", "utils", "foo"), unit)
+    val expr2 = variableAccessExpr(packageTarget("other", "utils", "bar"), unit)
+    val prog = newProgram(newPackage("mymod", "mypkg"), [], [], [expr1, expr2], unit)
+    st.program = prog
+    collectRequires(st)
+    val output = st.sb.toString()
+    // Should only have one require for other/utils
+    embedLua("__cr3_count = 0; for _ in string.gmatch(output, 'require') do __cr3_count = __cr3_count + 1 end")
+    val reqCount: int = luaExpr("__cr3_count")
+    assertEqual(reqCount, 1)
+}
+
+test("collectRequires - nested cross-package ref in fn body") {
+    val st = freshState()
+    embedLua("__cr4_expr = {kind='name_declaration', declName='f', isPublic=false, isMutable=false, exprType=nil, value={kind='fn', parameters={}, defaultValues=nil, body={kind='block', blockBody={{kind='variable_access', target={tag='package', moduleName='lib', packageName='math', name='add'}}}}}}")
+    val prog: Program = luaExpr("{packageDef={moduleName='mymod',packageName='mypkg'}, imports={}, typeAliases={}, expressions={__cr4_expr}, section=nil}")
+    st.program = prog
+    collectRequires(st)
+    val output = st.sb.toString()
+    embedLua("__cr4_hasReq = string.find(output, 'require(\"lib/math\")', 1, true) ~= nil")
+    assertTrue(luaExpr("__cr4_hasReq") as bool)
+}
+
+summary()

@@ -1,0 +1,301 @@
+// chicc/chicc/cli.chi
+// Task 4I.1: CLI Entry Point for the Chi self-hosting compiler
+// Provides cliMain(args) that handles argument parsing, file I/O,
+// stdlib loading, and dispatching to compile or run modes.
+package user/cli
+import std/lang { luaExpr, embedLua }
+import std/lang.array { size, push }
+import std/io.file { readString, writeString }
+
+// ============================================================================
+// Stdlib loading
+// ============================================================================
+
+// Load the standard library from CHI_HOME/lib/std.chim
+// Returns true if successfully loaded, false otherwise.
+pub fn loadStdlib(): bool {
+    val chiHome: any = luaExpr("os.getenv('CHI_HOME')")
+    if chiHome == unit {
+        println("WARN: CHI_HOME not set. Things might not work as expected!")
+        return false
+    }
+    val libPath = luaExpr("chiHome .. '/lib/std.chim'") as string
+    val exists = luaExpr("io.open(libPath, 'r') ~= nil") as bool
+    if exists {
+        embedLua("if io.open(libPath, 'r') then local f = io.open(libPath, 'r'); f:close() end")
+        val errCode: any = luaExpr("chi_load_module(libPath)")
+        if errCode != unit {
+            val errVal: any = luaExpr("errCode")
+            if errVal != 0 {
+                println("Error loading stdlib")
+                return false
+            }
+        }
+        true
+    } else {
+        println("WARN: Missing stdlib at $libPath. Things might not work as expected!")
+        false
+    }
+}
+
+// ============================================================================
+// Compile mode: source -> Lua file
+// ============================================================================
+
+pub fn compileFile(inputPath: string, outputPath: string): int {
+    val source = readString(inputPath)
+    val ns = newLuaCompilationEnv()
+    val result = compileToLua(source, ns)
+    val luaCode: any = luaExpr("result.luaCode")
+    val messages: any = luaExpr("result.messages")
+    val msgCount = luaExpr("#messages") as int
+    if luaCode == unit {
+        // Compilation failed - print errors
+        var i = 1
+        while i <= msgCount {
+            val msg: any = luaExpr("messages[i]")
+            val formatted = formatMessage(msg)
+            println(formatted)
+            i = i + 1
+        }
+        println("Compilation failed.")
+        1
+    } else {
+        writeString(outputPath, luaCode as string)
+        println("Compiled: $inputPath -> $outputPath")
+        0
+    }
+}
+
+// ============================================================================
+// Run mode: compile + execute
+// ============================================================================
+
+pub fn runFile(inputPath: string): int {
+    val source = readString(inputPath)
+    val ns = newLuaCompilationEnv()
+    val result = compileToLua(source, ns)
+    val luaCode: any = luaExpr("result.luaCode")
+    val messages: any = luaExpr("result.messages")
+    val msgCount = luaExpr("#messages") as int
+    if luaCode == unit {
+        var i = 1
+        while i <= msgCount {
+            val msg: any = luaExpr("messages[i]")
+            val formatted = formatMessage(msg)
+            println(formatted)
+            i = i + 1
+        }
+        println("Compilation failed.")
+        1
+    } else {
+        // Load and execute the compiled Lua code
+        embedLua("local chunk, err = load(luaCode, inputPath)")
+        val loadErr: any = luaExpr("err")
+        if loadErr != unit {
+            val errStr = luaExpr("tostring(err)") as string
+            println("Lua load error: $errStr")
+            return 1
+        }
+        embedLua("local ok, runErr = pcall(chunk)")
+        val runOk = luaExpr("ok") as bool
+        if runOk == false {
+            val runErrStr = luaExpr("tostring(runErr)") as string
+            println("Runtime error: $runErrStr")
+            return 1
+        }
+        0
+    }
+}
+
+// ============================================================================
+// Compile-module mode: compile source as a module and load it
+// ============================================================================
+
+pub fn compileAndLoadModule(inputPath: string): int {
+    val source = readString(inputPath)
+    val ns = newLuaCompilationEnv()
+    val result = compileToLua(source, ns)
+    val luaCode: any = luaExpr("result.luaCode")
+    val messages: any = luaExpr("result.messages")
+    val msgCount = luaExpr("#messages") as int
+    if luaCode == unit {
+        var i = 1
+        while i <= msgCount {
+            val msg: any = luaExpr("messages[i]")
+            val formatted = formatMessage(msg)
+            println(formatted)
+            i = i + 1
+        }
+        1
+    } else {
+        // Load and execute to register in package.loaded
+        embedLua("local chunk, err = load(luaCode, inputPath)")
+        val loadErr: any = luaExpr("err")
+        if loadErr != unit {
+            val errStr = luaExpr("tostring(err)") as string
+            println("Lua load error: $errStr")
+            return 1
+        }
+        embedLua("local ok, runErr = pcall(chunk)")
+        val runOk = luaExpr("ok") as bool
+        if runOk == false {
+            val runErrStr = luaExpr("tostring(runErr)") as string
+            println("Error loading module: $runErrStr")
+            return 1
+        }
+        0
+    }
+}
+
+// ============================================================================
+// Argument parsing helpers
+// ============================================================================
+
+// Helper to resolve output path from input path (replace .chi with .lua)
+fn defaultOutputPath(inputPath: string): string {
+    val len = luaExpr("string.len(inputPath)") as int
+    val suffix = luaExpr("string.sub(inputPath, -4)") as string
+    if suffix == ".chi" {
+        val base = luaExpr("string.sub(inputPath, 1, -5)") as string
+        "$base.lua"
+    } else {
+        "$inputPath.lua"
+    }
+}
+
+// Helper to check file extension
+fn hasExtension(path: string, ext: string): bool {
+    val pathLen = luaExpr("string.len(path)") as int
+    val extLen = luaExpr("string.len(ext)") as int
+    val neg: int = 0 - extLen
+    val suffix = luaExpr("string.sub(path, neg)") as string
+    suffix == ext
+}
+
+// ============================================================================
+// Usage help
+// ============================================================================
+
+fn printUsage() {
+    println("Usage: chicc <command> [options] <file>")
+    println("")
+    println("Commands:")
+    println("  compile [-o OUTPUT] FILE    Compile .chi to .lua")
+    println("  run FILE                    Compile and run .chi")
+    println("  FILE                        Compile and run .chi (default)")
+    println("")
+    println("Options:")
+    println("  -o, --output FILE           Output file path (compile mode)")
+    println("  -h, --help                  Show this help")
+}
+
+// ============================================================================
+// Main entry point
+// ============================================================================
+
+pub fn cliMain(args: any): int {
+    val argc = luaExpr("args and #args or 0") as int
+
+    if argc == 0 {
+        printUsage()
+        return 1
+    }
+
+    // Parse the command
+    val firstArg = luaExpr("args[1]") as string
+
+    if firstArg == "-h" {
+        printUsage()
+        return 0
+    }
+
+    if firstArg == "--help" {
+        printUsage()
+        return 0
+    }
+
+    if firstArg == "compile" {
+        // compile mode: chicc compile [-o OUTPUT] FILE
+        if argc < 2 {
+            println("Error: compile requires a file argument")
+            printUsage()
+            return 1
+        }
+        var outputPath: string = ""
+        var inputPath: string = ""
+        var i = 2
+        while i <= argc {
+            val a = luaExpr("args[i]") as string
+            if a == "-o" {
+                i = i + 1
+                if i > argc {
+                    println("Error: -o requires an argument")
+                    return 1
+                }
+                    outputPath = luaExpr("args[i]") as string
+                } else {
+                    if a == "--output" {
+                        i = i + 1
+                        if i > argc {
+                            println("Error: --output requires an argument")
+                            return 1
+                        }
+                        outputPath = luaExpr("args[i]") as string
+                } else {
+                    inputPath = a
+                }
+            }
+            i = i + 1
+        }
+
+        if inputPath == "" {
+            println("Error: no input file specified")
+            return 1
+        }
+
+        if hasExtension(inputPath, ".chi") == false {
+            println("Error: $inputPath is not a Chi source file (.chi)")
+            return 1
+        }
+
+        if outputPath == "" {
+            outputPath = defaultOutputPath(inputPath)
+        }
+
+        loadStdlib()
+        return compileFile(inputPath, outputPath)
+    }
+
+    if firstArg == "run" {
+        // run mode: chicc run FILE
+        if argc < 2 {
+            println("Error: run requires a file argument")
+            printUsage()
+            return 1
+        }
+        val filePath = luaExpr("args[2]") as string
+
+        if hasExtension(filePath, ".chi") == false {
+            println("Error: $filePath is not a Chi source file (.chi)")
+            return 1
+        }
+
+        loadStdlib()
+        return runFile(filePath)
+    }
+
+    // Default: treat first arg as a file to run
+    if hasExtension(firstArg, ".chi") {
+        loadStdlib()
+        return runFile(firstArg)
+    }
+
+    println("Error: unknown command '$firstArg'")
+    printUsage()
+    1
+}
+
+// Entry point — invoke cliMain with Lua's global arg table
+val exitCode = cliMain(luaExpr("arg") as any)
+embedLua("os.exit(__P_.exitCode)")

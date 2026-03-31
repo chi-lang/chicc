@@ -1,0 +1,160 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/token { Token, newToken, TK_INTERP_START, TK_INTERP_TEXT, TK_INTERP_EXPR_START, TK_INTERP_EXPR_END, TK_INTERP_END, TK_ID, TK_INT, TK_PLUS, TK_STRING, TK_EOF }
+import user/parser { newParser, parseExpression }
+import user/parse_ast { paTag, paStringValue, paParts, paInterpValue, paVariableName, paOp, paLeft, paRight, paLongValue }
+import std/lang.array { size }
+
+fn tk(kind: int, value: string): Token { newToken(kind, value, unit) }
+fn eof(): Token { newToken(TK_EOF, "", unit) }
+
+// --- Interpolated String Parsing ---
+
+test("parse interpolated string with text only") {
+    // "hello world" as interpolated string (just text, no expressions)
+    val tokens = [
+        tk(TK_INTERP_START, ""),
+        tk(TK_INTERP_TEXT, "hello world"),
+        tk(TK_INTERP_END, ""),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseInterpolatedString")
+    val parts = paParts(result)
+    assertEqual(parts.size(), 1)
+    assertEqual(paTag(parts[1]), "StringText")
+    assertEqual(paStringValue(parts[1]), "hello world")
+}
+
+test("parse interpolated string with single variable") {
+    // "hello $name"
+    val tokens = [
+        tk(TK_INTERP_START, ""),
+        tk(TK_INTERP_TEXT, "hello "),
+        tk(TK_INTERP_EXPR_START, ""),
+        tk(TK_ID, "name"),
+        tk(TK_INTERP_EXPR_END, ""),
+        tk(TK_INTERP_END, ""),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseInterpolatedString")
+    val parts = paParts(result)
+    assertEqual(parts.size(), 2)
+    assertEqual(paTag(parts[1]), "StringText")
+    assertEqual(paStringValue(parts[1]), "hello ")
+    assertEqual(paTag(parts[2]), "ParseInterpolation")
+    val expr = paInterpValue(parts[2])
+    assertEqual(paTag(expr), "ParseVariableRead")
+    assertEqual(paVariableName(expr), "name")
+}
+
+test("parse interpolated string with expression") {
+    // "${1+2}"
+    val tokens = [
+        tk(TK_INTERP_START, ""),
+        tk(TK_INTERP_EXPR_START, ""),
+        tk(TK_INT, "1"),
+        tk(TK_PLUS, "+"),
+        tk(TK_INT, "2"),
+        tk(TK_INTERP_EXPR_END, ""),
+        tk(TK_INTERP_END, ""),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseInterpolatedString")
+    val parts = paParts(result)
+    assertEqual(parts.size(), 1)
+    assertEqual(paTag(parts[1]), "ParseInterpolation")
+    val expr = paInterpValue(parts[1])
+    assertEqual(paTag(expr), "ParseBinaryOp")
+    assertEqual(paOp(expr), "+")
+    assertEqual(paLongValue(paLeft(expr)), 1)
+    assertEqual(paLongValue(paRight(expr)), 2)
+}
+
+test("parse interpolated string with text and expression") {
+    // "hello $name, ${1+2}!"
+    val tokens = [
+        tk(TK_INTERP_START, ""),
+        tk(TK_INTERP_TEXT, "hello "),
+        tk(TK_INTERP_EXPR_START, ""),
+        tk(TK_ID, "name"),
+        tk(TK_INTERP_EXPR_END, ""),
+        tk(TK_INTERP_TEXT, ", "),
+        tk(TK_INTERP_EXPR_START, ""),
+        tk(TK_INT, "1"),
+        tk(TK_PLUS, "+"),
+        tk(TK_INT, "2"),
+        tk(TK_INTERP_EXPR_END, ""),
+        tk(TK_INTERP_TEXT, "!"),
+        tk(TK_INTERP_END, ""),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseInterpolatedString")
+    val parts = paParts(result)
+    assertEqual(parts.size(), 5)
+    // "hello "
+    assertEqual(paTag(parts[1]), "StringText")
+    assertEqual(paStringValue(parts[1]), "hello ")
+    // $name
+    assertEqual(paTag(parts[2]), "ParseInterpolation")
+    val nameExpr = paInterpValue(parts[2])
+    assertEqual(paTag(nameExpr), "ParseVariableRead")
+    assertEqual(paVariableName(nameExpr), "name")
+    // ", "
+    assertEqual(paTag(parts[3]), "StringText")
+    assertEqual(paStringValue(parts[3]), ", ")
+    // ${1+2}
+    assertEqual(paTag(parts[4]), "ParseInterpolation")
+    val addExpr = paInterpValue(parts[4])
+    assertEqual(paTag(addExpr), "ParseBinaryOp")
+    assertEqual(paOp(addExpr), "+")
+    // "!"
+    assertEqual(paTag(parts[5]), "StringText")
+    assertEqual(paStringValue(parts[5]), "!")
+}
+
+test("parse empty interpolated string") {
+    // "" as interpolated string (no parts)
+    val tokens = [
+        tk(TK_INTERP_START, ""),
+        tk(TK_INTERP_END, ""),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseInterpolatedString")
+    val parts = paParts(result)
+    assertEqual(parts.size(), 0)
+}
+
+test("parse interpolated string with multiple adjacent expressions") {
+    // "${a}${b}"
+    val tokens = [
+        tk(TK_INTERP_START, ""),
+        tk(TK_INTERP_EXPR_START, ""),
+        tk(TK_ID, "a"),
+        tk(TK_INTERP_EXPR_END, ""),
+        tk(TK_INTERP_EXPR_START, ""),
+        tk(TK_ID, "b"),
+        tk(TK_INTERP_EXPR_END, ""),
+        tk(TK_INTERP_END, ""),
+        eof()
+    ]
+    val p = newParser(tokens, "")
+    val result = parseExpression(p)
+    assertEqual(paTag(result), "ParseInterpolatedString")
+    val parts = paParts(result)
+    assertEqual(parts.size(), 2)
+    assertEqual(paTag(parts[1]), "ParseInterpolation")
+    assertEqual(paVariableName(paInterpValue(parts[1])), "a")
+    assertEqual(paTag(parts[2]), "ParseInterpolation")
+    assertEqual(paVariableName(paInterpValue(parts[2])), "b")
+}
+
+summary()

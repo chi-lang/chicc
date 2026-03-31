@@ -1,0 +1,45 @@
+// tests/test_util.chi
+package user/test_util
+import std/lang { luaExpr, embedLua }
+
+pub var passed = 0
+pub var failed = 0
+pub var currentTest = ""
+
+pub fn test(name: string, body: () -> unit) {
+    currentTest = name
+    embedLua("local ok, err = pcall(body)")
+    embedLua("__chi_test_ok = ok")
+    embedLua("__chi_test_err = tostring(err)")
+    val ok: bool = luaExpr("__chi_test_ok")
+    if ok {
+        passed += 1
+    } else {
+        failed += 1
+        println("FAIL: $name")
+        val errMsg = luaExpr("__chi_test_err") as string
+        println("  $errMsg")
+    }
+}
+
+pub fn assertEqual[T](actual: T, expected: T) {
+    if actual != expected {
+        embedLua("error('Expected: ' .. tostring(expected) .. ', got: ' .. tostring(actual))")
+    }
+}
+
+pub fn assertTrue(value: bool) {
+    assertEqual(value, true)
+}
+
+pub fn assertFalse(value: bool) {
+    assertEqual(value, false)
+}
+
+pub fn summary() {
+    val total = passed + failed
+    println("Tests: $total total, $passed passed, $failed failed")
+    if failed > 0 {
+        embedLua("os.exit(1)")
+    }
+}

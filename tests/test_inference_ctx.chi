@@ -1,0 +1,356 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/types { Type, TypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, variableType, polyType, typeTag, typeName, typeLevel, typeEquals, isVariable, intTypeId, stringTypeId }
+import user/unification { Constraint, newConstraint, unify }
+import user/ast { Target, DotTarget, localTarget, packageTarget, localFnDotTarget, packageFnDotTarget }
+import user/symbols { newSymbol, newCompileTables, ctDefineSymbol, ctGetLocalSymbol }
+import user/source { newSection }
+import std/lang { luaExpr, embedLua }
+import std/lang.array { size, push }
+
+// --- icFreshVariable tests ---
+
+test("icFreshVariable: generates incrementing variable names") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    val v1 = icFreshVariable(0)
+    val v2 = icFreshVariable(0)
+    val v3 = icFreshVariable(1)
+    val n1: string = luaExpr("v1.name")
+    val n2: string = luaExpr("v2.name")
+    val n3: string = luaExpr("v3.name")
+    assertEqual(n1, "a1")
+    assertEqual(n2, "a2")
+    assertEqual(n3, "a3")
+}
+
+test("icFreshVariable: respects level") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    val v1 = icFreshVariable(5)
+    val lvl: int = luaExpr("v1.level")
+    assertEqual(lvl, 5)
+}
+
+test("icFreshVariable: counter resets on icInit") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    icFreshVariable(0)
+    icFreshVariable(0)
+    // Re-init resets counter
+    icInit(pkg, unit, unit)
+    val v = icFreshVariable(0)
+    val n: string = luaExpr("v.name")
+    assertEqual(n, "a1")
+}
+
+// --- icDefineLocalSymbol and icGetLocalSymbol tests ---
+
+test("icDefineLocalSymbol: stores and retrieves type scheme") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    icDefineLocalSymbol("x", tInt)
+    val result = icGetLocalSymbol("x")
+    assertTrue(result != unit)
+    val t: Type = luaExpr("result")
+    assertTrue(typeEquals(t, tInt))
+}
+
+test("icGetLocalSymbol: returns unit for unknown names") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    val result = icGetLocalSymbol("missing")
+    assertTrue(result == unit)
+}
+
+test("icDefineLocalSymbol: overwrites existing") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    icDefineLocalSymbol("x", tInt)
+    icDefineLocalSymbol("x", tString)
+    val result = icGetLocalSymbol("x")
+    val t: Type = luaExpr("result")
+    assertTrue(typeEquals(t, tString))
+}
+
+// --- icWithNewLocalScope tests ---
+
+test("icWithNewLocalScope: inner scope sees parent symbols") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    icDefineLocalSymbol("outer", tInt)
+    val result = icWithNewLocalScope {
+        val found = icGetLocalSymbol("outer")
+        found
+    }
+    assertTrue(result != unit)
+}
+
+test("icWithNewLocalScope: inner scope hides parent symbols") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    icDefineLocalSymbol("x", tInt)
+    val result = icWithNewLocalScope {
+        icDefineLocalSymbol("x", tString)
+        val found = icGetLocalSymbol("x")
+        found
+    }
+    val t: Type = luaExpr("result")
+    assertTrue(typeEquals(t, tString))
+    // After scope exits, outer x should be restored
+    val outerResult = icGetLocalSymbol("x")
+    val outerT: Type = luaExpr("outerResult")
+    assertTrue(typeEquals(outerT, tInt))
+}
+
+test("icWithNewLocalScope: inner definitions not visible after") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    icWithNewLocalScope {
+        icDefineLocalSymbol("innerOnly", tBool)
+        unit
+    }
+    val result = icGetLocalSymbol("innerOnly")
+    assertTrue(result == unit)
+}
+
+test("icWithNewLocalScope: nested scopes") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    icDefineLocalSymbol("a", tInt)
+    icWithNewLocalScope {
+        icDefineLocalSymbol("b", tString)
+        val innerResult = icWithNewLocalScope {
+            icDefineLocalSymbol("c", tBool)
+            // Should see a, b, c
+            val foundA = icGetLocalSymbol("a")
+            val foundB = icGetLocalSymbol("b")
+            val foundC = icGetLocalSymbol("c")
+            assertTrue(foundA != unit)
+            assertTrue(foundB != unit)
+            assertTrue(foundC != unit)
+            unit
+        }
+        // After inner scope, c not visible, b still visible
+        assertTrue(icGetLocalSymbol("b") != unit)
+        assertTrue(icGetLocalSymbol("c") == unit)
+        unit
+    }
+    // After outer scope, only a visible
+    assertTrue(icGetLocalSymbol("a") != unit)
+    assertTrue(icGetLocalSymbol("b") == unit)
+}
+
+test("icWithNewLocalScope: restores scope even on error") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    icDefineLocalSymbol("safe", tInt)
+    embedLua("local ok, err = pcall(function() icWithNewLocalScope(function() icDefineLocalSymbol('danger', tBool); error('boom') end) end)")
+    val ok: bool = luaExpr("ok")
+    assertFalse(ok)
+    // Scope should be restored
+    assertTrue(icGetLocalSymbol("safe") != unit)
+    assertTrue(icGetLocalSymbol("danger") == unit)
+}
+
+// --- icUpdateSymbolType tests ---
+
+test("icUpdateSymbolType: local target updates current scope") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    icDefineLocalSymbol("x", tInt)
+    val tgt = localTarget("x")
+    icUpdateSymbolType(tgt, tString)
+    val result = icGetLocalSymbol("x")
+    val t: Type = luaExpr("result")
+    assertTrue(typeEquals(t, tString))
+}
+
+test("icUpdateSymbolType: package target in same package updates package scope") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    icDefineLocalSymbol("y", tInt)
+    val tgt = packageTarget("test", "pkg", "y")
+    icUpdateSymbolType(tgt, tBool)
+    // Package symbols should have updated value
+    // Note: this updates packageSymbols, not localSymbols necessarily
+    // Since packageSymbols is the root of the chain, we check via getTargetType
+    val result: any = luaExpr("icLocalSymbolsGet(icPackageSymbols, 'y')")
+    val t: Type = luaExpr("result")
+    assertTrue(typeEquals(t, tBool))
+}
+
+test("icUpdateSymbolType: package target in different package does nothing") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    icDefineLocalSymbol("z", tInt)
+    val tgt = packageTarget("other", "pkg", "z")
+    icUpdateSymbolType(tgt, tBool)
+    // Should not have changed
+    val result = icGetLocalSymbol("z")
+    val t: Type = luaExpr("result")
+    assertTrue(typeEquals(t, tInt))
+}
+
+// --- icGetTargetType tests ---
+
+test("icGetTargetType: local target returns instantiated type") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    icDefineLocalSymbol("x", tInt)
+    val tgt = localTarget("x")
+    val result = icGetTargetType(tgt, 0, unit)
+    val t: Type = luaExpr("result")
+    assertTrue(typeEquals(t, tInt))
+}
+
+test("icGetTargetType: local target with poly type instantiates") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    // Create a poly type: forall level=0. fn(a1@1, a1@1)
+    val v = variableType("a1", 1)
+    val fnT = functionType([v, v], [], 0)
+    val poly = polyType(0, fnT)
+    icDefineLocalSymbol("id", poly)
+    val tgt = localTarget("id")
+    val result = icGetTargetType(tgt, 0, unit)
+    // Result should be a function type with fresh variables (not the original a1)
+    val resultTag: string = luaExpr("result.tag")
+    assertEqual(resultTag, "fn")
+}
+
+test("icGetTargetType: local target not found throws error") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    val tgt = localTarget("missing")
+    embedLua("local ok, err = pcall(function() icGetTargetType(tgt, 0, nil) end)")
+    val ok: bool = luaExpr("ok")
+    assertFalse(ok)
+    val code: string = luaExpr("err.code")
+    assertEqual(code, "UNRECOGNIZED_NAME")
+}
+
+test("icGetTargetType: package target same package") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val sym = newSymbol("test", "pkg", "foo", tString, true, false)
+    ctDefineSymbol(ct, sym)
+    icInit(pkg, unit, ct)
+    val tgt = packageTarget("test", "pkg", "foo")
+    val result = icGetTargetType(tgt, 0, unit)
+    val t: Type = luaExpr("result")
+    assertTrue(typeEquals(t, tString))
+}
+
+test("icGetTargetType: package target different package via ns") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ns: any = luaExpr("{}")
+    embedLua("ns.getSymbol = function(mod, pkg, name) if mod == 'std' and pkg == 'lang' and name == 'println' then return { moduleName = 'std', packageName = 'lang', name = 'println', symbolType = tUnit, isPublic = true, isMutable = false } end; return nil end")
+    icInit(pkg, ns, unit)
+    val tgt = packageTarget("std", "lang", "println")
+    val result = icGetTargetType(tgt, 0, unit)
+    val t: Type = luaExpr("result")
+    assertTrue(typeEquals(t, tUnit))
+}
+
+test("icGetTargetType: package target not found throws error") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    val tgt = packageTarget("other", "lib", "missing")
+    embedLua("local ok, err = pcall(function() icGetTargetType(tgt, 0, nil) end)")
+    val ok: bool = luaExpr("ok")
+    assertFalse(ok)
+    val code: string = luaExpr("err.code")
+    assertEqual(code, "UNRECOGNIZED_NAME")
+}
+
+// --- compileTables fallback tests ---
+
+test("icGetLocalSymbol: falls back to compileTables") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val sym = newSymbol("test", "pkg", "fromCT", tFloat, true, false)
+    ctDefineSymbol(ct, sym)
+    icInit(pkg, unit, ct)
+    val result = icGetLocalSymbol("fromCT")
+    assertTrue(result != unit)
+    val t: Type = luaExpr("result")
+    assertTrue(typeEquals(t, tFloat))
+}
+
+// --- UFCS resolution tests ---
+
+test("icListLocalFunctionsForType: finds matching local function") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    // Define a function fn(int, string): bool
+    val fnType = functionType([tInt, tString, tBool], [], 0)
+    icDefineLocalSymbol("doSomething", fnType)
+    val results = icListLocalFunctionsForType("doSomething", tInt)
+    val count: int = luaExpr("#results")
+    assertEqual(count, 1)
+    val entry: any = luaExpr("results[1]")
+    val dt: any = luaExpr("entry.dotTarget")
+    val dtTag: string = luaExpr("dt.tag")
+    assertEqual(dtTag, "local_fn")
+}
+
+test("icListLocalFunctionsForType: no match for wrong receiver type") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    // Define fn(string, int): bool
+    val fnType = functionType([tString, tInt, tBool], [], 0)
+    icDefineLocalSymbol("strFn", fnType)
+    val results = icListLocalFunctionsForType("strFn", tInt)
+    val count: int = luaExpr("#results")
+    assertEqual(count, 0)
+}
+
+test("icListLocalFunctionsForType: no match for non-function") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    icDefineLocalSymbol("notAFn", tInt)
+    val results = icListLocalFunctionsForType("notAFn", tInt)
+    val count: int = luaExpr("#results")
+    assertEqual(count, 0)
+}
+
+test("icListCurrentPackageFunctionsForType: finds matching package function") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val fnType = functionType([tInt, tString], [], 0)
+    val sym = newSymbol("test", "pkg", "intToStr", fnType, true, false)
+    ctDefineSymbol(ct, sym)
+    icInit(pkg, unit, ct)
+    val results = icListCurrentPackageFunctionsForType("intToStr", tInt)
+    val count: int = luaExpr("#results")
+    assertEqual(count, 1)
+    val entry: any = luaExpr("results[1]")
+    val dt: any = luaExpr("entry.dotTarget")
+    val dtTag: string = luaExpr("dt.tag")
+    assertEqual(dtTag, "package_fn")
+}
+
+test("icListTypesPackageFunctionsForType: finds function from type's package") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ns: any = luaExpr("{}")
+    val fnType = functionType([tInt, tString], [], 0)
+    embedLua("ns.getSymbol = function(mod, pkg, name) if mod == 'std' and pkg == 'lang.int' and name == 'toString' then return { moduleName = 'std', packageName = 'lang.int', name = 'toString', symbolType = fnType, isPublic = true, isMutable = false } end; return nil end")
+    icInit(pkg, ns, unit)
+    val results = icListTypesPackageFunctionsForType("toString", tInt)
+    val count: int = luaExpr("#results")
+    assertEqual(count, 1)
+    val entry: any = luaExpr("results[1]")
+    val dt: any = luaExpr("entry.dotTarget")
+    val dtTag: string = luaExpr("dt.tag")
+    assertEqual(dtTag, "package_fn")
+}
+
+test("icListTypesPackageFunctionsForType: no ns returns empty") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    val results = icListTypesPackageFunctionsForType("foo", tInt)
+    val count: int = luaExpr("#results")
+    assertEqual(count, 0)
+}
+
+summary()

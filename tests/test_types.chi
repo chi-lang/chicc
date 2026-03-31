@@ -1,0 +1,59 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/types { newTypeId, typeIdToString, typeIdEquals, anyTypeId, intTypeId, stringTypeId, tInt, tString, tUnit, tBool, tAny, primitiveType, functionType, recordType, sumType, arrayType, variableType, isPrimitive, isFunction, isRecord, isSum, isArray, isVariable, typeTag, typeTypesCount, typeDefaults, typeFieldsCount, typeName }
+
+test("newTypeId") {
+    val id = newTypeId("std", "lang.int", "int")
+    assertEqual(id.moduleName, "std")
+    assertEqual(id.packageName, "lang.int")
+    assertEqual(id.name, "int")
+}
+
+test("typeIdToString") {
+    val id = newTypeId("std", "lang.int", "int")
+    assertEqual(typeIdToString(id), "std::lang.int::int")
+}
+
+test("typeIdEquals") {
+    val a = newTypeId("std", "lang.int", "int")
+    val b = newTypeId("std", "lang.int", "int")
+    val c = newTypeId("std", "lang.string", "string")
+    assertTrue(typeIdEquals(a, b))
+    assertFalse(typeIdEquals(a, c))
+}
+
+test("primitiveType") {
+    assertTrue(isPrimitive(tInt))
+    assertTrue(isPrimitive(tString))
+    assertEqual(typeTag(tInt), "primitive")
+}
+
+test("functionType") {
+    val ft = functionType([tInt, tString], [], 0)
+    assertTrue(isFunction(ft))
+    assertEqual(typeTypesCount(ft), 2)
+    assertEqual(typeDefaults(ft), 0)
+}
+
+test("recordType") {
+    val r = recordType([], [{ name: "x", fieldType: tInt }], [])
+    assertTrue(isRecord(r))
+    assertEqual(typeFieldsCount(r), 1)
+}
+
+test("sumType") {
+    val s = sumType([], tInt, tString, [])
+    assertTrue(isSum(s))
+}
+
+test("arrayType") {
+    val a = arrayType(tInt, [])
+    assertTrue(isArray(a))
+}
+
+test("variableType") {
+    val v = variableType("T", 0)
+    assertTrue(isVariable(v))
+    assertEqual(typeName(v), "T")
+}
+
+summary()

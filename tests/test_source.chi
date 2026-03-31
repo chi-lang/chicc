@@ -1,0 +1,30 @@
+// tests/test_source.chi
+import user/test_util { test, assertEqual, summary }
+import user/source { newSection, merge, toCodePoint }
+
+test("newSection creates correct fields") {
+    val s = newSection(1, 5, 3, 10)
+    assertEqual(s.startLine, 1)
+    assertEqual(s.startCol, 5)
+    assertEqual(s.endLine, 3)
+    assertEqual(s.endCol, 10)
+}
+
+test("merge takes start from first, end from second") {
+    val a = newSection(1, 1, 1, 10)
+    val b = newSection(3, 5, 5, 20)
+    val m = merge(a, b)
+    assertEqual(m.startLine, 1)
+    assertEqual(m.startCol, 1)
+    assertEqual(m.endLine, 5)
+    assertEqual(m.endCol, 20)
+}
+
+test("toCodePoint extracts line and column from start") {
+    val s = newSection(7, 12, 9, 3)
+    val cp = s.toCodePoint()
+    assertEqual(cp.line, 7)
+    assertEqual(cp.column, 12)
+}
+
+summary()

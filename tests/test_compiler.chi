@@ -1,0 +1,329 @@
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import user/compiler { compile, compileToLua, hasErrors, markUsed, replaceTypes, newLuaCompilationEnv, formatMessage, newCompilationResult }
+import user/ast { newPackage, newProgram, atomExpr, blockExpr, nameDeclarationExpr, fnExpr, assignmentExpr, variableAccessExpr, localTarget, fnCallExpr, newFnParam, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, createRecordExpr, createArrayExpr, indexOpExpr, fieldAccessExpr, fieldAssignmentExpr, handleExpr, returnExpr, exprKind, exprExprType, exprUsed, newExprField, newImport, newImportEntry, newTypeAlias, setExprUsed }
+import user/types { tInt, tFloat, tBool, tString, tUnit, tAny, functionType, variableType, mapType, newTypeId, primitiveType, typeTag }
+import user/messages { newMessage, genericError, unrecognizedName }
+import std/lang { luaExpr, embedLua }
+
+// =====================================================================
+// markUsed tests
+// =====================================================================
+
+test("markUsed: top-level atoms stay unused") {
+    val expr = atomExpr("42", tInt, unit)
+    val exprs: any = luaExpr("{expr}")
+    markUsed(exprs)
+    val used: bool = luaExpr("expr.used == true")
+    assertFalse(used)
+}
+
+test("markUsed: name_declaration marks value as used") {
+    val valExpr = atomExpr("42", tInt, unit)
+    val decl = nameDeclarationExpr(false, "x", false, unit, valExpr, unit)
+    val exprs: any = luaExpr("{decl}")
+    markUsed(exprs)
+    val valueUsed: bool = luaExpr("valExpr.used == true")
+    assertTrue(valueUsed)
+}
+
+test("markUsed: assignment marks value as used") {
+    val valExpr = atomExpr("5", tInt, unit)
+    val assign = assignmentExpr(localTarget("x"), valExpr, unit)
+    val exprs: any = luaExpr("{assign}")
+    markUsed(exprs)
+    val valueUsed: bool = luaExpr("valExpr.used == true")
+    assertTrue(valueUsed)
+}
+
+test("markUsed: block propagates used to last expr only") {
+    val expr1 = atomExpr("1", tInt, unit)
+    val expr2 = atomExpr("2", tInt, unit)
+    val block = blockExpr([expr1, expr2], unit)
+    embedLua("block.used = true")
+    val exprs: any = luaExpr("{block}")
+    markUsed(exprs)
+    val e1Used: bool = luaExpr("expr1.used == true")
+    val e2Used: bool = luaExpr("expr2.used == true")
+    assertFalse(e1Used)
+    assertTrue(e2Used)
+}
+
+test("markUsed: fn_call marks callee and params as used") {
+    val callee = variableAccessExpr(localTarget("f"), unit)
+    val arg1 = atomExpr("1", tInt, unit)
+    val call = fnCallExpr(callee, [arg1], unit)
+    val exprs: any = luaExpr("{call}")
+    markUsed(exprs)
+    val calleeUsed: bool = luaExpr("callee.used == true")
+    val argUsed: bool = luaExpr("arg1.used == true")
+    assertTrue(calleeUsed)
+    assertTrue(argUsed)
+}
+
+test("markUsed: if_else propagates used to both branches") {
+    val cond = atomExpr("true", tBool, unit)
+    val thenB = atomExpr("1", tInt, unit)
+    val elseB = atomExpr("2", tInt, unit)
+    val ifE = ifElseExpr(cond, thenB, elseB, unit)
+    embedLua("ifE.used = true")
+    val exprs: any = luaExpr("{ifE}")
+    markUsed(exprs)
+    val condUsed: bool = luaExpr("cond.used == true")
+    val thenUsed: bool = luaExpr("thenB.used == true")
+    val elseUsed: bool = luaExpr("elseB.used == true")
+    assertTrue(condUsed)
+    assertTrue(thenUsed)
+    assertTrue(elseUsed)
+}
+
+test("markUsed: infix_op propagates used to operands") {
+    val left = atomExpr("1", tInt, unit)
+    val right = atomExpr("2", tInt, unit)
+    val op = infixOpExpr("+", left, right, unit)
+    embedLua("op.used = true")
+    val exprs: any = luaExpr("{op}")
+    markUsed(exprs)
+    val leftUsed: bool = luaExpr("left.used == true")
+    val rightUsed: bool = luaExpr("right.used == true")
+    assertTrue(leftUsed)
+    assertTrue(rightUsed)
+}
+
+test("markUsed: fn body does not inherit parent used") {
+    val fnBody = atomExpr("42", tInt, unit)
+    val fn_ = fnExpr([], unit, fnBody, unit)
+    embedLua("fn_.used = true")
+    val exprs: any = luaExpr("{fn_}")
+    markUsed(exprs)
+    val bodyUsed: bool = luaExpr("fnBody.used == true")
+    // fn body does NOT inherit parent used
+    assertFalse(bodyUsed)
+}
+
+test("markUsed: return marks value as used") {
+    val retVal = atomExpr("42", tInt, unit)
+    val ret = returnExpr(retVal, unit)
+    val exprs: any = luaExpr("{ret}")
+    markUsed(exprs)
+    val retValUsed: bool = luaExpr("retVal.used == true")
+    assertTrue(retValUsed)
+}
+
+test("markUsed: field_access marks receiver as used") {
+    val recv = variableAccessExpr(localTarget("obj"), unit)
+    val fa = fieldAccessExpr(recv, "x", unit, unit)
+    val exprs: any = luaExpr("{fa}")
+    markUsed(exprs)
+    val recvUsed: bool = luaExpr("recv.used == true")
+    assertTrue(recvUsed)
+}
+
+test("markUsed: create_record marks field values used when record is used") {
+    val fVal = atomExpr("42", tInt, unit)
+    val rec = createRecordExpr([newExprField("x", fVal)], unit)
+    embedLua("rec.used = true")
+    val exprs: any = luaExpr("{rec}")
+    markUsed(exprs)
+    val fValUsed: bool = luaExpr("fVal.used == true")
+    assertTrue(fValUsed)
+}
+
+test("markUsed: create_array marks element values used when array is used") {
+    val elem = atomExpr("42", tInt, unit)
+    val arr = createArrayExpr([elem], unit)
+    embedLua("arr.used = true")
+    val exprs: any = luaExpr("{arr}")
+    markUsed(exprs)
+    val elemUsed: bool = luaExpr("elem.used == true")
+    assertTrue(elemUsed)
+}
+
+// =====================================================================
+// replaceTypes tests
+// =====================================================================
+
+test("replaceTypes: replaces variable type in atom expr") {
+    val v1 = variableType("a1", 0)
+    val expr = atomExpr("42", unit, unit)
+    embedLua("expr.exprType = v1")
+    val solutions: any = luaExpr("{{ variable = v1, replacement = tInt }}")
+    replaceTypes(expr, solutions)
+    val resultType: any = luaExpr("expr.exprType")
+    val resultTag: string = luaExpr("resultType.tag")
+    assertEqual(resultTag, "primitive")
+}
+
+test("replaceTypes: recurses into children") {
+    val v1 = variableType("a1", 0)
+    val child = atomExpr("42", unit, unit)
+    embedLua("child.exprType = v1")
+    val decl = nameDeclarationExpr(false, "x", false, unit, child, unit)
+    val solutions: any = luaExpr("{{ variable = v1, replacement = tString }}")
+    replaceTypes(decl, solutions)
+    val childType: any = luaExpr("child.exprType")
+    val childTag: string = luaExpr("childType.tag")
+    assertEqual(childTag, "primitive")
+}
+
+test("replaceTypes: skips nodes without exprType") {
+    val expr = atomExpr("42", unit, unit)
+    // exprType is unit
+    val solutions: any = luaExpr("{}")
+    replaceTypes(expr, solutions)
+    val exprType: any = luaExpr("expr.exprType")
+    assertTrue(exprType == unit)
+}
+
+// =====================================================================
+// compile tests — full pipeline
+// =====================================================================
+
+test("compile: simple integer literal") {
+    val result = compile("42", unit)
+    // With ns=unit, imports won't resolve but the basic pipeline should work
+    val msgCount: int = luaExpr("#result.messages")
+    // May have 0 errors for a simple literal
+    val prog = result.program
+    val progExprs: any = luaExpr("prog.expressions")
+    val exprCount: int = luaExpr("#progExprs")
+    assertTrue(exprCount > 0)
+}
+
+test("compile: val declaration") {
+    val result = compile("val x = 42", unit)
+    val msgCount: int = luaExpr("#result.messages")
+    assertEqual(msgCount, 0)
+    val prog = result.program
+    val progExprs: any = luaExpr("prog.expressions")
+    val exprCount: int = luaExpr("#progExprs")
+    assertEqual(exprCount, 1)
+    val firstExpr: any = luaExpr("progExprs[1]")
+    val kind: string = luaExpr("firstExpr.kind")
+    assertEqual(kind, "name_declaration")
+}
+
+test("compile: detects unrecognized name") {
+    val result = compile("val x = unknownVar", unit)
+    assertTrue(hasErrors(result))
+    val firstMsg: any = luaExpr("result.messages[1]")
+    val code: string = luaExpr("firstMsg.code")
+    assertEqual(code, "UNRECOGNIZED_NAME")
+}
+
+test("compile: function declaration with type inference") {
+    val source = "fn add(a: int, b: int): int { a + b }"
+    val result = compile(source, unit)
+    val msgCount: int = luaExpr("#result.messages")
+    assertEqual(msgCount, 0)
+    val prog = result.program
+    val progExprs: any = luaExpr("prog.expressions")
+    val exprCount: int = luaExpr("#progExprs")
+    assertTrue(exprCount > 0)
+}
+
+test("compile: package declaration is extracted") {
+    val source = "package test/main\nval x = 42"
+    val result = compile(source, unit)
+    val prog = result.program
+    val pkgMod: string = luaExpr("prog.packageDef.moduleName")
+    val pkgPkg: string = luaExpr("prog.packageDef.packageName")
+    assertEqual(pkgMod, "test")
+    assertEqual(pkgPkg, "main")
+}
+
+test("compile: default package when not specified") {
+    val result = compile("val x = 1", unit)
+    val prog = result.program
+    val pkgMod: string = luaExpr("prog.packageDef.moduleName")
+    val pkgPkg: string = luaExpr("prog.packageDef.packageName")
+    assertEqual(pkgMod, "user")
+    assertEqual(pkgPkg, "default")
+}
+
+test("compile: if-else expression types match") {
+    val source = "val x = if true { 1 } else { 2 }"
+    val result = compile(source, unit)
+    val msgCount: int = luaExpr("#result.messages")
+    assertEqual(msgCount, 0)
+}
+
+test("compile: multiple val declarations") {
+    val source = "val x = 1\nval y = 2\nval z = x + y"
+    val result = compile(source, unit)
+    val msgCount: int = luaExpr("#result.messages")
+    // x and y are recognized since they're defined in order
+    assertEqual(msgCount, 0)
+}
+
+test("compile: type alias") {
+    val source = "type Num = int\nval x: Num = 42"
+    val result = compile(source, unit)
+    val msgCount: int = luaExpr("#result.messages")
+    assertEqual(msgCount, 0)
+}
+
+test("compile: syntax error produces message") {
+    val source = "val = "
+    val result = compile(source, unit)
+    assertTrue(hasErrors(result))
+}
+
+// =====================================================================
+// compileToLua tests
+// =====================================================================
+
+test("compileToLua: simple program produces lua code") {
+    val result: any = compileToLua("val x = 42", unit)
+    val luaCode: any = luaExpr("result.luaCode")
+    assertTrue(luaCode != unit)
+    val codeStr: string = luaExpr("result.luaCode") as string
+    // Should contain package.loaded setup
+    val hasPackageLoaded: bool = luaExpr("string.find(codeStr, 'package.loaded') ~= nil")
+    assertTrue(hasPackageLoaded)
+}
+
+test("compileToLua: error produces nil luaCode") {
+    val result: any = compileToLua("val x = unknownVar", unit)
+    val luaCode: any = luaExpr("result.luaCode")
+    assertTrue(luaCode == unit)
+    val msgs: any = luaExpr("result.messages")
+    val msgCount: int = luaExpr("#msgs")
+    assertTrue(msgCount > 0)
+}
+
+// =====================================================================
+// formatMessage tests
+// =====================================================================
+
+test("formatMessage: with code point") {
+    val msg = newMessage("TYPE_MISMATCH", "Expected int got string", { line: 5, column: 10 })
+    val formatted = formatMessage(msg)
+    val hasCode: bool = luaExpr("string.find(formatted, 'TYPE_MISMATCH') ~= nil")
+    assertTrue(hasCode)
+    val hasLine: bool = luaExpr("string.find(formatted, 'line 5') ~= nil")
+    assertTrue(hasLine)
+}
+
+test("formatMessage: without code point") {
+    val msg = newMessage("ERROR", "Something went wrong", unit)
+    val formatted = formatMessage(msg)
+    val hasCode: bool = luaExpr("string.find(formatted, 'ERROR') ~= nil")
+    assertTrue(hasCode)
+}
+
+// =====================================================================
+// CompilationResult tests
+// =====================================================================
+
+test("hasErrors: empty messages returns false") {
+    val result = newCompilationResult([], unit)
+    assertFalse(hasErrors(result))
+}
+
+test("hasErrors: with messages returns true") {
+    val msgs: array[any] = [genericError("test", unit)]
+    val result = newCompilationResult(msgs, unit)
+    assertTrue(hasErrors(result))
+}
+
+summary()

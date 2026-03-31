@@ -1,0 +1,9 @@
+// Smoke test for the test framework
+// Run via: ../run_tests.sh test_smoke.chi
+import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+
+test("basic arithmetic") { assertEqual(1 + 1, 2) }
+test("string equality") { assertEqual("hello", "hello") }
+test("true is true") { assertTrue(true) }
+test("false is false") { assertFalse(false) }
+summary()

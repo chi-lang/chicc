@@ -1,0 +1,36 @@
+import user/test_util { test, assertEqual, summary }
+import user/token { newToken, lookupKeyword, TK_INT, TK_ID, TK_PUB, TK_FN, TK_IF, TK_WHILE, TK_RETURN, TK_TYPE, TK_TRUE, TK_FALSE, TK_UNIT, TK_EOF }
+import user/source { newSection }
+
+test("newToken") {
+    val t = newToken(TK_INT, "42", unit)
+    assertEqual(t.kind, TK_INT)
+    assertEqual(t.value, "42")
+}
+
+test("newToken with section") {
+    val s = newSection(1, 1, 1, 3)
+    val t = newToken(TK_INT, "42", s)
+    assertEqual(t.kind, TK_INT)
+    assertEqual(t.value, "42")
+}
+
+test("lookupKeyword known") {
+    assertEqual(lookupKeyword("pub"), TK_PUB)
+    assertEqual(lookupKeyword("fn"), TK_FN)
+    assertEqual(lookupKeyword("if"), TK_IF)
+    assertEqual(lookupKeyword("while"), TK_WHILE)
+    assertEqual(lookupKeyword("return"), TK_RETURN)
+    assertEqual(lookupKeyword("type"), TK_TYPE)
+    assertEqual(lookupKeyword("true"), TK_TRUE)
+    assertEqual(lookupKeyword("false"), TK_FALSE)
+    assertEqual(lookupKeyword("unit"), TK_UNIT)
+}
+
+test("lookupKeyword unknown") {
+    assertEqual(lookupKeyword("foo"), TK_ID)
+    assertEqual(lookupKeyword("myVar"), TK_ID)
+    assertEqual(lookupKeyword("x"), TK_ID)
+}
+
+summary()

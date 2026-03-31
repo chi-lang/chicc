@@ -1,0 +1,952 @@
+package user/ast_converter
+import std/lang { luaExpr, embedLua }
+import std/lang.array { size, push, map, forEach }
+import user/source { Section }
+import user/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType }
+import user/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, packageTarget, atomExpr, interpolatedStringExpr, createRecordExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, assignmentExpr, nameDeclarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam, setExprType }
+import user/parse_ast { paTag, paSection, paLongValue, paFloatValue, paBoolValue, paStringValue, paInterpValue, paParts, paVariableName, paValue, paVariable, paIndexExpr, paIndexValue, paName, paIsPublic, paTypeParameters, paFormalArguments, paReturnTypeRef, paBody, paFuncBody, paCallee, paConcreteTypeParams, paArguments, paIsMutable, paSymbolName, paSymbolSection, paTypeRef, paCondition, paThenBody, paElseBody, paLoopBody, paForVars, paIterable, paForState, paForInit, paForBody, paWhenCases, paElseCase, paReturnValue, paOp, paLeft, paRight, paReceiverName, paMemberName, paReceiver, paMemberSection, paEffectCases, paHandleBody, paOpTemplate, paArrayValues, paRecordFields }
+import user/symbols { FnSymbolTable, Symbol, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newSymbol, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, CompileTables, TypeTable, resolveType }
+
+// --- State (module-level mutable variables) ---
+
+var currentFnSymbolTable: any = unit
+var currentTypeSchemeVars: array[string] = []
+var typeSchemeLevel: any = unit
+var currentTypeLevel: int = 0
+var nextTempVarId: int = 0
+var weaveInput: any = unit
+
+// --- Helpers ---
+
+fn effectiveTypeLevel(): int {
+    if typeSchemeLevel != unit {
+        typeSchemeLevel as int
+    } else {
+        currentTypeLevel
+    }
+}
+
+fn nextTempVarName(): string {
+    val id = nextTempVarId
+    nextTempVarId = id + 1
+    "tempVar$id"
+}
+
+fn getTypeTable(tables: any): any {
+    luaExpr("tables.localTypeTable")
+}
+
+// --- Symbol management ---
+
+pub fn getSymbol(name: string, tables: any): any {
+    val fst: any = currentFnSymbolTable
+    if fst != unit {
+        val fnSym: any = fstGet(fst as FnSymbolTable, name)
+        if fnSym != unit {
+            return localTarget(name)
+        }
+    }
+    val ctSym: any = ctGetLocalSymbol(tables as CompileTables, name)
+    if ctSym != unit {
+        val symMod = luaExpr("ctSym.moduleName") as string
+        val symPkg = luaExpr("ctSym.packageName") as string
+        val symName = luaExpr("ctSym.name") as string
+        return packageTarget(symMod, symPkg, symName)
+    }
+    // Fallback: return local target (symbol not found)
+    localTarget(name)
+}
+
+pub fn addLocalSymbol(name: string, isMut: bool, isPub: bool, symType: any, pkg: any, tables: any) {
+    val fst: any = currentFnSymbolTable
+    if fst != unit {
+        fstAddLocal(fst as FnSymbolTable, name, unit, isMut)
+    } else {
+        val mod: string = luaExpr("pkg.moduleName")
+        val pkgName: string = luaExpr("pkg.packageName")
+        val sym = newSymbol(mod, pkgName, name, symType, isPub, isMut)
+        ctDefineSymbol(tables as CompileTables, sym)
+    }
+}
+
+pub fn removeLocalSymbol(name: string, tables: any) {
+    val fst: any = currentFnSymbolTable
+    if fst != unit {
+        fstRemove(fst as FnSymbolTable, name)
+    } else {
+        ctRemoveSymbol(tables as CompileTables, name)
+    }
+}
+
+// --- Forward declarations for mutually-recursive convert helpers ---
+
+var convertLambda: (any, any, any) -> any = { node, pkg, tables -> unit }
+var convertFuncWithName: (any, any, any) -> any = { node, pkg, tables -> unit }
+var convertFnCall: (any, any, any) -> any = { node, pkg, tables -> unit }
+var convertNameDeclaration: (any, any, any) -> any = { node, pkg, tables -> unit }
+var convertBlock: (any, any, any) -> any = { node, pkg, tables -> unit }
+var convertFor: (any, any, any) -> any = { node, pkg, tables -> unit }
+var convertWhen: (any, any, any) -> any = { node, pkg, tables -> unit }
+var convertFieldAccess: (any, any, any) -> any = { node, pkg, tables -> unit }
+var convertHandle: (any, any, any) -> any = { node, pkg, tables -> unit }
+var convertWeave: (any, any, any) -> any = { node, pkg, tables -> unit }
+
+// --- Effect definition conversion (no mutual recursion with convert) ---
+
+fn convertEffectDefinition(node: any, pkg: any, tables: any): any {
+    val sec = paSection(node)
+    val isPub = paIsPublic(node)
+    val effName = paName(node)
+    val typeParams = paTypeParameters(node)
+    val args = paFormalArguments(node)
+    val retTypeRef: any = paReturnTypeRef(node)
+
+    // Save and set type scheme
+    val prevTypeSchemeVars = currentTypeSchemeVars
+    val prevTypeSchemeLevel = typeSchemeLevel
+
+    var tpNames: array[string] = []
+    var tpIdx = 1
+    val tpCount = typeParams.size()
+    while tpIdx <= tpCount {
+        val tp = typeParams[tpIdx]
+        val tpName = luaExpr("tp.name") as string
+        tpNames.push(tpName)
+        tpIdx = tpIdx + 1
+    }
+    currentTypeSchemeVars = tpNames
+    typeSchemeLevel = currentTypeLevel
+
+    val tt = getTypeTable(tables)
+
+    var params: array[any] = []
+    var typeArr: array[any] = []
+    var i = 1
+    val argCount = args.size()
+    while i <= argCount {
+        val arg = args[i]
+        val argName = luaExpr("arg.name") as string
+        val argTypeRef = luaExpr("arg.typeRef") as any
+        val argSec = luaExpr("arg.section") as any
+
+        var argType: any = tAny
+        if argTypeRef != unit {
+            argType = resolveType(tt, currentTypeSchemeVars, argTypeRef, effectiveTypeLevel())
+        }
+        params.push(newFnParam(argName, argType as Type | unit, argSec as Section | unit) as any)
+        typeArr.push(argType)
+        i = i + 1
+    }
+
+    // Add return type
+    var retType: any = tUnit
+    if retTypeRef != unit {
+        retType = resolveType(tt, currentTypeSchemeVars, retTypeRef, effectiveTypeLevel())
+    }
+    typeArr.push(retType)
+
+    val effType = functionType(typeArr as array[Type], tpNames, 0)
+
+    // Restore type scheme
+    currentTypeSchemeVars = prevTypeSchemeVars
+    typeSchemeLevel = prevTypeSchemeLevel
+
+    val modName = luaExpr("pkg.moduleName") as string
+    val pkgName = luaExpr("pkg.packageName") as string
+
+    val result: any = effectDefinitionExpr(modName, pkgName, effName, params as array[FnParam], sec as Section | unit)
+    setExprType(result as Expr, effType as Type | unit)
+
+    // Register effect as a local symbol
+    addLocalSymbol(effName, false, isPub, effType, pkg, tables)
+
+    result
+}
+
+// --- Main converter ---
+
+pub fn convert(node: any, pkg: any, tables: any): any {
+    val tag = paTag(node)
+    val sec = paSection(node)
+
+    if tag == "UnitValue" {
+        atomExpr("unit", tUnit, sec)
+    } else if tag == "LongValue" {
+        val v = paLongValue(node)
+        atomExpr("$v", tInt, sec)
+    } else if tag == "FloatValue" {
+        val v = paFloatValue(node)
+        atomExpr("$v", tFloat, sec)
+    } else if tag == "BoolValue" {
+        val v = paBoolValue(node)
+        if v { atomExpr("true", tBool, sec) }
+        else { atomExpr("false", tBool, sec) }
+    } else if tag == "StringValue" {
+        val v = paStringValue(node)
+        atomExpr(v, tString, sec)
+    } else if tag == "StringText" {
+        val v = paStringValue(node)
+        atomExpr(v, tString, sec)
+    } else if tag == "ParseInterpolation" {
+        val innerVal = paInterpValue(node)
+        val converted: any = convert(innerVal, pkg, tables)
+        castExpr_(converted as Expr, tString, sec)
+    } else if tag == "ParseInterpolatedString" {
+        val parts = paParts(node)
+        var convertedParts: array[any] = []
+        var i = 1
+        val partCount = parts.size()
+        while i <= partCount {
+            val part = parts[i]
+            val cp: any = convert(part, pkg, tables)
+            convertedParts.push(cp)
+            i = i + 1
+        }
+        interpolatedStringExpr(convertedParts as array[Expr], sec as Section | unit)
+    } else if tag == "ParseLambda" {
+        convertLambda(node, pkg, tables)
+    } else if tag == "ParseFuncWithName" {
+        convertFuncWithName(node, pkg, tables)
+    } else if tag == "ParseFnCall" {
+        convertFnCall(node, pkg, tables)
+    } else if tag == "ParseVariableRead" {
+        val varName = paVariableName(node)
+        val tgt = getSymbol(varName, tables)
+        variableAccessExpr(tgt, sec)
+    } else if tag == "ParseAssignment" {
+        val varName = paVariableName(node)
+        val tgt = getSymbol(varName, tables)
+        val val_ = convert(paValue(node), pkg, tables)
+        assignmentExpr(tgt, val_, sec)
+    } else if tag == "ParseIndexOperator" {
+        val var_ = convert(paVariable(node), pkg, tables)
+        val idx = convert(paIndexExpr(node), pkg, tables)
+        indexOpExpr(var_, idx, sec)
+    } else if tag == "ParseIndexedAssignment" {
+        val var_ = convert(paVariable(node), pkg, tables)
+        val idx = convert(paIndexExpr(node), pkg, tables)
+        val val_ = convert(paIndexValue(node), pkg, tables)
+        indexedAssignmentExpr(var_, idx, val_, sec)
+    } else if tag == "ParseNameDeclaration" {
+        convertNameDeclaration(node, pkg, tables)
+    } else if tag == "ParseBlock" {
+        convertBlock(node, pkg, tables)
+    } else if tag == "ParseGroup" {
+        convert(paValue(node), pkg, tables)
+    } else if tag == "ParseIfElse" {
+        val cond = convert(paCondition(node), pkg, tables)
+        val thenB = convert(paThenBody(node), pkg, tables)
+        val elseNode: any = paElseBody(node)
+        val elseB: any = if elseNode != unit { convert(elseNode, pkg, tables) } else { unit }
+        ifElseExpr(cond as Expr, thenB as Expr, elseB as Expr | unit, sec as Section | unit)
+    } else if tag == "ParseWhile" {
+        val cond = convert(paCondition(node), pkg, tables)
+        val loopBody = convert(paLoopBody(node), pkg, tables)
+        whileLoopExpr(cond, loopBody, sec)
+    } else if tag == "ParseFor" {
+        convertFor(node, pkg, tables)
+    } else if tag == "ParseWhen" {
+        convertWhen(node, pkg, tables)
+    } else if tag == "ParseReturn" {
+        val retVal: any = paReturnValue(node)
+        val converted: any = if retVal != unit { convert(retVal, pkg, tables) } else { atomExpr("unit", tUnit, sec) }
+        returnExpr(converted as Expr, sec as Section | unit)
+    } else if tag == "ParseBreak" {
+        breakExpr(sec)
+    } else if tag == "ParseContinue" {
+        continueExpr(sec)
+    } else if tag == "ParseNot" {
+        val inner = convert(paValue(node), pkg, tables)
+        prefixOpExpr("!", inner, sec)
+    } else if tag == "ParseBinaryOp" {
+        val op = paOp(node)
+        val left = convert(paLeft(node), pkg, tables)
+        val right = convert(paRight(node), pkg, tables)
+        infixOpExpr(op, left, right, sec)
+    } else if tag == "ParseCast" {
+        val inner = convert(paValue(node), pkg, tables)
+        val tt = getTypeTable(tables)
+        val targetType = resolveType(tt, currentTypeSchemeVars, paTypeRef(node), effectiveTypeLevel())
+        castExpr_(inner, targetType, sec)
+    } else if tag == "ParseIs" {
+        val inner = convert(paValue(node), pkg, tables)
+        val tt = getTypeTable(tables)
+        val checkedType = resolveType(tt, currentTypeSchemeVars, paTypeRef(node), effectiveTypeLevel())
+        isExpr(inner, checkedType, sec)
+    } else if tag == "ParseFieldAccess" {
+        convertFieldAccess(node, pkg, tables)
+    } else if tag == "ParseFieldAssignment" {
+        val recv = convert(paReceiver(node), pkg, tables)
+        val memName = paMemberName(node)
+        val val_ = convert(paValue(node), pkg, tables)
+        fieldAssignmentExpr(recv, memName, val_, sec)
+    } else if tag == "ParseCreateArray" {
+        val values = paArrayValues(node)
+        var converted: array[any] = []
+        var i = 1
+        val count = values.size()
+        while i <= count {
+            val cv: any = convert(values[i], pkg, tables)
+            converted.push(cv)
+            i = i + 1
+        }
+        createArrayExpr(converted as array[Expr], sec as Section | unit)
+    } else if tag == "ParseCreateRecord" {
+        val fields = paRecordFields(node)
+        var converted: array[any] = []
+        var i = 1
+        val count = fields.size()
+        while i <= count {
+            val f = fields[i]
+            val fName = luaExpr("f.name") as string
+            val fValue = luaExpr("f.value") as any
+            val cv: any = convert(fValue, pkg, tables)
+            converted.push(newExprField(fName, cv as Expr))
+            i = i + 1
+        }
+        createRecordExpr(converted as array[ExprField], sec as Section | unit)
+    } else if tag == "ParseEffectDefinition" {
+        convertEffectDefinition(node, pkg, tables)
+    } else if tag == "ParseHandle" {
+        convertHandle(node, pkg, tables)
+    } else if tag == "ParseWeave" {
+        convertWeave(node, pkg, tables)
+    } else if tag == "ParseWeavePlaceholder" {
+        if weaveInput != unit {
+            weaveInput
+        } else {
+            atomExpr("unit", tUnit, sec)
+        }
+    } else {
+        // Unknown tag, return unit atom
+        println("WARNING: ast_converter unknown tag '$tag'")
+        atomExpr("unit", tUnit, sec)
+    }
+}
+
+// --- Lambda conversion ---
+
+fn convertLambdaImpl(node: any, pkg: any, tables: any): any {
+    val sec = paSection(node)
+    val args = paFormalArguments(node)
+    val bodyNodes = paBody(node)
+
+    val parentFst: any = currentFnSymbolTable
+    val fst = newFnSymbolTable(parentFst)
+    val prevFst = currentFnSymbolTable
+    currentFnSymbolTable = fst
+
+    var params: array[any] = []
+    var defaultArgs = luaExpr("{}") as any
+    var fnTypes: array[any] = []
+    var i = 1
+    val argCount = args.size()
+    while i <= argCount {
+        val arg = args[i]
+        val argName = luaExpr("arg.name") as string
+        val argTypeRef = luaExpr("arg.typeRef") as any
+        val argDefValue = luaExpr("arg.defaultValue") as any
+        val argSec = luaExpr("arg.section") as any
+
+        var argType: any = unit
+        if argTypeRef != unit {
+            val tt = getTypeTable(tables)
+            argType = resolveType(tt, currentTypeSchemeVars, argTypeRef, effectiveTypeLevel())
+        }
+
+        if argDefValue != unit {
+            val defExpr: any = convert(argDefValue, pkg, tables)
+            embedLua("defaultArgs[argName] = defExpr")
+        }
+
+        fstAddArgument(fst, argName, argType)
+        params.push(newFnParam(argName, argType as Type | unit, argSec as Section | unit) as any)
+
+        // Build type array for function type
+        if argType != unit {
+            fnTypes.push(argType)
+        } else {
+            val varType = variableType("_p$i", 1)
+            fnTypes.push(varType)
+        }
+
+        i = i + 1
+    }
+
+    // Add return type variable
+    val retVar = variableType("_ret", 1)
+    fnTypes.push(retVar)
+
+    // Convert body
+    var bodyExprs: array[any] = []
+    i = 1
+    val bodyCount = bodyNodes.size()
+    while i <= bodyCount {
+        val be: any = convert(bodyNodes[i], pkg, tables)
+        bodyExprs.push(be)
+        i = i + 1
+    }
+
+    currentFnSymbolTable = prevFst
+
+    val body = blockExpr(bodyExprs as array[Expr], sec as Section | unit)
+
+    // Check if there are default args
+    val defaultCount = luaExpr("(function() local c=0; for _ in pairs(defaultArgs) do c=c+1 end; return c end)()") as int
+    val funcType = functionType(fnTypes as array[Type], [] as array[string], defaultCount)
+
+    val result: any = fnExpr(params as array[FnParam], defaultArgs, body as Expr, sec as Section | unit)
+    setExprType(result as Expr, funcType as Type | unit)
+    result
+}
+
+convertLambda = convertLambdaImpl
+
+// --- FuncWithName conversion ---
+
+fn convertFuncWithNameImpl(node: any, pkg: any, tables: any): any {
+    val sec = paSection(node)
+    val fnName = paName(node)
+    val isPub = paIsPublic(node)
+    val typeParams = paTypeParameters(node)
+    val args = paFormalArguments(node)
+    val retTypeRef: any = paReturnTypeRef(node)
+    val funcBodyNode: any = paFuncBody(node)
+
+    // Save and set type scheme variables
+    val prevTypeSchemeVars = currentTypeSchemeVars
+    val prevTypeSchemeLevel = typeSchemeLevel
+
+    var tpNames: array[string] = []
+    var tpIdx = 1
+    val tpCount = typeParams.size()
+    while tpIdx <= tpCount {
+        val tp = typeParams[tpIdx]
+        val tpName = luaExpr("tp.name") as string
+        tpNames.push(tpName)
+        tpIdx = tpIdx + 1
+    }
+    currentTypeSchemeVars = tpNames
+    typeSchemeLevel = currentTypeLevel + 1
+
+    val tt = getTypeTable(tables)
+
+    // Compute function type from annotations BEFORE converting body
+    var paramTypes: array[any] = []
+    var defaultArgCount = 0
+    var i = 1
+    val argCount = args.size()
+    while i <= argCount {
+        val arg = args[i]
+        val argTypeRef = luaExpr("arg.typeRef") as any
+        val argDefValue = luaExpr("arg.defaultValue") as any
+        if argTypeRef != unit {
+            val resolved = resolveType(tt, currentTypeSchemeVars, argTypeRef, effectiveTypeLevel())
+            paramTypes.push(resolved)
+        } else {
+            paramTypes.push(variableType("_p$i", effectiveTypeLevel()))
+        }
+        if argDefValue != unit {
+            defaultArgCount = defaultArgCount + 1
+        }
+        i = i + 1
+    }
+
+    // Resolve return type
+    var returnType: any = tUnit
+    if retTypeRef != unit {
+        returnType = resolveType(tt, currentTypeSchemeVars, retTypeRef, effectiveTypeLevel())
+    }
+
+    // Build function type: [paramTypes..., returnType]
+    var fnTypeArr: array[any] = []
+    i = 1
+    val ptCount = paramTypes.size()
+    while i <= ptCount {
+        fnTypeArr.push(paramTypes[i])
+        i = i + 1
+    }
+    fnTypeArr.push(returnType)
+    val funcType = functionType(fnTypeArr as array[Type], tpNames, defaultArgCount)
+
+    // Register symbol BEFORE converting body (for self-recursion)
+    addLocalSymbol(fnName, false, isPub, funcType, pkg, tables)
+
+    // Create FnSymbolTable for the function
+    val parentFst = currentFnSymbolTable
+    val fst = newFnSymbolTable(parentFst)
+    val prevFst = currentFnSymbolTable
+    currentFnSymbolTable = fst
+
+    // Add arguments to the fn symbol table and build params
+    var params: array[any] = []
+    var defaultArgs = luaExpr("{}") as any
+    i = 1
+    while i <= argCount {
+        val arg = args[i]
+        val argName = luaExpr("arg.name") as string
+        val argTypeRef = luaExpr("arg.typeRef") as any
+        val argDefValue = luaExpr("arg.defaultValue") as any
+        val argSec = luaExpr("arg.section") as any
+
+        var argType: any = unit
+        if argTypeRef != unit {
+            argType = resolveType(tt, currentTypeSchemeVars, argTypeRef, effectiveTypeLevel())
+        }
+
+        if argDefValue != unit {
+            val defExpr: any = convert(argDefValue, pkg, tables)
+            embedLua("defaultArgs[argName] = defExpr")
+        }
+
+        fstAddArgument(fst, argName, argType)
+        params.push(newFnParam(argName, argType as Type | unit, argSec as Section | unit) as any)
+        i = i + 1
+    }
+
+    // Convert body with incremented type level
+    currentTypeLevel = currentTypeLevel + 1
+    val body: any = convert(funcBodyNode, pkg, tables)
+    currentTypeLevel = currentTypeLevel - 1
+
+    // If the return type is a function type and the body ends with a block,
+    // convert that trailing block to a zero-arg lambda.
+    // In Chi, { ... } without -> in expression position is a zero-arg lambda
+    // when the context expects a function type (e.g. fn foo(): () -> int { { 42 } })
+    val retTag = luaExpr("returnType.tag") as string
+    if retTag == "fn" {
+        val bodyKind = luaExpr("body.kind") as string
+        if bodyKind == "block" {
+            val bodyCount = luaExpr("#body.blockBody") as int
+            if bodyCount > 0 {
+                val lastExpr = luaExpr("body.blockBody[bodyCount]") as any
+                val lastKind = luaExpr("lastExpr.kind") as string
+                if lastKind == "block" {
+                    val lambdaRetVar = variableType("_ret", effectiveTypeLevel())
+                    val lambdaType = functionType([lambdaRetVar] as array[Type], [] as array[string], 0)
+                    val lambdaParams: array[FnParam] = []
+                    val lambdaSec = luaExpr("lastExpr.section") as any
+                    val lambdaFn: any = fnExpr(lambdaParams, luaExpr("{}"), lastExpr as Expr, lambdaSec as Section | unit)
+                    setExprType(lambdaFn as Expr, lambdaType as Type | unit)
+                    embedLua("body.blockBody[bodyCount] = lambdaFn")
+                }
+            }
+        }
+    }
+
+    currentFnSymbolTable = prevFst
+
+    // Restore type scheme state
+    currentTypeSchemeVars = prevTypeSchemeVars
+    typeSchemeLevel = prevTypeSchemeLevel
+
+    val fnBody = fnExpr(params as array[FnParam], defaultArgs, body as Expr, sec as Section | unit)
+
+    nameDeclarationExpr(isPub, fnName, false, funcType as Type | unit, fnBody as Expr, sec as Section | unit)
+}
+
+convertFuncWithName = convertFuncWithNameImpl
+
+// --- FnCall conversion ---
+
+fn convertFnCallImpl(node: any, pkg: any, tables: any): any {
+    val sec = paSection(node)
+    val calleeNode: any = paCallee(node)
+    val argNodes = paArguments(node)
+
+    val callee: any = convert(calleeNode, pkg, tables)
+
+    var convertedArgs: array[any] = []
+    var i = 1
+    val argCount = argNodes.size()
+    while i <= argCount {
+        val argNode = argNodes[i]
+        val ca: any = convert(argNode, pkg, tables)
+        convertedArgs.push(ca)
+        i = i + 1
+    }
+
+    // Try to fill default arguments: look up the callee symbol
+    val calleeTag = paTag(calleeNode)
+    if calleeTag == "ParseVariableRead" {
+        val calleeName = paVariableName(calleeNode)
+        // Skip default-arg fill if callee is a local variable in function scope
+        // (local variables are closures/lambdas and don't have default-arg info)
+        val fst: any = currentFnSymbolTable
+        val isLocalVar: bool = if fst != unit { fstGet(fst as FnSymbolTable, calleeName) != unit } else { false }
+        val sym: any = if !isLocalVar { ctGetLocalSymbol(tables as CompileTables, calleeName) } else { unit }
+        if sym != unit {
+            val symType = luaExpr("sym.symbolType") as any
+            if symType != unit {
+                val stTag = luaExpr("symType.tag") as string
+                if stTag == "fn" {
+                    val totalTypes = luaExpr("#symType.types") as int
+                    val defCount = luaExpr("symType.defaults") as int
+                    // number of params = totalTypes - 1 (last is return type)
+                    val paramCount = totalTypes - 1
+                    // fill with "@" atoms for missing default args
+                    while convertedArgs.size() < paramCount {
+                        convertedArgs.push(atomExpr("@", unit, unit))
+                    }
+                }
+            }
+        }
+    }
+
+    // Wrap block arguments in zero-arg lambdas
+    // When a block { ... } is passed as a function argument, it should be treated
+    // as a zero-arg lambda { -> ... } (thunk), not as a bare block expression.
+    var wi = 1
+    val wCount = convertedArgs.size()
+    while wi <= wCount {
+        val arg: any = convertedArgs[wi]
+        val argKind = luaExpr("arg.kind") as string
+        if argKind == "block" {
+            val emptyParams: array[FnParam] = []
+            val emptyDefaults: any = luaExpr("{}") as any
+            val blockSec: any = luaExpr("arg.section") as any
+            val wrappedFn = fnExpr(emptyParams, emptyDefaults, arg as Expr, blockSec as Section | unit)
+            embedLua("convertedArgs[wi] = wrappedFn")
+        }
+        wi = wi + 1
+    }
+
+    fnCallExpr(callee as Expr, convertedArgs as array[Expr], sec as Section | unit)
+}
+
+convertFnCall = convertFnCallImpl
+
+// --- Block conversion ---
+
+fn convertBlockImpl(node: any, pkg: any, tables: any): any {
+    val sec = paSection(node)
+    val bodyNodes = paBody(node)
+
+    currentTypeLevel = currentTypeLevel + 1
+    var bodyExprs: array[any] = []
+    var i = 1
+    val count = bodyNodes.size()
+    while i <= count {
+        val be: any = convert(bodyNodes[i], pkg, tables)
+        bodyExprs.push(be)
+        i = i + 1
+    }
+    currentTypeLevel = currentTypeLevel - 1
+
+    blockExpr(bodyExprs as array[Expr], sec as Section | unit) as any
+}
+
+convertBlock = convertBlockImpl
+
+// --- NameDeclaration conversion ---
+
+fn convertNameDeclarationImpl(node: any, pkg: any, tables: any): any {
+    val sec = paSection(node)
+    val isPub = paIsPublic(node)
+    val symName = paSymbolName(node)
+    val isMut = paIsMutable(node)
+    val typeRef: any = paTypeRef(node)
+    val valNode: any = paValue(node)
+
+    val val_ = convert(valNode, pkg, tables)
+
+    currentTypeLevel = currentTypeLevel + 1
+
+    var expType: any = unit
+    if typeRef != unit {
+        val tt = getTypeTable(tables)
+        expType = resolveType(tt, currentTypeSchemeVars, typeRef, effectiveTypeLevel())
+    }
+
+    // Register the symbol
+    var symType: any = unit
+    // If the value is a function, try to use the function type
+    val valKind = luaExpr("val_.kind") as string
+    if valKind == "fn" {
+        symType = luaExpr("val_.exprType") as any
+    }
+    addLocalSymbol(symName, isMut, isPub, symType, pkg, tables)
+    currentTypeLevel = currentTypeLevel - 1
+
+    nameDeclarationExpr(isPub, symName, isMut, expType as Type | unit, val_ as Expr, sec as Section | unit) as any
+}
+
+convertNameDeclaration = convertNameDeclarationImpl
+
+// --- When conversion (fold into nested IfElse) ---
+
+fn convertWhenImpl(node: any, pkg: any, tables: any): any {
+    val sec = paSection(node)
+    val cases = paWhenCases(node)
+    val elseCase: any = paElseCase(node)
+
+    val caseCount = cases.size()
+
+    // Empty when
+    if caseCount == 0 && elseCase == unit {
+        return atomExpr("unit", tUnit, sec)
+    }
+
+    // Only else case
+    if caseCount == 0 && elseCase != unit {
+        val ecBody: any = luaExpr("elseCase.body")
+        return convert(ecBody, pkg, tables)
+    }
+
+    // Build from last case backward
+    // Start with the last case
+    val lastCase = cases[caseCount]
+    val lastCond: any = luaExpr("lastCase.condition")
+    val lastBody: any = luaExpr("lastCase.body")
+    val lastSec: any = luaExpr("lastCase.section")
+
+    val lastCondExpr: any = convert(lastCond, pkg, tables)
+    val lastBodyExpr: any = convert(lastBody, pkg, tables)
+
+    var result: any = unit
+    if elseCase != unit {
+        val ecBody: any = luaExpr("elseCase.body")
+        val elseExpr: any = convert(ecBody, pkg, tables)
+        result = ifElseExpr(lastCondExpr as Expr, lastBodyExpr as Expr, elseExpr as Expr | unit, lastSec as Section | unit) as any
+    } else {
+        result = ifElseExpr(lastCondExpr as Expr, lastBodyExpr as Expr, unit, lastSec as Section | unit) as any
+    }
+
+    // Fold from second-to-last to first
+    var idx = caseCount - 1
+    while idx >= 1 {
+        val wc = cases[idx]
+        val wcCond: any = luaExpr("wc.condition")
+        val wcBody: any = luaExpr("wc.body")
+        val wcSec: any = luaExpr("wc.section")
+
+        val condExpr: any = convert(wcCond, pkg, tables)
+        val bodyExpr: any = convert(wcBody, pkg, tables)
+        result = ifElseExpr(condExpr as Expr, bodyExpr as Expr, result as Expr | unit, wcSec as Section | unit) as any
+        idx = idx - 1
+    }
+
+    result
+}
+
+convertWhen = convertWhenImpl
+
+// --- For loop conversion ---
+
+fn convertForImpl(node: any, pkg: any, tables: any): any {
+    val sec = paSection(node)
+    val vars = paForVars(node)
+    val iterNode: any = paIterable(node)
+    val stateNode: any = paForState(node)
+    val initNode: any = paForInit(node)
+    val bodyNode: any = paForBody(node)
+
+    // Create a symbol table for loop variables
+    val parentFst = currentFnSymbolTable
+    val fst = newFnSymbolTable(parentFst)
+    var vi = 1
+    val varCount = vars.size()
+    while vi <= varCount {
+        fstAddLocal(fst, vars[vi], unit, false)
+        vi = vi + 1
+    }
+
+    val iter: any = convert(iterNode, pkg, tables)
+    val state: any = if stateNode != unit { convert(stateNode, pkg, tables) } else { unit }
+    val init: any = if initNode != unit { convert(initNode, pkg, tables) } else { unit }
+
+    val prevFst = currentFnSymbolTable
+    currentFnSymbolTable = fst
+    val body: any = convert(bodyNode, pkg, tables)
+    currentFnSymbolTable = prevFst
+
+    forLoopExpr(vars, iter as Expr, state as Expr | unit, init as Expr | unit, body as Expr, sec as Section | unit) as any
+}
+
+convertFor = convertForImpl
+
+// --- FieldAccess conversion ---
+
+fn convertFieldAccessImpl(node: any, pkg: any, tables: any): any {
+    val sec = paSection(node)
+    val receiverName = paReceiverName(node)
+    val memberName = paMemberName(node)
+    val memberSec = paMemberSection(node)
+
+    // First check if the receiver is a package alias
+    val aliasedPkg: any = ctGetAliasedPackage(tables as CompileTables, receiverName)
+    if aliasedPkg != unit {
+        val aliasMod = luaExpr("aliasedPkg.moduleName") as string
+        val aliasPkg = luaExpr("aliasedPkg.packageName") as string
+        // Check if the member exists as a symbol in that package
+        val ns = luaExpr("tables.ns") as any
+        if ns != unit {
+            val pkgSym = luaExpr("ns.getSymbol and ns.getSymbol(aliasMod, aliasPkg, memberName) or nil") as any
+            if pkgSym != unit {
+                val sMod = luaExpr("pkgSym.moduleName") as string
+                val sPkg = luaExpr("pkgSym.packageName") as string
+                val recvSection = luaExpr("node.receiver and node.receiver.section or nil") as any
+                return variableAccessExpr(packageTarget(sMod, sPkg, memberName), recvSection as Section | unit)
+            }
+        }
+        // Even without ns, treat as package access
+        val recvSection = luaExpr("node.receiver and node.receiver.section or nil") as any
+        return variableAccessExpr(packageTarget(aliasMod, aliasPkg, memberName), recvSection as Section | unit)
+    }
+
+    // Regular field access
+    val recv = convert(paReceiver(node), pkg, tables)
+    fieldAccessExpr(recv, memberName, memberSec, sec)
+}
+
+convertFieldAccess = convertFieldAccessImpl
+
+// --- Weave conversion ---
+
+fn convertWeaveImpl(node: any, pkg: any, tables: any): any {
+    val sec = paSection(node)
+    val valNode: any = paValue(node)
+    val templateNode: any = paOpTemplate(node)
+
+    val inputValue: any = convert(valNode, pkg, tables)
+    val tempVarName = nextTempVarName()
+
+    // Create temp variable declaration
+    val tempDecl = nameDeclarationExpr(false, tempVarName, false, unit, inputValue as Expr, paSection(valNode))
+    addLocalSymbol(tempVarName, false, false, unit, pkg, tables)
+
+    // Create read variable for the temp var
+    val readVar: any = variableAccessExpr(localTarget(tempVarName), paSection(valNode))
+
+    // Set weave input and convert template
+    val prevWeaveInput = weaveInput
+    weaveInput = readVar
+    val filledTemplate: any = convert(templateNode, pkg, tables)
+    weaveInput = prevWeaveInput
+
+    blockExpr([tempDecl as Expr, filledTemplate as Expr], sec as Section | unit) as any
+}
+
+convertWeave = convertWeaveImpl
+
+// --- Handle conversion ---
+
+fn convertHandleImpl(node: any, pkg: any, tables: any): any {
+    val sec = paSection(node)
+    val bodyNode: any = paHandleBody(node)
+    val casesArr = paEffectCases(node)
+
+    val body: any = convert(bodyNode, pkg, tables)
+
+    var handleCases: array[any] = []
+    var i = 1
+    val caseCount = casesArr.size()
+    while i <= caseCount {
+        val c = casesArr[i]
+        val effName = luaExpr("c.effectName") as string
+        val argNames = luaExpr("c.argumentNames") as array[string]
+        val caseBody = luaExpr("c.body") as any
+        val caseSec = luaExpr("c.section") as any
+
+        // Create virtual symbol table for this case
+        val virtualFst = newFnSymbolTable(currentFnSymbolTable)
+        val prevFst = currentFnSymbolTable
+        currentFnSymbolTable = virtualFst
+
+        // Resolve effect name to get module/package info
+        var eMod = ""
+        var ePkg = ""
+        val effTarget: any = getSymbol(effName, tables)
+        val effTargetTag = luaExpr("effTarget.tag") as string
+        if effTargetTag == "package" {
+            eMod = luaExpr("effTarget.moduleName") as string
+            ePkg = luaExpr("effTarget.packageName") as string
+        }
+
+        // Add "resume" and argument names as local symbols
+        fstAddLocal(virtualFst, "resume", unit, false)
+        var ai = 1
+        val anCount = argNames.size()
+        while ai <= anCount {
+            fstAddLocal(virtualFst, argNames[ai], unit, false)
+            ai = ai + 1
+        }
+
+        // Convert body
+        val convertedBody: any = convert(caseBody, pkg, tables)
+
+        // Remove symbols
+        fstRemove(virtualFst, "resume")
+        ai = 1
+        while ai <= anCount {
+            fstRemove(virtualFst, argNames[ai])
+            ai = ai + 1
+        }
+
+        currentFnSymbolTable = prevFst
+
+        handleCases.push(newHandleCase(eMod, ePkg, effName, argNames, convertedBody as Expr, caseSec as Section | unit) as any)
+        i = i + 1
+    }
+
+    handleExpr(body as Expr, handleCases as array[HandleCase], sec as Section | unit)
+}
+
+convertHandle = convertHandleImpl
+
+// --- Program conversion ---
+
+pub fn convertProgram(parseProg: any, pkg: any, tables: any): any {
+    val progSection = luaExpr("parseProg.section") as any
+
+    // Process type aliases
+    val typeAliases = luaExpr("parseProg.typeAliases") as array[any]
+    var i = 1
+    val aliasCount = typeAliases.size()
+    while i <= aliasCount {
+        val alias = typeAliases[i]
+        val aliasName = luaExpr("alias.name") as string
+        val aliasTypeRef = luaExpr("alias.typeRef") as any
+        val aliasTypeParams = luaExpr("alias.typeParameters") as array[any]
+
+        // Resolve type params
+        var tpNames: array[string] = []
+        var tpi = 1
+        val tpCount = aliasTypeParams.size()
+        while tpi <= tpCount {
+            val tp = aliasTypeParams[tpi]
+            val tpName = luaExpr("tp.name") as string
+            tpNames.push(tpName)
+            tpi = tpi + 1
+        }
+
+        val tt = getTypeTable(tables)
+        // Skip re-resolution if alias already exists in type table
+        // (compiler.chi already resolved with resolveTypeAndWrapRecursive which handles recursive types)
+        val existing: any = luaExpr("tt.aliases[aliasName]")
+        if existing == unit {
+            val resolved = resolveType(tt, tpNames, aliasTypeRef, currentTypeLevel)
+            val modName = luaExpr("pkg.moduleName") as string
+            val pkgName = luaExpr("pkg.packageName") as string
+
+            // Create and register the alias
+            val typeAlias = luaExpr("{ typeId = { moduleName = modName, packageName = pkgName, name = aliasName }, aliasType = resolved }") as any
+            embedLua("tables.localTypeTable.aliases[aliasName] = typeAlias")
+        }
+
+        i = i + 1
+    }
+
+    // Convert code expressions
+    val codeExprs = luaExpr("parseProg.code") as array[any]
+    var converted: array[any] = []
+    i = 1
+    val codeCount = codeExprs.size()
+    while i <= codeCount {
+        val ce: any = convert(codeExprs[i], pkg, tables)
+        converted.push(ce)
+        i = i + 1
+    }
+
+    converted
+}
