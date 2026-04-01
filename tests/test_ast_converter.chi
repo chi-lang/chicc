@@ -1,10 +1,11 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/source { newSection }
-import user/types { tAny, tUnit, tBool, tInt, tFloat, tString, functionType, variableType }
-import user/ast { localTarget, packageTarget, exprKind, exprAtomValue, exprExprType, exprTarget, exprOp, exprBlockBody, exprValue, exprDeclName, exprIsPublic, exprIsMutable, exprParts, exprCallParams, exprCondition, exprThenBranch, exprElseBranch, exprForVars, exprFieldName, exprParameters, exprEffectName, exprEffectModuleName, exprEffectPackageName, exprHandleCases, exprReturnValue, exprPrefixExpr, exprLeft, exprRight, exprArrayValues, exprRecordFields, exprLoopCondition, exprLoopBody, exprIndexVariable, exprIndexExpr, exprIndexValue, exprReceiver, exprFunction, exprCastExpr, exprTargetType, exprCheckedType, exprBody }
-import user/parse_ast { parseUnitValue, parseLongValue, parseFloatValue, parseBoolValue, parseStringValue, parseStringText, parseInterpolation, parseInterpolatedString, parseLambda, parseFuncWithName, parseFnCall, parseVariableRead, parseAssignment, parseBlock, parseGroup, parseIfElse, parseWhile, parseFor, parseWhen, parseReturn, parseBreak, parseContinue, parseNot, parseBinaryOp, parseCast, parseIs, parseFieldAccess, parseFieldAssignment, parseCreateArray, parseCreateRecord, parseWeave, parseWeavePlaceholder, parseEffectDefinition, parseHandle, parseNameDeclaration, parseIndexOperator, parseIndexedAssignment, newFormalArgument, newParseWhenCase, newParseElseCase, newParseRecordField, newParseHandleCase, typeNameRef }
-import user/symbols { newCompileTables, newSymbol, ctDefineSymbol, ctGetLocalSymbol }
-import user/ast_converter { convert, convertProgram, getSymbol, addLocalSymbol, removeLocalSymbol }
+import std/lang { luaExpr }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/source { newSection }
+import chicc/types { tAny, tUnit, tBool, tInt, tFloat, tString, functionType, variableType }
+import chicc/ast { localTarget, packageTarget, exprKind, exprAtomValue, exprExprType, exprTarget, exprOp, exprBlockBody, exprValue, exprDeclName, exprIsPublic, exprIsMutable, exprParts, exprCallParams, exprCondition, exprThenBranch, exprElseBranch, exprForVars, exprFieldName, exprParameters, exprEffectName, exprEffectModuleName, exprEffectPackageName, exprHandleCases, exprReturnValue, exprPrefixExpr, exprLeft, exprRight, exprArrayValues, exprRecordFields, exprLoopCondition, exprLoopBody, exprIndexVariable, exprIndexExpr, exprIndexValue, exprReceiver, exprFunction, exprCastExpr, exprTargetType, exprCheckedType, exprBody }
+import chicc/parse_ast { parseUnitValue, parseLongValue, parseFloatValue, parseBoolValue, parseStringValue, parseStringText, parseInterpolation, parseInterpolatedString, parseLambda, parseFuncWithName, parseFnCall, parseVariableRead, parseAssignment, parseBlock, parseGroup, parseIfElse, parseWhile, parseFor, parseWhen, parseReturn, parseBreak, parseContinue, parseNot, parseBinaryOp, parseCast, parseIs, parseFieldAccess, parseFieldAssignment, parseCreateArray, parseCreateRecord, parseWeave, parseWeavePlaceholder, parseEffectDefinition, parseHandle, parseNameDeclaration, parseIndexOperator, parseIndexedAssignment, newFormalArgument, newParseWhenCase, newParseElseCase, newParseRecordField, newParseHandleCase, typeNameRef }
+import chicc/symbols { newCompileTables, newSymbol, ctDefineSymbol, ctGetLocalSymbol }
+import chicc/ast_converter { convert, convertProgram, getSymbol, addLocalSymbol, removeLocalSymbol }
 
 // Helper: create a minimal package and tables for testing
 fn makeTestContext(): { pkg: any, tables: any } {

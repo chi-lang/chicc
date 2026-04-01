@@ -1,8 +1,8 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/lexer { tokenize }
-import user/token { TK_EOF }
-import user/parser { newParser, parseProgram, parsePackageDefinition, parseSingleImport, parseImports, parseImportEntries, parseImportEntry, peek }
-import user/parse_ast { PackageDefinition, ImportEntry, ParseImport, ParseProgram }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/lexer { tokenize }
+import chicc/token { TK_EOF }
+import chicc/parser { newParser, parseProgram, parsePackageDefinition, parseSingleImport, parseImports, parseImportEntries, parseImportEntry, peek }
+import chicc/parse_ast { PackageDefinition, ParseImportEntry, ParseImport, ParseProgram }
 import std/lang.array { size }
 
 // --- parsePackageDefinition ---

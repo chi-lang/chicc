@@ -1,5 +1,5 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/types { newTypeId, typeIdToString, typeIdEquals, anyTypeId, intTypeId, stringTypeId, tInt, tString, tUnit, tBool, tAny, primitiveType, functionType, recordType, sumType, arrayType, variableType, isPrimitive, isFunction, isRecord, isSum, isArray, isVariable, typeTag, typeTypesCount, typeDefaults, typeFieldsCount, typeName }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/types { newTypeId, typeIdToString, typeIdEquals, anyTypeId, intTypeId, stringTypeId, tInt, tString, tUnit, tBool, tAny, primitiveType, functionType, recordType, sumType, arrayType, variableType, isPrimitive, isFunction, isRecord, isSum, isArray, isVariable, typeTag, typeTypesCount, typeDefaults, typeFieldsCount, typeName }
 
 test("newTypeId") {
     val id = newTypeId("std", "lang.int", "int")

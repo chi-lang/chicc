@@ -1,8 +1,8 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/util { newStringBuilder, StringBuilder, toString }
-import user/ast { Program, Package, newPackage, newProgram, variableAccessExpr, nameDeclarationExpr, assignmentExpr, atomExpr, localTarget, packageTarget }
-import user/types { tInt, tString }
-import user/emitter { EmitterState, newState, emit, nextTmpName, topLevelName, localQualifiedName, emitVariableAccess, emitNameDeclaration, emitAssignment, emitExpr, emitAtom }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/util { newStringBuilder, StringBuilder, toString }
+import chicc/ast { Program, Package, newPackage, newProgram, variableAccessExpr, nameDeclarationExpr, assignmentExpr, atomExpr, localTarget, packageTarget }
+import chicc/types { tInt, tString }
+import chicc/emitter { EmitterState, newState, emit, nextTmpName, topLevelName, localQualifiedName, emitVariableAccess, emitNameDeclaration, emitAssignment, emitExpr, emitAtom }
 
 fn freshState(): EmitterState {
     val pkg = newPackage("mymod", "mypkg")
@@ -51,6 +51,7 @@ test("emitVariableAccess - package symbol different module") {
 test("emitNameDeclaration - inside function") {
     val st = freshState()
     st.inFunction = true
+    st.functionDepth = 1
     val valExpr = atomExpr("42", tInt, unit)
     val expr = nameDeclarationExpr(false, "x", false, unit, valExpr, unit)
     val result = emitNameDeclaration(st, expr)

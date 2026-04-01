@@ -1,6 +1,6 @@
-import user/test_util { test, assertEqual, summary }
-import user/lexer { newLexer, readString }
-import user/token { TK_STRING, TK_INTERP_START, TK_INTERP_TEXT, TK_INTERP_EXPR_START, TK_INTERP_EXPR_END, TK_INTERP_END, TK_ID, TK_INT, TK_PLUS, TK_DOT, TK_LBRACE, TK_RBRACE, TK_COLON, TK_COMMA }
+import chicc/test_util { test, assertEqual, summary }
+import chicc/lexer { newLexer, lexReadString }
+import chicc/token { TK_STRING, TK_INTERP_START, TK_INTERP_TEXT, TK_INTERP_EXPR_START, TK_INTERP_EXPR_END, TK_INTERP_END, TK_ID, TK_INT, TK_PLUS, TK_DOT, TK_LBRACE, TK_RBRACE, TK_COLON, TK_COMMA }
 import std/lang.array { size }
 import std/lang { luaExpr, embedLua }
 
@@ -25,7 +25,7 @@ fn mkExprSrc(before: string, expr: string, after: string): string {
 
 test("simple string: hello") {
     val lex = newLexer("\"hello\"")
-    readString(lex)
+    lexReadString(lex)
     assertEqual(lex.tokens.size(), 1)
     assertEqual(lex.tokens[1].kind, TK_STRING)
     assertEqual(lex.tokens[1].value, "hello")
@@ -33,7 +33,7 @@ test("simple string: hello") {
 
 test("simple string: empty") {
     val lex = newLexer("\"\"")
-    readString(lex)
+    lexReadString(lex)
     assertEqual(lex.tokens.size(), 1)
     assertEqual(lex.tokens[1].kind, TK_STRING)
     assertEqual(lex.tokens[1].value, "")
@@ -41,14 +41,14 @@ test("simple string: empty") {
 
 test("simple string: single char") {
     val lex = newLexer("\"a\"")
-    readString(lex)
+    lexReadString(lex)
     assertEqual(lex.tokens[1].kind, TK_STRING)
     assertEqual(lex.tokens[1].value, "a")
 }
 
 test("simple string: spaces") {
     val lex = newLexer("\"hello world\"")
-    readString(lex)
+    lexReadString(lex)
     assertEqual(lex.tokens[1].kind, TK_STRING)
     assertEqual(lex.tokens[1].value, "hello world")
 }
@@ -58,7 +58,7 @@ test("simple string: spaces") {
 test("escape: newline") {
     val src: string = luaExpr("'\"a\\\\nb\"'")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     assertEqual(lex.tokens[1].kind, TK_STRING)
     val expected: string = luaExpr("'a\\nb'")
     assertEqual(lex.tokens[1].value, expected)
@@ -67,7 +67,7 @@ test("escape: newline") {
 test("escape: tab") {
     val src: string = luaExpr("'\"a\\\\tb\"'")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     assertEqual(lex.tokens[1].kind, TK_STRING)
     val expected: string = luaExpr("'a\\tb'")
     assertEqual(lex.tokens[1].value, expected)
@@ -76,7 +76,7 @@ test("escape: tab") {
 test("escape: carriage return") {
     val src: string = luaExpr("'\"a\\\\rb\"'")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     assertEqual(lex.tokens[1].kind, TK_STRING)
     val expected: string = luaExpr("'a\\rb'")
     assertEqual(lex.tokens[1].value, expected)
@@ -85,7 +85,7 @@ test("escape: carriage return") {
 test("escape: backslash") {
     val src: string = luaExpr("'\"a\\\\\\\\b\"'")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     assertEqual(lex.tokens[1].kind, TK_STRING)
     val expected: string = luaExpr("'a\\\\b'")
     assertEqual(lex.tokens[1].value, expected)
@@ -94,7 +94,7 @@ test("escape: backslash") {
 test("escape: quote") {
     val src: string = luaExpr("'\"a\\\\\"b\"'")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     assertEqual(lex.tokens[1].kind, TK_STRING)
     val expected: string = luaExpr("'a\"b'")
     assertEqual(lex.tokens[1].value, expected)
@@ -104,7 +104,7 @@ test("escape: dollar sign") {
     // Source: "a\$b" - escaped dollar, no interpolation
     val src: string = luaExpr("'\"a\\\\' .. string.char(36) .. 'b\"'")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     // Escaped dollar means no interpolation -> simple TK_STRING
     assertEqual(lex.tokens[1].kind, TK_STRING)
     val expected: string = luaExpr("'a' .. string.char(36) .. 'b'")
@@ -114,7 +114,7 @@ test("escape: dollar sign") {
 test("escape: null") {
     val src: string = luaExpr("'\"a\\\\0b\"'")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     assertEqual(lex.tokens[1].kind, TK_STRING)
     val expected: string = luaExpr("'a\\0b'")
     assertEqual(lex.tokens[1].value, expected)
@@ -125,7 +125,7 @@ test("escape: null") {
 test("interp: hello and name") {
     val src = mkInterpSrc("hello ", "name", "")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     assertEqual(lex.tokens.size(), 6)
     assertEqual(lex.tokens[1].kind, TK_INTERP_START)
     assertEqual(lex.tokens[2].kind, TK_INTERP_TEXT)
@@ -140,7 +140,7 @@ test("interp: hello and name") {
 test("interp: ident at start") {
     val src = mkInterpSrc("", "name", " world")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     // INTERP_START, EXPR_START, ID(name), EXPR_END, TEXT(" world"), INTERP_END
     assertEqual(lex.tokens.size(), 6)
     assertEqual(lex.tokens[1].kind, TK_INTERP_START)
@@ -157,7 +157,7 @@ test("interp: a b c - mixed text and ident") {
     // "a $b c"
     val src = mkInterpSrc("a ", "b", " c")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     // INTERP_START, TEXT("a "), EXPR_START, ID("b"), EXPR_END, TEXT(" c"), INTERP_END
     assertEqual(lex.tokens.size(), 7)
     assertEqual(lex.tokens[1].kind, TK_INTERP_START)
@@ -177,7 +177,7 @@ test("interp: multiple vars") {
     val d = dollar()
     val src: string = luaExpr("'\"' .. string.char(36) .. 'a and ' .. string.char(36) .. 'b\"'")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     // INTERP_START, EXPR_START, ID(a), EXPR_END, TEXT(" and "), EXPR_START, ID(b), EXPR_END, INTERP_END
     assertEqual(lex.tokens.size(), 9)
     assertEqual(lex.tokens[1].kind, TK_INTERP_START)
@@ -199,7 +199,7 @@ test("interp: multiple vars") {
 test("interp: expr 1 + 2") {
     val src = mkExprSrc("", "1 + 2", "")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     // INTERP_START, EXPR_START, INT(1), PLUS, INT(2), EXPR_END, INTERP_END
     assertEqual(lex.tokens.size(), 7)
     assertEqual(lex.tokens[1].kind, TK_INTERP_START)
@@ -216,7 +216,7 @@ test("interp: expr 1 + 2") {
 test("interp: expr with identifier") {
     val src = mkExprSrc("", "name", "")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     // INTERP_START, EXPR_START, ID(name), EXPR_END, INTERP_END
     assertEqual(lex.tokens.size(), 5)
     assertEqual(lex.tokens[1].kind, TK_INTERP_START)
@@ -230,7 +230,7 @@ test("interp: expr with identifier") {
 test("interp: text before and after expr") {
     val src = mkExprSrc("a", "1", "b")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     // INTERP_START, TEXT(a), EXPR_START, INT(1), EXPR_END, TEXT(b), INTERP_END
     assertEqual(lex.tokens.size(), 7)
     assertEqual(lex.tokens[1].kind, TK_INTERP_START)
@@ -251,7 +251,7 @@ test("interp: nested braces in expr") {
     // "${a + {x: 1}.y}"
     val src = mkExprSrc("", "a + {x: 1}.y", "")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     // INTERP_START, EXPR_START, ID(a), PLUS, LBRACE, ID(x), COLON, INT(1), RBRACE, DOT, ID(y), EXPR_END, INTERP_END
     assertEqual(lex.tokens[1].kind, TK_INTERP_START)
     assertEqual(lex.tokens[2].kind, TK_INTERP_EXPR_START)
@@ -278,7 +278,7 @@ test("escaped dollar: no interpolation") {
     // Source: "hello\$name" - escaped dollar, no interpolation
     val src: string = luaExpr("'\"hello\\\\' .. string.char(36) .. 'name\"'")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     assertEqual(lex.tokens.size(), 1)
     assertEqual(lex.tokens[1].kind, TK_STRING)
     val expected: string = luaExpr("'hello' .. string.char(36) .. 'name'")
@@ -291,7 +291,7 @@ test("interp: dollar at end of string") {
     // "hello$" - dollar at the end before closing quote
     val src: string = luaExpr("'\"hello' .. string.char(36) .. '\"'")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     // Has dollar so enters interpolation mode
     // INTERP_START, TEXT("hello"), TEXT(dollar as literal), INTERP_END
     assertEqual(lex.tokens[1].kind, TK_INTERP_START)
@@ -308,7 +308,7 @@ test("interp: dollar at end of string") {
 test("interp: only identifier, no text") {
     val src = mkInterpSrc("", "name", "")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     // INTERP_START, EXPR_START, ID(name), EXPR_END, INTERP_END
     assertEqual(lex.tokens.size(), 5)
     assertEqual(lex.tokens[1].kind, TK_INTERP_START)
@@ -322,7 +322,7 @@ test("interp: only identifier, no text") {
 test("interp: identifier with underscore and digits") {
     val src = mkInterpSrc("", "my_var2", "")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     assertEqual(lex.tokens[1].kind, TK_INTERP_START)
     assertEqual(lex.tokens[2].kind, TK_INTERP_EXPR_START)
     assertEqual(lex.tokens[3].kind, TK_ID)
@@ -337,7 +337,7 @@ test("interp: mixed ident and expr") {
     // "$a=${1}"
     val src: string = luaExpr("'\"' .. string.char(36) .. 'a=' .. string.char(36) .. '{1}\"'")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     // INTERP_START, EXPR_START, ID(a), EXPR_END, TEXT("="), EXPR_START, INT(1), EXPR_END, INTERP_END
     assertEqual(lex.tokens[1].kind, TK_INTERP_START)
     assertEqual(lex.tokens[2].kind, TK_INTERP_EXPR_START)
@@ -359,7 +359,7 @@ test("interp: escape in text segment") {
     // "hello\n$name"
     val src: string = luaExpr("'\"hello\\\\n' .. string.char(36) .. 'name\"'")
     val lex = newLexer(src)
-    readString(lex)
+    lexReadString(lex)
     assertEqual(lex.tokens[1].kind, TK_INTERP_START)
     assertEqual(lex.tokens[2].kind, TK_INTERP_TEXT)
     val expectedText: string = luaExpr("'hello\\n'")

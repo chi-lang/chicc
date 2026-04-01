@@ -1,10 +1,10 @@
-import user/test_util { test, assertEqual, assertTrue, summary }
-import user/types { Type, TypeId, RecordField, newTypeId, typeIdEquals, typeTag, typeIds, typeTypes, typeTypeParams, typeDefaults, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeVariable, typeInnerType, typeBody, typeTypesCount, typeFieldsCount, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, polyType, tAny, tUnit, tBool, tInt, tFloat, tString, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, arrayTypeId }
-import user/type_writer { encodeType, decodeType }
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/types { Type, TypeId, RecordField, newTypeId, typeIdEquals, typeTag, typeIds, typeTypes, typeTypeParams, typeDefaults, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeVariable, typeInnerType, typeBody, typeTypesCount, typeFieldsCount, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, polyType, tAny, tUnit, tBool, tInt, tFloat, tString, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, arrayTypeId }
+import chicc/type_writer { encodeType, decodeType }
 import std/lang { luaExpr }
 
 fn typesEqual(a: Type, b: Type): bool {
-    luaExpr("encodeType(a) == encodeType(b)")
+    luaExpr("require('chicc/type_writer').encodeType(a) == require('chicc/type_writer').encodeType(b)")
 }
 
 test("encode primitive int") {

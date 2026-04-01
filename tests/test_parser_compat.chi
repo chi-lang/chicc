@@ -1,5 +1,5 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/parse_ast { PackageDefinition }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/parse_ast { PackageDefinition }
 import std/io.file { readString }
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size }

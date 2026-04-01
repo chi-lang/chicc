@@ -1,8 +1,8 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/util { newStringBuilder, StringBuilder, toString }
-import user/ast { Program, Package, newPackage, newProgram }
-import user/types { tInt, tString }
-import user/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitCreateArray, emitCreateRecord, emitIndexOperator, emitIndexAssignment, emitFieldAccess, emitFieldAssignment }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/util { newStringBuilder, StringBuilder, toString }
+import chicc/ast { Program, Package, newPackage, newProgram }
+import chicc/types { tInt, tString }
+import chicc/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitCreateArray, emitCreateRecord, emitIndexOperator, emitIndexAssignment, emitFieldAccess, emitFieldAssignment }
 import std/lang { luaExpr, embedLua }
 
 fn freshState(): EmitterState {

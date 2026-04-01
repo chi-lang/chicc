@@ -1,136 +1,109 @@
 #!/bin/bash
-# run_tests.sh — Run Chi test files with the test_util framework
-#
+# Run chicc unit tests using compileModules for proper per-package compilation.
 # Usage: ./run_tests.sh [test_file.chi ...]
-#   If no files given, runs all tests/test_*.chi files.
+# If no arguments given, runs all tests/test_*.chi files.
 #
 # How it works:
-#   The Chi compiler currently doesn't support cross-file user module imports.
-#   This script works around that by:
-#   1. Stripping the package declaration and import lines from test_util.chi
-#   2. Auto-discovering all source modules in chicc/chicc/*.chi and inlining
-#      them (stripping package decls and cross-user imports)
-#   3. Stripping the import of user/* from each test file
-#   4. Concatenating them into a single file and running with chi
-#
+#   1. Ensures chicc modules are cached (builds if needed)
+#   2. For each test file, prepends a package declaration, then uses
+#      compileModules to compile the test together with all chicc modules
+#   3. Runs the compiled test via dofile
+
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-TESTS_DIR="$SCRIPT_DIR/tests"
-SRC_DIR="$SCRIPT_DIR/chicc"
-UTIL_FILE="$TESTS_DIR/test_util.chi"
+cd "$SCRIPT_DIR"
 
-if [ ! -f "$UTIL_FILE" ]; then
-    echo "ERROR: $UTIL_FILE not found"
-    exit 1
+CHI_HOME="${CHI_HOME:-$HOME/.chi}"
+JVM_CHI="/home/marad/dev/chi/compiler/chi"
+CACHE_DIR=".cache"
+
+# All chicc source modules (order matches compile.chi)
+CHICC_SOURCES=(
+    "chicc/messages.chi"
+    "chicc/source.chi"
+    "chicc/token.chi"
+    "chicc/types.chi"
+    "chicc/util.chi"
+    "chicc/ast.chi"
+    "chicc/parse_ast.chi"
+    "chicc/type_writer.chi"
+    "chicc/emitter.chi"
+    "chicc/lexer.chi"
+    "chicc/parser.chi"
+    "chicc/symbols.chi"
+    "chicc/ast_converter.chi"
+    "chicc/unification.chi"
+    "chicc/inference_context.chi"
+    "chicc/typer.chi"
+    "chicc/checks.chi"
+    "chicc/compiler.chi"
+    "chicc/cli.chi"
+    "tests/test_util.chi"
+)
+
+# Ensure chicc is built (populates cache)
+if [ ! -d "$CACHE_DIR/chicc" ]; then
+    echo "Cache not found, building chicc first..."
+    "$JVM_CHI" compile.chi
 fi
 
-# Determine test files to run
+# Build the compileModules source list for the compile script
+SOURCES_LIST=""
+for src in "${CHICC_SOURCES[@]}"; do
+    if [ -n "$SOURCES_LIST" ]; then
+        SOURCES_LIST="$SOURCES_LIST,"
+    fi
+    SOURCES_LIST="$SOURCES_LIST\"$src\""
+done
+
+# Create compile-and-run script template
+RUNNER=$(mktemp /tmp/chicc_test_runner.XXXXXX.chi)
+trap "rm -f '$RUNNER' /tmp/_chicc_test_tmp.chi" EXIT
+
+cat > "$RUNNER" << CHIEOF
+import std/lang { compileModules }
+compileModules(["/tmp/_chicc_test_tmp.chi",${SOURCES_LIST}], ".cache")
+CHIEOF
+
+# Determine which test files to run
 if [ $# -gt 0 ]; then
     TEST_FILES=("$@")
 else
-    TEST_FILES=()
-    for f in "$TESTS_DIR"/test_*.chi; do
-        [ "$f" = "$UTIL_FILE" ] && continue
-        [ -f "$f" ] && TEST_FILES+=("$f")
-    done
+    TEST_FILES=(tests/test_*.chi)
 fi
 
-if [ ${#TEST_FILES[@]} -eq 0 ]; then
-    echo "No test files found."
-    exit 0
-fi
-
-PASS=0
-FAIL=0
+PASSED=0
+FAILED=0
+ERRORS=""
 
 for test_file in "${TEST_FILES[@]}"; do
-    # Resolve relative paths from tests/ dir
-    if [ ! -f "$test_file" ] && [ -f "$TESTS_DIR/$test_file" ]; then
-        test_file="$TESTS_DIR/$test_file"
+    # Skip test_util.chi — it's a library, not a test
+    if [[ "$(basename "$test_file")" == "test_util.chi" ]]; then
+        continue
     fi
 
-    rel=$(basename "$test_file")
-    tmp=$(mktemp /tmp/chi_test_XXXXXX.chi)
-    tmp_imports=$(mktemp /tmp/chi_imports_XXXXXX.txt)
-    tmp_code=$(mktemp /tmp/chi_code_XXXXXX.chi)
+    printf "%-50s " "$test_file"
 
-    # Collect imports and code separately, then merge:
-    #   - All unique std imports go first
-    #   - Then all code (with imports/package lines stripped)
+    # Prepend a temporary package declaration so compileModules can handle it
+    { echo "package chicc/test_runner"; cat "$test_file"; } > /tmp/_chicc_test_tmp.chi
 
-    # From test_util.chi
-    grep '^import ' "$UTIL_FILE" >> "$tmp_imports"
-    grep -v '^import ' "$UTIL_FILE" | grep -v '^package ' >> "$tmp_code"
-
-    # From source modules in chicc/chicc/
-    # If .build_order exists, use it for explicit ordering; remaining files go alphabetically after
-    if [ -d "$SRC_DIR" ]; then
-        src_files=()
-        if [ -f "$SRC_DIR/.build_order" ]; then
-            # Read ordered files first
-            while IFS= read -r line || [ -n "$line" ]; do
-                line=$(echo "$line" | sed 's/#.*//' | xargs)
-                [ -z "$line" ] && continue
-                [ -f "$SRC_DIR/$line" ] && src_files+=("$SRC_DIR/$line")
-            done < "$SRC_DIR/.build_order"
-            # Then add remaining .chi files not listed, in alphabetical order
-            for src_file in "$SRC_DIR"/*.chi; do
-                [ -f "$src_file" ] || continue
-                already_listed=false
-                for listed in "${src_files[@]}"; do
-                    if [ "$src_file" = "$listed" ]; then
-                        already_listed=true
-                        break
-                    fi
-                done
-                if [ "$already_listed" = false ]; then
-                    src_files+=("$src_file")
-                fi
-            done
-        else
-            for src_file in "$SRC_DIR"/*.chi; do
-                [ -f "$src_file" ] || continue
-                src_files+=("$src_file")
-            done
-        fi
-        for src_file in "${src_files[@]}"; do
-            # Skip cli.chi — it has a top-level entry point that would run instead of tests
-            [ "$(basename "$src_file")" = "cli.chi" ] && continue
-            grep '^import std/' "$src_file" >> "$tmp_imports" 2>/dev/null || true
-            echo "" >> "$tmp_code"
-            echo "// --- inlined: $(basename "$src_file") ---" >> "$tmp_code"
-            grep -v '^package ' "$src_file" | grep -v '^import ' >> "$tmp_code"
-        done
-    fi
-
-    # From the test file
-    grep '^import std/' "$test_file" >> "$tmp_imports" 2>/dev/null || true
-    echo "" >> "$tmp_code"
-    grep -v '^import ' "$test_file" >> "$tmp_code"
-
-    # Assemble: deduplicated imports first, then all code
-    sort -u "$tmp_imports" > "$tmp"
-    echo "" >> "$tmp"
-    cat "$tmp_code" >> "$tmp"
-
-    rm -f "$tmp_imports" "$tmp_code"
-
-    printf "  Running %-40s " "$rel"
-    if output=$(chi "$tmp" 2>&1); then
-        printf "\033[32mOK\033[0m\n"
-        echo "$output"
-        PASS=$((PASS + 1))
+    if OUTPUT=$(timeout 600 "$JVM_CHI" "$RUNNER" 2>&1); then
+        echo "PASS"
+        PASSED=$((PASSED + 1))
     else
-        printf "\033[31mFAIL\033[0m\n"
-        echo "$output"
-        FAIL=$((FAIL + 1))
+        echo "FAIL"
+        FAILED=$((FAILED + 1))
+        ERRORS="$ERRORS\n--- $test_file ---\n$OUTPUT\n"
     fi
-
-    rm -f "$tmp"
 done
 
 echo ""
-echo "Test files: $((PASS + FAIL)) total, $PASS passed, $FAIL failed"
-[ $FAIL -gt 0 ] && exit 1
-exit 0
+echo "Results: $PASSED passed, $FAILED failed out of $((PASSED + FAILED)) tests"
+
+if [ $FAILED -gt 0 ]; then
+    echo ""
+    echo "=== Failures ==="
+    echo -e "$ERRORS"
+    exit 1
+fi

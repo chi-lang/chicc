@@ -1,9 +1,9 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/types { Type, TypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, variableType, polyType, typeTag, typeName, typeLevel, typeEquals, isVariable, intTypeId, stringTypeId }
-import user/unification { Constraint, newConstraint, unify }
-import user/ast { Target, DotTarget, localTarget, packageTarget, localFnDotTarget, packageFnDotTarget }
-import user/symbols { newSymbol, newCompileTables, ctDefineSymbol, ctGetLocalSymbol }
-import user/source { newSection }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/types { Type, TypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, variableType, polyType, typeTag, typeName, typeLevel, typeEquals, isVariable, intTypeId, stringTypeId }
+import chicc/unification { Constraint, newConstraint, unify }
+import chicc/ast { Target, DotTarget, localTarget, packageTarget, localFnDotTarget, packageFnDotTarget }
+import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol, ctGetLocalSymbol }
+import chicc/source { newSection }
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
 

@@ -1,8 +1,8 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/util { newStringBuilder, StringBuilder, toString }
-import user/ast { Program, Package, newPackage, newProgram, atomExpr, blockExpr, fnExpr, fnCallExpr, variableAccessExpr, nameDeclarationExpr, returnExpr, localTarget, packageTarget, newFnParam }
-import user/types { tInt, tString, tUnit }
-import user/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitBlock, emitFn, emitFnCall, emitNameDeclaration, emitVariableAccess }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/util { newStringBuilder, StringBuilder, toString }
+import chicc/ast { Program, Package, Expr, newPackage, newProgram, atomExpr, blockExpr, fnExpr, fnCallExpr, variableAccessExpr, nameDeclarationExpr, returnExpr, localTarget, packageTarget, newFnParam }
+import chicc/types { tInt, tString, tUnit }
+import chicc/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitBlock, emitFn, emitFnCall, emitNameDeclaration, emitVariableAccess }
 import std/lang { luaExpr, embedLua }
 
 fn freshState(): EmitterState {
@@ -13,7 +13,7 @@ fn freshState(): EmitterState {
 
 // Wire emitExpr to dispatch based on kind
 emitExpr = { st, expr ->
-    val kind: string = luaExpr("expr.kind")
+    val kind = luaExpr("expr.kind") as string
     if kind == "atom" { emitAtom(st, expr) }
     else if kind == "block" { emitBlock(st, expr) }
     else if kind == "fn" { emitFn(st, expr, "", false) }
@@ -21,7 +21,7 @@ emitExpr = { st, expr ->
     else if kind == "variable_access" { emitVariableAccess(st, expr) }
     else if kind == "name_declaration" { emitNameDeclaration(st, expr) }
     else if kind == "return" {
-        val retVal: any = luaExpr("expr.returnValue")
+        val retVal = luaExpr("expr.returnValue")
         if retVal != unit {
             val result = emitExpr(st, retVal)
             emit(st, "return $result;")
@@ -134,7 +134,7 @@ test("emitFnCall - embedLua special case") {
     val call = fnCallExpr(callee, [codeArg], unit)
     val result = emitFnCall(st, call)
     assertEqual(result, "nil")
-    assertEqual(st.sb.toString(), "print('hi')")
+    assertEqual(st.sb.toString(), "print('hi');")
 }
 
 test("emitFnCall - luaExpr special case") {
@@ -151,12 +151,12 @@ test("emitFnCall - call with default param @ placeholder") {
     val st = freshState()
     val callee = variableAccessExpr(localTarget("bar"), unit)
     val arg1 = atomExpr("1", tInt, unit)
-    // "@" can't be passed as a string literal - it's intercepted as default param marker by the Chi compiler.
-    // Build the placeholder directly via embedLua.
-    embedLua("__placeholder = {kind='atom', atomValue='@', exprType=nil, used=false}")
-    val placeholder: any = luaExpr("__placeholder")
     val arg2 = atomExpr("3", tInt, unit)
-    val call = fnCallExpr(callee, [arg1, placeholder, arg2], unit)
+    // "@" can't be passed as a string literal - it's intercepted as default param marker by the Chi compiler.
+    // Build the call expression with placeholder directly via embedLua to avoid type issues.
+    embedLua("__placeholder = {kind='atom', atomValue='@', exprType=nil, used=false}")
+    embedLua("__fn_test_call = {kind='fn_call', callee=callee, callParams={arg1, __placeholder, arg2}, exprType=nil, section=nil, used=false}")
+    val call = luaExpr("__fn_test_call")
     val result = emitFnCall(st, call)
     assertEqual(result, "tmp0")
     // Should skip the "@" placeholder
@@ -178,6 +178,7 @@ test("emitNameDeclaration - top-level fn declaration uses emitFn") {
 test("emitNameDeclaration - fn inside function does NOT use shortcut") {
     val st = freshState()
     st.inFunction = true
+    st.functionDepth = 1
     val body = blockExpr([atomExpr("5", tInt, unit)], unit)
     val fnE = fnExpr([], unit, body, unit)
     val decl = nameDeclarationExpr(false, "inner", false, unit, fnE, unit)

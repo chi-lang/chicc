@@ -1,10 +1,10 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, functionType, typeEquals, isFunction }
-import user/ast { localTarget, packageTarget, atomExpr, variableAccessExpr, fnCallExpr, nameDeclarationExpr, assignmentExpr, fnExpr, blockExpr, returnExpr, setExprType, newFnParam, exprExprType }
-import user/parse_ast { parseVariableRead, parseNameDeclaration, parseLambda, parseFor, parseFuncWithName, parseEffectDefinition, parseHandle, parseFnCall, parseBlock, parseBinaryOp, parseIfElse, newFormalArgument, newParseHandleCase }
-import user/symbols { newSymbol, newCompileTables, ctDefineSymbol }
-import user/messages { Message, unrecognizedName, cannotAccessInternalName, notAFunction, cannotChangeImmutableVariable, typeMismatch, genericError }
-import user/source { newSection }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, functionType, typeEquals, isFunction }
+import chicc/ast { localTarget, packageTarget, atomExpr, variableAccessExpr, fnCallExpr, nameDeclarationExpr, assignmentExpr, fnExpr, blockExpr, returnExpr, setExprType, newFnParam, exprExprType }
+import chicc/parse_ast { parseVariableRead, parseNameDeclaration, parseLambda, parseFor, parseFuncWithName, parseEffectDefinition, parseHandle, parseFnCall, parseBlock, parseBinaryOp, parseIfElse, newFormalArgument, newParseHandleCase }
+import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol }
+import chicc/messages { Message, unrecognizedName, cannotAccessInternalName, notAFunction, cannotChangeImmutableVariable, typeMismatch, genericError }
+import chicc/source { newSection }
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
 

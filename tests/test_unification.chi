@@ -1,7 +1,7 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, typeTag, typeIds, typeTypes, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeEquals, isPrimitive, isFunction, isRecord, isSum, isArray, isVariable, isRecursive, replaceVariable, occursInExcludingSumBranches, unfoldRecursive, intTypeId, stringTypeId, boolTypeId, floatTypeId, unitTypeId }
-import user/unification { Constraint, newConstraint, constraintWithReplacedVariable, unify }
-import user/source { newSection, Section }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, typeTag, typeIds, typeTypes, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeEquals, isPrimitive, isFunction, isRecord, isSum, isArray, isVariable, isRecursive, replaceVariable, occursInExcludingSumBranches, unfoldRecursive, intTypeId, stringTypeId, boolTypeId, floatTypeId, unitTypeId }
+import chicc/unification { Constraint, newConstraint, constraintWithReplacedVariable, unify }
+import chicc/source { newSection, Section }
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
 

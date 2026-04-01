@@ -1,3 +1,7 @@
+import std/lang { embedLua, luaExpr }
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/cli { cliMain }
+
 // Test cli.chi functions
 // Tests for the CLI entry point module
 

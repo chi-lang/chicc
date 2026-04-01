@@ -1,7 +1,7 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/types { tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, typeTag, typeName, typeLevel, typeTypesCount, typeFieldsCount, isVariable, isPrimitive, isFunction, isRecord, isSum, isArray, typeLhs, typeRhs, typeElementType, typeFields }
-import user/symbols { newTypeTable, ttAdd, ttAddByName, ttGet, resolveType, resolveTypeAndWrapRecursive, arrayContains }
-import user/parse_ast { typeParameterRef, typeNameRef, functionTypeRef, recordTypeRef, sumTypeRef, typeConstructorRef, newTypeRefField }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/types { tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, typeTag, typeName, typeLevel, typeTypesCount, typeFieldsCount, isVariable, isPrimitive, isFunction, isRecord, isSum, isArray, typeLhs, typeRhs, typeElementType, typeFields }
+import chicc/symbols { newTypeTable, ttAdd, ttAddByName, ttGet, resolveType, resolveTypeAndWrapRecursive, arrayContains }
+import chicc/parse_ast { typeParameterRef, typeNameRef, functionTypeRef, recordTypeRef, sumTypeRef, typeConstructorRef, newTypeRefField }
 import std/lang { luaExpr }
 
 // --- arrayContains tests ---

@@ -1,8 +1,8 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/util { newStringBuilder, StringBuilder, toString }
-import user/ast { Program, Package, newPackage, newProgram, atomExpr, blockExpr, ifElseExpr, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, returnExpr, infixOpExpr }
-import user/types { tInt, tString, tBool, tUnit, tFloat, arrayType, functionType, recordType, primitiveType, intTypeId, stringTypeId }
-import user/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitBlock, emitIfElse, emitWhile, emitForLoop, emitBreak, emitContinue, emitReturn, mapInfixOperation }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/util { newStringBuilder, StringBuilder, toString }
+import chicc/ast { Program, Package, newPackage, newProgram, atomExpr, blockExpr, ifElseExpr, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, returnExpr, infixOpExpr }
+import chicc/types { tInt, tString, tBool, tUnit, tFloat, arrayType, functionType, recordType, primitiveType, intTypeId, stringTypeId }
+import chicc/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitBlock, emitIfElse, emitWhile, emitForLoop, emitBreak, emitContinue, emitReturn, mapInfixOperation }
 import std/lang { luaExpr, embedLua }
 
 fn freshState(): EmitterState {

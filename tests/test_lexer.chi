@@ -1,5 +1,5 @@
-import user/test_util { test, assertEqual, assertTrue, summary }
-import user/lexer { newLexer, peek, peekAt, advance, substringFrom }
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/lexer { newLexer, lexPeek, lexPeekAt, lexAdvance, substringFrom }
 
 test("newLexer initial state") {
     val lex = newLexer("hello")
@@ -17,67 +17,67 @@ test("newLexer empty source") {
     assertEqual(lex.length, 0)
 }
 
-test("peek returns first char code") {
+test("lexPeek returns first char code") {
     val lex = newLexer("ABC")
-    assertEqual(peek(lex), 65)
+    assertEqual(lexPeek(lex), 65)
 }
 
-test("peek at EOF returns 0") {
+test("lexPeek at EOF returns 0") {
     val lex = newLexer("")
-    assertEqual(peek(lex), 0)
+    assertEqual(lexPeek(lex), 0)
 }
 
-test("peekAt with offset 0 same as peek") {
+test("lexPeekAt with offset 0 same as lexPeek") {
     val lex = newLexer("ABC")
-    assertEqual(peekAt(lex, 0), peek(lex))
+    assertEqual(lexPeekAt(lex, 0), lexPeek(lex))
 }
 
-test("peekAt with positive offset") {
+test("lexPeekAt with positive offset") {
     val lex = newLexer("ABC")
-    assertEqual(peekAt(lex, 0), 65)
-    assertEqual(peekAt(lex, 1), 66)
-    assertEqual(peekAt(lex, 2), 67)
+    assertEqual(lexPeekAt(lex, 0), 65)
+    assertEqual(lexPeekAt(lex, 1), 66)
+    assertEqual(lexPeekAt(lex, 2), 67)
 }
 
-test("peekAt past end returns 0") {
+test("lexPeekAt past end returns 0") {
     val lex = newLexer("AB")
-    assertEqual(peekAt(lex, 5), 0)
+    assertEqual(lexPeekAt(lex, 5), 0)
 }
 
-test("advance moves position and column") {
+test("lexAdvance moves position and column") {
     val lex = newLexer("ABC")
     assertEqual(lex.pos, 1)
     assertEqual(lex.col, 1)
-    advance(lex)
+    lexAdvance(lex)
     assertEqual(lex.pos, 2)
     assertEqual(lex.col, 2)
     assertEqual(lex.line, 1)
-    advance(lex)
+    lexAdvance(lex)
     assertEqual(lex.pos, 3)
     assertEqual(lex.col, 3)
 }
 
-test("advance handles newline") {
+test("lexAdvance handles newline") {
     val lex = newLexer("a\nb")
-    advance(lex)
+    lexAdvance(lex)
     assertEqual(lex.pos, 2)
     assertEqual(lex.line, 1)
     assertEqual(lex.col, 2)
-    advance(lex)
+    lexAdvance(lex)
     assertEqual(lex.pos, 3)
     assertEqual(lex.line, 2)
     assertEqual(lex.col, 1)
-    advance(lex)
+    lexAdvance(lex)
     assertEqual(lex.pos, 4)
     assertEqual(lex.line, 2)
     assertEqual(lex.col, 2)
 }
 
-test("advance at EOF is safe") {
+test("lexAdvance at EOF is safe") {
     val lex = newLexer("a")
-    advance(lex)
+    lexAdvance(lex)
     assertEqual(lex.pos, 2)
-    advance(lex)
+    lexAdvance(lex)
     assertEqual(lex.pos, 2)
 }
 
@@ -93,25 +93,25 @@ test("substringFrom single char") {
     assertEqual(substringFrom(lex, 2, 2), "B")
 }
 
-test("peek after advance") {
+test("lexPeek after lexAdvance") {
     val lex = newLexer("XY")
-    assertEqual(peek(lex), 88)
-    advance(lex)
-    assertEqual(peek(lex), 89)
-    advance(lex)
-    assertEqual(peek(lex), 0)
+    assertEqual(lexPeek(lex), 88)
+    lexAdvance(lex)
+    assertEqual(lexPeek(lex), 89)
+    lexAdvance(lex)
+    assertEqual(lexPeek(lex), 0)
 }
 
 test("multiple newlines") {
     val lex = newLexer("\n\n\n")
     assertEqual(lex.line, 1)
-    advance(lex)
+    lexAdvance(lex)
     assertEqual(lex.line, 2)
     assertEqual(lex.col, 1)
-    advance(lex)
+    lexAdvance(lex)
     assertEqual(lex.line, 3)
     assertEqual(lex.col, 1)
-    advance(lex)
+    lexAdvance(lex)
     assertEqual(lex.line, 4)
     assertEqual(lex.col, 1)
 }

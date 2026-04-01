@@ -1,6 +1,6 @@
-import user/test_util { test, assertEqual, summary }
-import user/token { newToken, lookupKeyword, TK_INT, TK_ID, TK_PUB, TK_FN, TK_IF, TK_WHILE, TK_RETURN, TK_TYPE, TK_TRUE, TK_FALSE, TK_UNIT, TK_EOF }
-import user/source { newSection }
+import chicc/test_util { test, assertEqual, summary }
+import chicc/token { newToken, lookupKeyword, TK_INT, TK_ID, TK_PUB, TK_FN, TK_IF, TK_WHILE, TK_RETURN, TK_TYPE, TK_TRUE, TK_FALSE, TK_UNIT, TK_EOF }
+import chicc/source { newSection }
 
 test("newToken") {
     val t = newToken(TK_INT, "42", unit)

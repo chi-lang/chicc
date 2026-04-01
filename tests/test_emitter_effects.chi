@@ -1,8 +1,8 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/util { newStringBuilder, StringBuilder, toString }
-import user/ast { Program, Package, newPackage, newProgram, atomExpr, blockExpr, effectDefinitionExpr, handleExpr, newHandleCase, nameDeclarationExpr, variableAccessExpr, localTarget, packageTarget, newFnParam }
-import user/types { tInt, tString, tBool, tUnit }
-import user/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitBlock, emitEffectDefinition, emitHandle, emitPackageInfo, collectRequires, topLevelName, normaliseEffectName, localQualifiedName, localPackagePath }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/util { newStringBuilder, StringBuilder, toString }
+import chicc/ast { Program, Package, newPackage, newProgram, atomExpr, blockExpr, effectDefinitionExpr, handleExpr, newHandleCase, nameDeclarationExpr, variableAccessExpr, localTarget, packageTarget, newFnParam }
+import chicc/types { tInt, tString, tBool, tUnit }
+import chicc/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitBlock, emitEffectDefinition, emitHandle, emitPackageInfo, collectRequires, topLevelName, normaliseEffectName, localQualifiedName, localPackagePath }
 import std/lang { luaExpr, embedLua }
 
 fn freshState(): EmitterState {
@@ -13,7 +13,7 @@ fn freshState(): EmitterState {
 
 // Wire emitExpr for tests
 emitExpr = { st, expr ->
-    val kind: string = luaExpr("expr.kind")
+    val kind = luaExpr("expr.kind") as string
     if kind == "atom" { emitAtom(st, expr) }
     else if kind == "block" { emitBlock(st, expr) }
     else if kind == "effect_definition" { emitEffectDefinition(st, expr) }
@@ -234,14 +234,14 @@ test("collectRequires - deduplicates refs") {
     val output = st.sb.toString()
     // Should only have one require for other/utils
     embedLua("__cr3_count = 0; for _ in string.gmatch(output, 'require') do __cr3_count = __cr3_count + 1 end")
-    val reqCount: int = luaExpr("__cr3_count")
-    assertEqual(reqCount, 1)
+    val reqCount: any = luaExpr("__cr3_count")
+    assertTrue(reqCount == 1)
 }
 
 test("collectRequires - nested cross-package ref in fn body") {
     val st = freshState()
     embedLua("__cr4_expr = {kind='name_declaration', declName='f', isPublic=false, isMutable=false, exprType=nil, value={kind='fn', parameters={}, defaultValues=nil, body={kind='block', blockBody={{kind='variable_access', target={tag='package', moduleName='lib', packageName='math', name='add'}}}}}}")
-    val prog: Program = luaExpr("{packageDef={moduleName='mymod',packageName='mypkg'}, imports={}, typeAliases={}, expressions={__cr4_expr}, section=nil}")
+    val prog = luaExpr("{packageDef={moduleName='mymod',packageName='mypkg'}, imports={}, typeAliases={}, expressions={__cr4_expr}, section=nil}") as Program
     st.program = prog
     collectRequires(st)
     val output = st.sb.toString()

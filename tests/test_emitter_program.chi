@@ -1,8 +1,8 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/util { newStringBuilder, StringBuilder, toString }
-import user/ast { Program, Package, newPackage, newProgram, newTypeAlias, atomExpr, blockExpr, nameDeclarationExpr, variableAccessExpr, localTarget, packageTarget, infixOpExpr, returnExpr, effectDefinitionExpr, newFnParam }
-import user/types { tInt, tFloat, tBool, tString, tUnit, newTypeId, primitiveType }
-import user/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitProgram }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/util { newStringBuilder, StringBuilder, toString }
+import chicc/ast { Program, Package, newPackage, newProgram, newTypeAlias, atomExpr, blockExpr, nameDeclarationExpr, variableAccessExpr, localTarget, packageTarget, infixOpExpr, returnExpr, effectDefinitionExpr, newFnParam }
+import chicc/types { tInt, tFloat, tBool, tString, tUnit, newTypeId, primitiveType }
+import chicc/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitProgram }
 import std/lang { luaExpr, embedLua }
 
 // ===== emitExpr dispatcher tests =====

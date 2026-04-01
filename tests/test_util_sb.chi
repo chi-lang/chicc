@@ -1,6 +1,6 @@
 // tests/test_util_sb.chi
-import user/test_util { test, assertEqual, summary }
-import user/util { newStringBuilder }
+import chicc/test_util { test, assertEqual, summary }
+import chicc/util { newStringBuilder }
 
 test("empty sb") {
     val sb = newStringBuilder()

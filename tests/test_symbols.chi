@@ -1,5 +1,6 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/symbols { newSymbol, newFnSymbol, newSymbolTable, stAdd, stAddAlias, stGet, stRemove, stHas, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newTypeTable, ttAdd, ttAddByName, ttGet, newCompileTables, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, ctDefineTypeAlias }
+import std/lang { embedLua, luaExpr }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/symbols { newSymbol, newFnSymbol, newSymbolTable, stAdd, stAddAlias, stGet, stRemove, stHas, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newTypeTable, ttAdd, ttAddByName, ttGet, newCompileTables, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, ctDefineTypeAlias }
 
 // --- Symbol tests ---
 

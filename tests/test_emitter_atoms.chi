@@ -1,8 +1,8 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/util { newStringBuilder, StringBuilder, toString }
-import user/ast { Program, Package, newPackage, newProgram, atomExpr, interpolatedStringExpr }
-import user/types { tInt, tFloat, tBool, tString, tUnit }
-import user/emitter { EmitterState, newState, emit, nextTmpName, escapeLuaString, emitAtom, emitInterpolatedString, emitExpr }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/util { newStringBuilder, StringBuilder, toString }
+import chicc/ast { Program, Package, newPackage, newProgram, atomExpr, interpolatedStringExpr }
+import chicc/types { tInt, tFloat, tBool, tString, tUnit }
+import chicc/emitter { EmitterState, newState, emit, nextTmpName, escapeLuaString, emitAtom, emitInterpolatedString, emitExpr }
 
 fn freshState(): EmitterState {
     val pkg = newPackage("m", "p")

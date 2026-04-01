@@ -1,6 +1,6 @@
-import user/test_util { test, assertEqual, summary }
-import user/source { CodePoint }
-import user/messages { newMessage, genericError, typeMismatch, unrecognizedName, notAFunction, functionArityError, cannotChangeImmutableVariable, syntaxError }
+import chicc/test_util { test, assertEqual, summary }
+import chicc/source { CodePoint }
+import chicc/messages { newMessage, genericError, typeMismatch, unrecognizedName, notAFunction, functionArityError, cannotChangeImmutableVariable, syntaxError }
 
 test("newMessage") {
     val cp: CodePoint = { line: 1, column: 5 }

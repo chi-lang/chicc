@@ -1,6 +1,6 @@
 // tests/test_source.chi
-import user/test_util { test, assertEqual, summary }
-import user/source { newSection, merge, toCodePoint }
+import chicc/test_util { test, assertEqual, summary }
+import chicc/source { newSection, merge, toCodePoint }
 
 test("newSection creates correct fields") {
     val s = newSection(1, 5, 3, 10)

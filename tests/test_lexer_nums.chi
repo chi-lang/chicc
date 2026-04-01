@@ -1,6 +1,6 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/lexer { newLexer, peek, advance, isDigit, isLetter, isAlphaNum, readNumber, readIdentOrKeyword }
-import user/token { TK_INT, TK_FLOAT, TK_ID, TK_VAL, TK_FN, TK_IF, TK_PUB, TK_RETURN, TK_TRUE, TK_FALSE, TK_UNIT }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/lexer { newLexer, lexPeek, lexAdvance, isDigit, isLetter, isAlphaNum, readNumber, readIdentOrKeyword }
+import chicc/token { TK_INT, TK_FLOAT, TK_ID, TK_VAL, TK_FN, TK_IF, TK_PUB, TK_RETURN, TK_TRUE, TK_FALSE, TK_UNIT }
 import std/lang.array { size }
 
 // --- isDigit tests ---
@@ -73,7 +73,7 @@ test("readNumber: integer stops at non-digit") {
     assertEqual(lex.tokens[1].kind, TK_INT)
     assertEqual(lex.tokens[1].value, "42")
     // pos should be right after '2', pointing at 'a'
-    assertEqual(peek(lex), 97) // 'a'
+    assertEqual(lexPeek(lex), 97) // 'a'
 }
 
 // --- readNumber: floats ---
@@ -101,7 +101,7 @@ test("readNumber: trailing dot not followed by digit") {
     assertEqual(lex.tokens[1].kind, TK_INT)
     assertEqual(lex.tokens[1].value, "42")
     // pos should point at '.', not consumed
-    assertEqual(peek(lex), 46) // '.'
+    assertEqual(lexPeek(lex), 46) // '.'
 }
 
 test("readNumber: trailing dot at EOF") {
@@ -109,7 +109,7 @@ test("readNumber: trailing dot at EOF") {
     readNumber(lex)
     assertEqual(lex.tokens[1].kind, TK_INT)
     assertEqual(lex.tokens[1].value, "42")
-    assertEqual(peek(lex), 46) // '.'
+    assertEqual(lexPeek(lex), 46) // '.'
 }
 
 // --- readIdentOrKeyword: identifiers ---
@@ -147,7 +147,7 @@ test("readIdentOrKeyword: stops at non-alphanum") {
     val lex = newLexer("abc+def")
     readIdentOrKeyword(lex)
     assertEqual(lex.tokens[1].value, "abc")
-    assertEqual(peek(lex), 43) // '+'
+    assertEqual(lexPeek(lex), 43) // '+'
 }
 
 // --- readIdentOrKeyword: keywords ---
@@ -229,11 +229,11 @@ test("readNumber: section at start of source") {
 }
 
 test("readNumber: section after advancing") {
-    // "   99" -- advance 3 spaces first, number starts at col 4
+    // "   99" -- lexAdvance 3 spaces first, number starts at col 4
     val lex = newLexer("   99")
-    advance(lex) // col 2
-    advance(lex) // col 3
-    advance(lex) // col 4
+    lexAdvance(lex) // col 2
+    lexAdvance(lex) // col 3
+    lexAdvance(lex) // col 4
     readNumber(lex)
     val sec = lex.tokens[1].section
     assertEqual(sec.startCol, 4)
@@ -242,8 +242,8 @@ test("readNumber: section after advancing") {
 
 test("readIdentOrKeyword: section tracking") {
     val lex = newLexer("  foo")
-    advance(lex) // col 2
-    advance(lex) // col 3
+    lexAdvance(lex) // col 2
+    lexAdvance(lex) // col 3
     readIdentOrKeyword(lex)
     val sec = lex.tokens[1].section
     assertEqual(sec.startLine, 1)

@@ -1,9 +1,9 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/types { Type, TypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, polyType, typeTag, typeName, typeLevel, typeEquals, isVariable, isPrimitive, isFunction, isRecord, isSum, isArray, typeTypes, typeFields, typeElementType, intTypeId, stringTypeId, boolTypeId, optionTypeId, sumCreate, typeTypesCount, typeFieldsCount, mapType }
-import user/unification { Constraint, newConstraint, unify }
-import user/ast { Target, DotTarget, localTarget, packageTarget, fieldDotTarget, localFnDotTarget, packageFnDotTarget, atomExpr, variableAccessExpr, fieldAccessExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, nameDeclarationExpr, assignmentExpr, blockExpr, fnExpr, createRecordExpr, createArrayExpr, interpolatedStringExpr, castExpr_, whileLoopExpr, breakExpr, continueExpr, isExpr, returnExpr, indexOpExpr, indexedAssignmentExpr, fieldAssignmentExpr, newFnParam, newExprField, exprExprType, exprKind, setExprType }
-import user/symbols { newSymbol, newCompileTables, ctDefineSymbol }
-import user/source { newSection }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/types { Type, TypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, polyType, typeTag, typeName, typeLevel, typeEquals, isVariable, isPrimitive, isFunction, isRecord, isSum, isArray, typeTypes, typeFields, typeElementType, intTypeId, stringTypeId, boolTypeId, optionTypeId, sumCreate, typeTypesCount, typeFieldsCount, mapType }
+import chicc/unification { Constraint, newConstraint, unify }
+import chicc/ast { Target, DotTarget, localTarget, packageTarget, fieldDotTarget, localFnDotTarget, packageFnDotTarget, atomExpr, variableAccessExpr, fieldAccessExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, nameDeclarationExpr, assignmentExpr, blockExpr, fnExpr, createRecordExpr, createArrayExpr, interpolatedStringExpr, castExpr_, whileLoopExpr, breakExpr, continueExpr, isExpr, returnExpr, indexOpExpr, indexedAssignmentExpr, fieldAssignmentExpr, newFnParam, newExprField, exprExprType, exprKind, setExprType }
+import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol }
+import chicc/source { newSection }
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
 

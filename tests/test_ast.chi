@@ -1,7 +1,7 @@
-import user/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import user/source { newSection }
-import user/types { tInt, tString }
-import user/ast { localTarget, packageTarget, atomExpr, blockExpr, fnCallExpr, variableAccessExpr, breakExpr, continueExpr, returnExpr, infixOpExpr, ifElseExpr, isTerminator, exprKind, exprAtomValue, exprChildren }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/source { newSection }
+import chicc/types { tInt, tString }
+import chicc/ast { localTarget, packageTarget, atomExpr, blockExpr, fnCallExpr, variableAccessExpr, breakExpr, continueExpr, returnExpr, infixOpExpr, ifElseExpr, isTerminator, exprKind, exprAtomValue, exprChildren }
 
 test("localTarget") {
     val t = localTarget("x")
