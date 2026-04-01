@@ -5,6 +5,13 @@
 package chicc/compiler
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
+import chicc/source { Section }
+import chicc/ast { Expr, Import, TypeAlias, Program, newPackage, newProgram }
+import chicc/messages { invalidModuleName, invalidPackageName, cannotAccessInternalName, unrecognizedName }
+import chicc/symbols { newCompileTables, ctDefineTypeAlias }
+import chicc/checks { checkNames, visibilityCheck, fnCallCheck, immutabilityCheck, returnTypeCheck }
+import chicc/inference_context { icInit, icDefineLocalSymbol }
+import chicc/emitter { emitProgram }
 
 // ============================================================================
 // CompilationResult

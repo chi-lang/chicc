@@ -2,6 +2,11 @@
 package chicc/typer
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
+import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tString, tAny, sumCreate, recordType, arrayType, functionType, typeEquals, polyType, mapType, sumListTypes, typeIdEquals, optionTypeId, instantiate }
+import chicc/source { Section }
+import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget, atomExpr }
+import chicc/unification { unify, newConstraint }
+import chicc/inference_context { icFreshVariable, icGetTargetType, icWithNewLocalScope, icDefineLocalSymbol }
 
 // --- Helper: throw a typer error ---
 

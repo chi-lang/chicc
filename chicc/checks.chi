@@ -2,6 +2,10 @@
 package chicc/checks
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
+import chicc/types { Type, tUnit, typeEquals }
+import chicc/unification { newConstraint }
+import chicc/messages { unrecognizedName, cannotAccessInternalName, notAFunction, cannotChangeImmutableVariable, typeMismatch, genericError }
+import chicc/ast { exprChildren }
 
 // --- Module-level state for checkNames ---
 
