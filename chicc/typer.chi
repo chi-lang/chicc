@@ -241,22 +241,22 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
                     val dotOp_receiver = luaExpr("dotOp.receiver") as any
                     embedLua("table.insert(term.callParams, 1, dotOp_receiver)")
                     val dtName = luaExpr("dotTarget.name") as string
-                    val symbol = luaExpr("require('chicc/symbols').ctGetLocalSymbol(icCompileTables, dtName)") as any
-                    fillDefaultArgs(luaExpr("term.callParams") as any, symbol)
-                    val memberSec = luaExpr("dotOp.memberSection") as Section | unit
-                    val newCallee = variableAccessExpr(localTarget(dtName), memberSec)
-                    val calleeType = luaExpr("dotOp.exprType") as Type | unit
-                    setExprType(newCallee, calleeType)
-                    embedLua("term.callee = newCallee")
-                } else if dtTag == "package_fn" {
-                    // package_fn: prepend receiver, look up via ns, fill defaults
-                    val dotOp_receiver = luaExpr("dotOp.receiver") as any
-                    embedLua("table.insert(term.callParams, 1, dotOp_receiver)")
-                    val dtMod = luaExpr("dotTarget.moduleName") as string
-                    val dtPkg = luaExpr("dotTarget.packageName") as string
-                    val dtName = luaExpr("dotTarget.name") as string
-                    val tgt = packageTarget(dtMod, dtPkg, dtName)
-                    val symbol = luaExpr("icNs and icNs.getSymbol and icNs.getSymbol(dtMod, dtPkg, dtName) or nil") as any
+                    val symbol = luaExpr("require('chicc/symbols').ctGetLocalSymbol(require('chicc/inference_context').icCompileTables, dtName)") as any
+                     fillDefaultArgs(luaExpr("term.callParams") as any, symbol)
+                     val memberSec = luaExpr("dotOp.memberSection") as Section | unit
+                     val newCallee = variableAccessExpr(localTarget(dtName), memberSec)
+                     val calleeType = luaExpr("dotOp.exprType") as Type | unit
+                     setExprType(newCallee, calleeType)
+                     embedLua("term.callee = newCallee")
+                 } else if dtTag == "package_fn" {
+                     // package_fn: prepend receiver, look up via ns, fill defaults
+                     val dotOp_receiver = luaExpr("dotOp.receiver") as any
+                     embedLua("table.insert(term.callParams, 1, dotOp_receiver)")
+                     val dtMod = luaExpr("dotTarget.moduleName") as string
+                     val dtPkg = luaExpr("dotTarget.packageName") as string
+                     val dtName = luaExpr("dotTarget.name") as string
+                     val tgt = packageTarget(dtMod, dtPkg, dtName)
+                     val symbol = luaExpr("(function() local _ic = require('chicc/inference_context'); return _ic.icNs and _ic.icNs.getSymbol and _ic.icNs.getSymbol(dtMod, dtPkg, dtName) or nil end)()") as any
                     fillDefaultArgs(luaExpr("term.callParams") as any, symbol)
                     val memberSec = luaExpr("dotOp.memberSection") as Section | unit
                     val newCallee = variableAccessExpr(tgt, memberSec)
@@ -270,7 +270,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
         // Fill default args for direct function calls (variable_access callee)
         if calleeKind == "variable_access" {
             val calleeName = luaExpr("term.callee.target.name") as string
-            val symbol = luaExpr("require('chicc/symbols').ctGetLocalSymbol(icCompileTables, calleeName)") as any
+            val symbol = luaExpr("require('chicc/symbols').ctGetLocalSymbol(require('chicc/inference_context').icCompileTables, calleeName)") as any
             fillDefaultArgs(luaExpr("term.callParams") as any, symbol)
         }
 

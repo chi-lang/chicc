@@ -89,8 +89,8 @@ pub fn icUpdateSymbolType(tgt: any, typeScheme: any) {
     } else if tag == "package" {
         val tgtMod: string = luaExpr("tgt.moduleName")
         val tgtPkg: string = luaExpr("tgt.packageName")
-        val pkgMod: string = luaExpr("icPkg.moduleName")
-        val pkgPkg: string = luaExpr("icPkg.packageName")
+        val pkgMod: string = luaExpr("__P_.icPkg.moduleName")
+        val pkgPkg: string = luaExpr("__P_.icPkg.packageName")
         if tgtMod == pkgMod && tgtPkg == pkgPkg {
             val name: string = luaExpr("tgt.name")
             icLocalSymbolsDefine(icPackageSymbols, name, typeScheme)
@@ -131,8 +131,8 @@ pub fn icGetTargetType(tgt: any, level: int, section: any): any {
     } else if tag == "package" {
         val tgtMod = luaExpr("tgt.moduleName") as string
         val tgtPkg = luaExpr("tgt.packageName") as string
-        val pkgMod = luaExpr("icPkg.moduleName") as string
-        val pkgPkg = luaExpr("icPkg.packageName") as string
+        val pkgMod = luaExpr("__P_.icPkg.moduleName") as string
+        val pkgPkg = luaExpr("__P_.icPkg.packageName") as string
         val name = luaExpr("tgt.name") as string
         if tgtMod == pkgMod && tgtPkg == pkgPkg {
             // Same package — look up in package symbols
@@ -145,7 +145,7 @@ pub fn icGetTargetType(tgt: any, level: int, section: any): any {
             }
         } else {
             // Different package — look up via ns
-            val sym: any = luaExpr("icNs and icNs.getSymbol and icNs.getSymbol(tgtMod, tgtPkg, name) or nil")
+            val sym: any = luaExpr("__P_.icNs and __P_.icNs.getSymbol and __P_.icNs.getSymbol(tgtMod, tgtPkg, name) or nil")
             if sym == unit {
                 embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Identifier ' .. tgt.name .. ' not found!' })")
                 unit // unreachable
@@ -207,8 +207,8 @@ pub fn icListLocalFunctionsForType(name: string, receiverType: any): any {
                     if fullSym != unit {
                         val symMod = luaExpr("fullSym.moduleName") as string
                         val symPkg = luaExpr("fullSym.packageName") as string
-                        val pkgMod = luaExpr("icPkg.moduleName") as string
-                        val pkgPkg = luaExpr("icPkg.packageName") as string
+                        val pkgMod = luaExpr("__P_.icPkg.moduleName") as string
+                        val pkgPkg = luaExpr("__P_.icPkg.packageName") as string
                         if symMod == pkgMod && symPkg == pkgPkg {
                             luaExpr("require('chicc/ast').localFnDotTarget(name)")
                         } else {
@@ -243,8 +243,8 @@ pub fn icListCurrentPackageFunctionsForType(name: string, receiverType: any): an
                 // (it may be imported from a different package)
                 val symMod = luaExpr("sym.moduleName") as string
                 val symPkg = luaExpr("sym.packageName") as string
-                val pkgMod = luaExpr("icPkg.moduleName") as string
-                val pkgPkg = luaExpr("icPkg.packageName") as string
+                val pkgMod = luaExpr("__P_.icPkg.moduleName") as string
+                val pkgPkg = luaExpr("__P_.icPkg.packageName") as string
                 val entry: any = if symMod == pkgMod && symPkg == pkgPkg {
                     luaExpr("{ dotTarget = require('chicc/ast').localFnDotTarget(name), typeScheme = symType }")
                 } else {
@@ -274,7 +274,7 @@ pub fn icListTypesPackageFunctionsForType(name: string, receiverType: any): any 
         val idMod = luaExpr("typeId.moduleName") as string
         val idPkg = luaExpr("typeId.packageName") as string
         // Look up the function in that package via ns
-        val sym: any = luaExpr("icNs.getSymbol and icNs.getSymbol(idMod, idPkg, name) or nil")
+        val sym: any = luaExpr("__P_.icNs.getSymbol and __P_.icNs.getSymbol(idMod, idPkg, name) or nil")
         if sym != unit {
             val symType: any = luaExpr("sym.symbolType")
             if symType != unit {
