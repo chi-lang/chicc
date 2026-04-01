@@ -17,7 +17,7 @@ CFLAGS = -O2 -Wall -Wextra -std=c99 -D_POSIX_C_SOURCE=200809L
 LUAJIT_DIR = vendor/LuaJIT
 LUAJIT_SRC = $(LUAJIT_DIR)/src
 LUAJIT_A   = $(LUAJIT_SRC)/libluajit.a
-LUAJIT_BIN = $(LUAJIT_SRC)/luajit
+LUAJIT_BIN = LUA_PATH="$(LUAJIT_SRC)/?.lua" $(LUAJIT_SRC)/luajit
 GEN_DIR    = gen
 
 # Source locations
