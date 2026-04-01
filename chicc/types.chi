@@ -4,7 +4,7 @@ import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
 
 // TypeId — fully qualified type identity
-type TypeId = { moduleName: string, packageName: string, name: string }
+pub type TypeId = { moduleName: string, packageName: string, name: string }
 
 pub fn newTypeId(mod: string, pkg: string, name: string): TypeId {
     { moduleName: mod, packageName: pkg, name: name }
@@ -31,7 +31,7 @@ pub val arrayTypeId = newTypeId("std", "lang.array", "array")
 // Type is represented as a tagged record
 // Tags: "primitive", "fn", "record", "sum", "array", "var", "recursive", "poly"
 // RecordField is inlined as { name: string, fieldType: Type } in fields array
-type Type = {
+pub type Type = {
     tag: string,
     // Primitive fields
     ids: array[TypeId],
@@ -57,7 +57,7 @@ type Type = {
 }
 
 // RecordField alias for convenience
-type RecordField = { name: string, fieldType: Type }
+pub type RecordField = { name: string, fieldType: Type }
 
 // Constructors
 pub fn primitiveType(ids: array[TypeId]): Type {

@@ -4,7 +4,7 @@ import std/lang { luaExpr, embedLua }
 import std/lang.array { push }
 
 // StringBuilder — array-based string buffer for efficient concatenation
-type StringBuilder = { parts: array[string], length: int }
+pub type StringBuilder = { parts: array[string], length: int }
 
 pub fn newStringBuilder(): StringBuilder {
     { parts: [], length: 0 }

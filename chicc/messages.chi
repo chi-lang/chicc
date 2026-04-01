@@ -10,7 +10,7 @@ embedLua("setmetatable(_G, { __index = __P_ })")
 // A compiler message (error or warning)
 // Uses inline structural type instead of CodePoint to avoid
 // inlining order dependency with source.chi
-type Message = {
+pub type Message = {
     code: string,
     text: string,
     codePoint: { line: int, column: int } | unit

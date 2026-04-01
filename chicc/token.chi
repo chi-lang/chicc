@@ -86,7 +86,7 @@ pub val TK_EOF = 99
 pub val TK_NEWLINE = 100
 
 // Token record
-type Token = {
+pub type Token = {
     kind: int,
     value: string,
     section: Section | unit

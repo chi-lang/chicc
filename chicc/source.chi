@@ -2,7 +2,7 @@
 package user/source
 
 // Represents a section of source code (for error reporting)
-type Section = {
+pub type Section = {
     startLine: int,
     startCol: int,
     endLine: int,
@@ -18,7 +18,7 @@ pub fn merge(a: Section, b: Section): Section {
 }
 
 // CodePoint for error messages (line + column)
-type CodePoint = { line: int, column: int }
+pub type CodePoint = { line: int, column: int }
 
 pub fn toCodePoint(s: Section): CodePoint {
     { line: s.startLine, column: s.startCol }

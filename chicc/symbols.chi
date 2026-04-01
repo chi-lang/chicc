@@ -6,7 +6,7 @@ import user/parse_ast { trTag, trName, trTypeParameters, trArgumentTypeRefs, trR
 
 // --- Symbol: package-level symbol ---
 
-type Symbol = {
+pub type Symbol = {
     moduleName: string,
     packageName: string,
     name: string,
@@ -66,7 +66,7 @@ pub fn stHas(st: SymbolTable, name: string): bool {
 
 // --- FnSymbolTable: function-scoped symbol stack with parent chain ---
 
-type FnSymbolTable = { parent: any, locals: any }
+pub type FnSymbolTable = { parent: any, locals: any }
 
 pub fn newFnSymbolTable(parent: any): FnSymbolTable {
     val locals: any = luaExpr("{}")
@@ -105,7 +105,7 @@ pub fn fstRemove(fst: FnSymbolTable, name: string): unit {
 
 // --- TypeTable: type alias storage ---
 
-type TypeTable = { aliases: any, parentPkg: any }
+pub type TypeTable = { aliases: any, parentPkg: any }
 
 pub fn newTypeTable(parentPkg: any): TypeTable {
     val aliases: any = luaExpr("{}")
@@ -141,7 +141,7 @@ pub fn ttGet(tt: TypeTable, name: string): any {
 
 // --- CompileTables: top-level compilation context ---
 
-type CompileTables = {
+pub type CompileTables = {
     currentPackage: any,
     ns: any,
     packageAliasTable: any,

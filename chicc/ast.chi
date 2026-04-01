@@ -4,7 +4,7 @@ import std/lang.array { push, size, forEach }
 import user/source { Section }
 import user/types { Type, TypeId }
 
-type Target = {
+pub type Target = {
     tag: string,
     name: string,
     moduleName: string,
@@ -19,7 +19,7 @@ pub fn packageTarget(mod: string, pkg: string, name: string): Target {
     { tag: "package", name: name, moduleName: mod, packageName: pkg }
 }
 
-type DotTarget = {
+pub type DotTarget = {
     tag: string,
     moduleName: string,
     packageName: string,
@@ -38,13 +38,13 @@ pub fn packageFnDotTarget(mod: string, pkg: string, name: string): DotTarget {
     { tag: "package_fn", moduleName: mod, packageName: pkg, name: name }
 }
 
-type FnParam = { name: string, paramType: Type | unit, section: Section | unit }
+pub type FnParam = { name: string, paramType: Type | unit, section: Section | unit }
 
 pub fn newFnParam(name: string, paramType: Type | unit, section: Section | unit): FnParam {
     { name: name, paramType: paramType, section: section }
 }
 
-type Expr = {
+pub type Expr = {
     kind: string,
     exprType: Type | unit,
     used: bool,
@@ -98,7 +98,7 @@ type Expr = {
     blockBody: array[any]
 }
 
-type HandleCase = {
+pub type HandleCase = {
     moduleName: string,
     packageName: string,
     effectName: string,
@@ -107,7 +107,7 @@ type HandleCase = {
     section: Section | unit
 }
 
-type ExprField = { name: string, value: Expr }
+pub type ExprField = { name: string, value: Expr }
 
 fn emptyExpr(kind: string, section: Section | unit): Expr {
     { kind: kind, exprType: unit, used: false, section: section,
@@ -389,12 +389,12 @@ pub fn isTerminator(expr: any): bool {
 
 // --- Program and supporting types (compiled-level) ---
 
-type Package = { moduleName: string, packageName: string }
-type TypeAlias = { typeId: TypeId, aliasType: Type }
-type ImportEntry = { name: string, alias: string | unit, section: Section | unit }
-type Import = { moduleName: string, packageName: string, packageAlias: string | unit, entries: array[ImportEntry], section: Section | unit }
+pub type Package = { moduleName: string, packageName: string }
+pub type TypeAlias = { typeId: TypeId, aliasType: Type }
+pub type ImportEntry = { name: string, alias: string | unit, section: Section | unit }
+pub type Import = { moduleName: string, packageName: string, packageAlias: string | unit, entries: array[ImportEntry], section: Section | unit }
 
-type Program = {
+pub type Program = {
     packageDef: Package,
     imports: array[Import],
     typeAliases: array[TypeAlias],
