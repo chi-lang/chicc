@@ -1,15 +1,12 @@
 // chicc/compile.chi
 // Build script for the Chi self-hosting compiler.
-// Concatenates all chicc modules and compiles them as a single unit.
+// Compiles all chicc modules into a single Lua file (chicc.lua)
+// using per-package incremental compilation with caching.
 //
 // Usage: chi compile.chi   (from the chicc directory)
 package user/default
-import std/lang { luaExpr, embedLua }
+import std/lang { compileModules, luaExpr }
 import std/io.file { writeString }
-
-// Concatenate source files: extract std/ imports, strip all package/import
-// lines, merge everything into a single source with one package header.
-embedLua("function __chicc_concat_sources(files) local imports = {}; local seenImports = {}; local code = {}; for _, fileName in ipairs(files) do local f = io.open(fileName, 'r'); if not f then error('Cannot open: ' .. fileName) end; local content = f:read('a'); f:close(); for line in content:gmatch('[^\\n]+') do if line:match('^import std/') then if not seenImports[line] then seenImports[line] = true; imports[#imports+1] = line end elseif not line:match('^package ') and not line:match('^import ') then code[#code+1] = line end end; code[#code+1] = '' end; local result = 'package user/chicc\\n' .. table.concat(imports, '\\n') .. '\\n\\n' .. table.concat(code, '\\n'); return result end")
 
 fn build(): int {
     println("Building chicc self-hosting compiler...")
@@ -24,17 +21,11 @@ fn build(): int {
         "chicc/checks.chi", "chicc/compiler.chi", "chicc/cli.chi"
     ]
 
-    // Concatenate all sources into one
-    val concatenated: string = luaExpr("__chicc_concat_sources(sourceFiles)")
-    println("Concatenated all sources")
+    val luaCode = compileModules(sourceFiles, ".cache")
 
-    // Compile the concatenated source
-    val luaCode: string = luaExpr("chi_compile(concatenated)")
-    println("Compiled successfully")
+    val entry = "\n-- chicc entry point\nlocal _CLI = package.loaded['chicc/cli']\nlocal _COMPILER = package.loaded['chicc/compiler']\ncliMain = _CLI.cliMain\ncompileFile = _CLI.compileFile\nrunFile = _CLI.runFile\nloadStdlib = _CLI.loadStdlib\ncompileToLua = _COMPILER.compileToLua\nnewLuaCompilationEnv = _COMPILER.newLuaCompilationEnv\n\nif arg then\n  local exitCode = cliMain(arg)\n  if exitCode and exitCode ~= 0 then os.exit(exitCode) end\nend\n"
 
-    val entry = "\n-- chicc entry point\nlocal __P = package.loaded['user/chicc']\ncliMain = __P.cliMain\ncompileFile = __P.compileFile\nrunFile = __P.runFile\nloadStdlib = __P.loadStdlib\ncompileToLua = __P.compileToLua\nnewLuaCompilationEnv = __P.newLuaCompilationEnv\n\nif arg then\n  local exitCode = cliMain(arg)\n  if exitCode and exitCode ~= 0 then os.exit(exitCode) end\nend\n"
-
-    val finalCode: string = luaExpr("'function m1() ' .. luaCode .. ' end;m1();' .. entry")
+    val finalCode: string = luaExpr("luaCode .. entry")
     writeString("chicc.lua", finalCode)
 
     println("Built: chicc.lua")
