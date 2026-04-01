@@ -279,7 +279,7 @@ pub fn unify(constraints: array[any]): array[any] {
             embedLua("table.insert(rhsConstraints, rhsConstraint)")
 
             // Use pcall to try rhs first
-            embedLua("local __pcall_ok, __pcall_result = pcall(unify, rhsConstraints)")
+            embedLua("local __pcall_ok, __pcall_result = pcall(__P_.unify, rhsConstraints)")
             val pcallOk = luaExpr("__pcall_ok") as bool
             if pcallOk {
                 // Apply partial solutions to remaining queue

@@ -3,10 +3,10 @@ package chicc/typer
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
 import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tString, tAny, sumCreate, recordType, arrayType, functionType, typeEquals, polyType, mapType, sumListTypes, typeIdEquals, optionTypeId, instantiate }
-import chicc/source { Section }
+import chicc/source { Section, toCodePoint }
 import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget, atomExpr }
 import chicc/unification { unify, newConstraint }
-import chicc/inference_context { icFreshVariable, icGetTargetType, icWithNewLocalScope, icDefineLocalSymbol }
+import chicc/inference_context { icFreshVariable, icGetTargetType, icWithNewLocalScope, icDefineLocalSymbol, icListLocalFunctionsForType, icListCurrentPackageFunctionsForType, icListTypesPackageFunctionsForType }
 
 // --- Helper: throw a typer error ---
 
@@ -241,7 +241,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
                     val dotOp_receiver = luaExpr("dotOp.receiver") as any
                     embedLua("table.insert(term.callParams, 1, dotOp_receiver)")
                     val dtName = luaExpr("dotTarget.name") as string
-                    val symbol = luaExpr("ctGetLocalSymbol(icCompileTables, dtName)") as any
+                    val symbol = luaExpr("require('chicc/symbols').ctGetLocalSymbol(icCompileTables, dtName)") as any
                     fillDefaultArgs(luaExpr("term.callParams") as any, symbol)
                     val memberSec = luaExpr("dotOp.memberSection") as Section | unit
                     val newCallee = variableAccessExpr(localTarget(dtName), memberSec)
@@ -270,7 +270,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
         // Fill default args for direct function calls (variable_access callee)
         if calleeKind == "variable_access" {
             val calleeName = luaExpr("term.callee.target.name") as string
-            val symbol = luaExpr("ctGetLocalSymbol(icCompileTables, calleeName)") as any
+            val symbol = luaExpr("require('chicc/symbols').ctGetLocalSymbol(icCompileTables, calleeName)") as any
             fillDefaultArgs(luaExpr("term.callParams") as any, symbol)
         }
 
@@ -347,8 +347,8 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
                 instantiate(fnType as Type, level, icFreshVariable as (int) -> Type)
             } else {
                 // No function found
-                val cp = luaExpr("memberSection and toCodePoint(memberSection) or nil") as any
-                embedLua("error(memberDoesNotExist(finalReceiverType.tag or 'unknown', fieldName, cp))")
+                val cp = luaExpr("memberSection and require('chicc/source').toCodePoint(memberSection) or nil") as any
+                embedLua("error(require('chicc/messages').memberDoesNotExist(finalReceiverType.tag or 'unknown', fieldName, cp))")
                 unit // unreachable
             }
         }

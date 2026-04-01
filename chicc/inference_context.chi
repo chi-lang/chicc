@@ -28,7 +28,7 @@ fn icLocalSymbolsGet(ls: any, name: string): any {
     val existing: any = luaExpr("symbols[name]")
     if ct != unit && existing == unit {
         // Fall back to compileTables
-        val sym: any = luaExpr("ctGetLocalSymbol(ct, name)")
+        val sym: any = luaExpr("require('chicc/symbols').ctGetLocalSymbol(ct, name)")
         if sym != unit {
             val symType: any = luaExpr("sym.symbolType")
             if symType != unit {
@@ -186,7 +186,7 @@ fn icTrialUnify(typeScheme: any, receiverType: any): bool {
     }
     val firstParam: any = luaExpr("types[1]")
     // Use pcall to try unification
-    embedLua("local __trial_ok = pcall(function() unify({newConstraint(firstParam, receiverType, nil, {})}) end)")
+    embedLua("local _unif = require('chicc/unification'); local __trial_ok = pcall(function() _unif.unify({_unif.newConstraint(firstParam, receiverType, nil, {})}) end)")
     val trialOk = luaExpr("__trial_ok") as bool
     trialOk
 }
@@ -203,22 +203,22 @@ pub fn icListLocalFunctionsForType(name: string, receiverType: any): any {
                 // Determine the correct dot target: check if this is an imported symbol
                 val dotTarget: any = if icCompileTables != unit {
                     val ct = icCompileTables
-                    val fullSym: any = luaExpr("ctGetLocalSymbol(ct, name)")
+                    val fullSym: any = luaExpr("require('chicc/symbols').ctGetLocalSymbol(ct, name)")
                     if fullSym != unit {
                         val symMod = luaExpr("fullSym.moduleName") as string
                         val symPkg = luaExpr("fullSym.packageName") as string
                         val pkgMod = luaExpr("icPkg.moduleName") as string
                         val pkgPkg = luaExpr("icPkg.packageName") as string
                         if symMod == pkgMod && symPkg == pkgPkg {
-                            luaExpr("localFnDotTarget(name)")
+                            luaExpr("require('chicc/ast').localFnDotTarget(name)")
                         } else {
-                            luaExpr("packageFnDotTarget(symMod, symPkg, name)")
+                            luaExpr("require('chicc/ast').packageFnDotTarget(symMod, symPkg, name)")
                         }
                     } else {
-                        luaExpr("localFnDotTarget(name)")
+                        luaExpr("require('chicc/ast').localFnDotTarget(name)")
                     }
                 } else {
-                    luaExpr("localFnDotTarget(name)")
+                    luaExpr("require('chicc/ast').localFnDotTarget(name)")
                 }
                 val entry: any = luaExpr("{ dotTarget = dotTarget, typeScheme = sym }")
                 embedLua("table.insert(results, entry)")
@@ -234,7 +234,7 @@ pub fn icListCurrentPackageFunctionsForType(name: string, receiverType: any): an
     val results: any = luaExpr("{}")
     if icCompileTables == unit { return results }
     val ct = icCompileTables
-    val sym: any = luaExpr("ctGetLocalSymbol(ct, name)")
+    val sym: any = luaExpr("require('chicc/symbols').ctGetLocalSymbol(ct, name)")
     if sym != unit {
         val symType: any = luaExpr("sym.symbolType")
         if symType != unit {
@@ -246,9 +246,9 @@ pub fn icListCurrentPackageFunctionsForType(name: string, receiverType: any): an
                 val pkgMod = luaExpr("icPkg.moduleName") as string
                 val pkgPkg = luaExpr("icPkg.packageName") as string
                 val entry: any = if symMod == pkgMod && symPkg == pkgPkg {
-                    luaExpr("{ dotTarget = localFnDotTarget(name), typeScheme = symType }")
+                    luaExpr("{ dotTarget = require('chicc/ast').localFnDotTarget(name), typeScheme = symType }")
                 } else {
-                    luaExpr("{ dotTarget = packageFnDotTarget(symMod, symPkg, name), typeScheme = symType }")
+                    luaExpr("{ dotTarget = require('chicc/ast').packageFnDotTarget(symMod, symPkg, name), typeScheme = symType }")
                 }
                 embedLua("table.insert(results, entry)")
             }
@@ -279,7 +279,7 @@ pub fn icListTypesPackageFunctionsForType(name: string, receiverType: any): any 
             val symType: any = luaExpr("sym.symbolType")
             if symType != unit {
                 if icTrialUnify(symType, receiverType) {
-                    val entry: any = luaExpr("{ dotTarget = packageFnDotTarget(idMod, idPkg, name), typeScheme = symType }")
+                    val entry: any = luaExpr("{ dotTarget = require('chicc/ast').packageFnDotTarget(idMod, idPkg, name), typeScheme = symType }")
                     embedLua("table.insert(results, entry)")
                 }
             }

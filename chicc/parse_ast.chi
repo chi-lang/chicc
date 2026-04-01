@@ -125,19 +125,19 @@ pub fn newTypeRefField(fieldName: string, fieldTypeRef: any): TypeRefField {
     { name: fieldName, typeRef: fieldTypeRef }
 }
 
-pub type PackageDefinition = { moduleName: string, packageName: string, section: Section | unit }
+type PackageDefinition = { moduleName: string, packageName: string, section: Section | unit }
 
 pub fn newPackageDefinition(modName: string, pkgName: string, sec: Section | unit): PackageDefinition {
     { moduleName: modName, packageName: pkgName, section: sec }
 }
 
-pub type ParseImportEntry = { name: string, alias: string, section: Section | unit }
+type ParseImportEntry = { name: string, alias: string, section: Section | unit }
 
 pub fn newParseImportEntry(entryName: string, entryAlias: string, sec: Section | unit): ParseImportEntry {
     { name: entryName, alias: entryAlias, section: sec }
 }
 
-pub type ParseImport = {
+type ParseImport = {
     moduleName: string,
     packageName: string,
     packageAlias: string,
@@ -149,7 +149,7 @@ pub fn newParseImport(modName: string, pkgName: string, pkgAlias: string, import
     { moduleName: modName, packageName: pkgName, packageAlias: pkgAlias, entries: importEntries, section: sec }
 }
 
-pub type ParseProgram = {
+type ParseProgram = {
     packageDefinition: PackageDefinition | unit,
     imports: array[ParseImport],
     typeAliases: array[any],

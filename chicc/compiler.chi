@@ -35,7 +35,7 @@ pub fn hasErrors(result: CompilationResult): bool {
 // ============================================================================
 
 // Define the Lua-side env factory at module init time
-embedLua("__chicc_mkEnv = function() local env = {}; local cache = {}; function env.getSymbol(mod, pkg, name) local qualifier = mod .. '/' .. pkg; local pkgSymbols = cache[qualifier]; if pkgSymbols == nil then local loaded = package.loaded[qualifier]; if loaded == nil or loaded._package == nil then return nil end; pkgSymbols = {}; for symName, props in pairs(loaded._package) do if type(props) == 'table' then local symType = nil; if props.type then local ok, decoded = pcall(function() return decodeType(props.type) end); if ok then symType = decoded end end; pkgSymbols[symName] = { moduleName = mod, packageName = pkg, name = symName, symbolType = symType, isPublic = props.public == true, isMutable = props.mutable == true } end end; cache[qualifier] = pkgSymbols end; return pkgSymbols[name] end; function env.getTypeAlias(mod, pkg, name) local qualifier = mod .. '/' .. pkg; local loaded = package.loaded[qualifier]; if loaded == nil or loaded._types == nil then return nil end; local spec = loaded._types[name]; if spec == nil or type(spec) ~= 'string' then return nil end; local ok, decoded = pcall(function() return decodeType(spec) end); if not ok then return nil end; return { typeId = { moduleName = mod, packageName = pkg, name = name }, aliasType = decoded } end; function env.getPreludeImports() return { { moduleName = 'std', packageName = 'lang', packageAlias = nil, entries = { { name = 'println', alias = nil, section = nil }, { name = 'print', alias = nil, section = nil }, { name = 'eval', alias = nil, section = nil } }, section = nil } } end; return env end")
+embedLua("__chicc_mkEnv = function() local _tw = require('chicc/type_writer'); local env = {}; local cache = {}; function env.getSymbol(mod, pkg, name) local qualifier = mod .. '/' .. pkg; local pkgSymbols = cache[qualifier]; if pkgSymbols == nil then local loaded = package.loaded[qualifier]; if loaded == nil or loaded._package == nil then return nil end; pkgSymbols = {}; for symName, props in pairs(loaded._package) do if type(props) == 'table' then local symType = nil; if props.type then local ok, decoded = pcall(function() return _tw.decodeType(props.type) end); if ok then symType = decoded end end; pkgSymbols[symName] = { moduleName = mod, packageName = pkg, name = symName, symbolType = symType, isPublic = props.public == true, isMutable = props.mutable == true } end end; cache[qualifier] = pkgSymbols end; return pkgSymbols[name] end; function env.getTypeAlias(mod, pkg, name) local qualifier = mod .. '/' .. pkg; local loaded = package.loaded[qualifier]; if loaded == nil or loaded._types == nil then return nil end; local spec = loaded._types[name]; if spec == nil or type(spec) ~= 'string' then return nil end; local ok, decoded = pcall(function() return _tw.decodeType(spec) end); if not ok then return nil end; return { typeId = { moduleName = mod, packageName = pkg, name = name }, aliasType = decoded } end; function env.getPreludeImports() return { { moduleName = 'std', packageName = 'lang', packageAlias = nil, entries = { { name = 'println', alias = nil, section = nil }, { name = 'print', alias = nil, section = nil }, { name = 'eval', alias = nil, section = nil } }, section = nil } } end; return env end")
 
 pub fn newLuaCompilationEnv(): any {
     val ns: any = luaExpr("__chicc_mkEnv()")
@@ -64,13 +64,13 @@ embedLua("__chicc_splitExprs = function(expressions) local functions = {}; local
 // Lua helper: convert raw imports to typed Import records
 // ============================================================================
 
-embedLua("__chicc_convertImports = function(rawImports) local r = {}; for _, imp in ipairs(rawImports) do local entries = {}; if imp.entries then for _, e in ipairs(imp.entries) do entries[#entries+1] = newImportEntry(e.name, e.alias, e.section) end end; r[#r+1] = newImport(imp.moduleName, imp.packageName, imp.packageAlias, entries, imp.section) end; return r end")
+embedLua("__chicc_convertImports = function(rawImports) local _ast = require('chicc/ast'); local r = {}; for _, imp in ipairs(rawImports) do local entries = {}; if imp.entries then for _, e in ipairs(imp.entries) do entries[#entries+1] = _ast.newImportEntry(e.name, e.alias, e.section) end end; r[#r+1] = _ast.newImport(imp.moduleName, imp.packageName, imp.packageAlias, entries, imp.section) end; return r end")
 
 // ============================================================================
 // Lua helper: convert raw type aliases to typed TypeAlias records
 // ============================================================================
 
-embedLua("__chicc_convertTypeAliases = function(rawAliases) local r = {}; for _, alias in ipairs(rawAliases) do r[#r+1] = newTypeAlias(alias.typeId, alias.aliasType) end; return r end")
+embedLua("__chicc_convertTypeAliases = function(rawAliases) local _ast = require('chicc/ast'); local r = {}; for _, alias in ipairs(rawAliases) do r[#r+1] = _ast.newTypeAlias(alias.typeId, alias.aliasType) end; return r end")
 
 // ============================================================================
 // markUsed — propagate usage flags through expression AST
@@ -327,10 +327,10 @@ pub fn replaceTypes(expr: any, solutions: any) {
     if expr == unit { return unit }
     val exprType = luaExpr("expr.exprType") as any
     if exprType != unit {
-        val replaced = luaExpr("mapType(exprType, solutions)") as any
+        val replaced = luaExpr("require('chicc/types').mapType(exprType, solutions)") as any
         embedLua("expr.exprType = replaced")
     }
-    val children = luaExpr("exprChildren(expr)") as any
+    val children = luaExpr("require('chicc/ast').exprChildren(expr)") as any
     val childCount = luaExpr("#children") as int
     var i = 1
     while i <= childCount {
@@ -348,7 +348,7 @@ fn parseSource(source: string): any {
     // Returns { parsedProgram, messages }
     // Use pcall to catch parse errors
     embedLua("__chicc_parse_msgs = {}")
-    embedLua("__chicc_parse_ok, __chicc_parse_prog = pcall(function() local tokens = tokenize(source); local p = newParser(tokens, source); return parseProgram(p) end)")
+    embedLua("__chicc_parse_ok, __chicc_parse_prog = pcall(function() local _lex = require('chicc/lexer'); local _par = require('chicc/parser'); local tokens = _lex.tokenize(source); local p = _par.newParser(tokens, source); return _par.parseProgram(p) end)")
     val ok = luaExpr("__chicc_parse_ok") as bool
     if ok {
         val prog = luaExpr("__chicc_parse_prog") as any
@@ -467,7 +467,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
         val aliasTypeParams = luaExpr("aliasDef.typeParameters") as any
         val typeSchemeVars = luaExpr("__chicc_typeParamNames(aliasTypeParams)") as any
         val typeId = luaExpr("{ moduleName = moduleName, packageName = packageName, name = aliasName }") as any
-        val resolved = luaExpr("resolveTypeAndWrapRecursive(tables.localTypeTable, typeSchemeVars, aliasTypeRef, typeId, 1)") as any
+        val resolved = luaExpr("require('chicc/symbols').resolveTypeAndWrapRecursive(tables.localTypeTable, typeSchemeVars, aliasTypeRef, typeId, 1)") as any
         val typeAlias = luaExpr("{ typeId = typeId, aliasType = resolved }") as any
         embedLua("table.insert(definedTypeAliases, typeAlias)")
         ctDefineTypeAlias(tables, typeAlias)
@@ -490,7 +490,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
     }
 
     // PHASE 5: CONVERT parse AST -> expression AST
-    embedLua("__chicc_conv_ok, __chicc_conv_result = pcall(function() return convertProgram(parsedProgram, pkg, tables) end)")
+    embedLua("__chicc_conv_ok, __chicc_conv_result = pcall(function() local _ac = require('chicc/ast_converter'); return _ac.convertProgram(parsedProgram, pkg, tables) end)")
     val convOk = luaExpr("__chicc_conv_ok") as bool
     val expressions: any = if convOk {
         luaExpr("__chicc_conv_result") as any
@@ -525,14 +525,14 @@ pub fn compile(source: string, ns: any): CompilationResult {
             val expectedType = luaExpr("fn_.expectedType") as any
             if expectedType != unit {
                 val fnName = luaExpr("fn_.declName") as string
-                val scheme = luaExpr("polyType(0, expectedType)") as any
+                val scheme = luaExpr("require('chicc/types').polyType(0, expectedType)") as any
                 icDefineLocalSymbol(fnName, scheme)
             }
         } else if fnKind == "effect_definition" {
             val effType = luaExpr("fn_.exprType") as any
             if effType != unit {
                 val effName = luaExpr("fn_.effectName") as string
-                val scheme = luaExpr("polyType(0, effType)") as any
+                val scheme = luaExpr("require('chicc/types').polyType(0, effType)") as any
                 icDefineLocalSymbol(effName, scheme)
             }
         }
@@ -541,7 +541,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
 
     // Type-check non-function code as a group
     val codeConstraints = luaExpr("{}") as any
-    embedLua("__chicc_tc_ok, __chicc_tc_err = pcall(function() local codeCount = #code; for i = 1, codeCount do typeTerm(code[i], 0, codeConstraints) end; local solutions = unify(codeConstraints); for i = 1, codeCount do replaceTypes(code[i], solutions) end end)")
+    embedLua("__chicc_tc_ok, __chicc_tc_err = pcall(function() local _typer = require('chicc/typer'); local _unif = require('chicc/unification'); local codeCount = #code; for i = 1, codeCount do _typer.typeTerm(code[i], 0, codeConstraints) end; local solutions = _unif.unify(codeConstraints); for i = 1, codeCount do __P_.replaceTypes(code[i], solutions) end end)")
     val tcOk = luaExpr("__chicc_tc_ok") as bool
     if tcOk == false {
         val isTcMsg = luaExpr("type(__chicc_tc_err) == 'table' and __chicc_tc_err.code ~= nil") as bool
@@ -556,7 +556,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
     fi = 1
     while fi <= fnCount {
         val fn_ = luaExpr("functions[fi]") as any
-        embedLua("__chicc_fn_ok, __chicc_fn_err = pcall(function() local constraints = {}; typeTerm(fn_, 0, constraints); local solutions = unify(constraints); replaceTypes(fn_, solutions) end)")
+        embedLua("__chicc_fn_ok, __chicc_fn_err = pcall(function() local _typer = require('chicc/typer'); local _unif = require('chicc/unification'); local constraints = {}; _typer.typeTerm(fn_, 0, constraints); local solutions = _unif.unify(constraints); __P_.replaceTypes(fn_, solutions) end)")
         val fnOk = luaExpr("__chicc_fn_ok") as bool
         if fnOk == false {
             val isFnMsg = luaExpr("type(__chicc_fn_err) == 'table' and __chicc_fn_err.code ~= nil") as bool

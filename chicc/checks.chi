@@ -69,9 +69,9 @@ fn cnWalkParseAst(node: any) {
         val varName = luaExpr("node.variableName") as string
         if cnHasName(varName) == false {
             val ct = cnCtRef
-            val aliased = luaExpr("ct ~= nil and ctGetAliasedPackage(ct, varName) or nil") as any
+            val aliased = luaExpr("ct ~= nil and require('chicc/symbols').ctGetAliasedPackage(ct, varName) or nil") as any
             if aliased == unit {
-                val localSym = luaExpr("ct ~= nil and ctGetLocalSymbol(ct, varName) or nil") as any
+                val localSym = luaExpr("ct ~= nil and require('chicc/symbols').ctGetLocalSymbol(ct, varName) or nil") as any
                 if localSym == unit {
                     val sec = luaExpr("node.section") as any
                     val cp = cnSectionToCp(sec)
@@ -429,7 +429,7 @@ pub fn immutabilityCheck(exprs: any, currentModule: string, currentPackage: stri
                 var isMutable: any = unit
                 if tTag == "local" {
                     val tName = luaExpr("target.name") as string
-                    val sym = luaExpr("ct ~= nil and ctGetLocalSymbol(ct, tName) or nil") as any
+                    val sym = luaExpr("ct ~= nil and require('chicc/symbols').ctGetLocalSymbol(ct, tName) or nil") as any
                     if sym != unit {
                          isMutable = luaExpr("sym.isMutable") as any
                     }
@@ -438,7 +438,7 @@ pub fn immutabilityCheck(exprs: any, currentModule: string, currentPackage: stri
                     val tPkg = luaExpr("target.packageName") as string
                     val tName = luaExpr("target.name") as string
                     if tMod == currentModule && tPkg == currentPackage {
-                        val sym = luaExpr("ct ~= nil and ctGetLocalSymbol(ct, tName) or nil") as any
+                        val sym = luaExpr("ct ~= nil and require('chicc/symbols').ctGetLocalSymbol(ct, tName) or nil") as any
                         if sym != unit {
                             isMutable = luaExpr("sym.isMutable") as any
                         }
@@ -568,7 +568,7 @@ fn rtWalkExprImpl(expr: any, messages: any) {
                 val constraint = newConstraint(expRet, actualType, luaExpr("expr.section") as any, luaExpr("{}") as array[any])
                 val testConstraints = luaExpr("{}") as any
                 embedLua("table.insert(testConstraints, constraint)")
-                embedLua("local __rt_ok = pcall(unify, testConstraints)")
+                embedLua("local __rt_ok = pcall(require('chicc/unification').unify, testConstraints)")
                 val unifyOk = luaExpr("__rt_ok") as bool
                 if unifyOk == false {
                     val expTag = luaExpr("expRet.tag") as string

@@ -182,7 +182,7 @@ pub fn emitFn(st: EmitterState, expr: any, name: string, isTopLevel: bool): stri
     val prevFunctionDepth = st.functionDepth
     st.inFunction = true
     st.functionDepth = prevFunctionDepth + 1
-    embedLua("if expr.defaultValues and type(expr.defaultValues) == 'table' then for dname, dval in pairs(expr.defaultValues) do emit(st, 'if ' .. dname .. ' == nil then ') local dResult = emitExpr(st, dval) emit(st, dname .. '=' .. dResult .. ';end;') end end")
+    embedLua("if expr.defaultValues and type(expr.defaultValues) == 'table' then for dname, dval in pairs(expr.defaultValues) do __P_.emit(st, 'if ' .. dname .. ' == nil then ') local dResult = __P_.emitExpr(st, dval) __P_.emit(st, dname .. '=' .. dResult .. ';end;') end end")
     val fnBody = luaExpr("expr.body") as any
     val bodyResult = emitExpr(st, fnBody)
     val bodyCount = luaExpr("#fnBody.blockBody") as int
@@ -791,7 +791,7 @@ pub fn emitPackageInfo(st: EmitterState): string {
             emit(st, "mutable=$isMut,")
             val hasType = luaExpr("st.program.expressions[i].exprType ~= nil") as bool
             if hasType {
-                val encodedType = luaExpr("encodeType(st.program.expressions[i].exprType)") as string
+                val encodedType = luaExpr("require('chicc/type_writer').encodeType(st.program.expressions[i].exprType)") as string
                 emit(st, "type='$encodedType'")
             }
             emit(st, "};")
@@ -803,7 +803,7 @@ pub fn emitPackageInfo(st: EmitterState): string {
             emit(st, "mutable=false,")
             val hasType = luaExpr("st.program.expressions[i].exprType ~= nil") as bool
             if hasType {
-                val encodedType = luaExpr("encodeType(st.program.expressions[i].exprType)") as string
+                val encodedType = luaExpr("require('chicc/type_writer').encodeType(st.program.expressions[i].exprType)") as string
                 emit(st, "type='$encodedType'")
             }
             emit(st, "};")
@@ -812,6 +812,7 @@ pub fn emitPackageInfo(st: EmitterState): string {
     }
     ""
 }
+
 
 // --- Require Collection ---
 
@@ -878,7 +879,7 @@ pub fn emitProgram(prog: Program, emitModule: bool): string {
     while ai <= aliasCount {
         val aliasName = luaExpr("prog.typeAliases[ai].typeId.name") as string
         val aliasType = luaExpr("prog.typeAliases[ai].aliasType") as any
-        val encoded = luaExpr("encodeType(aliasType)") as string
+        val encoded = luaExpr("require('chicc/type_writer').encodeType(aliasType)") as string
         emit(st, "__T_.$aliasName='$encoded';")
         ai = ai + 1
     }

@@ -2,15 +2,16 @@
 package chicc/messages
 import std/lang { embedLua }
 
-// In concatenated builds, pub fn compiles to __P_.fnName.
-// embedLua/luaExpr code uses bare names. This metatable fallback
-// makes bare name lookups resolve to __P_ entries.
-embedLua("setmetatable(_G, { __index = __P_ })")
+// In separate-compilation builds, each package has its own __P_.
+// The metatable on _G chains lookups: first try __P_ (for package-exported
+// names used in embedLua/luaExpr), then fall back to any existing __index
+// (which may provide compiler internals during build time).
+embedLua("local _prev_mt = getmetatable(_G); local _prev_index = _prev_mt and _prev_mt.__index or nil; setmetatable(_G, { __index = function(t, k) local v = __P_[k]; if v ~= nil then return v end; if type(_prev_index) == 'table' then return _prev_index[k] elseif type(_prev_index) == 'function' then return _prev_index(t, k) end end })")
 
 // A compiler message (error or warning)
 // Uses inline structural type instead of CodePoint to avoid
 // inlining order dependency with source.chi
-pub type Message = {
+type Message = {
     code: string,
     text: string,
     codePoint: { line: int, column: int } | unit

@@ -1,12 +1,12 @@
 package chicc/symbols
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
-import chicc/types { Type, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType }
+import chicc/types { Type, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType, occursIn }
 import chicc/parse_ast { trTag, trName, trTypeParameters, trArgumentTypeRefs, trReturnType, trFields, trLhs, trRhs, trBaseType }
 
 // --- Symbol: package-level symbol ---
 
-pub type Symbol = {
+type Symbol = {
     moduleName: string,
     packageName: string,
     name: string,
@@ -66,7 +66,7 @@ pub fn stHas(st: SymbolTable, name: string): bool {
 
 // --- FnSymbolTable: function-scoped symbol stack with parent chain ---
 
-pub type FnSymbolTable = { parent: any, locals: any }
+type FnSymbolTable = { parent: any, locals: any }
 
 pub fn newFnSymbolTable(parent: any): FnSymbolTable {
     val locals: any = luaExpr("{}")
@@ -105,7 +105,7 @@ pub fn fstRemove(fst: FnSymbolTable, name: string): unit {
 
 // --- TypeTable: type alias storage ---
 
-pub type TypeTable = { aliases: any, parentPkg: any }
+type TypeTable = { aliases: any, parentPkg: any }
 
 pub fn newTypeTable(parentPkg: any): TypeTable {
     val aliases: any = luaExpr("{}")
@@ -141,7 +141,7 @@ pub fn ttGet(tt: TypeTable, name: string): any {
 
 // --- CompileTables: top-level compilation context ---
 
-pub type CompileTables = {
+type CompileTables = {
     currentPackage: any,
     ns: any,
     packageAliasTable: any,
@@ -322,7 +322,7 @@ pub fn resolveType(typeTable: TypeTable, typeSchemeVars: array[string], ref: any
                     pi = pi + 1
                 }
                 if paramCount > 0 {
-                    luaExpr("mapType(aliasType, replacements)")
+                    luaExpr("require('chicc/types').mapType(aliasType, replacements)")
                 } else {
                     aliasType
                 }
