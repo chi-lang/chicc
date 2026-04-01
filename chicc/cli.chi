@@ -296,6 +296,3 @@ pub fn cliMain(args: any): int {
     1
 }
 
-// Entry point — invoke cliMain with Lua's global arg table
-val exitCode = cliMain(luaExpr("arg") as any)
-embedLua("os.exit(__P_.exitCode)")

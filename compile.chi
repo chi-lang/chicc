@@ -32,9 +32,15 @@ fn build(): int {
     val tmpFiles: array[string] = [tmpPath]
     val luaCode = compileConcat(tmpFiles, { loadCompiledModules: false, verbose: false })
 
-    // Step 3: Append CLI entry point
-    val entry = "\n-- chicc CLI entry point\nif arg then\n  local exitCode = cliMain(arg)\n  if exitCode and exitCode ~= 0 then os.exit(exitCode) end\nend\n"
-    val finalCode: string = luaExpr("luaCode .. entry")
+    // Step 3: Strip trailing m1() call and add entry point with global exports
+    // The compiled output ends with "...return __P_ end;m1();" — we strip "m1();"
+    // and replace it with code that captures m1()'s return and exports globals.
+    // Note: $ must be escaped as \$ in Chi strings (otherwise triggers interpolation)
+    embedLua("__tmp_stripped = luaCode:gsub('m1%(%);%s*\$', '')")
+    val strippedCode: string = luaExpr("__tmp_stripped")
+
+    val entry = "\n-- chicc entry point\n_CHICC = m1()\ncliMain = _CHICC.cliMain\ncompileFile = _CHICC.compileFile\nrunFile = _CHICC.runFile\ncompileToLua = _CHICC.compileToLua\nnewLuaCompilationEnv = _CHICC.newLuaCompilationEnv\nloadStdlib = _CHICC.loadStdlib\n\nif arg then\n  local exitCode = cliMain(arg)\n  if exitCode and exitCode ~= 0 then os.exit(exitCode) end\nend\n"
+    val finalCode: string = luaExpr("strippedCode .. entry")
 
     // Step 4: Write output
     val outputPath = "chicc.lua"
