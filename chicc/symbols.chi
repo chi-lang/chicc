@@ -1,8 +1,8 @@
-package user/symbols
+package chicc/symbols
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
-import user/types { Type, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType }
-import user/parse_ast { trTag, trName, trTypeParameters, trArgumentTypeRefs, trReturnType, trFields, trLhs, trRhs, trBaseType }
+import chicc/types { Type, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType }
+import chicc/parse_ast { trTag, trName, trTypeParameters, trArgumentTypeRefs, trReturnType, trFields, trLhs, trRhs, trBaseType }
 
 // --- Symbol: package-level symbol ---
 

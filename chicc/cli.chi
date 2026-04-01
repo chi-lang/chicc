@@ -2,7 +2,7 @@
 // Task 4I.1: CLI Entry Point for the Chi self-hosting compiler
 // Provides cliMain(args) that handles argument parsing, file I/O,
 // stdlib loading, and dispatching to compile or run modes.
-package user/cli
+package chicc/cli
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
 import std/io.file { readString, writeString }

@@ -1,10 +1,10 @@
 // chicc/chicc/unification.chi
-package user/unification
+package chicc/unification
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
-import user/types { Type, TypeId, RecordField, typeTag, typeIds, typeTypes, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeEquals, replaceVariable, occursInExcludingSumBranches, unfoldRecursive, isPrimitive, isFunction, isRecord, isSum, isArray, isVariable, isRecursive, typeTypesCount, typeFieldsCount, typeIdEquals, tAny, tUnit }
-import user/messages { Message, typeMismatch, notAFunction, functionArityError, infiniteType }
-import user/source { Section, toCodePoint }
+import chicc/types { Type, TypeId, RecordField, typeTag, typeIds, typeTypes, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeEquals, replaceVariable, occursInExcludingSumBranches, unfoldRecursive, isPrimitive, isFunction, isRecord, isSum, isArray, isVariable, isRecursive, typeTypesCount, typeFieldsCount, typeIdEquals, tAny, tUnit }
+import chicc/messages { Message, typeMismatch, notAFunction, functionArityError, infiniteType }
+import chicc/source { Section, toCodePoint }
 
 // Constraint type
 type Constraint = {

@@ -1,5 +1,5 @@
 // chicc/chicc/inference_context.chi
-package user/inference_context
+package chicc/inference_context
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
 

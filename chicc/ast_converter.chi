@@ -1,11 +1,11 @@
-package user/ast_converter
+package chicc/ast_converter
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push, map, forEach }
-import user/source { Section }
-import user/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType }
-import user/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, packageTarget, atomExpr, interpolatedStringExpr, createRecordExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, assignmentExpr, nameDeclarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam, setExprType }
-import user/parse_ast { paTag, paSection, paLongValue, paFloatValue, paBoolValue, paStringValue, paInterpValue, paParts, paVariableName, paValue, paVariable, paIndexExpr, paIndexValue, paName, paIsPublic, paTypeParameters, paFormalArguments, paReturnTypeRef, paBody, paFuncBody, paCallee, paConcreteTypeParams, paArguments, paIsMutable, paSymbolName, paSymbolSection, paTypeRef, paCondition, paThenBody, paElseBody, paLoopBody, paForVars, paIterable, paForState, paForInit, paForBody, paWhenCases, paElseCase, paReturnValue, paOp, paLeft, paRight, paReceiverName, paMemberName, paReceiver, paMemberSection, paEffectCases, paHandleBody, paOpTemplate, paArrayValues, paRecordFields }
-import user/symbols { FnSymbolTable, Symbol, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newSymbol, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, CompileTables, TypeTable, resolveType }
+import chicc/source { Section }
+import chicc/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType }
+import chicc/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, packageTarget, atomExpr, interpolatedStringExpr, createRecordExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, assignmentExpr, nameDeclarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam, setExprType }
+import chicc/parse_ast { paTag, paSection, paLongValue, paFloatValue, paBoolValue, paStringValue, paInterpValue, paParts, paVariableName, paValue, paVariable, paIndexExpr, paIndexValue, paName, paIsPublic, paTypeParameters, paFormalArguments, paReturnTypeRef, paBody, paFuncBody, paCallee, paConcreteTypeParams, paArguments, paIsMutable, paSymbolName, paSymbolSection, paTypeRef, paCondition, paThenBody, paElseBody, paLoopBody, paForVars, paIterable, paForState, paForInit, paForBody, paWhenCases, paElseCase, paReturnValue, paOp, paLeft, paRight, paReceiverName, paMemberName, paReceiver, paMemberSection, paEffectCases, paHandleBody, paOpTemplate, paArrayValues, paRecordFields }
+import chicc/symbols { FnSymbolTable, Symbol, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newSymbol, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, CompileTables, TypeTable, resolveType }
 
 // --- State (module-level mutable variables) ---
 

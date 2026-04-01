@@ -2,7 +2,7 @@
 // Task 4H.2: Compiler Orchestrator
 // Full pipeline: tokenize -> parse -> validate -> build tables -> check names ->
 //   convert AST -> mark used -> type inference -> semantic checks -> build Program
-package user/compiler
+package chicc/compiler
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
 

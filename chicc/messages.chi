@@ -1,5 +1,5 @@
 // chicc/chicc/messages.chi
-package user/messages
+package chicc/messages
 import std/lang { embedLua }
 
 // In concatenated builds, pub fn compiles to __P_.fnName.

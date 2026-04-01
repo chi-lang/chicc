@@ -1,6 +1,6 @@
-package user/parse_ast
+package chicc/parse_ast
 import std/lang { luaExpr, embedLua }
-import user/source { Section }
+import chicc/source { Section }
 
 // -- TypeRef: tagged record for type references --
 

@@ -1,5 +1,5 @@
 // chicc/chicc/source.chi
-package user/source
+package chicc/source
 
 // Represents a section of source code (for error reporting)
 pub type Section = {

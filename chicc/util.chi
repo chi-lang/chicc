@@ -1,5 +1,5 @@
 // chicc/chicc/util.chi
-package user/util
+package chicc/util
 import std/lang { luaExpr, embedLua }
 import std/lang.array { push }
 

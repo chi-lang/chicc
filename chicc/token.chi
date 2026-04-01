@@ -1,6 +1,6 @@
 // chicc/chicc/token.chi
-package user/token
-import user/source { Section }
+package chicc/token
+import chicc/source { Section }
 
 // -- Literals --
 pub val TK_INT = 1

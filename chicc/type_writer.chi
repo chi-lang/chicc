@@ -1,10 +1,10 @@
 // chicc/chicc/type_writer.chi
-package user/type_writer
+package chicc/type_writer
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
 import std/lang.string { len }
-import user/types { Type, TypeId, RecordField, newTypeId, typeTag, typeIds, typeTypes, typeTypeParams, typeDefaults, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeVariable, typeInnerType, typeBody, typeTypesCount, typeFieldsCount, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, polyType, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, tAny, tUnit, tBool, tInt, tFloat, tString, typeIdEquals }
-import user/util { StringBuilder, newStringBuilder, append, toString }
+import chicc/types { Type, TypeId, RecordField, newTypeId, typeTag, typeIds, typeTypes, typeTypeParams, typeDefaults, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeVariable, typeInnerType, typeBody, typeTypesCount, typeFieldsCount, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, polyType, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, tAny, tUnit, tBool, tInt, tFloat, tString, typeIdEquals }
+import chicc/util { StringBuilder, newStringBuilder, append, toString }
 
 fn escapeLua(s: string): string {
     luaExpr("s:gsub('\\\\', '\\\\\\\\'):gsub('\"', '\\\\\"')")

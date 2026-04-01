@@ -1,8 +1,8 @@
-package user/ast
+package chicc/ast
 import std/lang { luaExpr, embedLua }
 import std/lang.array { push, size, forEach }
-import user/source { Section }
-import user/types { Type, TypeId }
+import chicc/source { Section }
+import chicc/types { Type, TypeId }
 
 pub type Target = {
     tag: string,
