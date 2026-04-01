@@ -1,6 +1,9 @@
 # Compiled Lua modules (generated from .chi sources)
 chicc/*.lua
 
+# Incremental compilation cache
+.cache/
+
 # Build artifacts
 chicc_gen1.lua
 compile.lua
