@@ -73,6 +73,12 @@ embedLua("__chicc_convertImports = function(rawImports) local _ast = require('ch
 embedLua("__chicc_convertTypeAliases = function(rawAliases) local _ast = require('chicc/ast'); local r = {}; for _, alias in ipairs(rawAliases) do r[#r+1] = _ast.newTypeAlias(alias.typeId, alias.aliasType) end; return r end")
 
 // ============================================================================
+// Lua helper: print per-phase profile timing (gated by CHI_PROFILE)
+// ============================================================================
+
+embedLua("__chicc_printProfile = function(ts, pkgName) if not ts[0] then return end; local function ms(a,b) return string.format('%.0f', (b-a)*1000) end; local last = 0; for i=1,8 do if ts[i] then last = i end end; local parts = {'parse','validate','tables','names','convert','usage','types','checks'}; local out = '[profile] ' .. (pkgName or '?') .. ':'; for i=1,last do out = out .. ' ' .. parts[i] .. '=' .. ms(ts[i-1],ts[i]) .. 'ms' end; out = out .. ' total=' .. ms(ts[0],ts[last]) .. 'ms'; io.stderr:write(out .. '\\n') end")
+
+// ============================================================================
 // markUsed — propagate usage flags through expression AST
 // ============================================================================
 
@@ -372,6 +378,8 @@ fn parseSource(source: string): any {
 // ============================================================================
 
 pub fn compile(source: string, ns: any): CompilationResult {
+    embedLua("local __prof = os.getenv('CHI_PROFILE') ~= nil")
+    embedLua("local __ts = {}; if __prof then __ts[0] = os.clock() end")
     // PHASE 1: PARSE
     val parseResult = parseSource(source)
     val parsedProgram = luaExpr("parseResult.parsedProgram") as any
@@ -385,6 +393,8 @@ pub fn compile(source: string, ns: any): CompilationResult {
         embedLua("table.insert(resultMessages, msg)")
         mi = mi + 1
     }
+
+    embedLua("if __prof then __ts[1] = os.clock() end")
 
     // Extract package definition
     val pkgDef = luaExpr("parsedProgram.packageDefinition") as any
@@ -450,6 +460,8 @@ pub fn compile(source: string, ns: any): CompilationResult {
         ii = ii + 1
     }
 
+    embedLua("if __prof then __ts[2] = os.clock() end")
+
     // PHASE 3: BUILD COMPILE TABLES
     val preludeImports = luaExpr("ns ~= nil and ns.getPreludeImports and ns.getPreludeImports() or {}") as any
     val allImports = luaExpr("__chicc_mergeImports(preludeImports, sourceImports)") as any
@@ -474,9 +486,13 @@ pub fn compile(source: string, ns: any): CompilationResult {
         ai = ai + 1
     }
 
+    embedLua("if __prof then __ts[3] = os.clock() end")
+
     // PHASE 4: CHECK NAMES (on parse AST)
     val parseCode = luaExpr("parsedProgram.code") as any
     checkNames(parseCode, tables, resultMessages)
+
+    embedLua("if __prof then __ts[4] = os.clock() end")
 
     val msgCountAfterNames = luaExpr("#resultMessages") as int
     if msgCountAfterNames > 0 {
@@ -486,6 +502,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
         val impsR = luaExpr("__chicc_convertImports(allImports)") as array[Import]
         val aliasesR = luaExpr("__chicc_convertTypeAliases(definedTypeAliases)") as array[TypeAlias]
         val program = newProgram(pkgR, impsR, aliasesR, emptyExprs, section)
+        embedLua("__chicc_printProfile(__ts, packageName)")
         return newCompilationResult(resultMessages, program)
     }
 
@@ -504,8 +521,12 @@ pub fn compile(source: string, ns: any): CompilationResult {
         luaExpr("{}") as any
     }
 
+    embedLua("if __prof then __ts[5] = os.clock() end")
+
     // PHASE 5.5: MARK USAGE
     markUsed(expressions)
+
+    embedLua("if __prof then __ts[6] = os.clock() end")
 
     // PHASE 6: TYPE INFERENCE (Hindley-Milner)
     val groups = luaExpr("__chicc_splitExprs(expressions)") as any
@@ -569,6 +590,8 @@ pub fn compile(source: string, ns: any): CompilationResult {
         fi = fi + 1
     }
 
+    embedLua("if __prof then __ts[7] = os.clock() end")
+
     val msgCountAfterTyping = luaExpr("#resultMessages") as int
     if msgCountAfterTyping > 0 {
         val section = luaExpr("parsedProgram.section") as Section | unit
@@ -576,6 +599,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
         val impsT = luaExpr("__chicc_convertImports(allImports)") as array[Import]
         val aliasesT = luaExpr("__chicc_convertTypeAliases(definedTypeAliases)") as array[TypeAlias]
         val program = newProgram(pkgT, impsT, aliasesT, expressions as array[Expr], section)
+        embedLua("__chicc_printProfile(__ts, packageName)")
         return newCompilationResult(resultMessages, program)
     }
 
@@ -585,12 +609,15 @@ pub fn compile(source: string, ns: any): CompilationResult {
     immutabilityCheck(expressions, moduleName, packageName, tables, ns, resultMessages)
     returnTypeCheck(expressions, resultMessages)
 
+    embedLua("if __prof then __ts[8] = os.clock() end")
+
     // PHASE 8: BUILD AND RETURN RESULT
     val section = luaExpr("parsedProgram.section") as Section | unit
     val pkgF = newPackage(moduleName, packageName)
     val impsF = luaExpr("__chicc_convertImports(allImports)") as array[Import]
     val aliasesF = luaExpr("__chicc_convertTypeAliases(definedTypeAliases)") as array[TypeAlias]
     val program = newProgram(pkgF, impsF, aliasesF, expressions as array[Expr], section)
+    embedLua("__chicc_printProfile(__ts, packageName)")
     newCompilationResult(resultMessages, program)
 }
 
@@ -599,12 +626,15 @@ pub fn compile(source: string, ns: any): CompilationResult {
 // ============================================================================
 
 pub fn compileToLua(source: string, ns: any): any {
-    val result = compile(source, ns)
-    if hasErrors(result) {
-        luaExpr("{ luaCode = nil, messages = result.messages }")
+    val result: any = compile(source, ns)
+    val hasErr = hasErrors(result)
+    if hasErr {
+        luaExpr("{ messages = result.messages, luaCode = nil }") as any
     } else {
-        val luaCode = emitProgram(result.program as Program, true)
-        luaExpr("{ luaCode = luaCode, messages = {} }")
+        embedLua("local __emit_t0 = os.getenv('CHI_PROFILE') and os.clock()")
+        val luaCode = emitProgram(result.program, true)
+        embedLua("if __emit_t0 then io.stderr:write('[profile] ' .. (result.program.packageDef.packageName or '?') .. ': emit=' .. string.format('%.0f', (os.clock()-__emit_t0)*1000) .. 'ms\\n') end")
+        luaExpr("{ messages = result.messages, luaCode = luaCode }") as any
     }
 }
 
