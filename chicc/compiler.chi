@@ -480,6 +480,10 @@ pub fn compile(source: string, ns: any): CompilationResult {
         val typeSchemeVars = luaExpr("__chicc_typeParamNames(aliasTypeParams)") as any
         val typeId = luaExpr("{ moduleName = moduleName, packageName = packageName, name = aliasName }") as any
         val resolved = luaExpr("require('chicc/symbols').resolveTypeAndWrapRecursive(tables.localTypeTable, typeSchemeVars, aliasTypeRef, typeId, 1)") as any
+        // Ensure the resolved type carries its own typeId in ids (needed for typeref encoding)
+        // For primitives, append after the well-known typeId (ids[1] must stay e.g. stringTypeId)
+        // For records/sums, prepend so ids[1] is the alias typeId
+        embedLua("local rt = resolved; if rt.tag == 'recursive' then rt = rt.innerType end; if rt.ids then if rt.tag == 'primitive' then table.insert(rt.ids, typeId) else table.insert(rt.ids, 1, typeId) end end")
         val typeAlias = luaExpr("{ typeId = typeId, aliasType = resolved }") as any
         embedLua("table.insert(definedTypeAliases, typeAlias)")
         ctDefineTypeAlias(tables, typeAlias)
@@ -626,13 +630,13 @@ pub fn compile(source: string, ns: any): CompilationResult {
 // ============================================================================
 
 pub fn compileToLua(source: string, ns: any): any {
-    val result: any = compile(source, ns)
+    val result = compile(source, ns)
     val hasErr = hasErrors(result)
     if hasErr {
         luaExpr("{ messages = result.messages, luaCode = nil }") as any
     } else {
         embedLua("local __emit_t0 = os.getenv('CHI_PROFILE') and os.clock()")
-        val luaCode = emitProgram(result.program, true)
+        val luaCode = emitProgram(result.program as Program, true)
         embedLua("if __emit_t0 then io.stderr:write('[profile] ' .. (result.program.packageDef.packageName or '?') .. ': emit=' .. string.format('%.0f', (os.clock()-__emit_t0)*1000) .. 'ms\\n') end")
         luaExpr("{ messages = result.messages, luaCode = luaCode }") as any
     }

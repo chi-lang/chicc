@@ -142,25 +142,20 @@ fn writeLuaTypeImpl(sb: StringBuilder, t: Type) {
             sb.append("}")
         }
     } else if tag == "sum" {
-        val ids = typeIds(t)
-        val idCount = ids.size()
-        val useRef = luaExpr("idCount > 0 and (__defining_type_id == nil or not (ids[1].moduleName == __defining_type_id.moduleName and ids[1].packageName == __defining_type_id.packageName and ids[1].name == __defining_type_id.name))") as bool
-        if useRef {
-            writeTypeRef(sb, ids)
-        } else {
-            sb.append("{tag=\"sum\",ids=")
-            writeTypeIdList(sb, ids, 1)
-            sb.append(",lhs=")
-            val lhs = luaExpr("t.lhs") as Type
-            writeLuaType(sb, lhs)
-            sb.append(",rhs=")
-            val rhs = luaExpr("t.rhs") as Type
-            writeLuaType(sb, rhs)
-            sb.append(",typeParams=")
-            val tps = typeTypeParams(t)
-            writeStringList(sb, tps)
-            sb.append("}")
-        }
+        // Sums always encode structurally with ids={} because the JVM compiler
+        // adds optionTypeId to T|unit sums but chicc doesn't. Stripping ids
+        // normalizes the encoding so __S_ and __T_ entries are consistent.
+        sb.append("{tag=\"sum\",ids={}")
+        sb.append(",lhs=")
+        val lhs = luaExpr("t.lhs") as Type
+        writeLuaType(sb, lhs)
+        sb.append(",rhs=")
+        val rhs = luaExpr("t.rhs") as Type
+        writeLuaType(sb, rhs)
+        sb.append(",typeParams=")
+        val tps = typeTypeParams(t)
+        writeStringList(sb, tps)
+        sb.append("}")
     } else if tag == "var" {
         sb.append("{tag=\"var\",name=\"")
         sb.append(escapeLua(typeName(t)))
@@ -170,22 +165,18 @@ fn writeLuaTypeImpl(sb: StringBuilder, t: Type) {
         sb.append(lvlStr)
         sb.append("}")
     } else if tag == "array" {
+        // Arrays always use structural encoding - arrayTypeId has no __T_ entry
+        // and the element type would be lost in a typeref
         val ids = typeIds(t)
-        val idCount = ids.size()
-        val useRef = luaExpr("idCount > 0 and (__defining_type_id == nil or not (ids[1].moduleName == __defining_type_id.moduleName and ids[1].packageName == __defining_type_id.packageName and ids[1].name == __defining_type_id.name))") as bool
-        if useRef {
-            writeTypeRef(sb, ids)
-        } else {
-            sb.append("{tag=\"array\",elem=")
-            val elem = luaExpr("t.elementType") as Type
-            writeLuaType(sb, elem)
-            sb.append(",typeParams=")
-            val tps = typeTypeParams(t)
-            writeStringList(sb, tps)
-            sb.append(",ids=")
-            writeTypeIdList(sb, ids, 1)
-            sb.append("}")
-        }
+        sb.append("{tag=\"array\",elem=")
+        val elem = luaExpr("t.elementType") as Type
+        writeLuaType(sb, elem)
+        sb.append(",typeParams=")
+        val tps = typeTypeParams(t)
+        writeStringList(sb, tps)
+        sb.append(",ids=")
+        writeTypeIdList(sb, ids, 1)
+        sb.append("}")
     } else if tag == "poly" {
         sb.append("{tag=\"scheme\",level=")
         val lvl = typeLevel(t)
@@ -196,13 +187,22 @@ fn writeLuaTypeImpl(sb: StringBuilder, t: Type) {
         writeLuaType(sb, b)
         sb.append("}")
     } else if tag == "recursive" {
-        sb.append("{tag=\"rec\",var=")
-        val v = luaExpr("t.variable") as Type
-        writeLuaType(sb, v)
-        sb.append(",type=")
+        // If the inner type has ids (it's a named type), emit the whole rec as a typeref
+        // to avoid double-wrapping when the typeref resolves to the full rec(var, record)
         val inner = luaExpr("t.innerType") as Type
-        writeLuaType(sb, inner)
-        sb.append("}")
+        val innerIds = typeIds(inner)
+        val innerIdCount = innerIds.size()
+        val useRef = luaExpr("innerIdCount > 0 and (__defining_type_id == nil or not (innerIds[1].moduleName == __defining_type_id.moduleName and innerIds[1].packageName == __defining_type_id.packageName and innerIds[1].name == __defining_type_id.name))") as bool
+        if useRef {
+            writeTypeRef(sb, innerIds)
+        } else {
+            sb.append("{tag=\"rec\",var=")
+            val v = luaExpr("t.variable") as Type
+            writeLuaType(sb, v)
+            sb.append(",type=")
+            writeLuaType(sb, inner)
+            sb.append("}")
+        }
     } else {
         embedLua("error('Unsupported type tag: ' .. tag)")
     }
@@ -332,13 +332,15 @@ fn decodeTableImpl(tbl: any): Type {
         val tps = decodeLuaStringList(tbl, "typeParams")
         recordType(ids, fields, tps)
     } else if tag == "sum" {
-        val ids = decodeLuaTypeIds(tbl, "ids")
+        // Always decode sums with empty ids to normalize JVM vs chicc semantics
+        // (JVM adds optionTypeId to T|unit sums, chicc doesn't)
+        val emptyIds = luaExpr("{}") as array[TypeId]
         val lhsTbl = luaExpr("tbl.lhs") as any
         val lhs = decodeTable(lhsTbl)
         val rhsTbl = luaExpr("tbl.rhs") as any
         val rhs = decodeTable(rhsTbl)
         val tps = decodeLuaStringList(tbl, "typeParams")
-        sumType(ids, lhs, rhs, tps)
+        sumType(emptyIds, lhs, rhs, tps)
     } else if tag == "var" {
         val n = luaExpr("tbl.name") as string
         val lvl = luaExpr("tbl.level") as int
@@ -367,35 +369,16 @@ fn decodeTableImpl(tbl: any): Type {
         val innerTbl = luaExpr("tbl['type']") as any
         val inner = decodeTable(innerTbl)
         recursiveType(v, inner)
-    } else if tag == "typeref" {
-        val ids = decodeLuaTypeIds(tbl, "ids")
-        val firstId = ids[1]
-        val mod = firstId.moduleName
-        val pkg = firstId.packageName
-        val name = firstId.name
-        val cacheKey = luaExpr("mod .. '/' .. pkg .. '.' .. name") as string
-        val cached = luaExpr("__typeref_cache[cacheKey]") as any
-        if cached != unit {
-            cached as Type
-        } else {
-            val qualifier = luaExpr("mod .. '/' .. pkg") as string
-            val spec = luaExpr("package.loaded[qualifier] and package.loaded[qualifier]._types and package.loaded[qualifier]._types[name]") as any
-            if spec != unit {
-                val specStr = spec as string
-                val resolved = decodeType(specStr)
-                embedLua("__typeref_cache[cacheKey] = resolved")
-                resolved
-            } else {
-                embedLua("error('typeref: cannot resolve type ' .. cacheKey)")
-                tUnit
-            }
-        }
     } else {
         embedLua("error('Unknown type tag: ' .. tostring(tag))")
         tUnit
     }
 }
 decodeTable = decodeTableImpl
+
+// Wrap decodeTable to handle typeref tag via Lua (avoids JVM compiler type-check issue with extra Chi-level branch)
+// Deep copy on cache hit ensures each resolution produces fresh objects (type checker relies on distinct table identity)
+embedLua("local function __deep_copy_type(t, visited) if type(t) ~= 'table' then return t end; if visited[t] then return visited[t] end; local copy = {}; visited[t] = copy; for k, v in pairs(t) do copy[k] = __deep_copy_type(v, visited) end; return copy end; local __origDecodeTable = __P_.decodeTable; local __wrappedDecodeTable = function(tbl) if tbl.tag == 'typeref' then local ids = tbl.ids; local fid = ids[1]; local mod, pkg, name = fid[1], fid[2], fid[3]; local cacheKey = mod .. '/' .. pkg .. '.' .. name; local cached = __typeref_cache[cacheKey]; if cached then return __deep_copy_type(cached, {}) end; local qualifier = mod .. '/' .. pkg; local loaded = package.loaded[qualifier]; local spec = loaded and loaded._types and loaded._types[name]; if not spec then error('typeref: cannot resolve type ' .. cacheKey) end; local resolved = __origDecodeTable(loadstring('return ' .. spec)()); __typeref_cache[cacheKey] = resolved; return __deep_copy_type(resolved, {}) end; return __origDecodeTable(tbl) end; __P_.decodeTable = __wrappedDecodeTable")
 
 pub fn decodeType(spec: string): Type {
     val tbl: any = luaExpr("loadstring('return ' .. spec)()")

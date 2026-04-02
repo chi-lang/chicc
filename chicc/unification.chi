@@ -306,6 +306,23 @@ pub fn unify(constraints: array[any]): array[any] {
                 val lhsConstraint = newConstraint(expLhs, actual, section, newHistory)
                 embedLua("table.insert(queue, pos, lhsConstraint)")
             }
+        } else if isSum(actual) {
+            // actual is a sum: both branches must unify with expected
+            val actLhs = typeLhs(actual)
+            val actRhs = typeRhs(actual)
+            val newHistory: array[any] = luaExpr("{}")
+            val hLen = luaExpr("#history") as int
+            var hi = 1
+            while hi <= hLen {
+                val hItem = luaExpr("history[hi]") as any
+                embedLua("table.insert(newHistory, hItem)")
+                hi = hi + 1
+            }
+            embedLua("table.insert(newHistory, constraint)")
+            val nc1 = newConstraint(expected, actLhs, section, newHistory)
+            val nc2 = newConstraint(expected, actRhs, section, newHistory)
+            embedLua("table.insert(queue, pos, nc1)")
+            embedLua("table.insert(queue, pos + 1, nc2)")
         } else if isFunction(expected) && isFunction(actual) == false {
             val cp = sectionToCodePoint(section)
             throwMessage(notAFunction(cp))

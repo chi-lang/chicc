@@ -78,7 +78,8 @@ test("encode record with type params") {
 test("encode sum type") {
     val s = sumType([newTypeId("test", "pkg", "Either")], tString, tInt, [])
     val encoded = encodeType(s)
-    assertEqual(encoded, "{tag=\"typeref\",ids={{\"test\",\"pkg\",\"Either\"}}}")
+    // Sum ids are always stripped to {} during encoding for JVM/chicc compatibility
+    assertEqual(encoded, "{tag=\"sum\",ids={},lhs={tag=\"string\"},rhs={tag=\"int\"},typeParams={}}")
 }
 
 test("encode variable type") {
@@ -96,7 +97,7 @@ test("encode variable with level") {
 test("encode array type") {
     val a = arrayType(tInt, [])
     val encoded = encodeType(a)
-    assertEqual(encoded, "{tag=\"typeref\",ids={{\"std\",\"lang.array\",\"array\"}}}")
+    assertEqual(encoded, "{tag=\"array\",elem={tag=\"int\"},typeParams={},ids={{\"std\",\"lang.array\",\"array\"}}}")
 }
 
 test("encode poly type") {
