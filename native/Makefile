@@ -54,6 +54,11 @@ $(LUAJIT_DIR):
 	mkdir -p vendor
 	git clone --depth 1 --branch v2.1 https://github.com/LuaJIT/LuaJIT.git $(LUAJIT_DIR)
 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+  export MACOSX_DEPLOYMENT_TARGET ?= $(shell sw_vers -productVersion | cut -d. -f1-2)
+endif
+
 $(LUAJIT_A): | $(LUAJIT_DIR)
 	@echo "=== Building LuaJIT (static) ==="
 	$(MAKE) -C $(LUAJIT_DIR) BUILDMODE=static
