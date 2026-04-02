@@ -50,11 +50,10 @@ static const char *get_exe_path(void) {
     if (_NSGetExecutablePath(path, &size) != 0) return NULL;
     /* Resolve symlinks to get a canonical path */
     char *resolved = realpath(path, NULL);
-    if (resolved) {
-        strncpy(path, resolved, sizeof(path) - 1);
-        path[sizeof(path) - 1] = '\0';
-        free(resolved);
-    }
+    if (!resolved) return NULL;
+    strncpy(path, resolved, sizeof(path) - 1);
+    path[sizeof(path) - 1] = '\0';
+    free(resolved);
 #else
     ssize_t len = readlink("/proc/self/exe", path, sizeof(path) - 1);
     if (len <= 0) return NULL;
