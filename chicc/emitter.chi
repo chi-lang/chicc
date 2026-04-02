@@ -395,14 +395,15 @@ pub fn emitIfElse(st: EmitterState, expr: any): string {
     val condResult = emitExpr(st, condition)
     emit(st, "if $condResult then ")
     val thenBranch = luaExpr("expr.thenBranch") as any
-    val thenResult = emitBlock(st, thenBranch)
     val thenIsBlock = luaExpr("expr.thenBranch.kind == 'block'") as bool
     if thenIsBlock {
+        val thenResult = emitBlock(st, thenBranch)
         val thenTerminated = isBlockTerminator(thenBranch)
         if !thenTerminated {
             emit(st, "$tmpName=$thenResult")
         }
     } else {
+        val thenResult = emitExpr(st, thenBranch)
         val thenTerminated = isExprTerminator(thenBranch)
         if !thenTerminated {
             emit(st, "$tmpName=$thenResult")
