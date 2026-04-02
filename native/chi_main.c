@@ -129,7 +129,25 @@ static int load_compiler(lua_State *L) {
     lua_pushnil(L);
     lua_setglobal(L, "arg");
 
-    /* Load chicc — executes m1(), sets _CHICC + global exports */
+    /* Set up _G metatable for cross-package name resolution in embedLua/luaExpr.
+     * Must be BEFORE loading chicc.lua so it's active during module loading.
+     * messages.chi will chain its own metatable on top of this one. */
+    if (luaL_dostring(L,
+            "setmetatable(_G, { __index = function(t, k)\n"
+            "  for pkgName, pkgTable in pairs(package.loaded) do\n"
+            "    if type(pkgName) == 'string' and pkgName:match('^chicc/') and type(pkgTable) == 'table' then\n"
+            "      local v = rawget(pkgTable, k)\n"
+            "      if v ~= nil then return v end\n"
+            "    end\n"
+            "  end\n"
+            "  return nil\n"
+            "end })\n") != 0) {
+        fprintf(stderr, "Fatal: setting _G metatable: %s\n",
+                lua_tostring(L, -1));
+        return -1;
+    }
+
+    /* Load chicc — loads per-package modules and sets global exports */
     if (load_embedded(L, luaJIT_BC_chicc, luaJIT_BC_chicc_SIZE,
                       "chicc") != 0)
         return -1;
@@ -137,8 +155,7 @@ static int load_compiler(lua_State *L) {
 
     /* Override loadStdlib — stdlib is already loaded from embedded data */
     if (luaL_dostring(L,
-            "_CHICC.loadStdlib = function() return true end\n"
-            "loadStdlib = _CHICC.loadStdlib\n") != 0) {
+            "loadStdlib = function() return true end\n") != 0) {
         fprintf(stderr, "Fatal: overriding loadStdlib: %s\n",
                 lua_tostring(L, -1));
         return -1;
