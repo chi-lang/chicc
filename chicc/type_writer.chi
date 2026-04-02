@@ -6,6 +6,8 @@ import std/lang.string { len }
 import chicc/types { Type, TypeId, RecordField, newTypeId, typeTag, typeIds, typeTypes, typeTypeParams, typeDefaults, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeVariable, typeInnerType, typeBody, typeTypesCount, typeFieldsCount, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, polyType, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, tAny, tUnit, tBool, tInt, tFloat, tString, typeIdEquals }
 import chicc/util { StringBuilder, newStringBuilder, append, toString }
 
+embedLua("local __defining_type_id = nil")
+
 fn escapeLua(s: string): string {
     luaExpr("s:gsub('\\\\', '\\\\\\\\'):gsub('\"', '\\\\\"')")
 }
@@ -89,6 +91,12 @@ fn writeFieldList(sb: StringBuilder, fields: array[any]) {
     sb.append("}")
 }
 
+fn writeTypeRef(sb: StringBuilder, ids: array[TypeId]) {
+    sb.append("{tag=\"typeref\",ids=")
+    writeTypeIdList(sb, ids, 1)
+    sb.append("}")
+}
+
 fn writeLuaTypeImpl(sb: StringBuilder, t: Type) {
     val tag = typeTag(t)
     if tag == "primitive" {
@@ -116,30 +124,42 @@ fn writeLuaTypeImpl(sb: StringBuilder, t: Type) {
         sb.append(defsStr)
         sb.append("}")
     } else if tag == "record" {
-        sb.append("{tag=\"record\",ids=")
         val ids = typeIds(t)
-        writeTypeIdList(sb, ids, 1)
-        sb.append(",fields=")
-        val fields = typeFields(t)
-        writeFieldList(sb, fields)
-        sb.append(",typeParams=")
-        val tps = typeTypeParams(t)
-        writeStringList(sb, tps)
-        sb.append("}")
+        val idCount = ids.size()
+        val useRef = luaExpr("idCount > 0 and (__defining_type_id == nil or not (ids[1].moduleName == __defining_type_id.moduleName and ids[1].packageName == __defining_type_id.packageName and ids[1].name == __defining_type_id.name))") as bool
+        if useRef {
+            writeTypeRef(sb, ids)
+        } else {
+            sb.append("{tag=\"record\",ids=")
+            writeTypeIdList(sb, ids, 1)
+            sb.append(",fields=")
+            val fields = typeFields(t)
+            writeFieldList(sb, fields)
+            sb.append(",typeParams=")
+            val tps = typeTypeParams(t)
+            writeStringList(sb, tps)
+            sb.append("}")
+        }
     } else if tag == "sum" {
-        sb.append("{tag=\"sum\",ids=")
         val ids = typeIds(t)
-        writeTypeIdList(sb, ids, 1)
-        sb.append(",lhs=")
-        val lhs = luaExpr("t.lhs") as Type
-        writeLuaType(sb, lhs)
-        sb.append(",rhs=")
-        val rhs = luaExpr("t.rhs") as Type
-        writeLuaType(sb, rhs)
-        sb.append(",typeParams=")
-        val tps = typeTypeParams(t)
-        writeStringList(sb, tps)
-        sb.append("}")
+        val idCount = ids.size()
+        val useRef = luaExpr("idCount > 0 and (__defining_type_id == nil or not (ids[1].moduleName == __defining_type_id.moduleName and ids[1].packageName == __defining_type_id.packageName and ids[1].name == __defining_type_id.name))") as bool
+        if useRef {
+            writeTypeRef(sb, ids)
+        } else {
+            sb.append("{tag=\"sum\",ids=")
+            writeTypeIdList(sb, ids, 1)
+            sb.append(",lhs=")
+            val lhs = luaExpr("t.lhs") as Type
+            writeLuaType(sb, lhs)
+            sb.append(",rhs=")
+            val rhs = luaExpr("t.rhs") as Type
+            writeLuaType(sb, rhs)
+            sb.append(",typeParams=")
+            val tps = typeTypeParams(t)
+            writeStringList(sb, tps)
+            sb.append("}")
+        }
     } else if tag == "var" {
         sb.append("{tag=\"var\",name=\"")
         sb.append(escapeLua(typeName(t)))
@@ -149,16 +169,22 @@ fn writeLuaTypeImpl(sb: StringBuilder, t: Type) {
         sb.append(lvlStr)
         sb.append("}")
     } else if tag == "array" {
-        sb.append("{tag=\"array\",elem=")
-        val elem = luaExpr("t.elementType") as Type
-        writeLuaType(sb, elem)
-        sb.append(",typeParams=")
-        val tps = typeTypeParams(t)
-        writeStringList(sb, tps)
-        sb.append(",ids=")
         val ids = typeIds(t)
-        writeTypeIdList(sb, ids, 1)
-        sb.append("}")
+        val idCount = ids.size()
+        val useRef = luaExpr("idCount > 0 and (__defining_type_id == nil or not (ids[1].moduleName == __defining_type_id.moduleName and ids[1].packageName == __defining_type_id.packageName and ids[1].name == __defining_type_id.name))") as bool
+        if useRef {
+            writeTypeRef(sb, ids)
+        } else {
+            sb.append("{tag=\"array\",elem=")
+            val elem = luaExpr("t.elementType") as Type
+            writeLuaType(sb, elem)
+            sb.append(",typeParams=")
+            val tps = typeTypeParams(t)
+            writeStringList(sb, tps)
+            sb.append(",ids=")
+            writeTypeIdList(sb, ids, 1)
+            sb.append("}")
+        }
     } else if tag == "poly" {
         sb.append("{tag=\"scheme\",level=")
         val lvl = typeLevel(t)
@@ -185,6 +211,14 @@ writeLuaType = writeLuaTypeImpl
 pub fn encodeType(t: Type): string {
     val sb = newStringBuilder()
     writeLuaType(sb, t)
+    sb.toString()
+}
+
+pub fn encodeTypeWithContext(t: Type, defTypeId: TypeId): string {
+    embedLua("__defining_type_id = defTypeId")
+    val sb = newStringBuilder()
+    writeLuaType(sb, t)
+    embedLua("__defining_type_id = nil")
     sb.toString()
 }
 
