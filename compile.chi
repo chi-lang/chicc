@@ -8,7 +8,7 @@ package user/default
 import std/lang { compileModules, luaExpr }
 import std/io.file { writeString }
 
-fn build(): int {
+fn build() {
     println("Building chicc self-hosting compiler...")
 
     val sourceFiles = [
@@ -29,7 +29,6 @@ fn build(): int {
     writeString("chicc.lua", finalCode)
 
     println("Built: chicc.lua")
-    0
 }
 
 build()
