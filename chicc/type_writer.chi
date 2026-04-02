@@ -7,6 +7,7 @@ import chicc/types { Type, TypeId, RecordField, newTypeId, typeTag, typeIds, typ
 import chicc/util { StringBuilder, newStringBuilder, append, toString }
 
 embedLua("local __defining_type_id = nil")
+embedLua("local __typeref_cache = {}")
 
 fn escapeLua(s: string): string {
     luaExpr("s:gsub('\\\\', '\\\\\\\\'):gsub('\"', '\\\\\"')")
@@ -222,6 +223,10 @@ pub fn encodeTypeWithContext(t: Type, defTypeId: TypeId): string {
     sb.toString()
 }
 
+pub fn clearTyperefCache() {
+    embedLua("__typeref_cache = {}")
+}
+
 fn decodeLuaTypeIds(tbl: any, field: string): array[TypeId] {
     val result = luaExpr("{}") as array[TypeId]
     val count = luaExpr("tbl[field] and #tbl[field] or 0") as int
@@ -362,6 +367,29 @@ fn decodeTableImpl(tbl: any): Type {
         val innerTbl = luaExpr("tbl['type']") as any
         val inner = decodeTable(innerTbl)
         recursiveType(v, inner)
+    } else if tag == "typeref" {
+        val ids = decodeLuaTypeIds(tbl, "ids")
+        val firstId = ids[1]
+        val mod = firstId.moduleName
+        val pkg = firstId.packageName
+        val name = firstId.name
+        val cacheKey = luaExpr("mod .. '/' .. pkg .. '.' .. name") as string
+        val cached = luaExpr("__typeref_cache[cacheKey]") as any
+        if cached != unit {
+            cached as Type
+        } else {
+            val qualifier = luaExpr("mod .. '/' .. pkg") as string
+            val spec = luaExpr("package.loaded[qualifier] and package.loaded[qualifier]._types and package.loaded[qualifier]._types[name]") as any
+            if spec != unit {
+                val specStr = spec as string
+                val resolved = decodeType(specStr)
+                embedLua("__typeref_cache[cacheKey] = resolved")
+                resolved
+            } else {
+                embedLua("error('typeref: cannot resolve type ' .. cacheKey)")
+                tUnit
+            }
+        }
     } else {
         embedLua("error('Unknown type tag: ' .. tostring(tag))")
         tUnit
