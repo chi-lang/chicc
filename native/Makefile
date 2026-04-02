@@ -20,9 +20,18 @@ LUAJIT_A   = $(LUAJIT_SRC)/libluajit.a
 LUAJIT_BIN = LUA_PATH="$(LUAJIT_SRC)/?.lua" $(LUAJIT_SRC)/luajit
 GEN_DIR    = gen
 
+# Preflight: CHI_HOME must be set
+ifndef CHI_HOME
+$(error CHI_HOME is not set. Please set CHI_HOME to the Chi installation directory.)
+endif
+
+# Preflight: stdlib must be installed
+ifeq ($(wildcard $(CHI_HOME)/lib/std.chim),)
+$(error $(CHI_HOME)/lib/std.chim not found. Build and install the stdlib first.)
+endif
+
 # Source locations
 CHI          ?= chi
-CHI_HOME     ?= $(HOME)/apps/chi
 CHICC_LUA    = ../chicc.lua
 RUNTIME_DIR  = ../runtime
 UTF8_LUA     = $(RUNTIME_DIR)/utf8.lua
