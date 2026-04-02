@@ -307,31 +307,34 @@ This is the core task. We add functions to:
 3. Resolve missing imports by compiling from source or loading from cache
 4. Call resolution before compilation in `runFile()` and `compileFile()`
 
-- [ ] **Step 1: Add new imports to `cli.chi`**
+- [ ] **Step 1: Update imports in `cli.chi`**
 
-At the top of `/home/marad/dev/chi/chicc/chicc/cli.chi`, add the new imports after the existing ones (after line 9):
+In `/home/marad/dev/chi/chicc/chicc/cli.chi`, modify the existing imports section (lines 6-9).
+
+Change lines 6-9 from:
 
 ```chi
-import std/io.dir { findFiles, exists, isNewer }
-import std/lang.string { startsWith, trim, len, substring, split, find }
-import std/lang.map { emptyMap, put, get, Map }
-import std/lang.array { forEach }
+import std/lang { luaExpr, embedLua }
+import std/lang.array { size, push }
+import std/io.file { readString, writeString }
+import chicc/compiler { newLuaCompilationEnv, compileToLua, formatMessage }
 ```
 
-The full import section should look like:
+to:
 
 ```chi
-package chicc/cli
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push, forEach }
 import std/io.file { readString, writeString }
 import std/io.dir { findFiles, exists, isNewer }
-import std/lang.string { startsWith, trim, len, substring, split, find }
-import std/lang.map { emptyMap, put, get, Map }
+import std/lang.map { emptyMap, Map }
 import chicc/compiler { newLuaCompilationEnv, compileToLua, formatMessage }
 ```
 
-Note: `push` was already imported from `std/lang.array`; we add `forEach`. Check if `push` is already there from the original imports (it is: `size, push`).
+**Important notes on these imports:**
+- `forEach` is added to the **existing** `std/lang.array` import line (Chi does not support duplicate imports from the same module).
+- `std/lang.string` is **NOT** imported — all string operations in the new code use `embedLua`/`luaExpr` with inline Lua patterns, consistent with the rest of `cli.chi`.
+- `std/lang.map` imports `emptyMap` and `Map` type. The `put`, `get` functions are called via UFCS (e.g. `index.put(...)`) which works without explicit import of the function names — UFCS resolves them from the `Map` type's module. **If UFCS resolution doesn't work for map functions**, fall back to importing them explicitly: `import std/lang.map { emptyMap, put, get, Map }`.
 
 - [ ] **Step 2: Add `extractImports` function**
 
@@ -382,6 +385,9 @@ Add immediately after `extractPackageName`:
 ```chi
 // Scan all .chi files in rootDir recursively and build a map of
 // package name -> file path. E.g. "chicc/test_util" -> "tests/test_util.chi"
+// Note: This scans the filesystem on each invocation. For a compiler
+// invoked per-file this is acceptable. If performance becomes an issue,
+// consider caching the index or using a manifest file.
 fn buildPackageIndex(rootDir: string): Map[string, string] {
     var index = emptyMap[string, string]()
     val chiFiles = findFiles(rootDir, ".chi")
@@ -389,12 +395,15 @@ fn buildPackageIndex(rootDir: string): Map[string, string] {
         val source = readString(filePath)
         val pkgName: any = extractPackageName(source)
         if pkgName != unit {
-            index = index.put(pkgName as string, filePath)
+            // put() mutates the map in-place (returns unit), do NOT reassign
+            index.put(pkgName as string, filePath)
         }
     }
     index
 }
 ```
+
+**Critical fix from original plan:** `Map.put()` is a **mutating** operation that returns `unit`. The original plan had `index = index.put(...)` which would set `index` to `unit`, destroying the map. The correct pattern is `index.put(key, value)` as a statement (no assignment).
 
 - [ ] **Step 5: Add `resolveImports` and `resolveOneImport` (mutually recursive)**
 
@@ -402,8 +411,8 @@ Add immediately after `buildPackageIndex`. These two functions call each other (
 
 ```chi
 // Forward declarations for mutual recursion (Chi requires var pattern)
-var resolveImports: (string, string, Map[string, string], any) -> unit = { source, cacheDir, index, resolving -> unit }
-var resolveOneImport: (string, string, Map[string, string], any) -> unit = { importPath, cacheDir, index, resolving -> unit }
+var resolveImports: (string, string, Map[string, string], any) -> unit = { source, cacheDir, index, resolving -> }
+var resolveOneImport: (string, string, Map[string, string], any) -> unit = { importPath, cacheDir, index, resolving -> }
 
 // Resolve all missing imports for a source file.
 // Checks package.loaded first, then cache, then compiles from source.
@@ -446,6 +455,7 @@ resolveOneImport = { importPath: string, cacheDir: string, index: Map[string, st
     val sourcePath: any = index.get(importPath)
 
     // Try cache-first strategy
+    var resolved = false
     if exists(cachePath) {
         // Cache exists - check if it's still valid
         var cacheValid = true
@@ -464,61 +474,66 @@ resolveOneImport = { importPath: string, cacheDir: string, index: Map[string, st
             val cacheLoadErr: any = luaExpr("__rc_err")
             if cacheLoadErr == unit {
                 embedLua("__rc_chunk()")
-                return unit
+                resolved = true
             } else {
                 println("WARN: Cache load failed for '$importPath', recompiling")
             }
         }
     }
 
-    // Cache miss or invalid - compile from source
-    if sourcePath != unit {
-        val depSource = readString(sourcePath as string)
+    if resolved == false {
+        // Cache miss or invalid - compile from source
+        if sourcePath != unit {
+            val depSource = readString(sourcePath as string)
 
-        // Recursively resolve this dependency's imports first
-        resolveImports(depSource, cacheDir, index, resolving)
+            // Recursively resolve this dependency's imports first
+            resolveImports(depSource, cacheDir, index, resolving)
 
-        // Now compile and load
-        val ns = newLuaCompilationEnv()
-        val result = compileToLua(depSource, ns)
-        val luaCode: any = luaExpr("result.luaCode")
+            // Now compile and load
+            val ns = newLuaCompilationEnv()
+            val result = compileToLua(depSource, ns)
+            val luaCode: any = luaExpr("result.luaCode")
 
-        if luaCode == unit {
-            val messages: any = luaExpr("result.messages")
-            val msgCount = luaExpr("#messages") as int
-            println("Error resolving import '$importPath' from '${sourcePath as string}':")
-            var i = 1
-            while i <= msgCount {
-                val msg: any = luaExpr("messages[i]")
-                val formatted = formatMessage(msg)
-                println("  $formatted")
-                i = i + 1
+            if luaCode == unit {
+                val messages: any = luaExpr("result.messages")
+                val msgCount = luaExpr("#messages") as int
+                println("Error resolving import '$importPath' from '${sourcePath as string}':")
+                var i = 1
+                while i <= msgCount {
+                    val msg: any = luaExpr("messages[i]")
+                    val formatted = formatMessage(msg)
+                    println("  $formatted")
+                    i = i + 1
+                }
+            } else {
+                // Load the compiled code into package.loaded
+                embedLua("local __rl_chunk,__rl_err=load(luaCode, sourcePath)")
+                val loadErr: any = luaExpr("__rl_err")
+                if loadErr != unit {
+                    println("Error loading compiled '$importPath': ${loadErr as string}")
+                } else {
+                    embedLua("__rl_chunk()")
+
+                    // Write to cache for next time
+                    embedLua("os.execute('mkdir -p ' .. cachePath:match('(.+)/[^/]+$'))")
+                    writeString(cachePath, luaCode as string)
+                }
             }
-            return unit
+        } else {
+            // No source found - give a detailed error
+            val directPath: string = luaExpr("importPath:gsub('%.', '/') .. '.chi'")
+            println("Could not resolve import '$importPath':")
+            println("  tried: $directPath (not found)")
+            println("  tried: $cachePath (not found)")
+            println("  scanned .chi files in '.' (no matching package declaration)")
         }
-
-        // Load the compiled code into package.loaded
-        embedLua("local __rl_chunk,__rl_err=load(luaCode, sourcePath)")
-        val loadErr: any = luaExpr("__rl_err")
-        if loadErr != unit {
-            println("Error loading compiled '$importPath': ${loadErr as string}")
-            return unit
-        }
-        embedLua("__rl_chunk()")
-
-        // Write to cache for next time
-        embedLua("os.execute('mkdir -p ' .. cachePath:match('(.+)/[^/]+$'))")
-        writeString(cachePath, luaCode as string)
-    } else {
-        // No source found - give a detailed error
-        val directPath: string = luaExpr("importPath:gsub('%.', '/') .. '.chi'")
-        println("Could not resolve import '$importPath':")
-        println("  tried: $directPath (not found)")
-        println("  tried: $cachePath (not found)")
-        println("  scanned .chi files in '.' (no matching package declaration)")
     }
 }
 ```
+
+**Key changes from original plan:**
+- **No `return unit` in lambda bodies.** `return` inside `{ ... -> }` lambdas is unproven in this codebase. Instead, the code uses a `var resolved = false` flag and `if resolved == false { ... }` branching to avoid early returns entirely. This is a safe, tested pattern.
+- **Flat control flow.** Each branch sets `resolved = true` on success rather than returning early.
 
 - [ ] **Step 6: Modify `runFile()` to call import resolution**
 
@@ -668,6 +683,20 @@ The build requires a two-phase bootstrap because `cli.chi` imports `std/io.dir`,
 
 1. **Phase 1** (Task 2): Compile new stdlib with `std/io.dir` → rebuild native binary → now `chi` has `std/io.dir` available
 2. **Phase 2** (Task 5): Compile updated chicc (which imports `std/io.dir`) → rebuild native binary → now `chi` has both new stdlib and new CLI
+
+## Changes from Original Plan
+
+This corrected plan fixes the following issues found during review:
+
+1. **`Map.put()` mutation bug (critical):** Original had `index = index.put(...)` which would set `index` to `unit` since `put()` is a void mutating operation. Fixed to `index.put(key, value)` as a standalone statement.
+
+2. **Duplicate module imports:** Original added a separate `import std/lang.array { forEach }` line. No codebase file has two imports from the same module; unknown if the parser accepts it. Fixed by merging `forEach` into the existing `import std/lang.array { size, push }` line.
+
+3. **Unused `std/lang.string` import removed:** Original imported `{ startsWith, trim, len, substring, split, find }` but none of these functions were used anywhere in the new code — all string operations use `embedLua`/`luaExpr` with inline Lua patterns.
+
+4. **`return unit` in lambda bodies replaced:** No codebase example uses `return` inside `{ ... -> }` lambda bodies. While the compiler supports `return` as a construct, its behavior in lambdas is unproven. Replaced with a `var resolved = false` flag pattern that avoids early returns entirely.
+
+5. **UFCS for Map functions:** Import of `put` and `get` from `std/lang.map` may not be needed if UFCS resolves them through the `Map` type. Plan imports only `emptyMap` and `Map`, with a fallback note to add `put` and `get` if UFCS doesn't resolve them.
 
 ## Error message format
 
