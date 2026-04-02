@@ -879,7 +879,8 @@ pub fn emitProgram(prog: Program, emitModule: bool): string {
     while ai <= aliasCount {
         val aliasName = luaExpr("prog.typeAliases[ai].typeId.name") as string
         val aliasType = luaExpr("prog.typeAliases[ai].aliasType") as any
-        val encoded = luaExpr("require('chicc/type_writer').encodeType(aliasType)") as string
+        val aliasTypeId = luaExpr("prog.typeAliases[ai].typeId") as any
+        val encoded = luaExpr("require('chicc/type_writer').encodeTypeWithContext(aliasType, aliasTypeId)") as string
         emit(st, "__T_.$aliasName='$encoded';")
         ai = ai + 1
     }
