@@ -1,5 +1,5 @@
 import chicc/test_util { test, assertEqual, assertTrue, summary }
-import chicc/types { Type, TypeId, RecordField, newTypeId, typeIdEquals, typeTag, typeIds, typeTypes, typeTypeParams, typeDefaults, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeVariable, typeInnerType, typeBody, typeTypesCount, typeFieldsCount, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, polyType, tAny, tUnit, tBool, tInt, tFloat, tString, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, arrayTypeId }
+import chicc/types { Type, TypeId, RecordField, newTypeId, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, polyType, tAny, tUnit, tBool, tInt, tFloat, tString, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, arrayTypeId }
 import chicc/type_writer { encodeType, encodeTypeWithContext, decodeType, clearTyperefCache }
 import std/lang { luaExpr, embedLua }
 

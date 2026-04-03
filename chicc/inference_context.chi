@@ -1,7 +1,7 @@
 // chicc/chicc/inference_context.chi
 package chicc/inference_context
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, variableType, instantiate }
+import chicc/types { Type, variableType }
 import chicc/ast { DotTarget }
 
 // --- Module-level state ---
@@ -125,7 +125,7 @@ pub fn icGetTargetType(tgt: any, level: int, section: any): any {
             embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Identifier ' .. tgt.name .. ' not found!' })")
             unit // unreachable
         } else {
-            instantiate(scheme as Type, level, icFreshVariable as (int) -> Type)
+            (scheme as Type).instantiate(level, icFreshVariable as (int) -> Type)
         }
     } else if tag == "package" {
         val tgtMod = luaExpr("tgt.moduleName") as string
@@ -140,7 +140,7 @@ pub fn icGetTargetType(tgt: any, level: int, section: any): any {
                 embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Identifier ' .. tgt.name .. ' not found!' })")
                 unit // unreachable
             } else {
-                instantiate(scheme as Type, level, icFreshVariable as (int) -> Type)
+                (scheme as Type).instantiate(level, icFreshVariable as (int) -> Type)
             }
         } else {
             // Different package — look up via ns
@@ -154,7 +154,7 @@ pub fn icGetTargetType(tgt: any, level: int, section: any): any {
                     embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Type not found for identifier ' .. tgt.name })")
                     unit // unreachable
                 } else {
-                    instantiate(symType as Type, level, icFreshVariable as (int) -> Type)
+                    (symType as Type).instantiate(level, icFreshVariable as (int) -> Type)
                 }
             }
         }

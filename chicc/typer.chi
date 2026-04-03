@@ -1,9 +1,9 @@
 // chicc/chicc/typer.chi
 package chicc/typer
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tString, tAny, sumCreate, recordType, arrayType, functionType, typeEquals, polyType, mapType, sumListTypes, typeIdEquals, optionTypeId, instantiate }
+import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tString, tAny, sumCreate, recordType, arrayType, functionType, polyType, mapType, optionTypeId }
 import chicc/source { Section, toCodePoint }
-import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget, atomExpr }
+import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, fieldDotTarget, atomExpr }
 import chicc/unification { unify, unifyWithUf, ufNew, ufResolve, ufAllBindings, newConstraint }
 import chicc/inference_context { icFreshVariable, icGetTargetType, icWithNewLocalScope, icDefineLocalSymbol, icListLocalFunctionsForType, icListCurrentPackageFunctionsForType, icListTypesPackageFunctionsForType }
 
@@ -23,13 +23,13 @@ fn typerErr(message: any, section: any) {
 // Flatten sum via sumListTypes, filter out matching type, fold remaining back
 
 fn sumRemoveType(sumT: any, toRemove: any): any {
-    val allTypes = sumListTypes(sumT as Type)
+    val allTypes = (sumT as Type).sumListTypes()
     val count = luaExpr("#allTypes") as int
     val filtered = luaExpr("{}") as any
     var i = 1
     while i <= count {
         val item = luaExpr("allTypes[i]") as Type
-        if typeEquals(item, toRemove as Type) == false {
+        if item.typeEquals(toRemove as Type) == false {
             embedLua("table.insert(filtered, item)")
         }
         i = i + 1
@@ -262,7 +262,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
                      val curPkg = luaExpr("require('chicc/inference_context').icPkg.packageName") as string
                      val newCallee = variableAccessExpr(packageTarget(curMod, curPkg, dtName), memberSec)
                      val calleeType = luaExpr("dotOp.exprType") as Type | unit
-                     setExprType(newCallee, calleeType)
+                     newCallee.setExprType(calleeType)
                      embedLua("term.callee = newCallee")
                  } else if dtTag == "package_fn" {
                      // package_fn: prepend receiver, look up via ns, fill defaults
@@ -277,7 +277,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
                     val memberSec = luaExpr("dotOp.memberSection") as Section | unit
                     val newCallee = variableAccessExpr(tgt, memberSec)
                     val calleeType = luaExpr("dotOp.exprType") as Type | unit
-                    setExprType(newCallee, calleeType)
+                    newCallee.setExprType(calleeType)
                     embedLua("term.callee = newCallee")
                 }
             }
@@ -366,7 +366,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
                 val dotTarget = luaExpr("fn_.dotTarget") as DotTarget | unit
                 val fnType = luaExpr("fn_.typeScheme") as any
                 setExprDotTarget(term as Expr, dotTarget)
-                instantiate(fnType as Type, level, icFreshVariable as (int) -> Type)
+                (fnType as Type).instantiate(level, icFreshVariable as (int) -> Type)
             } else {
                 // No function found
                 val cp = luaExpr("memberSection and require('chicc/source').toCodePoint(memberSection) or nil") as any
@@ -543,7 +543,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
             var ri = 1
             while ri <= returnIdsCount {
                 val rid = luaExpr("returnIds[ri]") as TypeId
-                if typeIdEquals(rid, optionTypeId) {
+                if rid.typeIdEquals(optionTypeId) {
                     hasOptionId = true
                 }
                 ri = ri + 1

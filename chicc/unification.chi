@@ -1,7 +1,7 @@
 // chicc/chicc/unification.chi
 package chicc/unification
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, TypeId, RecordField, typeTag, typeIds, typeTypes, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeEquals, replaceVariable, occursInExcludingSumBranches, unfoldRecursive, isPrimitive, isFunction, isRecord, isSum, isArray, isVariable, isRecursive, typeTypesCount, typeFieldsCount, typeIdEquals, tAny, tUnit, functionType, recordType, sumCreate, arrayType, recursiveType, polyType, typeTypeParams, typeDefaults }
+import chicc/types { Type, TypeId, RecordField, tAny, tUnit, functionType, recordType, sumCreate, arrayType, recursiveType, polyType }
 import chicc/messages { Message, typeMismatch, notAFunction, functionArityError, infiniteType }
 import chicc/source { Section, toCodePoint }
 
@@ -21,16 +21,16 @@ pub fn newConstraint(expected: any, actual: any, section: any, history: array[an
 pub fn constraintWithReplacedVariable(c: Constraint, toReplace: Type, substitution: Type): Constraint {
     val exp = luaExpr("c.expected") as Type
     val act = luaExpr("c.actual") as Type
-    val newExp = replaceVariable(exp, toReplace, substitution)
-    val newAct = replaceVariable(act, toReplace, substitution)
+    val newExp = exp.replaceVariable(toReplace, substitution)
+    val newAct = act.replaceVariable(toReplace, substitution)
     { expected: newExp, actual: newAct, section: c.section, history: c.history }
 }
 
 // Simple type description for error messages
 fn typeDescr(t: Type): string {
-    val tag = typeTag(t)
+    val tag = t.typeTag()
     if tag == "primitive" {
-        val ids = typeIds(t)
+        val ids = t.typeIds()
         val first = ids[1]
         first.name
     } else if tag == "fn" {
@@ -42,7 +42,7 @@ fn typeDescr(t: Type): string {
     } else if tag == "array" {
         "array"
     } else if tag == "var" {
-        typeName(t)
+        t.typeName()
     } else if tag == "recursive" {
         "recursive"
     } else {
@@ -93,8 +93,8 @@ pub fn ufNew(): any {
 
 // Variable key for union-find lookup
 fn varKey(v: Type): string {
-    val n = typeName(v)
-    val l = typeLevel(v)
+    val n = v.typeName()
+    val l = v.typeLevel()
     "$n:$l"
 }
 
@@ -113,7 +113,7 @@ pub fn ufFind(uf: any, variable: Type): Type {
     }
     val boundType = bound as Type
     var result: any = boundType
-    if isVariable(boundType) {
+    if boundType.isVariable() {
         val bKey = varKey(boundType)
         if bKey == key {
             result = variable
@@ -132,11 +132,11 @@ pub fn ufFind(uf: any, variable: Type): Type {
 
 // Deeply resolve a type through the union-find, replacing all bound variables
 pub fn ufResolve(uf: any, t: Type): Type {
-    val tag = typeTag(t)
+    val tag = t.typeTag()
     var result: any = t
     if tag == "var" {
         val found = ufFind(uf, t)
-        if isVariable(found) {
+        if found.isVariable() {
             val fKey = varKey(found)
             val tKey = varKey(t)
             if fKey != tKey {
@@ -152,7 +152,7 @@ pub fn ufResolve(uf: any, t: Type): Type {
     } else if tag == "primitive" {
         result = t
     } else if tag == "fn" {
-        val types = typeTypes(t)
+        val types = t.typeTypes()
         val count = luaExpr("#types") as int
         val newTypes = luaExpr("{}") as array[any]
         var changed = false
@@ -165,10 +165,10 @@ pub fn ufResolve(uf: any, t: Type): Type {
             i = i + 1
         }
         if changed {
-            result = functionType(newTypes as array[Type], typeTypeParams(t), typeDefaults(t))
+            result = functionType(newTypes as array[Type], t.typeTypeParams(), t.typeDefaults())
         }
     } else if tag == "record" {
-        val fields = typeFields(t)
+        val fields = t.typeFields()
         val count = luaExpr("#fields") as int
         val newFields = luaExpr("{}") as array[any]
         var changed = false
@@ -187,7 +187,7 @@ pub fn ufResolve(uf: any, t: Type): Type {
             i = i + 1
         }
         if changed {
-            result = recordType(typeIds(t), newFields as array[RecordField], typeTypeParams(t))
+            result = recordType(t.typeIds(), newFields as array[RecordField], t.typeTypeParams())
         }
     } else if tag == "sum" {
         val lhs = luaExpr("t.lhs") as Type
@@ -195,13 +195,13 @@ pub fn ufResolve(uf: any, t: Type): Type {
         val newLhs = ufResolve(uf, lhs)
         val newRhs = ufResolve(uf, rhs)
         if luaExpr("newLhs ~= lhs or newRhs ~= rhs") as bool {
-            result = sumCreate(typeIds(t), newLhs, newRhs, typeTypeParams(t))
+            result = sumCreate(t.typeIds(), newLhs, newRhs, t.typeTypeParams())
         }
     } else if tag == "array" {
         val elem = luaExpr("t.elementType") as Type
         val newElem = ufResolve(uf, elem)
         if luaExpr("newElem ~= elem") as bool {
-            result = arrayType(newElem, typeTypeParams(t))
+            result = arrayType(newElem, t.typeTypeParams())
         }
     } else if tag == "recursive" {
         val inner = luaExpr("t.innerType") as Type
@@ -214,7 +214,7 @@ pub fn ufResolve(uf: any, t: Type): Type {
         val b = luaExpr("t.body") as Type
         val newBody = ufResolve(uf, b)
         if luaExpr("newBody ~= b") as bool {
-            result = polyType(typeLevel(t), newBody)
+            result = polyType(t.typeLevel(), newBody)
         }
     }
     result as Type
@@ -278,44 +278,44 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
         val section = luaExpr("constraint.section") as any
         val history = luaExpr("constraint.history or {}") as array[any]
 
-        if typeEquals(expected, actual) {
+        if expected.typeEquals(actual) {
             // skip - types are equal
-        } else if typeEquals(expected, tAny) {
+        } else if expected.typeEquals(tAny) {
             // skip - expected is any
-        } else if isPrimitive(expected) && isPrimitive(actual) {
-            val expIds = typeIds(expected)
-            val actIds = typeIds(actual)
+        } else if expected.isPrimitive() && actual.isPrimitive() {
+            val expIds = expected.typeIds()
+            val actIds = actual.typeIds()
             if idsIntersect(expIds, actIds) == false {
                 val cp = sectionToCodePoint(section)
                 throwMessage(typeMismatch(typeDescr(expected), typeDescr(actual), cp))
             }
-        } else if isRecursive(expected) {
-            val unfolded = unfoldRecursive(expected)
+        } else if expected.isRecursive() {
+            val unfolded = expected.unfoldRecursive()
             val newHistory = copyHistoryWith(history, constraint)
             val nc = newConstraint(unfolded, actual, section, newHistory)
             embedLua("table.insert(queue, pos, nc)")
-        } else if isRecursive(actual) {
-            val unfolded = unfoldRecursive(actual)
+        } else if actual.isRecursive() {
+            val unfolded = actual.unfoldRecursive()
             val newHistory = copyHistoryWith(history, constraint)
             val nc = newConstraint(expected, unfolded, section, newHistory)
             embedLua("table.insert(queue, pos, nc)")
-        } else if isVariable(expected) {
-            if occursInExcludingSumBranches(expected, actual) {
+        } else if expected.isVariable() {
+            if expected.occursInExcludingSumBranches(actual) {
                 val cp = sectionToCodePoint(section)
-                throwMessage(infiniteType(typeName(expected), typeDescr(actual), cp))
+                throwMessage(infiniteType(expected.typeName(), typeDescr(actual), cp))
             }
             ufBind(uf, expected, actual)
             // No queue rebuild needed — next iteration resolves via union-find
-        } else if isVariable(actual) {
-            if occursInExcludingSumBranches(actual, expected) {
+        } else if actual.isVariable() {
+            if actual.occursInExcludingSumBranches(expected) {
                 val cp = sectionToCodePoint(section)
-                throwMessage(infiniteType(typeName(actual), typeDescr(expected), cp))
+                throwMessage(infiniteType(actual.typeName(), typeDescr(expected), cp))
             }
             ufBind(uf, actual, expected)
             // No queue rebuild needed — next iteration resolves via union-find
-        } else if isFunction(expected) && isFunction(actual) {
-            val expTypes = typeTypes(expected)
-            val actTypes = typeTypes(actual)
+        } else if expected.isFunction() && actual.isFunction() {
+            val expTypes = expected.typeTypes()
+            val actTypes = actual.typeTypes()
             val expLen = luaExpr("#expTypes") as int
             val actLen = luaExpr("#actTypes") as int
             if expLen != actLen {
@@ -327,7 +327,7 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             while fi <= expLen {
                 val expParam = luaExpr("expTypes[fi]") as Type
                 val actParam = luaExpr("actTypes[fi]") as Type
-                if fi == lastIndex && typeEquals(expParam, tUnit) && isVariable(actParam) == false {
+                if fi == lastIndex && expParam.typeEquals(tUnit) && actParam.isVariable() == false {
                     // void return accepts anything - skip
                 } else {
                     val newHistory = copyHistoryWith(history, constraint)
@@ -336,9 +336,9 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
                 }
                 fi = fi + 1
             }
-        } else if isRecord(expected) && isRecord(actual) {
-            val expFields = typeFields(expected)
-            val actFields = typeFields(actual)
+        } else if expected.isRecord() && actual.isRecord() {
+            val expFields = expected.typeFields()
+            val actFields = actual.typeFields()
             val expFCount = luaExpr("#expFields") as int
             val actFCount = luaExpr("#actFields") as int
             var fi = 1
@@ -366,13 +366,13 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
                 embedLua("table.insert(queue, pos, nc)")
                 fi = fi + 1
             }
-        } else if isArray(expected) && isArray(actual) {
+        } else if expected.isArray() && actual.isArray() {
             val expElem = luaExpr("expected.elementType") as Type
             val actElem = luaExpr("actual.elementType") as Type
             val newHistory = copyHistoryWith(history, constraint)
             val nc = newConstraint(expElem, actElem, section, newHistory)
             embedLua("table.insert(queue, pos, nc)")
-        } else if isSum(expected) {
+        } else if expected.isSum() {
             // Try unifying with rhs first, fall back to lhs
             val expRhs = luaExpr("expected.rhs") as Type
             val expLhs = luaExpr("expected.lhs") as Type
@@ -401,15 +401,15 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
                 val lhsConstraint = newConstraint(expLhs, actual, section, newHistory)
                 embedLua("table.insert(queue, pos, lhsConstraint)")
             }
-        } else if isSum(actual) {
-            val actLhs = typeLhs(actual)
-            val actRhs = typeRhs(actual)
+        } else if actual.isSum() {
+            val actLhs = actual.typeLhs()
+            val actRhs = actual.typeRhs()
             val newHistory = copyHistoryWith(history, constraint)
             val nc1 = newConstraint(expected, actLhs, section, newHistory)
             val nc2 = newConstraint(expected, actRhs, section, newHistory)
             embedLua("table.insert(queue, pos, nc1)")
             embedLua("table.insert(queue, pos + 1, nc2)")
-        } else if isFunction(expected) && isFunction(actual) == false {
+        } else if expected.isFunction() && actual.isFunction() == false {
             val cp = sectionToCodePoint(section)
             throwMessage(notAFunction(cp))
         } else {

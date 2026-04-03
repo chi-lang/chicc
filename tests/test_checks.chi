@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import chicc/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, functionType, typeEquals, isFunction }
-import chicc/ast { localTarget, packageTarget, atomExpr, variableAccessExpr, fnCallExpr, nameDeclarationExpr, assignmentExpr, fnExpr, blockExpr, returnExpr, setExprType, newFnParam, exprExprType }
+import chicc/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, functionType }
+import chicc/ast { localTarget, packageTarget, atomExpr, variableAccessExpr, fnCallExpr, nameDeclarationExpr, assignmentExpr, fnExpr, blockExpr, returnExpr, newFnParam }
 import chicc/parse_ast { parseVariableRead, parseNameDeclaration, parseLambda, parseFor, parseFuncWithName, parseEffectDefinition, parseHandle, parseFnCall, parseBlock, parseBinaryOp, parseIfElse, newFormalArgument, newParseHandleCase }
 import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol }
 import chicc/messages { Message, unrecognizedName, cannotAccessInternalName, notAFunction, cannotChangeImmutableVariable, typeMismatch, genericError }
@@ -213,7 +213,7 @@ test("checkNames: handle cases have resume and arg names") {
 test("visibilityCheck: local access is fine") {
     val messages: any = luaExpr("{}")
     val expr = variableAccessExpr(localTarget("x"), testSection)
-    setExprType(expr, tInt)
+    expr.setExprType(tInt)
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, expr)")
     visibilityCheck(exprs, "mymod", unit, messages)
@@ -224,7 +224,7 @@ test("visibilityCheck: local access is fine") {
 test("visibilityCheck: same module package access is fine") {
     val messages: any = luaExpr("{}")
     val expr = variableAccessExpr(packageTarget("mymod", "pkg", "foo"), testSection)
-    setExprType(expr, tInt)
+    expr.setExprType(tInt)
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, expr)")
     visibilityCheck(exprs, "mymod", unit, messages)
@@ -238,7 +238,7 @@ test("visibilityCheck: cross-module non-public access produces error") {
     val messages: any = luaExpr("{}")
 
     val expr = variableAccessExpr(packageTarget("othermod", "otherpkg", "secret"), testSection)
-    setExprType(expr, tInt)
+    expr.setExprType(tInt)
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, expr)")
     visibilityCheck(exprs, "mymod", ns, messages)
@@ -255,7 +255,7 @@ test("visibilityCheck: cross-module public access is fine") {
     val messages: any = luaExpr("{}")
 
     val expr = variableAccessExpr(packageTarget("othermod", "otherpkg", "pubFn"), testSection)
-    setExprType(expr, tInt)
+    expr.setExprType(tInt)
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, expr)")
     visibilityCheck(exprs, "mymod", ns, messages)
@@ -271,10 +271,10 @@ test("fnCallCheck: calling a function type is fine") {
     val messages: any = luaExpr("{}")
     val fnType = functionType([tInt, tString], [], 0)
     val callee = variableAccessExpr(localTarget("f"), testSection)
-    setExprType(callee, fnType)
+    callee.setExprType(fnType)
     val arg = atomExpr("42", tInt, testSection)
     val callExpr = fnCallExpr(callee, [arg], testSection)
-    setExprType(callExpr, tString)
+    callExpr.setExprType(tString)
 
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, callExpr)")
@@ -286,10 +286,10 @@ test("fnCallCheck: calling a function type is fine") {
 test("fnCallCheck: calling a non-function type produces error") {
     val messages: any = luaExpr("{}")
     val callee = variableAccessExpr(localTarget("x"), testSection)
-    setExprType(callee, tInt)
+    callee.setExprType(tInt)
     val arg = atomExpr("42", tInt, testSection)
     val callExpr = fnCallExpr(callee, [arg], testSection)
-    setExprType(callExpr, tInt)
+    callExpr.setExprType(tInt)
 
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, callExpr)")
@@ -305,16 +305,16 @@ test("fnCallCheck: nested fn_call checks callee types") {
     val messages: any = luaExpr("{}")
     // Inner call: callee is int (bad)
     val innerCallee = variableAccessExpr(localTarget("x"), testSection)
-    setExprType(innerCallee, tInt)
+    innerCallee.setExprType(tInt)
     val innerCall = fnCallExpr(innerCallee, [], testSection)
-    setExprType(innerCall, tInt)
+    innerCall.setExprType(tInt)
 
     // Outer call: callee is fn (good)
     val fnType = functionType([tInt, tString], [], 0)
     val outerCallee = variableAccessExpr(localTarget("f"), testSection)
-    setExprType(outerCallee, fnType)
+    outerCallee.setExprType(fnType)
     val outerCall = fnCallExpr(outerCallee, [innerCall], testSection)
-    setExprType(outerCall, tString)
+    outerCall.setExprType(tString)
 
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, outerCall)")
@@ -337,7 +337,7 @@ test("immutabilityCheck: assignment to mutable is fine") {
 
     val value = atomExpr("42", tInt, testSection)
     val expr = assignmentExpr(localTarget("x"), value, testSection)
-    setExprType(expr, tInt)
+    expr.setExprType(tInt)
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, expr)")
     immutabilityCheck(exprs, "test", "pkg", ct, unit, messages)
@@ -354,7 +354,7 @@ test("immutabilityCheck: assignment to immutable produces error") {
 
     val value = atomExpr("42", tInt, testSection)
     val expr = assignmentExpr(localTarget("y"), value, testSection)
-    setExprType(expr, tInt)
+    expr.setExprType(tInt)
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, expr)")
     immutabilityCheck(exprs, "test", "pkg", ct, unit, messages)
@@ -374,7 +374,7 @@ test("immutabilityCheck: package target same module") {
 
     val value = atomExpr("42", tInt, testSection)
     val expr = assignmentExpr(packageTarget("test", "pkg", "z"), value, testSection)
-    setExprType(expr, tInt)
+    expr.setExprType(tInt)
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, expr)")
     immutabilityCheck(exprs, "test", "pkg", ct, unit, messages)
@@ -389,7 +389,7 @@ test("immutabilityCheck: cross-module package target") {
 
     val value = atomExpr("42", tInt, testSection)
     val expr = assignmentExpr(packageTarget("other", "otherpkg", "w"), value, testSection)
-    setExprType(expr, tInt)
+    expr.setExprType(tInt)
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, expr)")
     immutabilityCheck(exprs, "test", "pkg", unit, ns, messages)
@@ -407,16 +407,16 @@ test("returnTypeCheck: matching return type is fine") {
     // fn: (int) -> int, body has return with int value
     val fnType = functionType([tInt, tInt], [], 0)
     val retValue = atomExpr("42", tInt, testSection)
-    setExprType(retValue, tInt)
+    retValue.setExprType(tInt)
     val retExpr = returnExpr(retValue, testSection)
-    setExprType(retExpr, tInt)
+    retExpr.setExprType(tInt)
     val body = blockExpr([retExpr], testSection)
-    setExprType(body, tInt)
+    body.setExprType(tInt)
     val params: any = luaExpr("{}")
     val p = newFnParam("x", tInt, testSection)
     embedLua("table.insert(params, p)")
     val fnNode = fnExpr(params, unit, body, testSection)
-    setExprType(fnNode, fnType)
+    fnNode.setExprType(fnType)
 
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, fnNode)")
@@ -431,16 +431,16 @@ test("returnTypeCheck: mismatched return type produces error") {
     // fn: (int) -> int, body has return with string value
     val fnType = functionType([tInt, tInt], [], 0)
     val retValue = atomExpr("hello", tString, testSection)
-    setExprType(retValue, tString)
+    retValue.setExprType(tString)
     val retExpr = returnExpr(retValue, testSection)
-    setExprType(retExpr, tString)
+    retExpr.setExprType(tString)
     val body = blockExpr([retExpr], testSection)
-    setExprType(body, tString)
+    body.setExprType(tString)
     val params: any = luaExpr("{}")
     val p = newFnParam("x", tInt, testSection)
     embedLua("table.insert(params, p)")
     val fnNode = fnExpr(params, unit, body, testSection)
-    setExprType(fnNode, fnType)
+    fnNode.setExprType(fnType)
 
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, fnNode)")
@@ -456,9 +456,9 @@ test("returnTypeCheck: return outside function produces error") {
     val messages: any = luaExpr("{}")
 
     val retValue = atomExpr("42", tInt, testSection)
-    setExprType(retValue, tInt)
+    retValue.setExprType(tInt)
     val retExpr = returnExpr(retValue, testSection)
-    setExprType(retExpr, tInt)
+    retExpr.setExprType(tInt)
 
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, retExpr)")
@@ -476,19 +476,19 @@ test("returnTypeCheck: name_declaration with fn value sets expected return type"
     // val f = fn(x: int): int { return "hello" }
     val fnType = functionType([tInt, tInt], [], 0)
     val retValue = atomExpr("hello", tString, testSection)
-    setExprType(retValue, tString)
+    retValue.setExprType(tString)
     val retExpr = returnExpr(retValue, testSection)
-    setExprType(retExpr, tString)
+    retExpr.setExprType(tString)
     val body = blockExpr([retExpr], testSection)
-    setExprType(body, tString)
+    body.setExprType(tString)
     val params: any = luaExpr("{}")
     val p = newFnParam("x", tInt, testSection)
     embedLua("table.insert(params, p)")
     val fnNode = fnExpr(params, unit, body, testSection)
-    setExprType(fnNode, fnType)
+    fnNode.setExprType(fnType)
 
     val decl = nameDeclarationExpr(false, "f", false, unit, fnNode, testSection)
-    setExprType(decl, fnType)
+    decl.setExprType(fnType)
 
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, decl)")

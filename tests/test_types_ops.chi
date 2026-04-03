@@ -1,115 +1,115 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import chicc/types { Type, TypeId, RecordField, newTypeId, typeIdToString, typeIdEquals, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, optionTypeId, arrayTypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, polyType, typeTag, typeIds, typeTypes, typeTypeParams, typeDefaults, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeVariable, typeInnerType, typeBody, typeTypesCount, typeFieldsCount, isPrimitive, isFunction, isRecord, isSum, isArray, isVariable, isRecursive, typeEquals, typeChildren, replaceVariable, mapType, occursIn, occursInExcludingSumBranches, sumCreate, sumListTypes, unfoldRecursive, instantiate }
+import chicc/types { Type, TypeId, RecordField, newTypeId, typeIdToString, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, optionTypeId, arrayTypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, polyType, typeChildren, mapType, sumCreate }
 import std/lang { luaExpr, embedLua }
 
 // --- typeEquals ---
 
 test("typeEquals: same primitives") {
-    assertTrue(typeEquals(tInt, tInt))
-    assertTrue(typeEquals(tString, tString))
-    assertTrue(typeEquals(tBool, tBool))
-    assertTrue(typeEquals(tUnit, tUnit))
+    assertTrue(tInt.typeEquals(tInt))
+    assertTrue(tString.typeEquals(tString))
+    assertTrue(tBool.typeEquals(tBool))
+    assertTrue(tUnit.typeEquals(tUnit))
 }
 
 test("typeEquals: different primitives") {
-    assertFalse(typeEquals(tInt, tString))
-    assertFalse(typeEquals(tBool, tFloat))
+    assertFalse(tInt.typeEquals(tString))
+    assertFalse(tBool.typeEquals(tFloat))
 }
 
 test("typeEquals: primitive with intersecting ids") {
     val alias = primitiveType([intTypeId, newTypeId("mymod", "mypkg", "MyInt")])
-    assertTrue(typeEquals(tInt, alias))
-    assertTrue(typeEquals(alias, tInt))
+    assertTrue(tInt.typeEquals(alias))
+    assertTrue(alias.typeEquals(tInt))
 }
 
 test("typeEquals: primitive with no intersection") {
     val custom1 = primitiveType([newTypeId("a", "b", "X")])
     val custom2 = primitiveType([newTypeId("c", "d", "Y")])
-    assertFalse(typeEquals(custom1, custom2))
+    assertFalse(custom1.typeEquals(custom2))
 }
 
 test("typeEquals: same function types") {
     val f1 = functionType([tInt, tString], [], 0)
     val f2 = functionType([tInt, tString], [], 0)
-    assertTrue(typeEquals(f1, f2))
+    assertTrue(f1.typeEquals(f2))
 }
 
 test("typeEquals: different function types (different params)") {
     val f1 = functionType([tInt, tString], [], 0)
     val f2 = functionType([tBool, tString], [], 0)
-    assertFalse(typeEquals(f1, f2))
+    assertFalse(f1.typeEquals(f2))
 }
 
 test("typeEquals: different function types (different length)") {
     val f1 = functionType([tInt, tString], [], 0)
     val f2 = functionType([tInt, tString, tBool], [], 0)
-    assertFalse(typeEquals(f1, f2))
+    assertFalse(f1.typeEquals(f2))
 }
 
 test("typeEquals: same record types") {
     val r1 = recordType([], [{ name: "x", fieldType: tInt }, { name: "y", fieldType: tString }], [])
     val r2 = recordType([], [{ name: "x", fieldType: tInt }, { name: "y", fieldType: tString }], [])
-    assertTrue(typeEquals(r1, r2))
+    assertTrue(r1.typeEquals(r2))
 }
 
 test("typeEquals: different record types (different field name)") {
     val r1 = recordType([], [{ name: "x", fieldType: tInt }], [])
     val r2 = recordType([], [{ name: "y", fieldType: tInt }], [])
-    assertFalse(typeEquals(r1, r2))
+    assertFalse(r1.typeEquals(r2))
 }
 
 test("typeEquals: different record types (different field type)") {
     val r1 = recordType([], [{ name: "x", fieldType: tInt }], [])
     val r2 = recordType([], [{ name: "x", fieldType: tString }], [])
-    assertFalse(typeEquals(r1, r2))
+    assertFalse(r1.typeEquals(r2))
 }
 
 test("typeEquals: different record types (different length)") {
     val r1 = recordType([], [{ name: "x", fieldType: tInt }], [])
     val r2 = recordType([], [{ name: "x", fieldType: tInt }, { name: "y", fieldType: tString }], [])
-    assertFalse(typeEquals(r1, r2))
+    assertFalse(r1.typeEquals(r2))
 }
 
 test("typeEquals: same sum types") {
     val s1 = sumType([], tInt, tString, [])
     val s2 = sumType([], tInt, tString, [])
-    assertTrue(typeEquals(s1, s2))
+    assertTrue(s1.typeEquals(s2))
 }
 
 test("typeEquals: different sum types") {
     val s1 = sumType([], tInt, tString, [])
     val s2 = sumType([], tInt, tBool, [])
-    assertFalse(typeEquals(s1, s2))
+    assertFalse(s1.typeEquals(s2))
 }
 
 test("typeEquals: same array types") {
     val a1 = arrayType(tInt, [])
     val a2 = arrayType(tInt, [])
-    assertTrue(typeEquals(a1, a2))
+    assertTrue(a1.typeEquals(a2))
 }
 
 test("typeEquals: different array types") {
     val a1 = arrayType(tInt, [])
     val a2 = arrayType(tString, [])
-    assertFalse(typeEquals(a1, a2))
+    assertFalse(a1.typeEquals(a2))
 }
 
 test("typeEquals: same variable types") {
     val v1 = variableType("T", 0)
     val v2 = variableType("T", 0)
-    assertTrue(typeEquals(v1, v2))
+    assertTrue(v1.typeEquals(v2))
 }
 
 test("typeEquals: different variable types (name)") {
     val v1 = variableType("T", 0)
     val v2 = variableType("U", 0)
-    assertFalse(typeEquals(v1, v2))
+    assertFalse(v1.typeEquals(v2))
 }
 
 test("typeEquals: different variable types (level)") {
     val v1 = variableType("T", 0)
     val v2 = variableType("T", 1)
-    assertFalse(typeEquals(v1, v2))
+    assertFalse(v1.typeEquals(v2))
 }
 
 test("typeEquals: same recursive types") {
@@ -117,7 +117,7 @@ test("typeEquals: same recursive types") {
     val inner = recordType([], [{ name: "a", fieldType: tInt }, { name: "next", fieldType: v }], [])
     val r1 = recursiveType(v, inner)
     val r2 = recursiveType(v, inner)
-    assertTrue(typeEquals(r1, r2))
+    assertTrue(r1.typeEquals(r2))
 }
 
 test("typeEquals: same poly types") {
@@ -125,7 +125,7 @@ test("typeEquals: same poly types") {
     val body = functionType([v, v], [], 0)
     val p1 = polyType(1, body)
     val p2 = polyType(1, body)
-    assertTrue(typeEquals(p1, p2))
+    assertTrue(p1.typeEquals(p2))
 }
 
 test("typeEquals: different poly types (different level)") {
@@ -133,11 +133,11 @@ test("typeEquals: different poly types (different level)") {
     val body = functionType([v, v], [], 0)
     val p1 = polyType(1, body)
     val p2 = polyType(2, body)
-    assertFalse(typeEquals(p1, p2))
+    assertFalse(p1.typeEquals(p2))
 }
 
 test("typeEquals: different tags") {
-    assertFalse(typeEquals(tInt, variableType("T", 0)))
+    assertFalse(tInt.typeEquals(variableType("T", 0)))
     assertFalse(typeEquals(functionType([tInt], [], 0), tString))
 }
 
@@ -157,9 +157,9 @@ test("typeChildren: function returns types array") {
     val c1: Type = luaExpr("children[1]")
     val c2: Type = luaExpr("children[2]")
     val c3: Type = luaExpr("children[3]")
-    assertTrue(typeEquals(c1, tInt))
-    assertTrue(typeEquals(c2, tString))
-    assertTrue(typeEquals(c3, tBool))
+    assertTrue(c1.typeEquals(tInt))
+    assertTrue(c2.typeEquals(tString))
+    assertTrue(c3.typeEquals(tBool))
 }
 
 test("typeChildren: record returns field types") {
@@ -169,8 +169,8 @@ test("typeChildren: record returns field types") {
     assertEqual(count, 2)
     val c1: Type = luaExpr("children[1]")
     val c2: Type = luaExpr("children[2]")
-    assertTrue(typeEquals(c1, tInt))
-    assertTrue(typeEquals(c2, tString))
+    assertTrue(c1.typeEquals(tInt))
+    assertTrue(c2.typeEquals(tString))
 }
 
 test("typeChildren: sum returns lhs and rhs") {
@@ -180,8 +180,8 @@ test("typeChildren: sum returns lhs and rhs") {
     assertEqual(count, 2)
     val c1: Type = luaExpr("children[1]")
     val c2: Type = luaExpr("children[2]")
-    assertTrue(typeEquals(c1, tInt))
-    assertTrue(typeEquals(c2, tString))
+    assertTrue(c1.typeEquals(tInt))
+    assertTrue(c2.typeEquals(tString))
 }
 
 test("typeChildren: array returns element type") {
@@ -190,7 +190,7 @@ test("typeChildren: array returns element type") {
     val count: int = luaExpr("#children")
     assertEqual(count, 1)
     val c1: Type = luaExpr("children[1]")
-    assertTrue(typeEquals(c1, tInt))
+    assertTrue(c1.typeEquals(tInt))
 }
 
 test("typeChildren: variable has no children") {
@@ -208,7 +208,7 @@ test("typeChildren: recursive returns innerType") {
     val count: int = luaExpr("#children")
     assertEqual(count, 1)
     val c1: Type = luaExpr("children[1]")
-    assertTrue(typeEquals(c1, inner))
+    assertTrue(c1.typeEquals(inner))
 }
 
 test("typeChildren: poly returns body") {
@@ -218,52 +218,52 @@ test("typeChildren: poly returns body") {
     val count: int = luaExpr("#children")
     assertEqual(count, 1)
     val c1: Type = luaExpr("children[1]")
-    assertTrue(typeEquals(c1, body))
+    assertTrue(c1.typeEquals(body))
 }
 
 // --- replaceVariable ---
 
 test("replaceVariable: replace matching var") {
     val v = variableType("T", 0)
-    val result = replaceVariable(v, v, tInt)
-    assertTrue(typeEquals(result, tInt))
+    val result = v.replaceVariable(v, tInt)
+    assertTrue(result.typeEquals(tInt))
 }
 
 test("replaceVariable: keep non-matching var") {
     val v1 = variableType("T", 0)
     val v2 = variableType("U", 0)
-    val result = replaceVariable(v1, v2, tInt)
-    assertTrue(typeEquals(result, v1))
+    val result = v1.replaceVariable(v2, tInt)
+    assertTrue(result.typeEquals(v1))
 }
 
 test("replaceVariable: primitive unchanged") {
     val v = variableType("T", 0)
-    val result = replaceVariable(tInt, v, tString)
-    assertTrue(typeEquals(result, tInt))
+    val result = tInt.replaceVariable(v, tString)
+    assertTrue(result.typeEquals(tInt))
 }
 
 test("replaceVariable: in function type") {
     val v = variableType("T", 0)
     val f = functionType([v, tString], [], 0)
-    val result = replaceVariable(f, v, tInt)
+    val result = f.replaceVariable(v, tInt)
     val expected = functionType([tInt, tString], [], 0)
-    assertTrue(typeEquals(result, expected))
+    assertTrue(result.typeEquals(expected))
 }
 
 test("replaceVariable: in record type") {
     val v = variableType("T", 0)
     val r = recordType([], [{ name: "x", fieldType: v }, { name: "y", fieldType: tString }], [])
-    val result = replaceVariable(r, v, tInt)
+    val result = r.replaceVariable(v, tInt)
     val expected = recordType([], [{ name: "x", fieldType: tInt }, { name: "y", fieldType: tString }], [])
-    assertTrue(typeEquals(result, expected))
+    assertTrue(result.typeEquals(expected))
 }
 
 test("replaceVariable: in array type") {
     val v = variableType("T", 0)
     val a = arrayType(v, [])
-    val result = replaceVariable(a, v, tInt)
+    val result = a.replaceVariable(v, tInt)
     val expected = arrayType(tInt, [])
-    assertTrue(typeEquals(result, expected))
+    assertTrue(result.typeEquals(expected))
 }
 
 test("replaceVariable: in recursive type") {
@@ -271,30 +271,30 @@ test("replaceVariable: in recursive type") {
     val recVar = variableType("X", 0)
     val inner = recordType([], [{ name: "val", fieldType: v }], [])
     val rec = recursiveType(recVar, inner)
-    val result = replaceVariable(rec, v, tInt)
+    val result = rec.replaceVariable(v, tInt)
     val expectedInner = recordType([], [{ name: "val", fieldType: tInt }], [])
     val expected = recursiveType(recVar, expectedInner)
-    assertTrue(typeEquals(result, expected))
+    assertTrue(result.typeEquals(expected))
 }
 
 test("replaceVariable: in poly type") {
     val v = variableType("T", 0)
     val body = functionType([v, tString], [], 0)
     val p = polyType(1, body)
-    val result = replaceVariable(p, v, tInt)
+    val result = p.replaceVariable(v, tInt)
     val expectedBody = functionType([tInt, tString], [], 0)
     val expected = polyType(1, expectedBody)
-    assertTrue(typeEquals(result, expected))
+    assertTrue(result.typeEquals(expected))
 }
 
 test("replaceVariable: deep nested") {
     val v = variableType("T", 0)
     val inner = functionType([v, v], [], 0)
     val outer = functionType([inner, v], [], 0)
-    val result = replaceVariable(outer, v, tInt)
+    val result = outer.replaceVariable(v, tInt)
     val expectedInner = functionType([tInt, tInt], [], 0)
     val expected = functionType([expectedInner, tInt], [], 0)
-    assertTrue(typeEquals(result, expected))
+    assertTrue(result.typeEquals(expected))
 }
 
 // --- mapType ---
@@ -307,7 +307,7 @@ test("mapType: single replacement") {
     embedLua("table.insert(replacements, entry)")
     val result = mapType(f, replacements)
     val expected = functionType([tInt, tString], [], 0)
-    assertTrue(typeEquals(result, expected))
+    assertTrue(result.typeEquals(expected))
 }
 
 test("mapType: multiple replacements") {
@@ -321,105 +321,105 @@ test("mapType: multiple replacements") {
     embedLua("table.insert(replacements, e2)")
     val result = mapType(f, replacements)
     val expected = functionType([tInt, tString], [], 0)
-    assertTrue(typeEquals(result, expected))
+    assertTrue(result.typeEquals(expected))
 }
 
 test("mapType: empty replacements") {
     val f = functionType([tInt, tString], [], 0)
     val replacements: array[any] = luaExpr("{}")
     val result = mapType(f, replacements)
-    assertTrue(typeEquals(result, f))
+    assertTrue(result.typeEquals(f))
 }
 
 // --- occursIn ---
 
 test("occursIn: variable occurs in itself") {
     val v = variableType("T", 0)
-    assertTrue(occursIn(v, v))
+    assertTrue(v.occursIn(v))
 }
 
 test("occursIn: variable not in primitive") {
     val v = variableType("T", 0)
-    assertFalse(occursIn(v, tInt))
+    assertFalse(v.occursIn(tInt))
 }
 
 test("occursIn: variable in function type") {
     val v = variableType("T", 0)
     val f = functionType([v, tString], [], 0)
-    assertTrue(occursIn(v, f))
+    assertTrue(v.occursIn(f))
 }
 
 test("occursIn: variable not in function type") {
     val v = variableType("T", 0)
     val f = functionType([tInt, tString], [], 0)
-    assertFalse(occursIn(v, f))
+    assertFalse(v.occursIn(f))
 }
 
 test("occursIn: variable in record type") {
     val v = variableType("T", 0)
     val r = recordType([], [{ name: "x", fieldType: v }], [])
-    assertTrue(occursIn(v, r))
+    assertTrue(v.occursIn(r))
 }
 
 test("occursIn: variable in array type") {
     val v = variableType("T", 0)
     val a = arrayType(v, [])
-    assertTrue(occursIn(v, a))
+    assertTrue(v.occursIn(a))
 }
 
 test("occursIn: variable in sum type") {
     val v = variableType("T", 0)
     val s = sumType([], v, tInt, [])
-    assertTrue(occursIn(v, s))
+    assertTrue(v.occursIn(s))
 }
 
 test("occursIn: different variable not found") {
     val v1 = variableType("T", 0)
     val v2 = variableType("U", 0)
     val f = functionType([v2, tString], [], 0)
-    assertFalse(occursIn(v1, f))
+    assertFalse(v1.occursIn(f))
 }
 
 test("occursIn: deep nesting") {
     val v = variableType("T", 0)
     val inner = arrayType(v, [])
     val outer = functionType([inner, tString], [], 0)
-    assertTrue(occursIn(v, outer))
+    assertTrue(v.occursIn(outer))
 }
 
 // --- sumListTypes ---
 
 test("sumListTypes: non-sum returns singleton") {
-    val result = sumListTypes(tInt)
+    val result = tInt.sumListTypes()
     val count: int = luaExpr("#result")
     assertEqual(count, 1)
     val item: Type = luaExpr("result[1]")
-    assertTrue(typeEquals(item, tInt))
+    assertTrue(item.typeEquals(tInt))
 }
 
 test("sumListTypes: simple sum") {
     val s = sumType([], tInt, tString, [])
-    val result = sumListTypes(s)
+    val result = s.sumListTypes()
     val count: int = luaExpr("#result")
     assertEqual(count, 2)
     val item1: Type = luaExpr("result[1]")
     val item2: Type = luaExpr("result[2]")
-    assertTrue(typeEquals(item1, tInt))
-    assertTrue(typeEquals(item2, tString))
+    assertTrue(item1.typeEquals(tInt))
+    assertTrue(item2.typeEquals(tString))
 }
 
 test("sumListTypes: nested sum") {
     val inner = sumType([], tInt, tString, [])
     val outer = sumType([], inner, tBool, [])
-    val result = sumListTypes(outer)
+    val result = outer.sumListTypes()
     val count: int = luaExpr("#result")
     assertEqual(count, 3)
     val item1: Type = luaExpr("result[1]")
     val item2: Type = luaExpr("result[2]")
     val item3: Type = luaExpr("result[3]")
-    assertTrue(typeEquals(item1, tInt))
-    assertTrue(typeEquals(item2, tString))
-    assertTrue(typeEquals(item3, tBool))
+    assertTrue(item1.typeEquals(tInt))
+    assertTrue(item2.typeEquals(tString))
+    assertTrue(item3.typeEquals(tBool))
 }
 
 // --- occursInExcludingSumBranches ---
@@ -427,47 +427,47 @@ test("sumListTypes: nested sum") {
 test("occursInExcludingSumBranches: variable in sum as a branch only") {
     val v = variableType("T", 0)
     val s = sumType([], v, tInt, [])
-    assertFalse(occursInExcludingSumBranches(v, s))
+    assertFalse(v.occursInExcludingSumBranches(s))
 }
 
 test("occursInExcludingSumBranches: variable in sum in a branch content") {
     val v = variableType("T", 0)
     val nested = functionType([v, tString], [], 0)
     val s = sumType([], nested, tInt, [])
-    assertTrue(occursInExcludingSumBranches(v, s))
+    assertTrue(v.occursInExcludingSumBranches(s))
 }
 
 test("occursInExcludingSumBranches: variable matches directly") {
     val v = variableType("T", 0)
-    assertTrue(occursInExcludingSumBranches(v, v))
+    assertTrue(v.occursInExcludingSumBranches(v))
 }
 
 test("occursInExcludingSumBranches: non-sum type delegates to occursIn") {
     val v = variableType("T", 0)
     val f = functionType([v, tString], [], 0)
-    assertTrue(occursInExcludingSumBranches(v, f))
+    assertTrue(v.occursInExcludingSumBranches(f))
 }
 
 test("occursInExcludingSumBranches: non-sum without variable") {
     val v = variableType("T", 0)
     val f = functionType([tInt, tString], [], 0)
-    assertFalse(occursInExcludingSumBranches(v, f))
+    assertFalse(v.occursInExcludingSumBranches(f))
 }
 
 // --- sumCreate ---
 
 test("sumCreate: basic creation") {
     val result = sumCreate([], tInt, tString, [])
-    assertTrue(isSum(result))
+    assertTrue(result.isSum())
     val lhs: Type = luaExpr("result.lhs")
     val rhs: Type = luaExpr("result.rhs")
-    assertTrue(typeEquals(lhs, tInt))
-    assertTrue(typeEquals(rhs, tString))
+    assertTrue(lhs.typeEquals(tInt))
+    assertTrue(rhs.typeEquals(tString))
 }
 
 test("sumCreate: auto-adds optionTypeId when unit present") {
     val result = sumCreate([], tInt, tUnit, [])
-    val ids = typeIds(result)
+    val ids = result.typeIds()
     var found = false
     val count = ids.size()
     var i = 1
@@ -480,7 +480,7 @@ test("sumCreate: auto-adds optionTypeId when unit present") {
 
 test("sumCreate: does not duplicate optionTypeId") {
     val result = sumCreate([optionTypeId], tInt, tUnit, [])
-    val ids = typeIds(result)
+    val ids = result.typeIds()
     var optCount = 0
     val count = ids.size()
     var i = 1
@@ -493,7 +493,7 @@ test("sumCreate: does not duplicate optionTypeId") {
 
 test("sumCreate: no optionTypeId when no unit") {
     val result = sumCreate([], tInt, tString, [])
-    val ids = typeIds(result)
+    val ids = result.typeIds()
     var found = false
     val count = ids.size()
     var i = 1
@@ -507,13 +507,13 @@ test("sumCreate: no optionTypeId when no unit") {
 test("sumCreate: deduplicates types") {
     val result = sumCreate([], tInt, tInt, [])
     // When both sides are the same non-sum type, result should be just the type
-    assertTrue(typeEquals(result, tInt))
+    assertTrue(result.typeEquals(tInt))
 }
 
 test("sumCreate: flattens nested sums") {
     val inner = sumType([], tInt, tString, [])
     val result = sumCreate([], inner, tBool, [])
-    val list = sumListTypes(result)
+    val list = result.sumListTypes()
     val count: int = luaExpr("#list")
     assertEqual(count, 3)
 }
@@ -524,20 +524,20 @@ test("unfoldRecursive: replaces variable with recursive type") {
     val v = variableType("X", 0)
     val inner = recordType([], [{ name: "val", fieldType: tInt }, { name: "next", fieldType: v }], [])
     val rec = recursiveType(v, inner)
-    val unfolded = unfoldRecursive(rec)
+    val unfolded = rec.unfoldRecursive()
     // The unfolded type should be a record where 'next' field is the recursive type itself
-    assertTrue(isRecord(unfolded))
-    val fields = typeFields(unfolded)
+    assertTrue(unfolded.isRecord())
+    val fields = unfolded.typeFields()
     val f2: RecordField = luaExpr("fields[2]")
     val f2Type: Type = luaExpr("f2.fieldType")
-    assertTrue(isRecursive(f2Type))
+    assertTrue(f2Type.isRecursive())
 }
 
 // --- instantiate ---
 
 test("instantiate: non-poly returns as-is") {
-    val result = instantiate(tInt, 5, { lvl: int -> variableType("fresh", lvl) })
-    assertTrue(typeEquals(result, tInt))
+    val result = tInt.instantiate(5, { lvl: int -> variableType("fresh", lvl) })
+    assertTrue(result.typeEquals(tInt))
 }
 
 test("instantiate: replaces variables above level") {
@@ -545,17 +545,17 @@ test("instantiate: replaces variables above level") {
     val body = functionType([v, tString], [], 0)
     val p = polyType(1, body)
     var counter = 0
-    val result = instantiate(p, 5, { lvl: int ->
+    val result = p.instantiate(5, { lvl: int ->
         counter = counter + 1
         variableType("fresh${counter}", lvl)
     })
-    assertTrue(isFunction(result))
+    assertTrue(result.isFunction())
     // The variable T at level 2 is above startingLevel 1, so it should be replaced
-    val types = typeTypes(result)
+    val types = result.typeTypes()
     val firstType: Type = luaExpr("types[1]")
-    assertFalse(typeEquals(firstType, v))
-    assertTrue(isVariable(firstType))
-    assertEqual(typeLevel(firstType), 5)
+    assertFalse(firstType.typeEquals(v))
+    assertTrue(firstType.isVariable())
+    assertEqual(firstType.typeLevel(), 5)
 }
 
 test("instantiate: keeps variables at or below level") {
@@ -564,18 +564,18 @@ test("instantiate: keeps variables at or below level") {
     val body = functionType([v1, v2], [], 0)
     val p = polyType(1, body)
     var counter = 0
-    val result = instantiate(p, 5, { lvl: int ->
+    val result = p.instantiate(5, { lvl: int ->
         counter = counter + 1
         variableType("fresh${counter}", lvl)
     })
-    assertTrue(isFunction(result))
-    val types = typeTypes(result)
+    assertTrue(result.isFunction())
+    val types = result.typeTypes()
     val firstType: Type = luaExpr("types[1]")
     val secondType: Type = luaExpr("types[2]")
     // v1 is at level 1 which equals startingLevel 1, so it should NOT be replaced
-    assertTrue(typeEquals(firstType, v1))
+    assertTrue(firstType.typeEquals(v1))
     // v2 is at level 0 which is below startingLevel 1, so it should NOT be replaced
-    assertTrue(typeEquals(secondType, v2))
+    assertTrue(secondType.typeEquals(v2))
 }
 
 test("instantiate: caches same variable") {
@@ -583,16 +583,16 @@ test("instantiate: caches same variable") {
     val body = functionType([v, v], [], 0)
     val p = polyType(1, body)
     var counter = 0
-    val result = instantiate(p, 5, { lvl: int ->
+    val result = p.instantiate(5, { lvl: int ->
         counter = counter + 1
         variableType("fresh${counter}", lvl)
     })
-    assertTrue(isFunction(result))
-    val types = typeTypes(result)
+    assertTrue(result.isFunction())
+    val types = result.typeTypes()
     val firstType: Type = luaExpr("types[1]")
     val secondType: Type = luaExpr("types[2]")
     // Both occurrences of T should map to the same fresh variable
-    assertTrue(typeEquals(firstType, secondType))
+    assertTrue(firstType.typeEquals(secondType))
     // counter should be 1, because only one fresh var was created
     assertEqual(counter, 1)
 }

@@ -1,7 +1,7 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/source { newSection }
 import chicc/types { tInt, tString }
-import chicc/ast { localTarget, packageTarget, atomExpr, blockExpr, fnCallExpr, variableAccessExpr, breakExpr, continueExpr, returnExpr, infixOpExpr, ifElseExpr, isTerminator, exprKind, exprAtomValue, exprChildren }
+import chicc/ast { localTarget, packageTarget, atomExpr, blockExpr, fnCallExpr, variableAccessExpr, breakExpr, continueExpr, returnExpr, infixOpExpr, ifElseExpr }
 
 test("localTarget") {
     val t = localTarget("x")
@@ -22,27 +22,27 @@ test("packageTarget") {
 test("atomExpr") {
     val sec = newSection(1, 1, 1, 5)
     val e = atomExpr("42", tInt, sec)
-    assertEqual(exprKind(e), "atom")
-    assertEqual(exprAtomValue(e), "42")
+    assertEqual(e.exprKind(), "atom")
+    assertEqual(e.exprAtomValue(), "42")
 }
 
 test("blockExpr") {
     val a1 = atomExpr("1", tInt, unit)
     val a2 = atomExpr("2", tInt, unit)
     val b = blockExpr([a1, a2], unit)
-    assertEqual(exprKind(b), "block")
+    assertEqual(b.exprKind(), "block")
 }
 
 test("fnCallExpr") {
     val func = variableAccessExpr(localTarget("foo"), unit)
     val arg = atomExpr("1", tInt, unit)
     val call = fnCallExpr(func, [arg], unit)
-    assertEqual(exprKind(call), "fn_call")
+    assertEqual(call.exprKind(), "fn_call")
 }
 
 test("exprChildren - atom") {
     val e = atomExpr("42", tInt, unit)
-    val children = exprChildren(e)
+    val children = e.exprChildren()
     assertEqual(children.size(), 0)
 }
 
@@ -50,7 +50,7 @@ test("exprChildren - block") {
     val a1 = atomExpr("1", tInt, unit)
     val a2 = atomExpr("2", tInt, unit)
     val b = blockExpr([a1, a2], unit)
-    val children = exprChildren(b)
+    val children = b.exprChildren()
     assertEqual(children.size(), 2)
 }
 
@@ -59,7 +59,7 @@ test("exprChildren - fnCall") {
     val arg1 = atomExpr("1", tInt, unit)
     val arg2 = atomExpr("2", tInt, unit)
     val call = fnCallExpr(func, [arg1, arg2], unit)
-    val children = exprChildren(call)
+    val children = call.exprChildren()
     assertEqual(children.size(), 3)
 }
 

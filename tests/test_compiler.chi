@@ -1,7 +1,7 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/compiler { compile, compileToLua, hasErrors, markUsed, replaceTypes, newLuaCompilationEnv, formatMessage, newCompilationResult }
-import chicc/ast { newPackage, newProgram, atomExpr, blockExpr, nameDeclarationExpr, fnExpr, assignmentExpr, variableAccessExpr, localTarget, fnCallExpr, newFnParam, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, createRecordExpr, createArrayExpr, indexOpExpr, fieldAccessExpr, fieldAssignmentExpr, handleExpr, returnExpr, exprKind, exprExprType, exprUsed, newExprField, newImport, newImportEntry, newTypeAlias, setExprUsed }
-import chicc/types { tInt, tFloat, tBool, tString, tUnit, tAny, functionType, variableType, mapType, newTypeId, primitiveType, typeTag }
+import chicc/ast { newPackage, newProgram, atomExpr, blockExpr, nameDeclarationExpr, fnExpr, assignmentExpr, variableAccessExpr, localTarget, fnCallExpr, newFnParam, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, createRecordExpr, createArrayExpr, indexOpExpr, fieldAccessExpr, fieldAssignmentExpr, handleExpr, returnExpr, newExprField, newImport, newImportEntry, newTypeAlias }
+import chicc/types { tInt, tFloat, tBool, tString, tUnit, tAny, functionType, variableType, mapType, newTypeId, primitiveType }
 import chicc/messages { newMessage, genericError, unrecognizedName }
 import std/lang { luaExpr, embedLua }
 

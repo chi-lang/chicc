@@ -1,5 +1,5 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import chicc/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, typeTag, typeIds, typeTypes, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeEquals, isPrimitive, isFunction, isRecord, isSum, isArray, isVariable, isRecursive, replaceVariable, occursInExcludingSumBranches, unfoldRecursive, intTypeId, stringTypeId, boolTypeId, floatTypeId, unitTypeId }
+import chicc/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, intTypeId, stringTypeId, boolTypeId, floatTypeId, unitTypeId }
 import chicc/unification { Constraint, newConstraint, constraintWithReplacedVariable, unify }
 import chicc/source { newSection, Section }
 import std/lang { luaExpr, embedLua }
@@ -12,8 +12,8 @@ test("newConstraint: creates constraint with expected, actual, section, history"
     val c = newConstraint(tInt, tString, testSection, [])
     val exp: Type = luaExpr("c.expected")
     val act: Type = luaExpr("c.actual")
-    assertTrue(typeEquals(exp, tInt))
-    assertTrue(typeEquals(act, tString))
+    assertTrue(exp.typeEquals(tInt))
+    assertTrue(act.typeEquals(tString))
 }
 
 test("newConstraint: with unit section") {
@@ -31,9 +31,9 @@ test("constraintWithReplacedVariable: replaces variable in expected and actual")
     val replaced = constraintWithReplacedVariable(c, v, tInt)
     val exp: Type = luaExpr("replaced.expected")
     val act: Type = luaExpr("replaced.actual")
-    assertTrue(typeEquals(exp, tInt))
+    assertTrue(exp.typeEquals(tInt))
     val expectedAct = functionType([tInt, tString], [], 0)
-    assertTrue(typeEquals(act, expectedAct))
+    assertTrue(act.typeEquals(expectedAct))
 }
 
 test("constraintWithReplacedVariable: no-op when variable not present") {
@@ -42,8 +42,8 @@ test("constraintWithReplacedVariable: no-op when variable not present") {
     val replaced = constraintWithReplacedVariable(c, v, tBool)
     val exp: Type = luaExpr("replaced.expected")
     val act: Type = luaExpr("replaced.actual")
-    assertTrue(typeEquals(exp, tInt))
-    assertTrue(typeEquals(act, tString))
+    assertTrue(exp.typeEquals(tInt))
+    assertTrue(act.typeEquals(tString))
 }
 
 // --- unify: basic cases ---
@@ -77,8 +77,8 @@ test("unify: variable expected resolves to actual") {
     val sol: any = luaExpr("solutions[1]")
     val solVar: Type = luaExpr("sol.variable")
     val solRepl: Type = luaExpr("sol.replacement")
-    assertTrue(typeEquals(solVar, v))
-    assertTrue(typeEquals(solRepl, tInt))
+    assertTrue(solVar.typeEquals(v))
+    assertTrue(solRepl.typeEquals(tInt))
 }
 
 test("unify: variable actual resolves to expected") {
@@ -92,8 +92,8 @@ test("unify: variable actual resolves to expected") {
     val sol: any = luaExpr("solutions[1]")
     val solVar: Type = luaExpr("sol.variable")
     val solRepl: Type = luaExpr("sol.replacement")
-    assertTrue(typeEquals(solVar, v))
-    assertTrue(typeEquals(solRepl, tString))
+    assertTrue(solVar.typeEquals(v))
+    assertTrue(solRepl.typeEquals(tString))
 }
 
 // --- unify: primitive mismatch ---
@@ -163,7 +163,7 @@ test("unify: void return does NOT skip if actual is variable") {
     assertEqual(count, 1)
     val sol: any = luaExpr("solutions[1]")
     val solRepl: Type = luaExpr("sol.replacement")
-    assertTrue(typeEquals(solRepl, tUnit))
+    assertTrue(solRepl.typeEquals(tUnit))
 }
 
 // --- unify: record types ---
@@ -180,7 +180,7 @@ test("unify: matching record types") {
     assertEqual(count, 1)
     val sol: any = luaExpr("solutions[1]")
     val solRepl: Type = luaExpr("sol.replacement")
-    assertTrue(typeEquals(solRepl, tInt))
+    assertTrue(solRepl.typeEquals(tInt))
 }
 
 test("unify: record missing field throws error") {
@@ -210,7 +210,7 @@ test("unify: matching array types") {
     assertEqual(count, 1)
     val sol: any = luaExpr("solutions[1]")
     val solRepl: Type = luaExpr("sol.replacement")
-    assertTrue(typeEquals(solRepl, tInt))
+    assertTrue(solRepl.typeEquals(tInt))
 }
 
 // --- unify: sum types ---
@@ -251,8 +251,8 @@ test("unify: sum type with variable") {
     val sol: any = luaExpr("solutions[1]")
     val solVar: Type = luaExpr("sol.variable")
     val solRepl: Type = luaExpr("sol.replacement")
-    assertTrue(typeEquals(solVar, v))
-    assertTrue(typeEquals(solRepl, tString))
+    assertTrue(solVar.typeEquals(v))
+    assertTrue(solRepl.typeEquals(tString))
 }
 
 // --- unify: recursive types ---

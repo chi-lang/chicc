@@ -1,7 +1,7 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import chicc/types { Type, TypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, polyType, typeTag, typeName, typeLevel, typeEquals, isVariable, isPrimitive, isFunction, isRecord, isSum, isArray, typeTypes, typeFields, typeElementType, intTypeId, stringTypeId, boolTypeId, optionTypeId, sumCreate, typeTypesCount, typeFieldsCount, mapType }
+import chicc/types { Type, TypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, polyType, intTypeId, stringTypeId, boolTypeId, optionTypeId, sumCreate, mapType }
 import chicc/unification { Constraint, newConstraint, unify, ufNew, ufAllBindings, ufResolve, unifyWithUf }
-import chicc/ast { Target, DotTarget, localTarget, packageTarget, fieldDotTarget, localFnDotTarget, packageFnDotTarget, atomExpr, variableAccessExpr, fieldAccessExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, nameDeclarationExpr, assignmentExpr, blockExpr, fnExpr, createRecordExpr, createArrayExpr, interpolatedStringExpr, castExpr_, whileLoopExpr, breakExpr, continueExpr, isExpr, returnExpr, indexOpExpr, indexedAssignmentExpr, fieldAssignmentExpr, newFnParam, newExprField, exprExprType, exprKind, setExprType }
+import chicc/ast { Target, DotTarget, localTarget, packageTarget, fieldDotTarget, localFnDotTarget, packageFnDotTarget, atomExpr, variableAccessExpr, fieldAccessExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, nameDeclarationExpr, assignmentExpr, blockExpr, fnExpr, createRecordExpr, createArrayExpr, interpolatedStringExpr, castExpr_, whileLoopExpr, breakExpr, continueExpr, isExpr, returnExpr, indexOpExpr, indexedAssignmentExpr, fieldAssignmentExpr, newFnParam, newExprField }
 import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol }
 import chicc/source { newSection }
 import std/lang { luaExpr, embedLua }
@@ -24,7 +24,7 @@ test("typeTerm: atom int returns int type") {
     val constraints = newConstraints()
     val expr = atomExpr("42", tInt, testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tInt))
+    assertTrue(result.typeEquals(tInt))
 }
 
 test("typeTerm: atom string returns string type") {
@@ -32,7 +32,7 @@ test("typeTerm: atom string returns string type") {
     val constraints = newConstraints()
     val expr = atomExpr("hello", tString, testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tString))
+    assertTrue(result.typeEquals(tString))
 }
 
 test("typeTerm: atom bool returns bool type") {
@@ -40,7 +40,7 @@ test("typeTerm: atom bool returns bool type") {
     val constraints = newConstraints()
     val expr = atomExpr("true", tBool, testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tBool))
+    assertTrue(result.typeEquals(tBool))
 }
 
 test("typeTerm: atom sets exprType") {
@@ -49,7 +49,7 @@ test("typeTerm: atom sets exprType") {
     val expr = atomExpr("42", tInt, testSection)
     typeTerm(expr, 0, constraints)
     val exprType: any = luaExpr("expr.exprType")
-    assertTrue(typeEquals(exprType, tInt))
+    assertTrue(exprType.typeEquals(tInt))
 }
 
 // --- typeTerm: variable_access ---
@@ -60,7 +60,7 @@ test("typeTerm: variable_access returns defined type") {
     val constraints = newConstraints()
     val expr = variableAccessExpr(localTarget("x"), testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tInt))
+    assertTrue(result.typeEquals(tInt))
 }
 
 test("typeTerm: variable_access instantiates poly type") {
@@ -94,7 +94,7 @@ test("typeTerm: fn with typed params") {
     val count: int = luaExpr("#types")
     assertEqual(count, 2)
     val firstParam: any = luaExpr("types[1]")
-    assertTrue(typeEquals(firstParam, tInt))
+    assertTrue(firstParam.typeEquals(tInt))
 }
 
 test("typeTerm: fn with untyped params infers fresh vars") {
@@ -172,7 +172,7 @@ test("typeTerm: infix_op logical returns bool") {
     val right = atomExpr("false", tBool, testSection)
     val expr = infixOpExpr("&&", left, right, testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tBool))
+    assertTrue(result.typeEquals(tBool))
 }
 
 test("typeTerm: infix_op comparison returns bool") {
@@ -182,7 +182,7 @@ test("typeTerm: infix_op comparison returns bool") {
     val right = atomExpr("2", tInt, testSection)
     val expr = infixOpExpr("<", left, right, testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tBool))
+    assertTrue(result.typeEquals(tBool))
 }
 
 test("typeTerm: infix_op arithmetic returns fresh var") {
@@ -218,7 +218,7 @@ test("typeTerm: name_declaration with type annotation") {
     val value = atomExpr("42", tInt, testSection)
     val expr = nameDeclarationExpr(false, "x", false, tInt, value, testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tInt))
+    assertTrue(result.typeEquals(tInt))
 }
 
 // --- typeTerm: block ---
@@ -229,7 +229,7 @@ test("typeTerm: empty block returns unit") {
     val bodyExprs: any = luaExpr("{}")
     val expr = blockExpr(bodyExprs, testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tUnit))
+    assertTrue(result.typeEquals(tUnit))
 }
 
 test("typeTerm: block returns last expr type") {
@@ -242,7 +242,7 @@ test("typeTerm: block returns last expr type") {
     embedLua("table.insert(bodyExprs, e2)")
     val expr = blockExpr(bodyExprs, testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tInt))
+    assertTrue(result.typeEquals(tInt))
 }
 
 // --- typeTerm: prefix_op ---
@@ -253,7 +253,7 @@ test("typeTerm: prefix_op returns bool") {
     val inner = atomExpr("true", tBool, testSection)
     val expr = prefixOpExpr("!", inner, testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tBool))
+    assertTrue(result.typeEquals(tBool))
 }
 
 // --- typeTerm: break, continue ---
@@ -263,7 +263,7 @@ test("typeTerm: break returns unit") {
     val constraints = newConstraints()
     val expr = breakExpr(testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tUnit))
+    assertTrue(result.typeEquals(tUnit))
 }
 
 test("typeTerm: continue returns unit") {
@@ -271,7 +271,7 @@ test("typeTerm: continue returns unit") {
     val constraints = newConstraints()
     val expr = continueExpr(testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tUnit))
+    assertTrue(result.typeEquals(tUnit))
 }
 
 // --- typeTerm: return ---
@@ -282,7 +282,7 @@ test("typeTerm: return with value returns value type") {
     val value = atomExpr("42", tInt, testSection)
     val expr = returnExpr(value, testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tInt))
+    assertTrue(result.typeEquals(tInt))
 }
 
 test("typeTerm: return without value returns unit") {
@@ -290,7 +290,7 @@ test("typeTerm: return without value returns unit") {
     val constraints = newConstraints()
     val expr = returnExpr(unit, testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tUnit))
+    assertTrue(result.typeEquals(tUnit))
 }
 
 // --- typeTerm: cast ---
@@ -301,7 +301,7 @@ test("typeTerm: cast returns target type") {
     val inner = atomExpr("42", tInt, testSection)
     val expr = castExpr_(inner, tString, testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tString))
+    assertTrue(result.typeEquals(tString))
 }
 
 // --- typeTerm: is ---
@@ -312,7 +312,7 @@ test("typeTerm: is returns bool") {
     val inner = atomExpr("42", tInt, testSection)
     val expr = isExpr(inner, tString, testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tBool))
+    assertTrue(result.typeEquals(tBool))
 }
 
 // --- typeTerm: interpolated_string ---
@@ -325,7 +325,7 @@ test("typeTerm: interpolated_string returns string") {
     embedLua("table.insert(parts, part1)")
     val expr = interpolatedStringExpr(parts, testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tString))
+    assertTrue(result.typeEquals(tString))
 }
 
 // --- typeTerm: while_loop ---
@@ -337,7 +337,7 @@ test("typeTerm: while_loop returns unit") {
     val body = atomExpr("unit", tUnit, testSection)
     val expr = whileLoopExpr(cond, body, testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tUnit))
+    assertTrue(result.typeEquals(tUnit))
     // Should have a constraint that condition is bool
     val cCount: int = luaExpr("#constraints")
     assertTrue(cCount >= 1)
@@ -389,7 +389,7 @@ test("typeTerm: assignment returns variable type") {
     val value = atomExpr("42", tInt, testSection)
     val expr = assignmentExpr(localTarget("x"), value, testSection)
     val result = typeTerm(expr, 0, constraints)
-    assertTrue(typeEquals(result, tInt))
+    assertTrue(result.typeEquals(tInt))
 }
 
 // --- typeTerm: index_op ---
@@ -443,8 +443,8 @@ test("typeTerms: maps over expressions") {
     assertEqual(count, 2)
     val t1: any = luaExpr("results[1]")
     val t2: any = luaExpr("results[2]")
-    assertTrue(typeEquals(t1, tInt))
-    assertTrue(typeEquals(t2, tString))
+    assertTrue(t1.typeEquals(tInt))
+    assertTrue(t2.typeEquals(tString))
 }
 
 // --- typeTerm: field_assignment ---
@@ -498,7 +498,7 @@ test("incremental UF: name_declaration resolves type correctly") {
     val symTag: string = luaExpr("symType.tag or ''")
     assertEqual(symTag, "poly")
     val body: any = luaExpr("symType.body")
-    assertTrue(typeEquals(body, tInt))
+    assertTrue(body.typeEquals(tInt))
     typerSetUf(unit)
 }
 
@@ -549,11 +549,11 @@ test("incremental UF: multiple declarations accumulate bindings in shared UF") {
     val symA: any = icGetLocalSymbol("a")
     val symAType: any = luaExpr("symA.symbolType or symA")
     val symABody: any = luaExpr("symAType.body or symAType")
-    assertTrue(typeEquals(symABody, tInt))
+    assertTrue(symABody.typeEquals(tInt))
     val symB: any = icGetLocalSymbol("b")
     val symBType: any = luaExpr("symB.symbolType or symB")
     val symBBody: any = luaExpr("symBType.body or symBType")
-    assertTrue(typeEquals(symBBody, tString))
+    assertTrue(symBBody.typeEquals(tString))
     typerSetUf(unit)
 }
 

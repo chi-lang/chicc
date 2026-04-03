@@ -1,5 +1,5 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import chicc/types { Type, TypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, variableType, polyType, typeTag, typeName, typeLevel, typeEquals, isVariable, intTypeId, stringTypeId }
+import chicc/types { Type, TypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, variableType, polyType, intTypeId, stringTypeId }
 import chicc/unification { Constraint, newConstraint, unify }
 import chicc/ast { Target, DotTarget, localTarget, packageTarget, localFnDotTarget, packageFnDotTarget }
 import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol, ctGetLocalSymbol }
@@ -51,7 +51,7 @@ test("icDefineLocalSymbol: stores and retrieves type scheme") {
     val result = icGetLocalSymbol("x")
     assertTrue(result != unit)
     val t: Type = luaExpr("result")
-    assertTrue(typeEquals(t, tInt))
+    assertTrue(t.typeEquals(tInt))
 }
 
 test("icGetLocalSymbol: returns unit for unknown names") {
@@ -68,7 +68,7 @@ test("icDefineLocalSymbol: overwrites existing") {
     icDefineLocalSymbol("x", tString)
     val result = icGetLocalSymbol("x")
     val t: Type = luaExpr("result")
-    assertTrue(typeEquals(t, tString))
+    assertTrue(t.typeEquals(tString))
 }
 
 // --- icWithNewLocalScope tests ---
@@ -94,11 +94,11 @@ test("icWithNewLocalScope: inner scope hides parent symbols") {
         found
     }
     val t: Type = luaExpr("result")
-    assertTrue(typeEquals(t, tString))
+    assertTrue(t.typeEquals(tString))
     // After scope exits, outer x should be restored
     val outerResult = icGetLocalSymbol("x")
     val outerT: Type = luaExpr("outerResult")
-    assertTrue(typeEquals(outerT, tInt))
+    assertTrue(outerT.typeEquals(tInt))
 }
 
 test("icWithNewLocalScope: inner definitions not visible after") {
@@ -161,7 +161,7 @@ test("icUpdateSymbolType: local target updates current scope") {
     icUpdateSymbolType(tgt, tString)
     val result = icGetLocalSymbol("x")
     val t: Type = luaExpr("result")
-    assertTrue(typeEquals(t, tString))
+    assertTrue(t.typeEquals(tString))
 }
 
 test("icUpdateSymbolType: package target in same package updates package scope") {
@@ -175,7 +175,7 @@ test("icUpdateSymbolType: package target in same package updates package scope")
     // Since packageSymbols is the root of the chain, we check via getTargetType
     val result: any = luaExpr("icLocalSymbolsGet(icPackageSymbols, 'y')")
     val t: Type = luaExpr("result")
-    assertTrue(typeEquals(t, tBool))
+    assertTrue(t.typeEquals(tBool))
 }
 
 test("icUpdateSymbolType: package target in different package does nothing") {
@@ -187,7 +187,7 @@ test("icUpdateSymbolType: package target in different package does nothing") {
     // Should not have changed
     val result = icGetLocalSymbol("z")
     val t: Type = luaExpr("result")
-    assertTrue(typeEquals(t, tInt))
+    assertTrue(t.typeEquals(tInt))
 }
 
 // --- icGetTargetType tests ---
@@ -199,7 +199,7 @@ test("icGetTargetType: local target returns instantiated type") {
     val tgt = localTarget("x")
     val result = icGetTargetType(tgt, 0, unit)
     val t: Type = luaExpr("result")
-    assertTrue(typeEquals(t, tInt))
+    assertTrue(t.typeEquals(tInt))
 }
 
 test("icGetTargetType: local target with poly type instantiates") {
@@ -237,7 +237,7 @@ test("icGetTargetType: package target same package") {
     val tgt = packageTarget("test", "pkg", "foo")
     val result = icGetTargetType(tgt, 0, unit)
     val t: Type = luaExpr("result")
-    assertTrue(typeEquals(t, tString))
+    assertTrue(t.typeEquals(tString))
 }
 
 test("icGetTargetType: package target different package via ns") {
@@ -248,7 +248,7 @@ test("icGetTargetType: package target different package via ns") {
     val tgt = packageTarget("std", "lang", "println")
     val result = icGetTargetType(tgt, 0, unit)
     val t: Type = luaExpr("result")
-    assertTrue(typeEquals(t, tUnit))
+    assertTrue(t.typeEquals(tUnit))
 }
 
 test("icGetTargetType: package target not found throws error") {
@@ -273,7 +273,7 @@ test("icGetLocalSymbol: falls back to compileTables") {
     val result = icGetLocalSymbol("fromCT")
     assertTrue(result != unit)
     val t: Type = luaExpr("result")
-    assertTrue(typeEquals(t, tFloat))
+    assertTrue(t.typeEquals(tFloat))
 }
 
 // --- UFCS resolution tests ---
