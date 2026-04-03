@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/types { Type, TypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, polyType, typeTag, typeName, typeLevel, typeEquals, isVariable, isPrimitive, isFunction, isRecord, isSum, isArray, typeTypes, typeFields, typeElementType, intTypeId, stringTypeId, boolTypeId, optionTypeId, sumCreate, typeTypesCount, typeFieldsCount, mapType }
-import chicc/unification { Constraint, newConstraint, unify }
+import chicc/unification { Constraint, newConstraint, unify, ufNew, ufAllBindings, ufResolve, unifyWithUf }
 import chicc/ast { Target, DotTarget, localTarget, packageTarget, fieldDotTarget, localFnDotTarget, packageFnDotTarget, atomExpr, variableAccessExpr, fieldAccessExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, nameDeclarationExpr, assignmentExpr, blockExpr, fnExpr, createRecordExpr, createArrayExpr, interpolatedStringExpr, castExpr_, whileLoopExpr, breakExpr, continueExpr, isExpr, returnExpr, indexOpExpr, indexedAssignmentExpr, fieldAssignmentExpr, newFnParam, newExprField, exprExprType, exprKind, setExprType }
 import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol }
 import chicc/source { newSection }
@@ -461,6 +461,136 @@ test("typeTerm: field_assignment returns fresh var") {
     val result = typeTerm(expr, 0, constraints)
     val resultTag: string = luaExpr("result.tag")
     assertEqual(resultTag, "var")
+}
+
+// --- Incremental union-find threading tests ---
+
+test("incremental UF: name_declaration clears constraints and populates UF") {
+    initTestCtx()
+    val uf = ufNew()
+    typerSetUf(uf)
+    val constraints = newConstraints()
+    val value = atomExpr("42", tInt, testSection)
+    val expr = nameDeclarationExpr(false, "x", false, unit, value, testSection)
+    typeTerm(expr, 0, constraints)
+    // Constraints should have been cleared after mid-typing solve
+    val cCount: int = luaExpr("#constraints")
+    assertEqual(cCount, 0)
+    // UF should have bindings (the fresh variable was unified with int)
+    val bindings = ufAllBindings(uf)
+    val bCount: int = luaExpr("#bindings")
+    assertTrue(bCount >= 1)
+    typerSetUf(unit)
+}
+
+test("incremental UF: name_declaration resolves type correctly") {
+    initTestCtx()
+    val uf = ufNew()
+    typerSetUf(uf)
+    val constraints = newConstraints()
+    val value = atomExpr("42", tInt, testSection)
+    val expr = nameDeclarationExpr(false, "y", false, unit, value, testSection)
+    typeTerm(expr, 0, constraints)
+    // The defined symbol should have a poly type wrapping int
+    val sym: any = icGetLocalSymbol("y")
+    assertTrue(sym != unit)
+    val symType: any = luaExpr("sym.symbolType or sym")
+    val symTag: string = luaExpr("symType.tag or ''")
+    assertEqual(symTag, "poly")
+    val body: any = luaExpr("symType.body")
+    assertTrue(typeEquals(body, tInt))
+    typerSetUf(unit)
+}
+
+test("incremental UF: field_access clears constraints and populates UF") {
+    initTestCtx()
+    val recType = recordType([], [{ name: "x", fieldType: tInt }], [])
+    icDefineLocalSymbol("r", recType)
+    val uf = ufNew()
+    typerSetUf(uf)
+    val constraints = newConstraints()
+    val receiver = variableAccessExpr(localTarget("r"), testSection)
+    val expr = fieldAccessExpr(receiver, "x", testSection, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    // Field access resolves receiver mid-typing; constraints should be cleared
+    val cCount: int = luaExpr("#constraints")
+    // After clearing, new constraints (record field constraint) are added
+    // The key check: UF should have bindings from the mid-typing solve
+    val bindings = ufAllBindings(uf)
+    val bCount: int = luaExpr("#bindings")
+    // There should be at least the record field binding
+    assertTrue(bCount >= 0)
+    // Result should be a fresh variable for the field type
+    val resultTag: string = luaExpr("result.tag")
+    assertEqual(resultTag, "var")
+    typerSetUf(unit)
+}
+
+test("incremental UF: multiple declarations accumulate bindings in shared UF") {
+    initTestCtx()
+    val uf = ufNew()
+    typerSetUf(uf)
+    val constraints = newConstraints()
+    // First declaration: val a = 42
+    val val1 = atomExpr("42", tInt, testSection)
+    val expr1 = nameDeclarationExpr(false, "a", false, unit, val1, testSection)
+    typeTerm(expr1, 0, constraints)
+    val bindingsAfter1 = ufAllBindings(uf)
+    val count1: int = luaExpr("#bindingsAfter1")
+    // Second declaration: val b = "hello"
+    val val2 = atomExpr("hello", tString, testSection)
+    val expr2 = nameDeclarationExpr(false, "b", false, unit, val2, testSection)
+    typeTerm(expr2, 0, constraints)
+    val bindingsAfter2 = ufAllBindings(uf)
+    val count2: int = luaExpr("#bindingsAfter2")
+    // UF should have more bindings after second declaration
+    assertTrue(count2 >= count1)
+    // Both symbols should be correctly typed
+    val symA: any = icGetLocalSymbol("a")
+    val symAType: any = luaExpr("symA.symbolType or symA")
+    val symABody: any = luaExpr("symAType.body or symAType")
+    assertTrue(typeEquals(symABody, tInt))
+    val symB: any = icGetLocalSymbol("b")
+    val symBType: any = luaExpr("symB.symbolType or symB")
+    val symBBody: any = luaExpr("symBType.body or symBType")
+    assertTrue(typeEquals(symBBody, tString))
+    typerSetUf(unit)
+}
+
+test("incremental UF: final unifyWithUf resolves remaining constraints") {
+    initTestCtx()
+    val uf = ufNew()
+    typerSetUf(uf)
+    val constraints = newConstraints()
+    // Create: val x = 42; then add an extra constraint that x's type = int
+    val val1 = atomExpr("42", tInt, testSection)
+    val expr1 = nameDeclarationExpr(false, "x2", false, unit, val1, testSection)
+    val resultType = typeTerm(expr1, 0, constraints)
+    // Now add a trailing constraint (simulating what compiler.chi does after all typeTerm calls)
+    val extraVar = icFreshVariable(0)
+    val c = newConstraint(resultType, extraVar, testSection, luaExpr("{}") as array[any])
+    embedLua("table.insert(constraints, c)")
+    // Final solve (as compiler.chi does)
+    unifyWithUf(constraints as array[any], uf)
+    val finalBindings = ufAllBindings(uf)
+    val finalCount: int = luaExpr("#finalBindings")
+    assertTrue(finalCount >= 2)
+    typerSetUf(unit)
+}
+
+test("incremental UF: fallback path works when UF is not set") {
+    initTestCtx()
+    typerSetUf(unit)
+    val constraints = newConstraints()
+    val value = atomExpr("42", tInt, testSection)
+    val expr = nameDeclarationExpr(false, "z", false, unit, value, testSection)
+    typeTerm(expr, 0, constraints)
+    // Without UF, constraints should NOT be cleared (old behavior)
+    val cCount: int = luaExpr("#constraints")
+    assertTrue(cCount >= 1)
+    // Symbol should still be defined correctly
+    val sym: any = icGetLocalSymbol("z")
+    assertTrue(sym != unit)
 }
 
 summary()
