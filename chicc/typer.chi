@@ -238,13 +238,17 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
                     // field: leave callee as-is
                 } else if dtTag == "local_fn" {
                     // local_fn: prepend receiver, look up symbol, fill defaults
+                    // Use packageTarget (not localTarget) because UFCS functions are
+                    // package-level and need __P_ prefix when accessed inside functions.
                     val dotOp_receiver = luaExpr("dotOp.receiver") as any
                     embedLua("table.insert(term.callParams, 1, dotOp_receiver)")
                     val dtName = luaExpr("dotTarget.name") as string
                     val symbol = luaExpr("require('chicc/symbols').ctGetLocalSymbol(require('chicc/inference_context').icCompileTables, dtName)") as any
                      fillDefaultArgs(luaExpr("term.callParams") as any, symbol)
                      val memberSec = luaExpr("dotOp.memberSection") as Section | unit
-                     val newCallee = variableAccessExpr(localTarget(dtName), memberSec)
+                     val curMod = luaExpr("require('chicc/inference_context').icPkg.moduleName") as string
+                     val curPkg = luaExpr("require('chicc/inference_context').icPkg.packageName") as string
+                     val newCallee = variableAccessExpr(packageTarget(curMod, curPkg, dtName), memberSec)
                      val calleeType = luaExpr("dotOp.exprType") as Type | unit
                      setExprType(newCallee, calleeType)
                      embedLua("term.callee = newCallee")
