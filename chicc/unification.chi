@@ -112,36 +112,45 @@ pub fn ufFind(uf: any, variable: Type): Type {
         return variable
     }
     val boundType = bound as Type
+    var result: any = boundType
     if isVariable(boundType) {
         val bKey = varKey(boundType)
-        if bKey == key { return variable }
-        val root = ufFind(uf, boundType)
-        // Path compression
-        val rootIsNotBound = luaExpr("root ~= boundType") as bool
-        if rootIsNotBound {
-            embedLua("uf[key] = root")
+        if bKey == key {
+            result = variable
+        } else {
+            val root = ufFind(uf, boundType)
+            // Path compression
+            val rootIsNotBound = luaExpr("root ~= boundType") as bool
+            if rootIsNotBound {
+                embedLua("uf[key] = root")
+            }
+            result = root
         }
-        root
-    } else {
-        boundType
     }
+    result as Type
 }
 
 // Deeply resolve a type through the union-find, replacing all bound variables
 pub fn ufResolve(uf: any, t: Type): Type {
     val tag = typeTag(t)
+    var result: any = t
     if tag == "var" {
         val found = ufFind(uf, t)
         if isVariable(found) {
             val fKey = varKey(found)
             val tKey = varKey(t)
-            if fKey == tKey { return t }
-            return found
+            if fKey != tKey {
+                result = found
+            }
+        } else {
+            // Temporarily unbind variable to prevent infinite recursion on recursive types
+            val key = varKey(t)
+            embedLua("uf[key] = nil")
+            result = ufResolve(uf, found)
+            embedLua("uf[key] = found")
         }
-        // Resolve the bound type too, in case it contains variables
-        ufResolve(uf, found)
     } else if tag == "primitive" {
-        t
+        result = t
     } else if tag == "fn" {
         val types = typeTypes(t)
         val count = luaExpr("#types") as int
@@ -156,9 +165,7 @@ pub fn ufResolve(uf: any, t: Type): Type {
             i = i + 1
         }
         if changed {
-            functionType(newTypes as array[Type], typeTypeParams(t), typeDefaults(t))
-        } else {
-            t
+            result = functionType(newTypes as array[Type], typeTypeParams(t), typeDefaults(t))
         }
     } else if tag == "record" {
         val fields = typeFields(t)
@@ -180,9 +187,7 @@ pub fn ufResolve(uf: any, t: Type): Type {
             i = i + 1
         }
         if changed {
-            recordType(typeIds(t), newFields as array[RecordField], typeTypeParams(t))
-        } else {
-            t
+            result = recordType(typeIds(t), newFields as array[RecordField], typeTypeParams(t))
         }
     } else if tag == "sum" {
         val lhs = luaExpr("t.lhs") as Type
@@ -190,38 +195,29 @@ pub fn ufResolve(uf: any, t: Type): Type {
         val newLhs = ufResolve(uf, lhs)
         val newRhs = ufResolve(uf, rhs)
         if luaExpr("newLhs ~= lhs or newRhs ~= rhs") as bool {
-            sumCreate(typeIds(t), newLhs, newRhs, typeTypeParams(t))
-        } else {
-            t
+            result = sumCreate(typeIds(t), newLhs, newRhs, typeTypeParams(t))
         }
     } else if tag == "array" {
         val elem = luaExpr("t.elementType") as Type
         val newElem = ufResolve(uf, elem)
         if luaExpr("newElem ~= elem") as bool {
-            arrayType(newElem, typeTypeParams(t))
-        } else {
-            t
+            result = arrayType(newElem, typeTypeParams(t))
         }
     } else if tag == "recursive" {
         val inner = luaExpr("t.innerType") as Type
         val newInner = ufResolve(uf, inner)
         if luaExpr("newInner ~= inner") as bool {
             val v = luaExpr("t.variable") as Type
-            recursiveType(v, newInner)
-        } else {
-            t
+            result = recursiveType(v, newInner)
         }
     } else if tag == "poly" {
         val b = luaExpr("t.body") as Type
         val newBody = ufResolve(uf, b)
         if luaExpr("newBody ~= b") as bool {
-            polyType(typeLevel(t), newBody)
-        } else {
-            t
+            result = polyType(typeLevel(t), newBody)
         }
-    } else {
-        t
     }
+    result as Type
 }
 
 // Return all bindings from the union-find as solution entries {variable, replacement}
@@ -238,11 +234,11 @@ fn ufResolveConstraint(uf: any, c: Constraint): Constraint {
     val act = luaExpr("c.actual") as Type
     val newExp = ufResolve(uf, exp)
     val newAct = ufResolve(uf, act)
-    if luaExpr("newExp == exp and newAct == act") as bool {
-        c
-    } else {
-        { expected: newExp, actual: newAct, section: c.section, history: c.history }
+    var result: any = c
+    if luaExpr("newExp ~= exp or newAct ~= act") as bool {
+        result = { expected: newExp, actual: newAct, section: c.section, history: c.history }
     }
+    result as Constraint
 }
 
 // Helper to copy history and append a constraint
@@ -257,13 +253,6 @@ fn copyHistoryWith(history: array[any], constraint: any): array[any] {
     }
     embedLua("table.insert(newHistory, constraint)")
     newHistory
-}
-
-// Main unification function — uses union-find for O(N·α(N)) instead of O(N²)
-pub fn unify(constraints: array[any]): array[any] {
-    val uf = ufNew()
-    unifyWithUf(constraints, uf)
-    ufAllBindings(uf)
 }
 
 // Unify constraints using a pre-existing union-find
@@ -428,4 +417,11 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             throwMessage(typeMismatch(typeDescr(expected), typeDescr(actual), cp))
         }
     }
+}
+
+// Main unification function — uses union-find for O(N·α(N)) instead of O(N²)
+pub fn unify(constraints: array[any]): array[any] {
+    val uf = ufNew()
+    unifyWithUf(constraints, uf)
+    ufAllBindings(uf)
 }

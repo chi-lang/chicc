@@ -4,7 +4,7 @@ import std/lang { luaExpr, embedLua }
 import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tString, tAny, sumCreate, recordType, arrayType, functionType, typeEquals, polyType, mapType, sumListTypes, typeIdEquals, optionTypeId, instantiate }
 import chicc/source { Section, toCodePoint }
 import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget, atomExpr }
-import chicc/unification { unify, newConstraint }
+import chicc/unification { unify, unifyWithUf, ufNew, ufResolve, ufAllBindings, newConstraint }
 import chicc/inference_context { icFreshVariable, icGetTargetType, icWithNewLocalScope, icDefineLocalSymbol, icListLocalFunctionsForType, icListCurrentPackageFunctionsForType, icListTypesPackageFunctionsForType }
 
 // --- Helper: throw a typer error ---
@@ -97,6 +97,19 @@ var typerDefaultPlaceholder: any = unit
 
 pub fn typerResetDefaultPlaceholder() {
     typerDefaultPlaceholder = unit
+}
+
+// --- Shared union-find for incremental mid-typing solves ---
+// When set (non-unit), mid-typing unify() calls use this union-find incrementally
+// instead of re-solving all constraints from scratch.
+var typerUf: any = unit
+
+pub fn typerSetUf(uf: any) {
+    typerUf = uf
+}
+
+pub fn typerGetUf(): any {
+    typerUf
 }
 
 // --- Forward declaration for typeTerm (needed before typeTerms references it) ---
@@ -289,8 +302,14 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
         // 8. field_access: type receiver, solve constraints, check field or UFCS
         val receiver = luaExpr("term.receiver") as any
         val receiverType = typeTerm(receiver, level, constraints)
-        val solutions = unify(constraints as array[any])
-        val finalReceiverType = mapType(receiverType as Type, solutions)
+        val finalReceiverType: any = if typerUf != unit {
+            unifyWithUf(constraints as array[any], typerUf)
+            embedLua("for i = 1, #constraints do constraints[i] = nil end")
+            ufResolve(typerUf, receiverType as Type)
+        } else {
+            val solutions = unify(constraints as array[any])
+            mapType(receiverType as Type, solutions)
+        }
         val fieldName = luaExpr("term.fieldName") as string
         val memberSection = luaExpr("term.memberSection") as any
 
@@ -367,9 +386,15 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
         val valueType = typeTerm(value, level + 1, constraints)
         val valueSection = luaExpr("value.section") as any
         addConstraint(constraints, expectedType, valueType, valueSection)
-        val solution = unify(constraints as array[any])
-        val mappedType = mapType(expectedType as Type, solution)
-        val polymorphicType = polyType(level, mappedType)
+        val mappedType: any = if typerUf != unit {
+            unifyWithUf(constraints as array[any], typerUf)
+            embedLua("for i = 1, #constraints do constraints[i] = nil end")
+            ufResolve(typerUf, expectedType as Type)
+        } else {
+            val solution = unify(constraints as array[any])
+            mapType(expectedType as Type, solution)
+        }
+        val polymorphicType = polyType(level, mappedType as Type)
         val declName = luaExpr("term.declName") as string
         icDefineLocalSymbol(declName, polymorphicType)
         expectedType
@@ -438,8 +463,14 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
         if forInit != unit {
             initType = typeTerm(forInit, level, constraints)
         }
-        val solution = unify(constraints as array[any])
-        val finalIterableType = mapType(iterableType as Type, solution)
+        val finalIterableType: any = if typerUf != unit {
+            unifyWithUf(constraints as array[any], typerUf)
+            embedLua("for i = 1, #constraints do constraints[i] = nil end")
+            ufResolve(typerUf, iterableType as Type)
+        } else {
+            val solution = unify(constraints as array[any])
+            mapType(iterableType as Type, solution)
+        }
         val forVars = luaExpr("term.forVars") as any
         val varCount = luaExpr("#forVars") as int
         val varTypes = luaExpr("{}") as any

@@ -563,11 +563,12 @@ pub fn compile(source: string, ns: any): CompilationResult {
         fi = fi + 1
     }
 
-    // Type-check non-function code as a group
+    // Type-check non-function code as a group (with shared union-find for incremental solving)
     val codeConstraints = luaExpr("{}") as any
-    embedLua("__chicc_tc_ok, __chicc_tc_err = pcall(function() local _typer = require('chicc/typer'); local _unif = require('chicc/unification'); local codeCount = #code; for i = 1, codeCount do _typer.typeTerm(code[i], 0, codeConstraints) end; local solutions = _unif.unify(codeConstraints); for i = 1, codeCount do __P_.replaceTypes(code[i], solutions) end end)")
+    embedLua("__chicc_tc_ok, __chicc_tc_err = pcall(function() local _typer = require('chicc/typer'); local _unif = require('chicc/unification'); local uf = _unif.ufNew(); _typer.typerSetUf(uf); local codeCount = #code; for i = 1, codeCount do _typer.typeTerm(code[i], 0, codeConstraints) end; _unif.unifyWithUf(codeConstraints, uf); local solutions = _unif.ufAllBindings(uf); for i = 1, codeCount do __P_.replaceTypes(code[i], solutions) end; _typer.typerSetUf(nil) end)")
     val tcOk = luaExpr("__chicc_tc_ok") as bool
     if tcOk == false {
+        embedLua("require('chicc/typer').typerSetUf(nil)")
         val isTcMsg = luaExpr("type(__chicc_tc_err) == 'table' and __chicc_tc_err.code ~= nil") as bool
         if isTcMsg {
             embedLua("table.insert(resultMessages, __chicc_tc_err)")
@@ -576,13 +577,14 @@ pub fn compile(source: string, ns: any): CompilationResult {
         }
     }
 
-    // Type-check each function independently
+    // Type-check each function independently (with shared union-find for incremental solving)
     fi = 1
     while fi <= fnCount {
         val fn_ = luaExpr("functions[fi]") as any
-        embedLua("__chicc_fn_ok, __chicc_fn_err = pcall(function() local _typer = require('chicc/typer'); local _unif = require('chicc/unification'); local constraints = {}; _typer.typeTerm(fn_, 0, constraints); local solutions = _unif.unify(constraints); __P_.replaceTypes(fn_, solutions) end)")
+        embedLua("__chicc_fn_ok, __chicc_fn_err = pcall(function() local _typer = require('chicc/typer'); local _unif = require('chicc/unification'); local uf = _unif.ufNew(); _typer.typerSetUf(uf); local constraints = {}; _typer.typeTerm(fn_, 0, constraints); _unif.unifyWithUf(constraints, uf); local solutions = _unif.ufAllBindings(uf); __P_.replaceTypes(fn_, solutions); _typer.typerSetUf(nil) end)")
         val fnOk = luaExpr("__chicc_fn_ok") as bool
         if fnOk == false {
+            embedLua("require('chicc/typer').typerSetUf(nil)")
             val isFnMsg = luaExpr("type(__chicc_fn_err) == 'table' and __chicc_fn_err.code ~= nil") as bool
             if isFnMsg {
                 embedLua("table.insert(resultMessages, __chicc_fn_err)")
