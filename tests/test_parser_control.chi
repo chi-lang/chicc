@@ -1,7 +1,7 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/token { Token, newToken, TK_INT, TK_FLOAT, TK_STRING, TK_TRUE, TK_FALSE, TK_UNIT, TK_ID, TK_PLUS, TK_MINUS, TK_STAR, TK_SLASH, TK_PERCENT, TK_EQEQ, TK_NEQ, TK_LT, TK_LTEQ, TK_GT, TK_GTEQ, TK_NOT, TK_AND, TK_OR, TK_AMP, TK_PIPE, TK_LSHIFT, TK_RSHIFT, TK_WEAVE, TK_UNDERSCORE, TK_DOT, TK_COMMA, TK_COLON, TK_EQ, TK_PLUSEQ, TK_MINUSEQ, TK_STAREQ, TK_SLASHEQ, TK_LPAREN, TK_RPAREN, TK_LBRACE, TK_RBRACE, TK_LBRACKET, TK_RBRACKET, TK_RETURN, TK_BREAK, TK_CONTINUE, TK_EOF, TK_NEWLINE, TK_FN, TK_VAL, TK_VAR, TK_PUB, TK_ARROW, TK_IF, TK_ELSE, TK_WHILE, TK_FOR, TK_IN, TK_WHEN }
 import chicc/parser { newParser, parseExpression, parseExpr }
-import chicc/parse_ast { paTag, paLongValue, paFloatValue, paBoolValue, paStringValue, paVariableName, paOp, paLeft, paRight, paValue, paReturnValue, paArrayValues, paRecordFields, paCallee, paArguments, paReceiverName, paMemberName, paReceiver, paVariable, paIndexExpr, paIndexValue, paCondition, paThenBody, paElseBody, paLoopBody, paForVars, paIterable, paForState, paForInit, paForBody, paWhenCases, paElseCase, paBody }
+import chicc/parse_ast { ParseAst }
 import std/lang { luaExpr }
 
 fn tk(kind: int, value: string): Token { newToken(kind, value, unit) }
@@ -20,13 +20,13 @@ test("parse if without else") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseIfElse")
-    assertEqual(paTag(paCondition(result)), "BoolValue")
-    assertTrue(paBoolValue(paCondition(result)))
-    val thenB = paThenBody(result)
-    assertEqual(paTag(thenB), "ParseBlock")
-    assertEqual(paBody(thenB).size(), 1)
-    assertTrue(paElseBody(result) == unit)
+    assertEqual(result.paTag(), "ParseIfElse")
+    assertEqual(paTag(result.paCondition()), "BoolValue")
+    assertTrue(paBoolValue(result.paCondition()))
+    val thenB = result.paThenBody()
+    assertEqual(thenB.paTag(), "ParseBlock")
+    assertEqual(thenB.paBody().size(), 1)
+    assertTrue(result.paElseBody() == unit)
 }
 
 test("parse if with else") {
@@ -40,14 +40,14 @@ test("parse if with else") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseIfElse")
-    val thenB = paThenBody(result)
-    assertEqual(paTag(thenB), "ParseBlock")
-    assertEqual(paBody(thenB).size(), 1)
-    val elseB = paElseBody(result)
+    assertEqual(result.paTag(), "ParseIfElse")
+    val thenB = result.paThenBody()
+    assertEqual(thenB.paTag(), "ParseBlock")
+    assertEqual(thenB.paBody().size(), 1)
+    val elseB = result.paElseBody()
     assertTrue(elseB != unit)
-    assertEqual(paTag(elseB), "ParseBlock")
-    assertEqual(paBody(elseB).size(), 1)
+    assertEqual(elseB.paTag(), "ParseBlock")
+    assertEqual(elseB.paBody().size(), 1)
 }
 
 test("parse if with else if") {
@@ -62,13 +62,13 @@ test("parse if with else if") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseIfElse")
-    assertEqual(paVariableName(paCondition(result)), "x")
-    val elseB = paElseBody(result)
+    assertEqual(result.paTag(), "ParseIfElse")
+    assertEqual(paVariableName(result.paCondition()), "x")
+    val elseB = result.paElseBody()
     assertTrue(elseB != unit)
     // else if produces a nested ParseIfElse
-    assertEqual(paTag(elseB), "ParseIfElse")
-    assertEqual(paVariableName(paCondition(elseB)), "y")
+    assertEqual(elseB.paTag(), "ParseIfElse")
+    assertEqual(paVariableName(elseB.paCondition()), "y")
 }
 
 test("parse if else if else") {
@@ -85,14 +85,14 @@ test("parse if else if else") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseIfElse")
-    assertEqual(paVariableName(paCondition(result)), "a")
-    val elseIfNode = paElseBody(result)
-    assertEqual(paTag(elseIfNode), "ParseIfElse")
-    assertEqual(paVariableName(paCondition(elseIfNode)), "b")
-    val finalElse = paElseBody(elseIfNode)
-    assertEqual(paTag(finalElse), "ParseBlock")
-    assertEqual(paBody(finalElse).size(), 1)
+    assertEqual(result.paTag(), "ParseIfElse")
+    assertEqual(paVariableName(result.paCondition()), "a")
+    val elseIfNode = result.paElseBody()
+    assertEqual(elseIfNode.paTag(), "ParseIfElse")
+    assertEqual(paVariableName(elseIfNode.paCondition()), "b")
+    val finalElse = elseIfNode.paElseBody()
+    assertEqual(finalElse.paTag(), "ParseBlock")
+    assertEqual(finalElse.paBody().size(), 1)
 }
 
 test("parse if with expression condition") {
@@ -104,10 +104,10 @@ test("parse if with expression condition") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseIfElse")
-    val cond = paCondition(result)
-    assertEqual(paTag(cond), "ParseBinaryOp")
-    assertEqual(paOp(cond), ">")
+    assertEqual(result.paTag(), "ParseIfElse")
+    val cond = result.paCondition()
+    assertEqual(cond.paTag(), "ParseBinaryOp")
+    assertEqual(cond.paOp(), ">")
 }
 
 test("parse if with newlines before else") {
@@ -122,10 +122,10 @@ test("parse if with newlines before else") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseIfElse")
-    val elseB = paElseBody(result)
+    assertEqual(result.paTag(), "ParseIfElse")
+    val elseB = result.paElseBody()
     assertTrue(elseB != unit)
-    assertEqual(paTag(elseB), "ParseBlock")
+    assertEqual(elseB.paTag(), "ParseBlock")
 }
 
 // ==============================
@@ -141,12 +141,12 @@ test("parse while loop basic") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseWhile")
-    assertEqual(paTag(paCondition(result)), "BoolValue")
-    assertTrue(paBoolValue(paCondition(result)))
-    val body = paLoopBody(result)
-    assertEqual(paTag(body), "ParseBlock")
-    assertEqual(paBody(body).size(), 1)
+    assertEqual(result.paTag(), "ParseWhile")
+    assertEqual(paTag(result.paCondition()), "BoolValue")
+    assertTrue(paBoolValue(result.paCondition()))
+    val body = result.paLoopBody()
+    assertEqual(body.paTag(), "ParseBlock")
+    assertEqual(body.paBody().size(), 1)
 }
 
 test("parse while with expression condition") {
@@ -158,10 +158,10 @@ test("parse while with expression condition") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseWhile")
-    val cond = paCondition(result)
-    assertEqual(paTag(cond), "ParseBinaryOp")
-    assertEqual(paOp(cond), "<")
+    assertEqual(result.paTag(), "ParseWhile")
+    val cond = result.paCondition()
+    assertEqual(cond.paTag(), "ParseBinaryOp")
+    assertEqual(cond.paOp(), "<")
 }
 
 test("parse while with multi-line body") {
@@ -177,10 +177,10 @@ test("parse while with multi-line body") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseWhile")
-    val body = paLoopBody(result)
-    assertEqual(paTag(body), "ParseBlock")
-    assertEqual(paBody(body).size(), 3)
+    assertEqual(result.paTag(), "ParseWhile")
+    val body = result.paLoopBody()
+    assertEqual(body.paTag(), "ParseBlock")
+    assertEqual(body.paBody().size(), 3)
 }
 
 // ==============================
@@ -196,15 +196,15 @@ test("parse for with single var") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseFor")
-    assertEqual(paForVars(result).size(), 1)
-    assertEqual(paForVars(result)[1], "x")
-    assertEqual(paVariableName(paIterable(result)), "arr")
-    assertTrue(paForState(result) == unit)
-    assertTrue(paForInit(result) == unit)
-    val body = paForBody(result)
-    assertEqual(paTag(body), "ParseBlock")
-    assertEqual(paBody(body).size(), 1)
+    assertEqual(result.paTag(), "ParseFor")
+    assertEqual(result.paForVars().size(), 1)
+    assertEqual(result.paForVars()[1], "x")
+    assertEqual(paVariableName(result.paIterable()), "arr")
+    assertTrue(result.paForState() == unit)
+    assertTrue(result.paForInit() == unit)
+    val body = result.paForBody()
+    assertEqual(body.paTag(), "ParseBlock")
+    assertEqual(body.paBody().size(), 1)
 }
 
 test("parse for with two vars") {
@@ -217,10 +217,10 @@ test("parse for with two vars") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseFor")
-    assertEqual(paForVars(result).size(), 2)
-    assertEqual(paForVars(result)[1], "idx")
-    assertEqual(paForVars(result)[2], "item")
+    assertEqual(result.paTag(), "ParseFor")
+    assertEqual(result.paForVars().size(), 2)
+    assertEqual(result.paForVars()[1], "idx")
+    assertEqual(result.paForVars()[2], "item")
 }
 
 test("parse for with state and init") {
@@ -235,14 +235,14 @@ test("parse for with state and init") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseFor")
-    assertEqual(paForVars(result).size(), 1)
-    assertEqual(paForVars(result)[1], "x")
-    assertEqual(paVariableName(paIterable(result)), "gen")
-    assertTrue(paForState(result) != unit)
-    assertEqual(paVariableName(paForState(result)), "state")
-    assertTrue(paForInit(result) != unit)
-    assertEqual(paVariableName(paForInit(result)), "initVal")
+    assertEqual(result.paTag(), "ParseFor")
+    assertEqual(result.paForVars().size(), 1)
+    assertEqual(result.paForVars()[1], "x")
+    assertEqual(paVariableName(result.paIterable()), "gen")
+    assertTrue(result.paForState() != unit)
+    assertEqual(paVariableName(result.paForState()), "state")
+    assertTrue(result.paForInit() != unit)
+    assertEqual(paVariableName(result.paForInit()), "initVal")
 }
 
 test("parse for with multi-line body") {
@@ -257,10 +257,10 @@ test("parse for with multi-line body") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseFor")
-    val body = paForBody(result)
-    assertEqual(paTag(body), "ParseBlock")
-    assertEqual(paBody(body).size(), 2)
+    assertEqual(result.paTag(), "ParseFor")
+    val body = result.paForBody()
+    assertEqual(body.paTag(), "ParseBlock")
+    assertEqual(body.paBody().size(), 2)
 }
 
 // ==============================
@@ -278,13 +278,13 @@ test("parse when with single case") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseWhen")
-    assertEqual(paWhenCases(result).size(), 1)
-    val c1 = paWhenCases(result)[1]
+    assertEqual(result.paTag(), "ParseWhen")
+    assertEqual(result.paWhenCases().size(), 1)
+    val c1 = result.paWhenCases()[1]
     assertEqual(paTag(c1.condition), "BoolValue")
     assertTrue(paBoolValue(c1.condition))
     assertEqual(paLongValue(c1.body), 1)
-    assertTrue(paElseCase(result) == unit)
+    assertTrue(result.paElseCase() == unit)
 }
 
 test("parse when with multiple cases") {
@@ -300,12 +300,12 @@ test("parse when with multiple cases") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseWhen")
-    assertEqual(paWhenCases(result).size(), 2)
-    val c1 = paWhenCases(result)[1]
+    assertEqual(result.paTag(), "ParseWhen")
+    assertEqual(result.paWhenCases().size(), 2)
+    val c1 = result.paWhenCases()[1]
     assertEqual(paTag(c1.condition), "ParseBinaryOp")
     assertEqual(paOp(c1.condition), ">")
-    val c2 = paWhenCases(result)[2]
+    val c2 = result.paWhenCases()[2]
     assertEqual(paTag(c2.condition), "ParseBinaryOp")
     assertEqual(paOp(c2.condition), "<")
 }
@@ -323,9 +323,9 @@ test("parse when with else case") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseWhen")
-    assertEqual(paWhenCases(result).size(), 1)
-    val ec = paElseCase(result)
+    assertEqual(result.paTag(), "ParseWhen")
+    assertEqual(result.paWhenCases().size(), 1)
+    val ec = result.paElseCase()
     assertTrue(ec != unit)
     assertEqual(paLongValue(ec.body), 0)
 }
@@ -345,9 +345,9 @@ test("parse when with cases and else") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseWhen")
-    assertEqual(paWhenCases(result).size(), 2)
-    val ec = paElseCase(result)
+    assertEqual(result.paTag(), "ParseWhen")
+    assertEqual(result.paWhenCases().size(), 2)
+    val ec = result.paElseCase()
     assertTrue(ec != unit)
     assertEqual(paLongValue(ec.body), 30)
 }
@@ -365,8 +365,8 @@ test("parse when with newlines") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(paTag(result), "ParseWhen")
-    assertEqual(paWhenCases(result).size(), 1)
+    assertEqual(result.paTag(), "ParseWhen")
+    assertEqual(result.paWhenCases().size(), 1)
 }
 
 summary()

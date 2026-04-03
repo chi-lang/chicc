@@ -1,7 +1,7 @@
 package chicc/symbols
 import std/lang { luaExpr, embedLua }
 import chicc/types { Type, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType, occursIn }
-import chicc/parse_ast { trTag, trName, trTypeParameters, trArgumentTypeRefs, trReturnType, trFields, trLhs, trRhs, trBaseType }
+import chicc/parse_ast { TypeRef }
 
 // --- Symbol: package-level symbol ---
 
@@ -263,12 +263,12 @@ pub fn arrayContains(arr: array[string], name: string): bool {
 }
 
 pub fn resolveType(typeTable: TypeTable, typeSchemeVars: array[string], ref: any, level: int): any {
-    val tag = trTag(ref)
+    val tag = ref.trTag()
 
     if tag == "TypeParameterRef" {
-        variableType(trName(ref), level)
+        variableType(ref.trName(), level)
     } else if tag == "TypeNameRef" {
-        val name = trName(ref)
+        val name = ref.trName()
         if arrayContains(typeSchemeVars, name) {
             variableType(name, level)
         } else if name == "any" {
@@ -294,17 +294,17 @@ pub fn resolveType(typeTable: TypeTable, typeSchemeVars: array[string], ref: any
             }
         }
     } else if tag == "TypeConstructorRef" {
-        val baseRef = trBaseType(ref)
-        val baseTag = trTag(baseRef)
-        val typeParams = trTypeParameters(ref)
+        val baseRef = ref.trBaseType()
+        val baseTag = baseRef.trTag()
+        val typeParams = ref.trTypeParameters()
         // Special case: array[T]
-        if baseTag == "TypeNameRef" && trName(baseRef) == "array" {
+        if baseTag == "TypeNameRef" && baseRef.trName() == "array" {
             val elemRef = typeParams[1]
             val elemType = resolveType(typeTable, typeSchemeVars, elemRef, level)
             arrayType(elemType, [])
         } else {
             // General type constructor: resolve base type alias and substitute type params
-            val baseName = if baseTag == "TypeNameRef" { trName(baseRef) } else { "" }
+            val baseName = if baseTag == "TypeNameRef" { baseRef.trName() } else { "" }
             val alias: any = if baseName != "" { ttGet(typeTable, baseName) } else { unit }
             if alias != unit {
                 val aliasType: any = luaExpr("alias.aliasType")
@@ -332,8 +332,8 @@ pub fn resolveType(typeTable: TypeTable, typeSchemeVars: array[string], ref: any
             }
         }
     } else if tag == "FunctionTypeRef" {
-        val retRef = trReturnType(ref)
-        val argRefs = trArgumentTypeRefs(ref)
+        val retRef = ref.trReturnType()
+        val argRefs = ref.trArgumentTypeRefs()
         val resolvedReturnType = resolveType(typeTable, typeSchemeVars, retRef, level)
         var resolvedTypes: array[any] = []
         var i = 1
@@ -347,13 +347,13 @@ pub fn resolveType(typeTable: TypeTable, typeSchemeVars: array[string], ref: any
         resolvedTypes.push(resolvedReturnType)
         functionType(resolvedTypes as array[Type], typeSchemeVars, 0)
     } else if tag == "SumTypeRef" {
-        val lhsRef = trLhs(ref)
-        val rhsRef = trRhs(ref)
+        val lhsRef = ref.trLhs()
+        val rhsRef = ref.trRhs()
         val lhsType = resolveType(typeTable, typeSchemeVars, lhsRef, level)
         val rhsType = resolveType(typeTable, typeSchemeVars, rhsRef, level)
         sumType([], lhsType, rhsType, typeSchemeVars)
     } else if tag == "RecordTypeRef" {
-        val fieldRefs = trFields(ref)
+        val fieldRefs = ref.trFields()
         var resolvedFields: array[any] = []
         var i = 1
         val fieldCount = fieldRefs.size()

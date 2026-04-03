@@ -2,7 +2,7 @@ import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/lexer { tokenize }
 import chicc/token { TK_EOF }
 import chicc/parser { newParser, parseTypeRefImpl, parseTypeAliasImpl, parseVariantTypeDef, peek }
-import chicc/parse_ast { trTag, trName, trModuleName, trPackageName, trTypeParameters, trArgumentTypeRefs, trReturnType, trFields, trLhs, trRhs, trBaseType }
+import chicc/parse_ast { TypeRef }
 import std/lang { luaExpr }
 
 // Helper to get field name from TypeRefField
@@ -18,10 +18,10 @@ test("parseTypeRef - simple type name") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "TypeNameRef")
-    assertEqual(trName(tr), "int")
-    assertEqual(trModuleName(tr), "")
-    assertEqual(trPackageName(tr), "")
+    assertEqual(tr.trTag(), "TypeNameRef")
+    assertEqual(tr.trName(), "int")
+    assertEqual(tr.trModuleName(), "")
+    assertEqual(tr.trPackageName(), "")
 }
 
 test("parseTypeRef - string type") {
@@ -29,8 +29,8 @@ test("parseTypeRef - string type") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "TypeNameRef")
-    assertEqual(trName(tr), "string")
+    assertEqual(tr.trTag(), "TypeNameRef")
+    assertEqual(tr.trName(), "string")
 }
 
 test("parseTypeRef - bool type") {
@@ -38,8 +38,8 @@ test("parseTypeRef - bool type") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "TypeNameRef")
-    assertEqual(trName(tr), "bool")
+    assertEqual(tr.trTag(), "TypeNameRef")
+    assertEqual(tr.trName(), "bool")
 }
 
 test("parseTypeRef - custom type name") {
@@ -47,8 +47,8 @@ test("parseTypeRef - custom type name") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "TypeNameRef")
-    assertEqual(trName(tr), "MyType")
+    assertEqual(tr.trTag(), "TypeNameRef")
+    assertEqual(tr.trName(), "MyType")
 }
 
 // -- unit type --
@@ -58,8 +58,8 @@ test("parseTypeRef - unit") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "TypeNameRef")
-    assertEqual(trName(tr), "unit")
+    assertEqual(tr.trTag(), "TypeNameRef")
+    assertEqual(tr.trName(), "unit")
 }
 
 // -- Generic types --
@@ -69,11 +69,11 @@ test("parseTypeRef - generic single param") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "TypeConstructorRef")
-    val base = trBaseType(tr)
-    assertEqual(trTag(base), "TypeNameRef")
-    assertEqual(trName(base), "array")
-    val tps = trTypeParameters(tr)
+    assertEqual(tr.trTag(), "TypeConstructorRef")
+    val base = tr.trBaseType()
+    assertEqual(base.trTag(), "TypeNameRef")
+    assertEqual(base.trName(), "array")
+    val tps = tr.trTypeParameters()
     assertEqual(tps.size(), 1)
     assertEqual(trTag(tps[1]), "TypeNameRef")
     assertEqual(trName(tps[1]), "int")
@@ -84,10 +84,10 @@ test("parseTypeRef - generic multiple params") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "TypeConstructorRef")
-    val base = trBaseType(tr)
-    assertEqual(trName(base), "Map")
-    val tps = trTypeParameters(tr)
+    assertEqual(tr.trTag(), "TypeConstructorRef")
+    val base = tr.trBaseType()
+    assertEqual(base.trName(), "Map")
+    val tps = tr.trTypeParameters()
     assertEqual(tps.size(), 2)
     assertEqual(trName(tps[1]), "string")
     assertEqual(trName(tps[2]), "int")
@@ -98,13 +98,13 @@ test("parseTypeRef - nested generic") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "TypeConstructorRef")
-    assertEqual(trName(trBaseType(tr)), "array")
-    val inner = trTypeParameters(tr)[1]
-    assertEqual(trTag(inner), "TypeConstructorRef")
-    assertEqual(trName(trBaseType(inner)), "array")
-    val innerParam = trTypeParameters(inner)[1]
-    assertEqual(trName(innerParam), "int")
+    assertEqual(tr.trTag(), "TypeConstructorRef")
+    assertEqual(trName(tr.trBaseType()), "array")
+    val inner = tr.trTypeParameters()[1]
+    assertEqual(inner.trTag(), "TypeConstructorRef")
+    assertEqual(trName(inner.trBaseType()), "array")
+    val innerParam = inner.trTypeParameters()[1]
+    assertEqual(innerParam.trName(), "int")
 }
 
 // -- Function types --
@@ -114,10 +114,10 @@ test("parseTypeRef - function type no args") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "FunctionTypeRef")
-    assertEqual(trArgumentTypeRefs(tr).size(), 0)
-    assertEqual(trTag(trReturnType(tr)), "TypeNameRef")
-    assertEqual(trName(trReturnType(tr)), "int")
+    assertEqual(tr.trTag(), "FunctionTypeRef")
+    assertEqual(tr.trArgumentTypeRefs().size(), 0)
+    assertEqual(trTag(tr.trReturnType()), "TypeNameRef")
+    assertEqual(trName(tr.trReturnType()), "int")
 }
 
 test("parseTypeRef - function type single arg") {
@@ -125,11 +125,11 @@ test("parseTypeRef - function type single arg") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "FunctionTypeRef")
-    val args = trArgumentTypeRefs(tr)
+    assertEqual(tr.trTag(), "FunctionTypeRef")
+    val args = tr.trArgumentTypeRefs()
     assertEqual(args.size(), 1)
     assertEqual(trName(args[1]), "int")
-    assertEqual(trName(trReturnType(tr)), "string")
+    assertEqual(trName(tr.trReturnType()), "string")
 }
 
 test("parseTypeRef - function type multiple args") {
@@ -137,12 +137,12 @@ test("parseTypeRef - function type multiple args") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "FunctionTypeRef")
-    val args = trArgumentTypeRefs(tr)
+    assertEqual(tr.trTag(), "FunctionTypeRef")
+    val args = tr.trArgumentTypeRefs()
     assertEqual(args.size(), 2)
     assertEqual(trName(args[1]), "int")
     assertEqual(trName(args[2]), "string")
-    assertEqual(trName(trReturnType(tr)), "bool")
+    assertEqual(trName(tr.trReturnType()), "bool")
 }
 
 test("parseTypeRef - function type unit return") {
@@ -150,8 +150,8 @@ test("parseTypeRef - function type unit return") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "FunctionTypeRef")
-    assertEqual(trName(trReturnType(tr)), "unit")
+    assertEqual(tr.trTag(), "FunctionTypeRef")
+    assertEqual(trName(tr.trReturnType()), "unit")
 }
 
 // -- Record types --
@@ -161,8 +161,8 @@ test("parseTypeRef - record type single field") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "RecordTypeRef")
-    val fields = trFields(tr)
+    assertEqual(tr.trTag(), "RecordTypeRef")
+    val fields = tr.trFields()
     assertEqual(fields.size(), 1)
     assertEqual(trfName(fields[1]), "name")
     assertEqual(trName(trfTypeRef(fields[1])), "string")
@@ -173,8 +173,8 @@ test("parseTypeRef - record type multiple fields") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "RecordTypeRef")
-    val fields = trFields(tr)
+    assertEqual(tr.trTag(), "RecordTypeRef")
+    val fields = tr.trFields()
     assertEqual(fields.size(), 2)
     assertEqual(trfName(fields[1]), "name")
     assertEqual(trName(trfTypeRef(fields[1])), "string")
@@ -189,9 +189,9 @@ test("parseTypeRef - sum type two options") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "SumTypeRef")
-    assertEqual(trName(trLhs(tr)), "int")
-    assertEqual(trName(trRhs(tr)), "string")
+    assertEqual(tr.trTag(), "SumTypeRef")
+    assertEqual(trName(tr.trLhs()), "int")
+    assertEqual(trName(tr.trRhs()), "string")
 }
 
 test("parseTypeRef - sum type three options") {
@@ -200,12 +200,12 @@ test("parseTypeRef - sum type three options") {
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
     // Should be left-associative: (int | string) | bool
-    assertEqual(trTag(tr), "SumTypeRef")
-    assertEqual(trTag(trLhs(tr)), "SumTypeRef")
-    assertEqual(trName(trRhs(tr)), "bool")
-    val inner = trLhs(tr)
-    assertEqual(trName(trLhs(inner)), "int")
-    assertEqual(trName(trRhs(inner)), "string")
+    assertEqual(tr.trTag(), "SumTypeRef")
+    assertEqual(trTag(tr.trLhs()), "SumTypeRef")
+    assertEqual(trName(tr.trRhs()), "bool")
+    val inner = tr.trLhs()
+    assertEqual(trName(inner.trLhs()), "int")
+    assertEqual(trName(inner.trRhs()), "string")
 }
 
 test("parseTypeRef - sum with unit") {
@@ -213,9 +213,9 @@ test("parseTypeRef - sum with unit") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "SumTypeRef")
-    assertEqual(trName(trLhs(tr)), "int")
-    assertEqual(trName(trRhs(tr)), "unit")
+    assertEqual(tr.trTag(), "SumTypeRef")
+    assertEqual(trName(tr.trLhs()), "int")
+    assertEqual(trName(tr.trRhs()), "unit")
 }
 
 // -- Complex/nested types --
@@ -225,12 +225,12 @@ test("parseTypeRef - generic with sum type param") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "TypeConstructorRef")
-    assertEqual(trName(trBaseType(tr)), "array")
-    val param = trTypeParameters(tr)[1]
-    assertEqual(trTag(param), "SumTypeRef")
-    assertEqual(trName(trLhs(param)), "int")
-    assertEqual(trName(trRhs(param)), "string")
+    assertEqual(tr.trTag(), "TypeConstructorRef")
+    assertEqual(trName(tr.trBaseType()), "array")
+    val param = tr.trTypeParameters()[1]
+    assertEqual(param.trTag(), "SumTypeRef")
+    assertEqual(trName(param.trLhs()), "int")
+    assertEqual(trName(param.trRhs()), "string")
 }
 
 test("parseTypeRef - function type with generic args") {
@@ -238,8 +238,8 @@ test("parseTypeRef - function type with generic args") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "FunctionTypeRef")
-    val args = trArgumentTypeRefs(tr)
+    assertEqual(tr.trTag(), "FunctionTypeRef")
+    val args = tr.trArgumentTypeRefs()
     assertEqual(args.size(), 1)
     assertEqual(trTag(args[1]), "TypeConstructorRef")
     assertEqual(trName(trBaseType(args[1])), "array")
@@ -250,8 +250,8 @@ test("parseTypeRef - record type with generic field") {
     val tokens = tokenize(src)
     val p = newParser(tokens, src)
     val tr = parseTypeRefImpl(p)
-    assertEqual(trTag(tr), "RecordTypeRef")
-    val fields = trFields(tr)
+    assertEqual(tr.trTag(), "RecordTypeRef")
+    val fields = tr.trFields()
     assertEqual(fields.size(), 2)
     assertEqual(trfName(fields[1]), "items")
     assertEqual(trTag(trfTypeRef(fields[1])), "TypeConstructorRef")
