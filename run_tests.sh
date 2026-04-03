@@ -15,7 +15,9 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
 CHI_HOME="${CHI_HOME:-$HOME/.chi}"
-JVM_CHI="/home/marad/dev/chi/compiler/chi"
+# The test runner requires compileModules which is only in the bootstrap compiler.
+# Override with CHI_BOOTSTRAP env var if the bootstrap compiler is elsewhere.
+CHI_BOOTSTRAP="${CHI_BOOTSTRAP:-/home/marad/dev/chi/compiler/chi}"
 CACHE_DIR=".cache"
 
 # All chicc source modules (order matches compile.chi)
@@ -45,7 +47,7 @@ CHICC_SOURCES=(
 # Ensure chicc is built (populates cache)
 if [ ! -d "$CACHE_DIR/chicc" ]; then
     echo "Cache not found, building chicc first..."
-    "$JVM_CHI" compile.chi
+    "$CHI_BOOTSTRAP" compile.chi
 fi
 
 # Build the compileModules source list for the compile script
@@ -88,7 +90,7 @@ for test_file in "${TEST_FILES[@]}"; do
     # Prepend a temporary package declaration so compileModules can handle it
     { echo "package chicc/test_runner"; cat "$test_file"; } > /tmp/_chicc_test_tmp.chi
 
-    if OUTPUT=$(timeout 600 "$JVM_CHI" "$RUNNER" 2>&1); then
+    if OUTPUT=$(timeout 600 "$CHI_BOOTSTRAP" "$RUNNER" 2>&1); then
         echo "PASS"
         PASSED=$((PASSED + 1))
     else
