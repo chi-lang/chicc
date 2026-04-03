@@ -450,19 +450,103 @@ pub fn replaceVariable(t: Type, toReplace: Type, substitution: Type): Type {
     result as Type
 }
 
-// 4. Apply a list of variable->type substitutions by folding through replaceVariable
-pub fn mapType(t: Type, replacements: array[any]): Type {
-    val count = luaExpr("#replacements") as int
+// Single-pass recursive type substitution using a lookup table
+fn bulkReplace(t: Type, lookup: any): Type {
+    val tag = typeTag(t)
     var result: any = t
-    var i = 1
-    while i <= count {
-        val entry: any = luaExpr("replacements[i]")
-        val v: any = luaExpr("entry.variable")
-        val r: any = luaExpr("entry.replacement")
-        result = replaceVariable(result as Type, v as Type, r as Type)
-        i = i + 1
+    if tag == "var" {
+        val key = "${typeName(t)}:${typeLevel(t)}"
+        val sub: any = luaExpr("lookup[key]")
+        if sub != unit {
+            // Temporarily remove from lookup to prevent infinite recursion on recursive types
+            embedLua("lookup[key] = nil")
+            result = bulkReplace(sub as Type, lookup)
+            embedLua("lookup[key] = sub")
+        }
+    } else if tag == "primitive" {
+        result = t
+    } else if tag == "fn" {
+        val types = typeTypes(t)
+        val len = luaExpr("#types") as int
+        val newTypes = luaExpr("{}") as array[any]
+        var changed = false
+        var fi = 1
+        while fi <= len {
+            val child = luaExpr("types[fi]") as Type
+            val replaced = bulkReplace(child, lookup)
+            embedLua("table.insert(newTypes, replaced)")
+            if luaExpr("replaced ~= child") as bool { changed = true }
+            fi = fi + 1
+        }
+        if changed {
+            result = functionType(newTypes as array[Type], typeTypeParams(t), typeDefaults(t))
+        }
+    } else if tag == "record" {
+        val fields = typeFields(t)
+        val len = luaExpr("#fields") as int
+        val newFields = luaExpr("{}") as array[any]
+        var changed = false
+        var fi = 1
+        while fi <= len {
+            val f = luaExpr("fields[fi]") as RecordField
+            val ft = luaExpr("f.fieldType") as Type
+            val replaced = bulkReplace(ft, lookup)
+            if luaExpr("replaced ~= ft") as bool {
+                changed = true
+                val newField = { name: f.name, fieldType: replaced }
+                embedLua("table.insert(newFields, newField)")
+            } else {
+                embedLua("table.insert(newFields, f)")
+            }
+            fi = fi + 1
+        }
+        if changed {
+            result = recordType(typeIds(t), newFields as array[RecordField], typeTypeParams(t))
+        }
+    } else if tag == "sum" {
+        val lhs = luaExpr("t.lhs") as Type
+        val rhs = luaExpr("t.rhs") as Type
+        val newLhs = bulkReplace(lhs, lookup)
+        val newRhs = bulkReplace(rhs, lookup)
+        if luaExpr("newLhs ~= lhs or newRhs ~= rhs") as bool {
+            result = sumCreate(typeIds(t), newLhs, newRhs, typeTypeParams(t))
+        }
+    } else if tag == "array" {
+        val elem = luaExpr("t.elementType") as Type
+        val newElem = bulkReplace(elem, lookup)
+        if luaExpr("newElem ~= elem") as bool {
+            result = arrayType(newElem, typeTypeParams(t))
+        }
+    } else if tag == "recursive" {
+        val inner = luaExpr("t.innerType") as Type
+        val newInner = bulkReplace(inner, lookup)
+        if luaExpr("newInner ~= inner") as bool {
+            val v = luaExpr("t.variable") as Type
+            result = recursiveType(v, newInner)
+        }
+    } else if tag == "poly" {
+        val b = luaExpr("t.body") as Type
+        val newBody = bulkReplace(b, lookup)
+        if luaExpr("newBody ~= b") as bool {
+            result = polyType(typeLevel(t), newBody)
+        }
     }
     result as Type
+}
+
+// 4. Apply a list of variable->type substitutions in a single pass
+//    Builds a lookup map from all solutions, then traverses the type tree once: O(T) instead of O(S×T)
+pub fn mapType(t: Type, replacements: array[any]): Type {
+    val count = luaExpr("#replacements") as int
+    if count == 0 { return t }
+    // Build lookup table keyed by "name:level"
+    val lookup: any = luaExpr("{}")
+    var i = 1
+    while i <= count {
+        embedLua("local entry = replacements[i]; local v = entry.variable; lookup[v.name .. ':' .. v.level] = entry.replacement")
+        i = i + 1
+    }
+    bulkReplace(t, lookup)
 }
 
 // 5. Standard occurs check
