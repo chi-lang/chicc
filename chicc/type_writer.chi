@@ -3,7 +3,7 @@ package chicc/type_writer
 import std/lang { luaExpr, embedLua }
 import std/lang.array { size, push }
 import std/lang.string { len }
-import chicc/types { Type, TypeId, RecordField, newTypeId, typeTag, typeIds, typeTypes, typeTypeParams, typeDefaults, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeVariable, typeInnerType, typeBody, typeTypesCount, typeFieldsCount, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, polyType, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, tAny, tUnit, tBool, tInt, tFloat, tString, typeIdEquals }
+import chicc/types { Type, TypeId, RecordField, newTypeId, typeTag, typeIds, typeTypes, typeTypeParams, typeDefaults, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeVariable, typeInnerType, typeBody, typeTypesCount, typeFieldsCount, primitiveType, functionType, recordType, sumType, sumCreate, arrayType, variableType, recursiveType, polyType, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, tAny, tUnit, tBool, tInt, tFloat, tString, typeIdEquals }
 import chicc/util { StringBuilder, newStringBuilder, append, toString }
 
 embedLua("local __defining_type_id = nil")
@@ -332,15 +332,16 @@ fn decodeTableImpl(tbl: any): Type {
         val tps = decodeLuaStringList(tbl, "typeParams")
         recordType(ids, fields, tps)
     } else if tag == "sum" {
-        // Always decode sums with empty ids to normalize JVM vs chicc semantics
-        // (JVM adds optionTypeId to T|unit sums, chicc doesn't)
+        // Decode with empty ids, then use sumCreate to restore optionTypeId
+        // when unit is present. This enables UFCS lookup into std/lang.option
+        // for imported Option types.
         val emptyIds = luaExpr("{}") as array[TypeId]
         val lhsTbl = luaExpr("tbl.lhs") as any
         val lhs = decodeTable(lhsTbl)
         val rhsTbl = luaExpr("tbl.rhs") as any
         val rhs = decodeTable(rhsTbl)
         val tps = decodeLuaStringList(tbl, "typeParams")
-        sumType(emptyIds, lhs, rhs, tps)
+        sumCreate(emptyIds, lhs, rhs, tps)
     } else if tag == "var" {
         val n = luaExpr("tbl.name") as string
         val lvl = luaExpr("tbl.level") as int
