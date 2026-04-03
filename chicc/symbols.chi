@@ -1,6 +1,6 @@
 package chicc/symbols
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType, occursIn }
+import chicc/types { Type, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType }
 import chicc/parse_ast { TypeRef }
 
 // --- Symbol: package-level symbol ---
@@ -387,7 +387,7 @@ pub fn resolveTypeAndWrapRecursive(typeTable: TypeTable, typeSchemeVars: array[s
     val resolved = resolveType(typeTable, typeSchemeVars, ref, level)
 
     // Check if the resolved type references itself
-    val isSelfRef = occursIn(selfRefVar, resolved)
+    val isSelfRef = selfRefVar.occursIn(resolved)
     val finalType = if isSelfRef {
         recursiveType(selfRefVar, resolved)
     } else {

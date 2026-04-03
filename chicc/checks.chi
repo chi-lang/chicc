@@ -1,7 +1,7 @@
 // chicc/chicc/checks.chi
 package chicc/checks
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, tUnit, typeEquals }
+import chicc/types { Type, tUnit }
 import chicc/unification { newConstraint }
 import chicc/messages { unrecognizedName, cannotAccessInternalName, notAFunction, cannotChangeImmutableVariable, typeMismatch, genericError }
 import chicc/ast { exprChildren }
@@ -330,7 +330,7 @@ fn walkExpr(expr: any, visitFn: (any) -> bool) {
     if expr == unit { return unit }
     val handled = visitFn(expr)
     if handled == false {
-        val children = exprChildren(expr)
+        val children = expr.exprChildren()
         val count = luaExpr("#children") as int
         var i = 1
         while i <= count {
@@ -512,7 +512,7 @@ fn rtWalkExprImpl(expr: any, messages: any) {
         }
         // Walk children of the value
         if value != unit {
-            val valueChildren = exprChildren(value)
+            val valueChildren = value.exprChildren()
             val childCount = luaExpr("#valueChildren") as int
             var i = 1
             while i <= childCount {
@@ -537,7 +537,7 @@ fn rtWalkExprImpl(expr: any, messages: any) {
             }
         }
         // Walk children
-        val children = exprChildren(expr)
+        val children = expr.exprChildren()
         val childCount = luaExpr("#children") as int
         var i = 1
         while i <= childCount {
@@ -602,7 +602,7 @@ fn rtWalkExprImpl(expr: any, messages: any) {
         }
     } else {
         // Default: walk all children
-        val children = exprChildren(expr)
+        val children = expr.exprChildren()
         val childCount = luaExpr("#children") as int
         var i = 1
         while i <= childCount {
