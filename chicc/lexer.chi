@@ -4,7 +4,6 @@ import chicc/token { Token, newToken, lookupKeyword, TK_INT, TK_FLOAT, TK_STRING
 import chicc/source { newSection }
 import chicc/util { newStringBuilder, append, toString }
 import std/lang { luaExpr }
-import std/lang.array { push }
 
 type Lexer = {
     source: string,

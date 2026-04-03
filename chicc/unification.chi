@@ -1,8 +1,7 @@
 // chicc/chicc/unification.chi
 package chicc/unification
 import std/lang { luaExpr, embedLua }
-import std/lang.array { size, push }
-import chicc/types { Type, TypeId, RecordField, typeTag, typeIds, typeTypes, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeEquals, replaceVariable, occursInExcludingSumBranches, unfoldRecursive, isPrimitive, isFunction, isRecord, isSum, isArray, isVariable, isRecursive, typeTypesCount, typeFieldsCount, typeIdEquals, tAny, tUnit }
+import chicc/types { Type, TypeId, RecordField, typeTag, typeIds, typeTypes, typeFields, typeLhs, typeRhs, typeElementType, typeName, typeLevel, typeEquals, replaceVariable, occursInExcludingSumBranches, unfoldRecursive, isPrimitive, isFunction, isRecord, isSum, isArray, isVariable, isRecursive, typeTypesCount, typeFieldsCount, typeIdEquals, tAny, tUnit, functionType, recordType, sumCreate, arrayType, recursiveType, polyType, typeTypeParams, typeDefaults }
 import chicc/messages { Message, typeMismatch, notAFunction, functionArityError, infiniteType }
 import chicc/source { Section, toCodePoint }
 
@@ -83,9 +82,192 @@ fn throwMessage(msg: Message) {
     embedLua("error(msg)")
 }
 
-// Main unification function
+// ---------------------------------------------------------------------------
+// Union-Find for type variable bindings
+// ---------------------------------------------------------------------------
+
+// Create a new union-find structure (a Lua table keyed by "name:level")
+pub fn ufNew(): any {
+    luaExpr("{}") as any
+}
+
+// Variable key for union-find lookup
+fn varKey(v: Type): string {
+    val n = typeName(v)
+    val l = typeLevel(v)
+    "$n:$l"
+}
+
+// Bind a variable to a type in the union-find
+pub fn ufBind(uf: any, variable: Type, t: Type) {
+    val key = varKey(variable)
+    embedLua("uf[key] = t")
+}
+
+// Find the representative type for a variable, following chains with path compression
+pub fn ufFind(uf: any, variable: Type): Type {
+    val key = varKey(variable)
+    val bound: any = luaExpr("uf[key]")
+    if bound == unit {
+        return variable
+    }
+    val boundType = bound as Type
+    if isVariable(boundType) {
+        val bKey = varKey(boundType)
+        if bKey == key { return variable }
+        val root = ufFind(uf, boundType)
+        // Path compression
+        val rootIsNotBound = luaExpr("root ~= boundType") as bool
+        if rootIsNotBound {
+            embedLua("uf[key] = root")
+        }
+        root
+    } else {
+        boundType
+    }
+}
+
+// Deeply resolve a type through the union-find, replacing all bound variables
+pub fn ufResolve(uf: any, t: Type): Type {
+    val tag = typeTag(t)
+    if tag == "var" {
+        val found = ufFind(uf, t)
+        if isVariable(found) {
+            val fKey = varKey(found)
+            val tKey = varKey(t)
+            if fKey == tKey { return t }
+            return found
+        }
+        // Resolve the bound type too, in case it contains variables
+        ufResolve(uf, found)
+    } else if tag == "primitive" {
+        t
+    } else if tag == "fn" {
+        val types = typeTypes(t)
+        val count = luaExpr("#types") as int
+        val newTypes = luaExpr("{}") as array[any]
+        var changed = false
+        var i = 1
+        while i <= count {
+            val child = luaExpr("types[i]") as Type
+            val resolved = ufResolve(uf, child)
+            embedLua("table.insert(newTypes, resolved)")
+            if luaExpr("resolved ~= child") as bool { changed = true }
+            i = i + 1
+        }
+        if changed {
+            functionType(newTypes as array[Type], typeTypeParams(t), typeDefaults(t))
+        } else {
+            t
+        }
+    } else if tag == "record" {
+        val fields = typeFields(t)
+        val count = luaExpr("#fields") as int
+        val newFields = luaExpr("{}") as array[any]
+        var changed = false
+        var i = 1
+        while i <= count {
+            val f = luaExpr("fields[i]") as RecordField
+            val ft = luaExpr("f.fieldType") as Type
+            val resolved = ufResolve(uf, ft)
+            if luaExpr("resolved ~= ft") as bool {
+                changed = true
+                val newField = { name: f.name, fieldType: resolved }
+                embedLua("table.insert(newFields, newField)")
+            } else {
+                embedLua("table.insert(newFields, f)")
+            }
+            i = i + 1
+        }
+        if changed {
+            recordType(typeIds(t), newFields as array[RecordField], typeTypeParams(t))
+        } else {
+            t
+        }
+    } else if tag == "sum" {
+        val lhs = luaExpr("t.lhs") as Type
+        val rhs = luaExpr("t.rhs") as Type
+        val newLhs = ufResolve(uf, lhs)
+        val newRhs = ufResolve(uf, rhs)
+        if luaExpr("newLhs ~= lhs or newRhs ~= rhs") as bool {
+            sumCreate(typeIds(t), newLhs, newRhs, typeTypeParams(t))
+        } else {
+            t
+        }
+    } else if tag == "array" {
+        val elem = luaExpr("t.elementType") as Type
+        val newElem = ufResolve(uf, elem)
+        if luaExpr("newElem ~= elem") as bool {
+            arrayType(newElem, typeTypeParams(t))
+        } else {
+            t
+        }
+    } else if tag == "recursive" {
+        val inner = luaExpr("t.innerType") as Type
+        val newInner = ufResolve(uf, inner)
+        if luaExpr("newInner ~= inner") as bool {
+            val v = luaExpr("t.variable") as Type
+            recursiveType(v, newInner)
+        } else {
+            t
+        }
+    } else if tag == "poly" {
+        val b = luaExpr("t.body") as Type
+        val newBody = ufResolve(uf, b)
+        if luaExpr("newBody ~= b") as bool {
+            polyType(typeLevel(t), newBody)
+        } else {
+            t
+        }
+    } else {
+        t
+    }
+}
+
+// Return all bindings from the union-find as solution entries {variable, replacement}
+pub fn ufAllBindings(uf: any): array[any] {
+    val result: array[any] = luaExpr("{}")
+    // Iterate over all keys in the uf table
+    embedLua("for key, typ in pairs(uf) do local name, level = key:match('(.+):(%d+)'); if name then level = tonumber(level); local v = {tag='var', ids={}, types={}, typeParams={}, defaults=0, fields={}, lhs=nil, rhs=nil, elementType=nil, name=name, level=level, variable=nil, innerType=nil, body=nil}; table.insert(result, {variable=v, replacement=__P_.ufResolve(uf, typ)}) end end")
+    result
+}
+
+// Resolve a constraint's expected and actual types through the union-find
+fn ufResolveConstraint(uf: any, c: Constraint): Constraint {
+    val exp = luaExpr("c.expected") as Type
+    val act = luaExpr("c.actual") as Type
+    val newExp = ufResolve(uf, exp)
+    val newAct = ufResolve(uf, act)
+    if luaExpr("newExp == exp and newAct == act") as bool {
+        c
+    } else {
+        { expected: newExp, actual: newAct, section: c.section, history: c.history }
+    }
+}
+
+// Helper to copy history and append a constraint
+fn copyHistoryWith(history: array[any], constraint: any): array[any] {
+    val newHistory: array[any] = luaExpr("{}")
+    val hLen = luaExpr("#history") as int
+    var hi = 1
+    while hi <= hLen {
+        val hItem = luaExpr("history[hi]") as any
+        embedLua("table.insert(newHistory, hItem)")
+        hi = hi + 1
+    }
+    embedLua("table.insert(newHistory, constraint)")
+    newHistory
+}
+
+// Main unification function — uses union-find for O(N·α(N)) instead of O(N²)
 pub fn unify(constraints: array[any]): array[any] {
-    // Build the queue as a Lua array, use pos index to advance
+    val uf = ufNew()
+    unifyWithUf(constraints, uf)
+    ufAllBindings(uf)
+}
+
+// Unify constraints using a pre-existing union-find
+pub fn unifyWithUf(constraints: array[any], uf: any) {
     val queue: array[any] = luaExpr("{}") as array[any]
     val initialCount = luaExpr("#constraints") as int
     var i = 1
@@ -95,12 +277,13 @@ pub fn unify(constraints: array[any]): array[any] {
         i = i + 1
     }
 
-    val solutions: array[any] = luaExpr("{}")
     var pos = 1
 
     while pos <= luaExpr("#queue") as int {
-        val constraint = luaExpr("queue[pos]") as Constraint
+        val rawConstraint = luaExpr("queue[pos]") as Constraint
         pos = pos + 1
+        // Resolve both sides through the union-find
+        val constraint = ufResolveConstraint(uf, rawConstraint)
         val expected = luaExpr("constraint.expected") as Type
         val actual = luaExpr("constraint.actual") as Type
         val section = luaExpr("constraint.section") as any
@@ -119,29 +302,12 @@ pub fn unify(constraints: array[any]): array[any] {
             }
         } else if isRecursive(expected) {
             val unfolded = unfoldRecursive(expected)
-            val newHistory: array[any] = luaExpr("{}")
-            val hLen = luaExpr("#history") as int
-            var hi = 1
-            while hi <= hLen {
-                val hItem = luaExpr("history[hi]") as any
-                embedLua("table.insert(newHistory, hItem)")
-                hi = hi + 1
-            }
-            embedLua("table.insert(newHistory, constraint)")
+            val newHistory = copyHistoryWith(history, constraint)
             val nc = newConstraint(unfolded, actual, section, newHistory)
-            // Insert at current position (before remaining items)
             embedLua("table.insert(queue, pos, nc)")
         } else if isRecursive(actual) {
             val unfolded = unfoldRecursive(actual)
-            val newHistory: array[any] = luaExpr("{}")
-            val hLen = luaExpr("#history") as int
-            var hi = 1
-            while hi <= hLen {
-                val hItem = luaExpr("history[hi]") as any
-                embedLua("table.insert(newHistory, hItem)")
-                hi = hi + 1
-            }
-            embedLua("table.insert(newHistory, constraint)")
+            val newHistory = copyHistoryWith(history, constraint)
             val nc = newConstraint(expected, unfolded, section, newHistory)
             embedLua("table.insert(queue, pos, nc)")
         } else if isVariable(expected) {
@@ -149,33 +315,15 @@ pub fn unify(constraints: array[any]): array[any] {
                 val cp = sectionToCodePoint(section)
                 throwMessage(infiniteType(typeName(expected), typeDescr(actual), cp))
             }
-            val sol = { variable: expected, replacement: actual }
-            embedLua("table.insert(solutions, sol)")
-            // Replace in all remaining constraints
-            val qLen = luaExpr("#queue") as int
-            var qi = pos
-            while qi <= qLen {
-                val qc = luaExpr("queue[qi]") as Constraint
-                val replaced = constraintWithReplacedVariable(qc, expected, actual)
-                embedLua("queue[qi] = replaced")
-                qi = qi + 1
-            }
+            ufBind(uf, expected, actual)
+            // No queue rebuild needed — next iteration resolves via union-find
         } else if isVariable(actual) {
             if occursInExcludingSumBranches(actual, expected) {
                 val cp = sectionToCodePoint(section)
                 throwMessage(infiniteType(typeName(actual), typeDescr(expected), cp))
             }
-            val sol = { variable: actual, replacement: expected }
-            embedLua("table.insert(solutions, sol)")
-            // Replace in all remaining constraints
-            val qLen = luaExpr("#queue") as int
-            var qi = pos
-            while qi <= qLen {
-                val qc = luaExpr("queue[qi]") as Constraint
-                val replaced = constraintWithReplacedVariable(qc, actual, expected)
-                embedLua("queue[qi] = replaced")
-                qi = qi + 1
-            }
+            ufBind(uf, actual, expected)
+            // No queue rebuild needed — next iteration resolves via union-find
         } else if isFunction(expected) && isFunction(actual) {
             val expTypes = typeTypes(expected)
             val actTypes = typeTypes(actual)
@@ -190,19 +338,10 @@ pub fn unify(constraints: array[any]): array[any] {
             while fi <= expLen {
                 val expParam = luaExpr("expTypes[fi]") as Type
                 val actParam = luaExpr("actTypes[fi]") as Type
-                // Special: if last type is unit expected and actual is not a variable, skip
                 if fi == lastIndex && typeEquals(expParam, tUnit) && isVariable(actParam) == false {
                     // void return accepts anything - skip
                 } else {
-                    val newHistory: array[any] = luaExpr("{}")
-                    val hLen = luaExpr("#history") as int
-                    var hi = 1
-                    while hi <= hLen {
-                        val hItem = luaExpr("history[hi]") as any
-                        embedLua("table.insert(newHistory, hItem)")
-                        hi = hi + 1
-                    }
-                    embedLua("table.insert(newHistory, constraint)")
+                    val newHistory = copyHistoryWith(history, constraint)
                     val nc = newConstraint(expParam, actParam, section, newHistory)
                     embedLua("table.insert(queue, pos, nc)")
                 }
@@ -218,7 +357,6 @@ pub fn unify(constraints: array[any]): array[any] {
                 val expField = luaExpr("expFields[fi]") as RecordField
                 val expFieldName = expField.name
                 val expFieldType = luaExpr("expField.fieldType") as Type
-                // Find matching actual field by name
                 var found = false
                 var actFieldType: Type = tUnit
                 var aj = 1
@@ -234,15 +372,7 @@ pub fn unify(constraints: array[any]): array[any] {
                     val cp = sectionToCodePoint(section)
                     throwMessage(typeMismatch("record with field '$expFieldName'", "record without field '$expFieldName'", cp))
                 }
-                val newHistory: array[any] = luaExpr("{}")
-                val hLen = luaExpr("#history") as int
-                var hi = 1
-                while hi <= hLen {
-                    val hItem = luaExpr("history[hi]") as any
-                    embedLua("table.insert(newHistory, hItem)")
-                    hi = hi + 1
-                }
-                embedLua("table.insert(newHistory, constraint)")
+                val newHistory = copyHistoryWith(history, constraint)
                 val nc = newConstraint(expFieldType, actFieldType, section, newHistory)
                 embedLua("table.insert(queue, pos, nc)")
                 fi = fi + 1
@@ -250,30 +380,14 @@ pub fn unify(constraints: array[any]): array[any] {
         } else if isArray(expected) && isArray(actual) {
             val expElem = luaExpr("expected.elementType") as Type
             val actElem = luaExpr("actual.elementType") as Type
-            val newHistory: array[any] = luaExpr("{}")
-            val hLen = luaExpr("#history") as int
-            var hi = 1
-            while hi <= hLen {
-                val hItem = luaExpr("history[hi]") as any
-                embedLua("table.insert(newHistory, hItem)")
-                hi = hi + 1
-            }
-            embedLua("table.insert(newHistory, constraint)")
+            val newHistory = copyHistoryWith(history, constraint)
             val nc = newConstraint(expElem, actElem, section, newHistory)
             embedLua("table.insert(queue, pos, nc)")
         } else if isSum(expected) {
             // Try unifying with rhs first, fall back to lhs
             val expRhs = luaExpr("expected.rhs") as Type
             val expLhs = luaExpr("expected.lhs") as Type
-            val newHistory: array[any] = luaExpr("{}")
-            val hLen = luaExpr("#history") as int
-            var hi = 1
-            while hi <= hLen {
-                val hItem = luaExpr("history[hi]") as any
-                embedLua("table.insert(newHistory, hItem)")
-                hi = hi + 1
-            }
-            embedLua("table.insert(newHistory, constraint)")
+            val newHistory = copyHistoryWith(history, constraint)
             val rhsConstraint = newConstraint(expRhs, actual, section, newHistory)
             val rhsConstraints: array[any] = luaExpr("{}")
             embedLua("table.insert(rhsConstraints, rhsConstraint)")
@@ -282,7 +396,7 @@ pub fn unify(constraints: array[any]): array[any] {
             embedLua("local __pcall_ok, __pcall_result = pcall(__P_.unify, rhsConstraints)")
             val pcallOk = luaExpr("__pcall_ok") as bool
             if pcallOk {
-                // Apply partial solutions to remaining queue
+                // Merge partial solutions into our union-find
                 val partialSolutions: array[any] = luaExpr("__pcall_result")
                 val psLen = luaExpr("#partialSolutions") as int
                 var si = 1
@@ -290,15 +404,7 @@ pub fn unify(constraints: array[any]): array[any] {
                     val psEntry = luaExpr("partialSolutions[si]") as any
                     val psVar = luaExpr("psEntry.variable") as Type
                     val psRepl = luaExpr("psEntry.replacement") as Type
-                    embedLua("table.insert(solutions, psEntry)")
-                    val qLen = luaExpr("#queue") as int
-                    var qi = pos
-                    while qi <= qLen {
-                        val qc = luaExpr("queue[qi]") as Constraint
-                        val replaced = constraintWithReplacedVariable(qc, psVar, psRepl)
-                        embedLua("queue[qi] = replaced")
-                        qi = qi + 1
-                    }
+                    ufBind(uf, psVar, psRepl)
                     si = si + 1
                 }
             } else {
@@ -307,18 +413,9 @@ pub fn unify(constraints: array[any]): array[any] {
                 embedLua("table.insert(queue, pos, lhsConstraint)")
             }
         } else if isSum(actual) {
-            // actual is a sum: both branches must unify with expected
             val actLhs = typeLhs(actual)
             val actRhs = typeRhs(actual)
-            val newHistory: array[any] = luaExpr("{}")
-            val hLen = luaExpr("#history") as int
-            var hi = 1
-            while hi <= hLen {
-                val hItem = luaExpr("history[hi]") as any
-                embedLua("table.insert(newHistory, hItem)")
-                hi = hi + 1
-            }
-            embedLua("table.insert(newHistory, constraint)")
+            val newHistory = copyHistoryWith(history, constraint)
             val nc1 = newConstraint(expected, actLhs, section, newHistory)
             val nc2 = newConstraint(expected, actRhs, section, newHistory)
             embedLua("table.insert(queue, pos, nc1)")
@@ -331,6 +428,4 @@ pub fn unify(constraints: array[any]): array[any] {
             throwMessage(typeMismatch(typeDescr(expected), typeDescr(actual), cp))
         }
     }
-
-    solutions
 }

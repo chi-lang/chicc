@@ -1,6 +1,5 @@
 package chicc/ast
 import std/lang { luaExpr, embedLua }
-import std/lang.array { push, size, forEach }
 import chicc/source { Section }
 import chicc/types { Type, TypeId }
 

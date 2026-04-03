@@ -1,7 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/token { Token, newToken, TK_INT, TK_ID, TK_PLUS, TK_EOF, TK_NEWLINE }
 import chicc/parser { newParser, current, peek, advance, expect, matchToken, skipNewlines }
-import std/lang.array { size }
 
 // Helper to create a simple token list for tests
 fn makeTokens(kind1: int, val1: string, kind2: int, val2: string): array[Token] {

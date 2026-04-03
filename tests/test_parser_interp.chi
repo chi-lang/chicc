@@ -2,7 +2,6 @@ import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/token { Token, newToken, TK_INTERP_START, TK_INTERP_TEXT, TK_INTERP_EXPR_START, TK_INTERP_EXPR_END, TK_INTERP_END, TK_ID, TK_INT, TK_PLUS, TK_STRING, TK_EOF }
 import chicc/parser { newParser, parseExpression }
 import chicc/parse_ast { paTag, paStringValue, paParts, paInterpValue, paVariableName, paOp, paLeft, paRight, paLongValue }
-import std/lang.array { size }
 
 fn tk(kind: int, value: string): Token { newToken(kind, value, unit) }
 fn eof(): Token { newToken(TK_EOF, "", unit) }

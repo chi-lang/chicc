@@ -1,7 +1,6 @@
 import chicc/test_util { test, assertEqual, summary }
 import chicc/lexer { newLexer, lexReadString }
 import chicc/token { TK_STRING, TK_INTERP_START, TK_INTERP_TEXT, TK_INTERP_EXPR_START, TK_INTERP_EXPR_END, TK_INTERP_END, TK_ID, TK_INT, TK_PLUS, TK_DOT, TK_LBRACE, TK_RBRACE, TK_COLON, TK_COMMA }
-import std/lang.array { size }
 import std/lang { luaExpr, embedLua }
 
 // Helper: build a string containing dollar sign via Lua

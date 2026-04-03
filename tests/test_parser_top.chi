@@ -3,7 +3,6 @@ import chicc/lexer { tokenize }
 import chicc/token { TK_EOF }
 import chicc/parser { newParser, parseProgram, parsePackageDefinition, parseSingleImport, parseImports, parseImportEntries, parseImportEntry, peek }
 import chicc/parse_ast { PackageDefinition, ParseImportEntry, ParseImport, ParseProgram }
-import std/lang.array { size }
 
 // --- parsePackageDefinition ---
 

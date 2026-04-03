@@ -1,7 +1,6 @@
 // chicc/chicc/types.chi
 package chicc/types
 import std/lang { luaExpr, embedLua }
-import std/lang.array { size, push }
 
 // TypeId — fully qualified type identity
 type TypeId = { moduleName: string, packageName: string, name: string }

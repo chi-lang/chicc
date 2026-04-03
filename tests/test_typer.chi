@@ -5,7 +5,6 @@ import chicc/ast { Target, DotTarget, localTarget, packageTarget, fieldDotTarget
 import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol }
 import chicc/source { newSection }
 import std/lang { luaExpr, embedLua }
-import std/lang.array { size, push }
 
 val testSection = newSection(1, 1, 1, 10)
 

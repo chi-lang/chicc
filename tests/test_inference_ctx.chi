@@ -5,7 +5,6 @@ import chicc/ast { Target, DotTarget, localTarget, packageTarget, localFnDotTarg
 import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol, ctGetLocalSymbol }
 import chicc/source { newSection }
 import std/lang { luaExpr, embedLua }
-import std/lang.array { size, push }
 
 // --- icFreshVariable tests ---
 
