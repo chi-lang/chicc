@@ -176,7 +176,8 @@ pub fn convert(node: any, pkg: any, tables: any): any {
         atomExpr("$v", tInt, sec)
     } else if tag == "FloatValue" {
         val v = paFloatValue(node)
-        atomExpr("$v", tFloat, sec)
+        val vStr = luaExpr("(function() local s = tostring(v); return string.find(s, '.', 1, true) and s or s .. '.0' end)()") as string
+        atomExpr(vStr, tFloat, sec)
     } else if tag == "BoolValue" {
         val v = paBoolValue(node)
         if v { atomExpr("true", tBool, sec) }
