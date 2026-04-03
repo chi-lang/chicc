@@ -1,7 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/lexer { newLexer, lexPeek, lexAdvance, isDigit, isLetter, isAlphaNum, readNumber, readIdentOrKeyword }
 import chicc/token { TK_INT, TK_FLOAT, TK_ID, TK_VAL, TK_FN, TK_IF, TK_PUB, TK_RETURN, TK_TRUE, TK_FALSE, TK_UNIT }
-import std/lang.array { size }
 
 // --- isDigit tests ---
 

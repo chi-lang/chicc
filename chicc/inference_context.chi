@@ -1,7 +1,6 @@
 // chicc/chicc/inference_context.chi
 package chicc/inference_context
 import std/lang { luaExpr, embedLua }
-import std/lang.array { size, push }
 import chicc/types { Type, variableType, instantiate }
 import chicc/ast { DotTarget }
 

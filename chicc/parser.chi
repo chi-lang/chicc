@@ -3,7 +3,6 @@ import chicc/token { Token, TK_EOF, TK_NEWLINE, TK_PACKAGE, TK_IMPORT, TK_TYPE, 
 import chicc/source { Section, newSection }
 import chicc/parse_ast { PackageDefinition, ParseImportEntry, ParseImport, ParseProgram, ParseAst, newPackageDefinition, newParseImportEntry, newParseImport, newParseProgram, parseLongValue, parseFloatValue, parseBoolValue, parseStringValue, parseUnitValue, parseVariableRead, parseNot, parseBinaryOp, parseCast, parseIs, parseFieldAccess, parseFieldAssignment, parseAssignment, parseIndexOperator, parseIndexedAssignment, parseFnCall, parseWeave, parseWeavePlaceholder, parseCreateArray, parseCreateRecord, parseGroup, parseReturn, parseBreak, parseContinue, parseBlock, parseLambda, parseFuncWithName, parseNameDeclaration, newFormalArgument, typeParameterRef, paTag, paSection, paBody, paVariableName, paReceiverName, paMemberName, paReceiver, paMemberSection, paVariable, paIndexExpr, newParseRecordField, parseIfElse, parseWhile, parseFor, parseWhen, newParseWhenCase, newParseElseCase, typeNameRef, functionTypeRef, recordTypeRef, sumTypeRef, typeConstructorRef, newTypeRefField, newParseTypeAlias, newParseVariantTypeDefinition, newVariantConstructor, newFormalField, parseEffectDefinition, parseHandle, newParseHandleCase, parseStringText, parseInterpolation, parseInterpolatedString }
 import std/lang { luaExpr, embedLua }
-import std/lang.array { push, size }
 
 type Parser = {
     tokens: array[Token],

@@ -1,7 +1,6 @@
 // chicc/chicc/emitter.chi
 package chicc/emitter
 import std/lang { luaExpr, embedLua }
-import std/lang.string { replace, len }
 import chicc/util { newStringBuilder, StringBuilder, append, toString }
 import chicc/ast { Program }
 

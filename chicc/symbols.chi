@@ -1,6 +1,5 @@
 package chicc/symbols
 import std/lang { luaExpr, embedLua }
-import std/lang.array { size, push }
 import chicc/types { Type, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType, occursIn }
 import chicc/parse_ast { trTag, trName, trTypeParameters, trArgumentTypeRefs, trReturnType, trFields, trLhs, trRhs, trBaseType }
 

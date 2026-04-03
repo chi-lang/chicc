@@ -1,6 +1,5 @@
 package chicc/ast_converter
 import std/lang { luaExpr, embedLua }
-import std/lang.array { size, push, map, forEach }
 import chicc/source { Section }
 import chicc/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType }
 import chicc/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, packageTarget, atomExpr, interpolatedStringExpr, createRecordExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, assignmentExpr, nameDeclarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam, setExprType }

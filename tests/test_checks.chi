@@ -6,7 +6,6 @@ import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol }
 import chicc/messages { Message, unrecognizedName, cannotAccessInternalName, notAFunction, cannotChangeImmutableVariable, typeMismatch, genericError }
 import chicc/source { newSection }
 import std/lang { luaExpr, embedLua }
-import std/lang.array { size, push }
 
 val testSection = newSection(1, 1, 1, 10)
 

@@ -2,7 +2,6 @@ import chicc/test_util { test, assertEqual, assertTrue, summary }
 import chicc/source { newSection }
 import chicc/types { tInt, tString, newTypeId }
 import chicc/ast { newPackage, newTypeAlias, newImportEntry, newImport, newProgram, atomExpr }
-import std/lang.array { size }
 
 test("newPackage") {
     val pkg = newPackage("std", "lang")
