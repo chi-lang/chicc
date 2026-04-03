@@ -1,7 +1,7 @@
 package chicc/parser
 import chicc/token { Token, TK_EOF, TK_NEWLINE, TK_PACKAGE, TK_IMPORT, TK_TYPE, TK_DATA, TK_ID, TK_SLASH, TK_DOT, TK_AS, TK_LBRACE, TK_RBRACE, TK_COMMA, newToken, TK_INT, TK_FLOAT, TK_STRING, TK_TRUE, TK_FALSE, TK_UNIT, TK_PLUS, TK_MINUS, TK_STAR, TK_PERCENT, TK_EQEQ, TK_NEQ, TK_LT, TK_LTEQ, TK_GT, TK_GTEQ, TK_NOT, TK_AND, TK_OR, TK_AMP, TK_PIPE, TK_LSHIFT, TK_RSHIFT, TK_WEAVE, TK_UNDERSCORE, TK_LPAREN, TK_RPAREN, TK_LBRACKET, TK_RBRACKET, TK_COLON, TK_EQ, TK_PLUSEQ, TK_MINUSEQ, TK_STAREQ, TK_SLASHEQ, TK_IS, TK_ARROW, TK_FN, TK_VAL, TK_VAR, TK_PUB, TK_IF, TK_ELSE, TK_WHILE, TK_FOR, TK_IN, TK_WHEN, TK_WITH, TK_HANDLE, TK_EFFECT, TK_RETURN, TK_BREAK, TK_CONTINUE, TK_INTERP_START, TK_INTERP_TEXT, TK_INTERP_EXPR_START, TK_INTERP_EXPR_END, TK_INTERP_END }
 import chicc/source { Section, newSection }
-import chicc/parse_ast { PackageDefinition, ParseImportEntry, ParseImport, ParseProgram, ParseAst, newPackageDefinition, newParseImportEntry, newParseImport, newParseProgram, parseLongValue, parseFloatValue, parseBoolValue, parseStringValue, parseUnitValue, parseVariableRead, parseNot, parseBinaryOp, parseCast, parseIs, parseFieldAccess, parseFieldAssignment, parseAssignment, parseIndexOperator, parseIndexedAssignment, parseFnCall, parseWeave, parseWeavePlaceholder, parseCreateArray, parseCreateRecord, parseGroup, parseReturn, parseBreak, parseContinue, parseBlock, parseLambda, parseFuncWithName, parseNameDeclaration, newFormalArgument, typeParameterRef, paTag, paSection, paBody, paVariableName, paReceiverName, paMemberName, paReceiver, paMemberSection, paVariable, paIndexExpr, newParseRecordField, parseIfElse, parseWhile, parseFor, parseWhen, newParseWhenCase, newParseElseCase, typeNameRef, functionTypeRef, recordTypeRef, sumTypeRef, typeConstructorRef, newTypeRefField, newParseTypeAlias, newParseVariantTypeDefinition, newVariantConstructor, newFormalField, parseEffectDefinition, parseHandle, newParseHandleCase, parseStringText, parseInterpolation, parseInterpolatedString }
+import chicc/parse_ast { PackageDefinition, ParseImportEntry, ParseImport, ParseProgram, ParseAst, newPackageDefinition, newParseImportEntry, newParseImport, newParseProgram, parseLongValue, parseFloatValue, parseBoolValue, parseStringValue, parseUnitValue, parseVariableRead, parseNot, parseBinaryOp, parseCast, parseIs, parseFieldAccess, parseFieldAssignment, parseAssignment, parseIndexOperator, parseIndexedAssignment, parseFnCall, parseWeave, parseWeavePlaceholder, parseCreateArray, parseCreateRecord, parseGroup, parseReturn, parseBreak, parseContinue, parseBlock, parseLambda, parseFuncWithName, parseNameDeclaration, newFormalArgument, typeParameterRef, newParseRecordField, parseIfElse, parseWhile, parseFor, parseWhen, newParseWhenCase, newParseElseCase, typeNameRef, functionTypeRef, recordTypeRef, sumTypeRef, typeConstructorRef, newTypeRefField, newParseTypeAlias, newParseVariantTypeDefinition, newVariantConstructor, newFormalField, parseEffectDefinition, parseHandle, newParseHandleCase, parseStringText, parseInterpolation, parseInterpolatedString }
 import std/lang { luaExpr, embedLua }
 
 type Parser = {
@@ -496,7 +496,7 @@ fn parseInfixExpr(p: Parser, left: any, prec: int): any {
         advance(p)
         val memTok = expect(p, TK_ID)
         val memSec = tokenSection(memTok)
-        val recvName = if paTag(left) == "ParseVariableRead" { paVariableName(left) } else { "" }
+        val recvName = if left.paTag() == "ParseVariableRead" { left.paVariableName() } else { "" }
         val access = parseFieldAccess(recvName, memTok.value, left, memSec, sec)
         // Check for field assignment: .field = value
         if peek(p) == TK_EQ {
@@ -573,9 +573,9 @@ fn parseInfixExpr(p: Parser, left: any, prec: int): any {
         // IIFE support: if left is a block, convert it to a zero-arg lambda
         // so that { ... }() is treated as an immediately-invoked function
         var callee = left
-        if paTag(left) == "ParseBlock" {
-            val blockBody = paBody(left)
-            val blockSec = paSection(left)
+        if left.paTag() == "ParseBlock" {
+            val blockBody = left.paBody()
+            val blockSec = left.paSection()
             callee = parseLambda([], blockBody, blockSec)
         }
         val args = parseArgList(p)
@@ -596,25 +596,25 @@ fn parseInfixExpr(p: Parser, left: any, prec: int): any {
 
     // Assignment: name = value
     if kind == TK_EQ {
-        if paTag(left) == "ParseVariableRead" {
+        if left.paTag() == "ParseVariableRead" {
             advance(p)
             skipNewlines(p)
             val rhs = parseExprFwd(p, 0)
-            return parseAssignment(paVariableName(left), rhs, sec)
+            return parseAssignment(left.paVariableName(), rhs, sec)
         }
         // If left is a field access, convert to field assignment
-        if paTag(left) == "ParseFieldAccess" {
+        if left.paTag() == "ParseFieldAccess" {
             advance(p)
             skipNewlines(p)
             val rhs = parseExprFwd(p, 0)
-            return parseFieldAssignment(paReceiverName(left), paMemberName(left), paReceiver(left), rhs, paMemberSection(left), sec)
+            return parseFieldAssignment(left.paReceiverName(), left.paMemberName(), left.paReceiver(), rhs, left.paMemberSection(), sec)
         }
         // If left is index operator, convert to indexed assignment
-        if paTag(left) == "ParseIndexOperator" {
+        if left.paTag() == "ParseIndexOperator" {
             advance(p)
             skipNewlines(p)
             val rhs = parseExprFwd(p, 0)
-            return parseIndexedAssignment(paVariable(left), paIndexExpr(left), rhs, sec)
+            return parseIndexedAssignment(left.paVariable(), left.paIndexExpr(), rhs, sec)
         }
         // Fallback: consume and return left
         advance(p)
@@ -628,14 +628,14 @@ fn parseInfixExpr(p: Parser, left: any, prec: int): any {
         skipNewlines(p)
         val rhs = parseExprFwd(p, 0)
         val binOp = parseBinaryOp(opStr, left, rhs, sec)
-        if paTag(left) == "ParseVariableRead" {
-            return parseAssignment(paVariableName(left), binOp, sec)
+        if left.paTag() == "ParseVariableRead" {
+            return parseAssignment(left.paVariableName(), binOp, sec)
         }
-        if paTag(left) == "ParseFieldAccess" {
-            return parseFieldAssignment(paReceiverName(left), paMemberName(left), paReceiver(left), binOp, paMemberSection(left), sec)
+        if left.paTag() == "ParseFieldAccess" {
+            return parseFieldAssignment(left.paReceiverName(), left.paMemberName(), left.paReceiver(), binOp, left.paMemberSection(), sec)
         }
-        if paTag(left) == "ParseIndexOperator" {
-            return parseIndexedAssignment(paVariable(left), paIndexExpr(left), binOp, sec)
+        if left.paTag() == "ParseIndexOperator" {
+            return parseIndexedAssignment(left.paVariable(), left.paIndexExpr(), binOp, sec)
         }
         return binOp
     }

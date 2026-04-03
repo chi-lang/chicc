@@ -3,7 +3,7 @@ import std/lang { luaExpr, embedLua }
 import chicc/source { Section }
 import chicc/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType }
 import chicc/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, packageTarget, atomExpr, interpolatedStringExpr, createRecordExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, assignmentExpr, nameDeclarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam, setExprType }
-import chicc/parse_ast { paTag, paSection, paLongValue, paFloatValue, paBoolValue, paStringValue, paInterpValue, paParts, paVariableName, paValue, paVariable, paIndexExpr, paIndexValue, paName, paIsPublic, paTypeParameters, paFormalArguments, paReturnTypeRef, paBody, paFuncBody, paCallee, paConcreteTypeParams, paArguments, paIsMutable, paSymbolName, paSymbolSection, paTypeRef, paCondition, paThenBody, paElseBody, paLoopBody, paForVars, paIterable, paForState, paForInit, paForBody, paWhenCases, paElseCase, paReturnValue, paOp, paLeft, paRight, paReceiverName, paMemberName, paReceiver, paMemberSection, paEffectCases, paHandleBody, paOpTemplate, paArrayValues, paRecordFields }
+import chicc/parse_ast { ParseAst }
 import chicc/symbols { FnSymbolTable, Symbol, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newSymbol, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, CompileTables, TypeTable, resolveType }
 
 // --- State (module-level mutable variables) ---
@@ -93,12 +93,12 @@ var convertWeave: (any, any, any) -> any = { node, pkg, tables -> unit }
 // --- Effect definition conversion (no mutual recursion with convert) ---
 
 fn convertEffectDefinition(node: any, pkg: any, tables: any): any {
-    val sec = paSection(node)
-    val isPub = paIsPublic(node)
-    val effName = paName(node)
-    val typeParams = paTypeParameters(node)
-    val args = paFormalArguments(node)
-    val retTypeRef: any = paReturnTypeRef(node)
+    val sec = node.paSection()
+    val isPub = node.paIsPublic()
+    val effName = node.paName()
+    val typeParams = node.paTypeParameters()
+    val args = node.paFormalArguments()
+    val retTypeRef: any = node.paReturnTypeRef()
 
     // Save and set type scheme
     val prevTypeSchemeVars = currentTypeSchemeVars
@@ -165,34 +165,34 @@ fn convertEffectDefinition(node: any, pkg: any, tables: any): any {
 // --- Main converter ---
 
 pub fn convert(node: any, pkg: any, tables: any): any {
-    val tag = paTag(node)
-    val sec = paSection(node)
+    val tag = node.paTag()
+    val sec = node.paSection()
 
     if tag == "UnitValue" {
         atomExpr("unit", tUnit, sec)
     } else if tag == "LongValue" {
-        val v = paLongValue(node)
+        val v = node.paLongValue()
         atomExpr("$v", tInt, sec)
     } else if tag == "FloatValue" {
-        val v = paFloatValue(node)
+        val v = node.paFloatValue()
         val vStr = luaExpr("(function() local s = tostring(v); return string.find(s, '.', 1, true) and s or s .. '.0' end)()") as string
         atomExpr(vStr, tFloat, sec)
     } else if tag == "BoolValue" {
-        val v = paBoolValue(node)
+        val v = node.paBoolValue()
         if v { atomExpr("true", tBool, sec) }
         else { atomExpr("false", tBool, sec) }
     } else if tag == "StringValue" {
-        val v = paStringValue(node)
+        val v = node.paStringValue()
         atomExpr(v, tString, sec)
     } else if tag == "StringText" {
-        val v = paStringValue(node)
+        val v = node.paStringValue()
         atomExpr(v, tString, sec)
     } else if tag == "ParseInterpolation" {
-        val innerVal = paInterpValue(node)
+        val innerVal = node.paInterpValue()
         val converted: any = convert(innerVal, pkg, tables)
         castExpr_(converted as Expr, tString, sec)
     } else if tag == "ParseInterpolatedString" {
-        val parts = paParts(node)
+        val parts = node.paParts()
         var convertedParts: array[any] = []
         var i = 1
         val partCount = parts.size()
@@ -210,45 +210,45 @@ pub fn convert(node: any, pkg: any, tables: any): any {
     } else if tag == "ParseFnCall" {
         convertFnCall(node, pkg, tables)
     } else if tag == "ParseVariableRead" {
-        val varName = paVariableName(node)
+        val varName = node.paVariableName()
         val tgt = getSymbol(varName, tables)
         variableAccessExpr(tgt, sec)
     } else if tag == "ParseAssignment" {
-        val varName = paVariableName(node)
+        val varName = node.paVariableName()
         val tgt = getSymbol(varName, tables)
-        val val_ = convert(paValue(node), pkg, tables)
+        val val_ = convert(node.paValue(), pkg, tables)
         assignmentExpr(tgt, val_, sec)
     } else if tag == "ParseIndexOperator" {
-        val var_ = convert(paVariable(node), pkg, tables)
-        val idx = convert(paIndexExpr(node), pkg, tables)
+        val var_ = convert(node.paVariable(), pkg, tables)
+        val idx = convert(node.paIndexExpr(), pkg, tables)
         indexOpExpr(var_, idx, sec)
     } else if tag == "ParseIndexedAssignment" {
-        val var_ = convert(paVariable(node), pkg, tables)
-        val idx = convert(paIndexExpr(node), pkg, tables)
-        val val_ = convert(paIndexValue(node), pkg, tables)
+        val var_ = convert(node.paVariable(), pkg, tables)
+        val idx = convert(node.paIndexExpr(), pkg, tables)
+        val val_ = convert(node.paIndexValue(), pkg, tables)
         indexedAssignmentExpr(var_, idx, val_, sec)
     } else if tag == "ParseNameDeclaration" {
         convertNameDeclaration(node, pkg, tables)
     } else if tag == "ParseBlock" {
         convertBlock(node, pkg, tables)
     } else if tag == "ParseGroup" {
-        convert(paValue(node), pkg, tables)
+        convert(node.paValue(), pkg, tables)
     } else if tag == "ParseIfElse" {
-        val cond = convert(paCondition(node), pkg, tables)
-        val thenB = convert(paThenBody(node), pkg, tables)
-        val elseNode: any = paElseBody(node)
+        val cond = convert(node.paCondition(), pkg, tables)
+        val thenB = convert(node.paThenBody(), pkg, tables)
+        val elseNode: any = node.paElseBody()
         val elseB: any = if elseNode != unit { convert(elseNode, pkg, tables) } else { unit }
         ifElseExpr(cond as Expr, thenB as Expr, elseB as Expr | unit, sec as Section | unit)
     } else if tag == "ParseWhile" {
-        val cond = convert(paCondition(node), pkg, tables)
-        val loopBody = convert(paLoopBody(node), pkg, tables)
+        val cond = convert(node.paCondition(), pkg, tables)
+        val loopBody = convert(node.paLoopBody(), pkg, tables)
         whileLoopExpr(cond, loopBody, sec)
     } else if tag == "ParseFor" {
         convertFor(node, pkg, tables)
     } else if tag == "ParseWhen" {
         convertWhen(node, pkg, tables)
     } else if tag == "ParseReturn" {
-        val retVal: any = paReturnValue(node)
+        val retVal: any = node.paReturnValue()
         val converted: any = if retVal != unit { convert(retVal, pkg, tables) } else { atomExpr("unit", tUnit, sec) }
         returnExpr(converted as Expr, sec as Section | unit)
     } else if tag == "ParseBreak" {
@@ -256,32 +256,32 @@ pub fn convert(node: any, pkg: any, tables: any): any {
     } else if tag == "ParseContinue" {
         continueExpr(sec)
     } else if tag == "ParseNot" {
-        val inner = convert(paValue(node), pkg, tables)
+        val inner = convert(node.paValue(), pkg, tables)
         prefixOpExpr("!", inner, sec)
     } else if tag == "ParseBinaryOp" {
-        val op = paOp(node)
-        val left = convert(paLeft(node), pkg, tables)
-        val right = convert(paRight(node), pkg, tables)
+        val op = node.paOp()
+        val left = convert(node.paLeft(), pkg, tables)
+        val right = convert(node.paRight(), pkg, tables)
         infixOpExpr(op, left, right, sec)
     } else if tag == "ParseCast" {
-        val inner = convert(paValue(node), pkg, tables)
+        val inner = convert(node.paValue(), pkg, tables)
         val tt = getTypeTable(tables)
-        val targetType = resolveType(tt, currentTypeSchemeVars, paTypeRef(node), effectiveTypeLevel())
+        val targetType = resolveType(tt, currentTypeSchemeVars, node.paTypeRef(), effectiveTypeLevel())
         castExpr_(inner, targetType, sec)
     } else if tag == "ParseIs" {
-        val inner = convert(paValue(node), pkg, tables)
+        val inner = convert(node.paValue(), pkg, tables)
         val tt = getTypeTable(tables)
-        val checkedType = resolveType(tt, currentTypeSchemeVars, paTypeRef(node), effectiveTypeLevel())
+        val checkedType = resolveType(tt, currentTypeSchemeVars, node.paTypeRef(), effectiveTypeLevel())
         isExpr(inner, checkedType, sec)
     } else if tag == "ParseFieldAccess" {
         convertFieldAccess(node, pkg, tables)
     } else if tag == "ParseFieldAssignment" {
-        val recv = convert(paReceiver(node), pkg, tables)
-        val memName = paMemberName(node)
-        val val_ = convert(paValue(node), pkg, tables)
+        val recv = convert(node.paReceiver(), pkg, tables)
+        val memName = node.paMemberName()
+        val val_ = convert(node.paValue(), pkg, tables)
         fieldAssignmentExpr(recv, memName, val_, sec)
     } else if tag == "ParseCreateArray" {
-        val values = paArrayValues(node)
+        val values = node.paArrayValues()
         var converted: array[any] = []
         var i = 1
         val count = values.size()
@@ -292,7 +292,7 @@ pub fn convert(node: any, pkg: any, tables: any): any {
         }
         createArrayExpr(converted as array[Expr], sec as Section | unit)
     } else if tag == "ParseCreateRecord" {
-        val fields = paRecordFields(node)
+        val fields = node.paRecordFields()
         var converted: array[any] = []
         var i = 1
         val count = fields.size()
@@ -327,9 +327,9 @@ pub fn convert(node: any, pkg: any, tables: any): any {
 // --- Lambda conversion ---
 
 fn convertLambdaImpl(node: any, pkg: any, tables: any): any {
-    val sec = paSection(node)
-    val args = paFormalArguments(node)
-    val bodyNodes = paBody(node)
+    val sec = node.paSection()
+    val args = node.paFormalArguments()
+    val bodyNodes = node.paBody()
 
     val parentFst: any = currentFnSymbolTable
     val fst = newFnSymbolTable(parentFst)
@@ -405,13 +405,13 @@ convertLambda = convertLambdaImpl
 // --- FuncWithName conversion ---
 
 fn convertFuncWithNameImpl(node: any, pkg: any, tables: any): any {
-    val sec = paSection(node)
-    val fnName = paName(node)
-    val isPub = paIsPublic(node)
-    val typeParams = paTypeParameters(node)
-    val args = paFormalArguments(node)
-    val retTypeRef: any = paReturnTypeRef(node)
-    val funcBodyNode: any = paFuncBody(node)
+    val sec = node.paSection()
+    val fnName = node.paName()
+    val isPub = node.paIsPublic()
+    val typeParams = node.paTypeParameters()
+    val args = node.paFormalArguments()
+    val retTypeRef: any = node.paReturnTypeRef()
+    val funcBodyNode: any = node.paFuncBody()
 
     // Save and set type scheme variables
     val prevTypeSchemeVars = currentTypeSchemeVars
@@ -550,9 +550,9 @@ convertFuncWithName = convertFuncWithNameImpl
 // --- FnCall conversion ---
 
 fn convertFnCallImpl(node: any, pkg: any, tables: any): any {
-    val sec = paSection(node)
-    val calleeNode: any = paCallee(node)
-    val argNodes = paArguments(node)
+    val sec = node.paSection()
+    val calleeNode: any = node.paCallee()
+    val argNodes = node.paArguments()
 
     val callee: any = convert(calleeNode, pkg, tables)
 
@@ -567,9 +567,9 @@ fn convertFnCallImpl(node: any, pkg: any, tables: any): any {
     }
 
     // Try to fill default arguments: look up the callee symbol
-    val calleeTag = paTag(calleeNode)
+    val calleeTag = calleeNode.paTag()
     if calleeTag == "ParseVariableRead" {
-        val calleeName = paVariableName(calleeNode)
+        val calleeName = calleeNode.paVariableName()
         // Skip default-arg fill if callee is a local variable in function scope
         // (local variables are closures/lambdas and don't have default-arg info)
         val fst: any = currentFnSymbolTable
@@ -619,8 +619,8 @@ convertFnCall = convertFnCallImpl
 // --- Block conversion ---
 
 fn convertBlockImpl(node: any, pkg: any, tables: any): any {
-    val sec = paSection(node)
-    val bodyNodes = paBody(node)
+    val sec = node.paSection()
+    val bodyNodes = node.paBody()
 
     currentTypeLevel = currentTypeLevel + 1
     var bodyExprs: array[any] = []
@@ -641,12 +641,12 @@ convertBlock = convertBlockImpl
 // --- NameDeclaration conversion ---
 
 fn convertNameDeclarationImpl(node: any, pkg: any, tables: any): any {
-    val sec = paSection(node)
-    val isPub = paIsPublic(node)
-    val symName = paSymbolName(node)
-    val isMut = paIsMutable(node)
-    val typeRef: any = paTypeRef(node)
-    val valNode: any = paValue(node)
+    val sec = node.paSection()
+    val isPub = node.paIsPublic()
+    val symName = node.paSymbolName()
+    val isMut = node.paIsMutable()
+    val typeRef: any = node.paTypeRef()
+    val valNode: any = node.paValue()
 
     val val_ = convert(valNode, pkg, tables)
 
@@ -676,9 +676,9 @@ convertNameDeclaration = convertNameDeclarationImpl
 // --- When conversion (fold into nested IfElse) ---
 
 fn convertWhenImpl(node: any, pkg: any, tables: any): any {
-    val sec = paSection(node)
-    val cases = paWhenCases(node)
-    val elseCase: any = paElseCase(node)
+    val sec = node.paSection()
+    val cases = node.paWhenCases()
+    val elseCase: any = node.paElseCase()
 
     val caseCount = cases.size()
 
@@ -734,12 +734,12 @@ convertWhen = convertWhenImpl
 // --- For loop conversion ---
 
 fn convertForImpl(node: any, pkg: any, tables: any): any {
-    val sec = paSection(node)
-    val vars = paForVars(node)
-    val iterNode: any = paIterable(node)
-    val stateNode: any = paForState(node)
-    val initNode: any = paForInit(node)
-    val bodyNode: any = paForBody(node)
+    val sec = node.paSection()
+    val vars = node.paForVars()
+    val iterNode: any = node.paIterable()
+    val stateNode: any = node.paForState()
+    val initNode: any = node.paForInit()
+    val bodyNode: any = node.paForBody()
 
     // Create a symbol table for loop variables
     val parentFst = currentFnSymbolTable
@@ -768,10 +768,10 @@ convertFor = convertForImpl
 // --- FieldAccess conversion ---
 
 fn convertFieldAccessImpl(node: any, pkg: any, tables: any): any {
-    val sec = paSection(node)
-    val receiverName = paReceiverName(node)
-    val memberName = paMemberName(node)
-    val memberSec = paMemberSection(node)
+    val sec = node.paSection()
+    val receiverName = node.paReceiverName()
+    val memberName = node.paMemberName()
+    val memberSec = node.paMemberSection()
 
     // First check if the receiver is a package alias
     val aliasedPkg: any = ctGetAliasedPackage(tables as CompileTables, receiverName)
@@ -795,7 +795,7 @@ fn convertFieldAccessImpl(node: any, pkg: any, tables: any): any {
     }
 
     // Regular field access
-    val recv = convert(paReceiver(node), pkg, tables)
+    val recv = convert(node.paReceiver(), pkg, tables)
     fieldAccessExpr(recv, memberName, memberSec, sec)
 }
 
@@ -804,19 +804,19 @@ convertFieldAccess = convertFieldAccessImpl
 // --- Weave conversion ---
 
 fn convertWeaveImpl(node: any, pkg: any, tables: any): any {
-    val sec = paSection(node)
-    val valNode: any = paValue(node)
-    val templateNode: any = paOpTemplate(node)
+    val sec = node.paSection()
+    val valNode: any = node.paValue()
+    val templateNode: any = node.paOpTemplate()
 
     val inputValue: any = convert(valNode, pkg, tables)
     val tempVarName = nextTempVarName()
 
     // Create temp variable declaration
-    val tempDecl = nameDeclarationExpr(false, tempVarName, false, unit, inputValue as Expr, paSection(valNode))
+    val tempDecl = nameDeclarationExpr(false, tempVarName, false, unit, inputValue as Expr, valNode.paSection())
     addLocalSymbol(tempVarName, false, false, unit, pkg, tables)
 
     // Create read variable for the temp var
-    val readVar: any = variableAccessExpr(localTarget(tempVarName), paSection(valNode))
+    val readVar: any = variableAccessExpr(localTarget(tempVarName), valNode.paSection())
 
     // Set weave input and convert template
     val prevWeaveInput = weaveInput
@@ -832,9 +832,9 @@ convertWeave = convertWeaveImpl
 // --- Handle conversion ---
 
 fn convertHandleImpl(node: any, pkg: any, tables: any): any {
-    val sec = paSection(node)
-    val bodyNode: any = paHandleBody(node)
-    val casesArr = paEffectCases(node)
+    val sec = node.paSection()
+    val bodyNode: any = node.paHandleBody()
+    val casesArr = node.paEffectCases()
 
     val body: any = convert(bodyNode, pkg, tables)
 

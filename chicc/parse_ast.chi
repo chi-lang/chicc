@@ -68,18 +68,18 @@ pub fn typeConstructorRef(base: any, typeParams: array[any], sec: Section | unit
 }
 
 // TypeRef accessor functions
-pub fn trTag(tr: any): string { luaExpr("tr.tag") }
-pub fn trSection(tr: any): Section | unit { luaExpr("tr.section") }
-pub fn trName(tr: any): string { luaExpr("tr.name") }
-pub fn trModuleName(tr: any): string { luaExpr("tr.moduleName") }
-pub fn trPackageName(tr: any): string { luaExpr("tr.packageName") }
-pub fn trTypeParameters(tr: any): array[any] { luaExpr("tr.typeParameters") }
-pub fn trArgumentTypeRefs(tr: any): array[any] { luaExpr("tr.argumentTypeRefs") }
-pub fn trReturnType(tr: any): any { luaExpr("tr.returnType") }
-pub fn trFields(tr: any): array[any] { luaExpr("tr.fields") }
-pub fn trLhs(tr: any): any { luaExpr("tr.lhs") }
-pub fn trRhs(tr: any): any { luaExpr("tr.rhs") }
-pub fn trBaseType(tr: any): any { luaExpr("tr.baseType") }
+pub fn trTag(tr: TypeRef): string { luaExpr("tr.tag") }
+pub fn trSection(tr: TypeRef): Section | unit { luaExpr("tr.section") }
+pub fn trName(tr: TypeRef): string { luaExpr("tr.name") }
+pub fn trModuleName(tr: TypeRef): string { luaExpr("tr.moduleName") }
+pub fn trPackageName(tr: TypeRef): string { luaExpr("tr.packageName") }
+pub fn trTypeParameters(tr: TypeRef): array[any] { luaExpr("tr.typeParameters") }
+pub fn trArgumentTypeRefs(tr: TypeRef): array[any] { luaExpr("tr.argumentTypeRefs") }
+pub fn trReturnType(tr: TypeRef): any { luaExpr("tr.returnType") }
+pub fn trFields(tr: TypeRef): array[any] { luaExpr("tr.fields") }
+pub fn trLhs(tr: TypeRef): any { luaExpr("tr.lhs") }
+pub fn trRhs(tr: TypeRef): any { luaExpr("tr.rhs") }
+pub fn trBaseType(tr: TypeRef): any { luaExpr("tr.baseType") }
 
 // -- Supporting types (simple records) --
 
@@ -514,54 +514,54 @@ pub fn parseCreateRecord(fields: array[any], sec: Section | unit): ParseAst {
 
 // -- ParseAst accessor functions --
 
-pub fn paTag(p: any): string { luaExpr("p.tag") }
-pub fn paSection(p: any): Section | unit { luaExpr("p.section") }
-pub fn paLongValue(p: any): int { luaExpr("p.longValue") }
-pub fn paFloatValue(p: any): float { luaExpr("p.floatValue") }
-pub fn paBoolValue(p: any): bool { luaExpr("p.boolValue") }
-pub fn paStringValue(p: any): string { luaExpr("p.stringValue") }
-pub fn paInterpValue(p: any): any { luaExpr("p.interpValue") }
-pub fn paParts(p: any): array[any] { luaExpr("p.parts") }
-pub fn paVariableName(p: any): string { luaExpr("p.variableName") }
-pub fn paValue(p: any): any { luaExpr("p.value") }
-pub fn paVariable(p: any): any { luaExpr("p.variable") }
-pub fn paIndexExpr(p: any): any { luaExpr("p.indexExpr") }
-pub fn paIndexValue(p: any): any { luaExpr("p.indexValue") }
-pub fn paName(p: any): string { luaExpr("p.name") }
-pub fn paIsPublic(p: any): bool { luaExpr("p.isPublic") }
-pub fn paTypeParameters(p: any): array[any] { luaExpr("p.typeParameters") }
-pub fn paFormalArguments(p: any): array[any] { luaExpr("p.formalArguments") }
-pub fn paReturnTypeRef(p: any): any { luaExpr("p.returnTypeRef") }
-pub fn paBody(p: any): array[any] { luaExpr("p.body") }
-pub fn paFuncBody(p: any): any { luaExpr("p.funcBody") }
-pub fn paCallee(p: any): any { luaExpr("p.callee") }
-pub fn paConcreteTypeParams(p: any): array[any] { luaExpr("p.concreteTypeParams") }
-pub fn paArguments(p: any): array[any] { luaExpr("p.arguments") }
-pub fn paIsMutable(p: any): bool { luaExpr("p.isMutable") }
-pub fn paSymbolName(p: any): string { luaExpr("p.symbolName") }
-pub fn paSymbolSection(p: any): Section | unit { luaExpr("p.symbolSection") }
-pub fn paTypeRef(p: any): any { luaExpr("p.typeRef") }
-pub fn paCondition(p: any): any { luaExpr("p.condition") }
-pub fn paThenBody(p: any): any { luaExpr("p.thenBody") }
-pub fn paElseBody(p: any): any { luaExpr("p.elseBody") }
-pub fn paLoopBody(p: any): any { luaExpr("p.loopBody") }
-pub fn paForVars(p: any): array[string] { luaExpr("p.forVars") }
-pub fn paIterable(p: any): any { luaExpr("p.iterable") }
-pub fn paForState(p: any): any { luaExpr("p.forState") }
-pub fn paForInit(p: any): any { luaExpr("p.forInit") }
-pub fn paForBody(p: any): any { luaExpr("p.forBody") }
-pub fn paWhenCases(p: any): array[any] { luaExpr("p.whenCases") }
-pub fn paElseCase(p: any): any { luaExpr("p.elseCase") }
-pub fn paReturnValue(p: any): any { luaExpr("p.returnValue") }
-pub fn paOp(p: any): string { luaExpr("p.op") }
-pub fn paLeft(p: any): any { luaExpr("p.left") }
-pub fn paRight(p: any): any { luaExpr("p.right") }
-pub fn paReceiverName(p: any): string { luaExpr("p.receiverName") }
-pub fn paMemberName(p: any): string { luaExpr("p.memberName") }
-pub fn paReceiver(p: any): any { luaExpr("p.receiver") }
-pub fn paMemberSection(p: any): Section | unit { luaExpr("p.memberSection") }
-pub fn paEffectCases(p: any): array[any] { luaExpr("p.effectCases") }
-pub fn paHandleBody(p: any): any { luaExpr("p.handleBody") }
-pub fn paOpTemplate(p: any): any { luaExpr("p.opTemplate") }
-pub fn paArrayValues(p: any): array[any] { luaExpr("p.arrayValues") }
-pub fn paRecordFields(p: any): array[any] { luaExpr("p.recordFields") }
+pub fn paTag(p: ParseAst): string { luaExpr("p.tag") }
+pub fn paSection(p: ParseAst): Section | unit { luaExpr("p.section") }
+pub fn paLongValue(p: ParseAst): int { luaExpr("p.longValue") }
+pub fn paFloatValue(p: ParseAst): float { luaExpr("p.floatValue") }
+pub fn paBoolValue(p: ParseAst): bool { luaExpr("p.boolValue") }
+pub fn paStringValue(p: ParseAst): string { luaExpr("p.stringValue") }
+pub fn paInterpValue(p: ParseAst): any { luaExpr("p.interpValue") }
+pub fn paParts(p: ParseAst): array[any] { luaExpr("p.parts") }
+pub fn paVariableName(p: ParseAst): string { luaExpr("p.variableName") }
+pub fn paValue(p: ParseAst): any { luaExpr("p.value") }
+pub fn paVariable(p: ParseAst): any { luaExpr("p.variable") }
+pub fn paIndexExpr(p: ParseAst): any { luaExpr("p.indexExpr") }
+pub fn paIndexValue(p: ParseAst): any { luaExpr("p.indexValue") }
+pub fn paName(p: ParseAst): string { luaExpr("p.name") }
+pub fn paIsPublic(p: ParseAst): bool { luaExpr("p.isPublic") }
+pub fn paTypeParameters(p: ParseAst): array[any] { luaExpr("p.typeParameters") }
+pub fn paFormalArguments(p: ParseAst): array[any] { luaExpr("p.formalArguments") }
+pub fn paReturnTypeRef(p: ParseAst): any { luaExpr("p.returnTypeRef") }
+pub fn paBody(p: ParseAst): array[any] { luaExpr("p.body") }
+pub fn paFuncBody(p: ParseAst): any { luaExpr("p.funcBody") }
+pub fn paCallee(p: ParseAst): any { luaExpr("p.callee") }
+pub fn paConcreteTypeParams(p: ParseAst): array[any] { luaExpr("p.concreteTypeParams") }
+pub fn paArguments(p: ParseAst): array[any] { luaExpr("p.arguments") }
+pub fn paIsMutable(p: ParseAst): bool { luaExpr("p.isMutable") }
+pub fn paSymbolName(p: ParseAst): string { luaExpr("p.symbolName") }
+pub fn paSymbolSection(p: ParseAst): Section | unit { luaExpr("p.symbolSection") }
+pub fn paTypeRef(p: ParseAst): any { luaExpr("p.typeRef") }
+pub fn paCondition(p: ParseAst): any { luaExpr("p.condition") }
+pub fn paThenBody(p: ParseAst): any { luaExpr("p.thenBody") }
+pub fn paElseBody(p: ParseAst): any { luaExpr("p.elseBody") }
+pub fn paLoopBody(p: ParseAst): any { luaExpr("p.loopBody") }
+pub fn paForVars(p: ParseAst): array[string] { luaExpr("p.forVars") }
+pub fn paIterable(p: ParseAst): any { luaExpr("p.iterable") }
+pub fn paForState(p: ParseAst): any { luaExpr("p.forState") }
+pub fn paForInit(p: ParseAst): any { luaExpr("p.forInit") }
+pub fn paForBody(p: ParseAst): any { luaExpr("p.forBody") }
+pub fn paWhenCases(p: ParseAst): array[any] { luaExpr("p.whenCases") }
+pub fn paElseCase(p: ParseAst): any { luaExpr("p.elseCase") }
+pub fn paReturnValue(p: ParseAst): any { luaExpr("p.returnValue") }
+pub fn paOp(p: ParseAst): string { luaExpr("p.op") }
+pub fn paLeft(p: ParseAst): any { luaExpr("p.left") }
+pub fn paRight(p: ParseAst): any { luaExpr("p.right") }
+pub fn paReceiverName(p: ParseAst): string { luaExpr("p.receiverName") }
+pub fn paMemberName(p: ParseAst): string { luaExpr("p.memberName") }
+pub fn paReceiver(p: ParseAst): any { luaExpr("p.receiver") }
+pub fn paMemberSection(p: ParseAst): Section | unit { luaExpr("p.memberSection") }
+pub fn paEffectCases(p: ParseAst): array[any] { luaExpr("p.effectCases") }
+pub fn paHandleBody(p: ParseAst): any { luaExpr("p.handleBody") }
+pub fn paOpTemplate(p: ParseAst): any { luaExpr("p.opTemplate") }
+pub fn paArrayValues(p: ParseAst): array[any] { luaExpr("p.arrayValues") }
+pub fn paRecordFields(p: ParseAst): array[any] { luaExpr("p.recordFields") }
