@@ -12,4 +12,3 @@ compile.lua
 run_chicc.sh
 test_golden.sh
 
-.claude/
