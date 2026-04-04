@@ -1,7 +1,7 @@
 // chicc/chicc/typer.chi
 package chicc/typer
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tString, tAny, sumCreate, recordType, arrayType, functionType, polyType, mapType, optionTypeId }
+import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tFloat, tString, tAny, sumCreate, recordType, arrayType, functionType, polyType, mapType, optionTypeId, intTypeId, floatTypeId }
 import chicc/source { Section, toCodePoint }
 import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget, atomExpr }
 import chicc/unification { unify, unifyWithUf, ufNew, ufResolve, ufAllBindings, newConstraint }
@@ -87,6 +87,36 @@ fn fillDefaultArgs(callParams: any, symbol: any) {
 fn addConstraint(constraints: any, expected: any, actual: any, section: any) {
     val c = newConstraint(expected, actual, section, luaExpr("{}") as array[any])
     embedLua("table.insert(constraints, c)")
+}
+
+// --- Helpers: check for numeric primitive types ---
+
+fn isIntType(t: any): bool {
+    val typ = t as Type
+    if typ.isPrimitive() {
+        val ids = typ.typeIds()
+        val count = luaExpr("#ids") as int
+        var i = 1
+        while i <= count {
+            if ids[i].typeIdEquals(intTypeId) { return true }
+            i = i + 1
+        }
+    }
+    false
+}
+
+fn isFloatType(t: any): bool {
+    val typ = t as Type
+    if typ.isPrimitive() {
+        val ids = typ.typeIds()
+        val count = luaExpr("#ids") as int
+        var i = 1
+        while i <= count {
+            if ids[i].typeIdEquals(floatTypeId) { return true }
+            i = i + 1
+        }
+    }
+    false
 }
 
 // --- Shared '@' placeholder type variable for default-arg type inference ---
@@ -705,10 +735,24 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
             addConstraint(constraints, lhsType, rhsType, rightSection)
             tBool
         } else {
-            val infixResult = icFreshVariable(level)
-            addConstraint(constraints, infixResult, lhsType, leftSection)
-            addConstraint(constraints, infixResult, rhsType, rightSection)
-            infixResult
+            // Numeric widening: int op float -> float, float op int -> float
+            val lhsIsInt = isIntType(lhsType)
+            val lhsIsFloat = isFloatType(lhsType)
+            val rhsIsInt = isIntType(rhsType)
+            val rhsIsFloat = isFloatType(rhsType)
+            if lhsIsInt && rhsIsFloat {
+                // int op float -> float (no equality constraint between operands)
+                tFloat
+            } else if lhsIsFloat && rhsIsInt {
+                // float op int -> float (no equality constraint between operands)
+                tFloat
+            } else {
+                // Same-type arithmetic or non-numeric (e.g. string ++)
+                val infixResult = icFreshVariable(level)
+                addConstraint(constraints, infixResult, lhsType, leftSection)
+                addConstraint(constraints, infixResult, rhsType, rightSection)
+                infixResult
+            }
         }
     } else if kind == "is" {
         // 24. is: type value, return bool
@@ -716,12 +760,21 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
         typeTerm(isExpr_, level, constraints)
         tBool
     } else if kind == "prefix_op" {
-        // 25. prefix_op: type expr (constrain=bool), return bool
+        // 25. prefix_op: dispatch on operator
+        val prefixOp = luaExpr("term.op") as string
         val prefixExpr_ = luaExpr("term.prefixExpr") as any
         val valueType = typeTerm(prefixExpr_, level, constraints)
         val exprSection = luaExpr("prefixExpr_.section") as any
-        addConstraint(constraints, tBool, valueType, exprSection)
-        tBool
+        if prefixOp == "-" {
+            // Unary minus: result type matches operand (int -> int, float -> float)
+            val prefixResult = icFreshVariable(level)
+            addConstraint(constraints, prefixResult, valueType, exprSection)
+            prefixResult
+        } else {
+            // Boolean not (!)
+            addConstraint(constraints, tBool, valueType, exprSection)
+            tBool
+        }
     } else if kind == "return" {
         // 26. return: type value or return unit
         val returnValue = luaExpr("term.returnValue") as any
