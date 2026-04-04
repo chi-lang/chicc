@@ -12,3 +12,5 @@ compile.lua
 run_chicc.sh
 test_golden.sh
 
+# Claude stuff
+.claude/worktrees
