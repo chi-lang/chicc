@@ -3,7 +3,7 @@ package chicc/typer
 import std/lang { luaExpr, embedLua }
 import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tString, tAny, sumCreate, recordType, arrayType, functionType, polyType, mapType, optionTypeId }
 import chicc/source { Section, toCodePoint }
-import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, fieldDotTarget, atomExpr }
+import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget, atomExpr }
 import chicc/unification { unify, unifyWithUf, ufNew, ufResolve, ufAllBindings, newConstraint }
 import chicc/inference_context { icFreshVariable, icGetTargetType, icWithNewLocalScope, icDefineLocalSymbol, icListLocalFunctionsForType, icListCurrentPackageFunctionsForType, icListTypesPackageFunctionsForType }
 

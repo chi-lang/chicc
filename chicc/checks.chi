@@ -1,7 +1,7 @@
 // chicc/chicc/checks.chi
 package chicc/checks
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, tUnit }
+import chicc/types { Type, tUnit, typeEquals }
 import chicc/unification { newConstraint }
 import chicc/messages { unrecognizedName, cannotAccessInternalName, notAFunction, cannotChangeImmutableVariable, typeMismatch, genericError }
 import chicc/ast { exprChildren }

@@ -1,7 +1,7 @@
 // chicc/chicc/unification.chi
 package chicc/unification
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, TypeId, RecordField, tAny, tUnit, functionType, recordType, sumCreate, arrayType, recursiveType, polyType }
+import chicc/types { Type, TypeId, RecordField, tAny, tUnit, functionType, recordType, sumCreate, arrayType, recursiveType, polyType, typeIdEquals }
 import chicc/messages { Message, typeMismatch, notAFunction, functionArityError, infiniteType }
 import chicc/source { Section, toCodePoint }
 

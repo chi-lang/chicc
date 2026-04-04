@@ -21,7 +21,10 @@ fn build() {
         "chicc/checks.chi", "chicc/compiler.chi", "chicc/cli.chi"
     ]
 
-    val luaCode = compileModules(sourceFiles, ".cache")
+    val luaCode = compileModules(sourceFiles, ".cache", {
+        loadCompiledModules: false,
+        verbose: true,
+    })
 
     val entry = "\n-- chicc entry point\nlocal _CLI = package.loaded['chicc/cli']\nlocal _COMPILER = package.loaded['chicc/compiler']\ncliMain = _CLI.cliMain\ncompileFile = _CLI.compileFile\nrunFile = _CLI.runFile\nloadStdlib = _CLI.loadStdlib\ncompileToLua = _COMPILER.compileToLua\nnewLuaCompilationEnv = _COMPILER.newLuaCompilationEnv\n\nif arg then\n  local exitCode = cliMain(arg)\n  if exitCode and exitCode ~= 0 then os.exit(exitCode) end\nend\n"
 
