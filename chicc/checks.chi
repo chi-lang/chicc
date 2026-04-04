@@ -496,8 +496,15 @@ fn rtWalkExprImpl(expr: any, messages: any) {
 
     if kind == "name_declaration" {
         // Check if the value has a function type — sets expected return type
+        // Prefer the declared expectedType (preserves sum types like int | unit)
+        // over the inferred exprType (which may resolve to just unit after unification)
         val value = luaExpr("expr.value") as any
-        val exprType = luaExpr("expr.value and expr.value.exprType or expr.exprType") as any
+        val declaredType = luaExpr("expr.expectedType") as any
+        val exprType = if declaredType != unit {
+            declaredType
+        } else {
+            luaExpr("expr.value and expr.value.exprType or expr.exprType") as any
+        }
         val prevExpectedReturnType = rtExpectedReturnType
         if exprType != unit {
             val etTag = luaExpr("exprType.tag") as string
