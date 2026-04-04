@@ -121,14 +121,12 @@ Functions to convert (all take `Type` as first param):
 
 **Files to update:**
 - `chicc/type_writer.chi` — heaviest user
-- `chicc/unification.chi` — heavy user (ufResolve, varKey, unification logic all use typeTag, typeName, typeLevel, isVariable, typeTypes, typeFields, typeIds, typeTypeParams, typeDefaults, etc.)
+- `chicc/unification.chi` — heavy user
 - `chicc/typer.chi` — heavy user
 - `chicc/symbols.chi`
 - `chicc/checks.chi`
 - `chicc/inference_context.chi`
-- All `tests/test_types*.chi`, `tests/test_unification.chi`, `tests/test_typer.chi`, `tests/test_inference_ctx.chi`, `tests/test_resolve_type.chi`, `tests/test_type_writer.chi`
-
-Note: `chicc/compiler.chi` no longer imports from `chicc/types` — it delegates type-checking via `embedLua`/`require` calls, so no changes needed there.
+- All `tests/test_types*.chi`, `tests/test_unification.chi`, `tests/test_typer.chi`, `tests/test_inference_ctx.chi`, `tests/test_resolve_type.chi`, `tests/test_type_writer.chi`, `tests/test_compiler.chi`
 
 ### 3c. Remove accessor/predicate imports
 
