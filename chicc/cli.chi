@@ -177,19 +177,22 @@ fn hasExtension(path: string, ext: string): bool {
 // Usage help
 // ============================================================================
 
+val CHI_VERSION = "0.1.0"
+
 fn printUsage() {
     println("Usage: chi <command> [options] [file]")
     println("")
     println("Commands:")
     println("  repl                        Start interactive REPL")
     println("  compile [-o OUTPUT] FILE    Compile .chi to .lua")
-    println("  run FILE                    Compile and run .chi")
-    println("  FILE                        Compile and run .chi (default)")
+    println("  build [-o OUTPUT] FILE      Build standalone native executable")
+    println("  FILE                        Compile and run .chi")
     println("  (no arguments)              Start interactive REPL")
     println("")
     println("Options:")
-    println("  -o, --output FILE           Output file path (compile mode)")
+    println("  -o, --output FILE           Output file path (compile and build)")
     println("  -h, --help                  Show this help")
+    println("  --version                   Show version")
 }
 
 // ============================================================================
@@ -281,6 +284,11 @@ pub fn cliMain(args: any): int {
         return 0
     }
 
+    if firstArg == "--version" {
+        println("chi $CHI_VERSION")
+        return 0
+    }
+
     if firstArg == "repl" {
         return runRepl()
     }
@@ -337,22 +345,14 @@ pub fn cliMain(args: any): int {
         return compileFile(inputPath, outputPath)
     }
 
-    if firstArg == "run" {
-        // run mode: chicc run FILE
-        if argc < 2 {
-            println("Error: run requires a file argument")
-            printUsage()
+    if firstArg == "build" {
+        val isNative = luaExpr("_CHI_NATIVE == true") as bool
+        if isNative == false {
+            println("Error: 'build' command requires native chi binary")
             return 1
         }
-        val filePath = luaExpr("args[2]") as string
-
-        if hasExtension(filePath, ".chi") == false {
-            println("Error: $filePath is not a Chi source file (.chi)")
-            return 1
-        }
-
-        loadStdlib()
-        return runFile(filePath)
+        val buildResult = luaExpr("chi_build(args)") as int
+        return buildResult
     }
 
     // Default: treat first arg as a file to run
@@ -361,7 +361,7 @@ pub fn cliMain(args: any): int {
         return runFile(firstArg)
     }
 
-    println("Error: unknown command '$firstArg'")
+    println("Error: '$firstArg' is not a .chi file")
     printUsage()
     1
 }

@@ -1,11 +1,11 @@
 /*
  * chi_main.c — Native Chi language compiler/runtime launcher
  *
- * Embeds LuaJIT with all runtime, stdlib, and compiler bytecode.
- * Three execution modes:
+ * Thin wrapper: embeds LuaJIT with all runtime, stdlib, compiler, and
+ * build-tool bytecode, then forwards arguments to cliMain in cli.chi.
+ * Two execution modes:
  *   1. Payload mode: runs bytecode appended to this binary (chi build output)
- *   2. Build mode:   'chi build FILE [-o OUT]' compiles and packages a Chi program
- *   3. Compiler mode: 'chi compile/run/FILE' — normal compiler CLI
+ *   2. Compiler mode: loads chicc + chi_build, sets _CHI_NATIVE, calls cliMain
  *
  * Payload format (appended to end of binary):
  *   [lua bytecode][size: 8 bytes LE uint64]["CHIEXE"]
@@ -301,12 +301,6 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    /* Handle --version early (before Lua init) */
-    if (argc >= 2 && strcmp(argv[1], "--version") == 0) {
-        printf("chi %s (native)\n", CHI_VERSION);
-        return 0;
-    }
-
     /* Create Lua state */
     lua_State *L = luaL_newstate();
     if (!L) {
@@ -336,41 +330,30 @@ int main(int argc, char **argv) {
             return 1;
         }
 
-        if (argc >= 2 && strcmp(argv[1], "build") == 0) {
-            /* Build command: chi build FILE [-o OUTPUT] */
-            if (load_embedded(L, luaJIT_BC_chi_build,
-                              luaJIT_BC_chi_build_SIZE, "chi_build") != 0) {
-                lua_close(L);
-                return 1;
-            }
-            lua_pop(L, 1);
+        /* Set _CHI_NATIVE so cli.chi can check it */
+        lua_pushboolean(L, 1);
+        lua_setglobal(L, "_CHI_NATIVE");
 
-            /* Set _CHI_EXE_PATH so chi_build.lua can copy this binary */
-            lua_pushstring(L, exe_path);
-            lua_setglobal(L, "_CHI_EXE_PATH");
+        /* Load chi_build and set _CHI_EXE_PATH for 'chi build' support */
+        if (load_embedded(L, luaJIT_BC_chi_build,
+                          luaJIT_BC_chi_build_SIZE, "chi_build") != 0) {
+            lua_close(L);
+            return 1;
+        }
+        lua_pop(L, 1);
 
-            /* Call chi_build(arg) */
-            create_arg_table(L, argc, argv);
-            lua_getglobal(L, "chi_build");
-            lua_getglobal(L, "arg");
-            if (lua_pcall(L, 1, 1, 0) != 0) {
-                fprintf(stderr, "Error: %s\n", lua_tostring(L, -1));
-                exit_code = 1;
-            } else {
-                exit_code = (int)lua_tointeger(L, -1);
-            }
+        lua_pushstring(L, exe_path);
+        lua_setglobal(L, "_CHI_EXE_PATH");
 
+        /* Forward all arguments to cliMain */
+        create_arg_table(L, argc, argv);
+        lua_getglobal(L, "cliMain");
+        lua_getglobal(L, "arg");
+        if (lua_pcall(L, 1, 1, 0) != 0) {
+            fprintf(stderr, "Error: %s\n", lua_tostring(L, -1));
+            exit_code = 1;
         } else {
-            /* Normal compiler mode: chi compile/run/FILE */
-            create_arg_table(L, argc, argv);
-            lua_getglobal(L, "cliMain");
-            lua_getglobal(L, "arg");
-            if (lua_pcall(L, 1, 1, 0) != 0) {
-                fprintf(stderr, "Error: %s\n", lua_tostring(L, -1));
-                exit_code = 1;
-            } else {
-                exit_code = (int)lua_tointeger(L, -1);
-            }
+            exit_code = (int)lua_tointeger(L, -1);
         }
     }
 
