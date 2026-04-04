@@ -15,3 +15,6 @@ Two ways to run compiler:
 
 - `run_chicc.sh` sets up the environment and uses LuaJIT directly to run chicc.lua which is the compiled compiler
 - use the native `chi` 
+
+Use `spec` program with markdown backend for specifications. Run `spec prime` in bash to learn using spec.
+Specification is the 'WHAT' and 'WHY'. It also describes how the feature works. It does NOT describe how to build the feature.
