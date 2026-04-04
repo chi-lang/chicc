@@ -5,7 +5,7 @@
 package chicc/cli
 import std/lang { luaExpr, embedLua }
 import std/io.file { readString, writeString }
-import chicc/compiler { newLuaCompilationEnv, compileToLua, formatMessage }
+import chicc/compiler { newLuaCompilationEnv, newReplCompilationEnv, compileToLua, compileReplLine, formatMessage }
 
 // ============================================================================
 // Stdlib loading
@@ -178,16 +178,83 @@ fn hasExtension(path: string, ext: string): bool {
 // ============================================================================
 
 fn printUsage() {
-    println("Usage: chicc <command> [options] <file>")
+    println("Usage: chi <command> [options] [file]")
     println("")
     println("Commands:")
+    println("  repl                        Start interactive REPL")
     println("  compile [-o OUTPUT] FILE    Compile .chi to .lua")
     println("  run FILE                    Compile and run .chi")
     println("  FILE                        Compile and run .chi (default)")
+    println("  (no arguments)              Start interactive REPL")
     println("")
     println("Options:")
     println("  -o, --output FILE           Output file path (compile mode)")
     println("  -h, --help                  Show this help")
+}
+
+// ============================================================================
+// REPL mode
+// ============================================================================
+
+// Pretty-printer for REPL values (Lua-side)
+embedLua("local __RDQ = string.char(34); local __RBS = string.char(92); local __RNL = string.char(10); local __RCR = string.char(13); local __RTAB = string.char(9); function __chi_repl_fmt_type(t) if not t then return '?' end; local tag = t.tag; if tag == 'primitive' then if t.ids and t.ids[1] then return t.ids[1].name or '?' end; return '?' elseif tag == 'fn' then local types = t.types; if not types or #types == 0 then return 'function' end; local n = #types; local params = {}; for i = 1, n - 1 do params[#params+1] = __chi_repl_fmt_type(types[i]) end; return '(' .. table.concat(params, ', ') .. ') -> ' .. __chi_repl_fmt_type(types[n]) elseif tag == 'record' then if t.ids and #t.ids > 0 and t.ids[1] and t.ids[1].name then return t.ids[1].name end; if not t.fields or #t.fields == 0 then return '{}' end; local parts = {}; for _, f in ipairs(t.fields) do parts[#parts+1] = f.name .. ': ' .. __chi_repl_fmt_type(f.fieldType) end; return '{ ' .. table.concat(parts, ', ') .. ' }' elseif tag == 'sum' then return __chi_repl_fmt_type(t.lhs) .. ' | ' .. __chi_repl_fmt_type(t.rhs) elseif tag == 'array' then return 'array[' .. __chi_repl_fmt_type(t.elementType) .. ']' elseif tag == 'var' then return t.name or '?' elseif tag == 'poly' then return __chi_repl_fmt_type(t.body) elseif tag == 'recursive' then return __chi_repl_fmt_type(t.innerType) else return tag or '?' end end")
+
+embedLua("function __chi_repl_format(val, seen) if val == nil then return nil end; local t = type(val); if t == 'number' then if val ~= val then return 'NaN' end; if val == 1/0 then return 'Infinity' end; if val == -1/0 then return '-Infinity' end; if val % 1 == 0 and val >= -2^53 and val <= 2^53 then return string.format('%d', val) end; return tostring(val) elseif t == 'string' then return __RDQ .. val:gsub(__RBS, __RBS..__RBS):gsub(__RDQ, __RBS..__RDQ):gsub(__RNL, __RBS..'n'):gsub(__RCR, __RBS..'r'):gsub(__RTAB, __RBS..'t') .. __RDQ elseif t == 'boolean' then return tostring(val) elseif t == 'function' then local pkg = package.loaded['user/default']; if pkg then for name, v in pairs(pkg) do if v == val and type(name) == 'string' and name:sub(1,1) ~= '_' then local info = pkg._package and pkg._package[name]; if info and info.type then local ok, decoded = pcall(function() return require('chicc/type_writer').decodeType(info.type) end); if ok and decoded and decoded.tag == 'fn' then local types = decoded.types; if types and #types > 0 then local n = #types; local params = {}; for i = 1, n - 1 do params[#params+1] = __chi_repl_fmt_type(types[i]) end; local ret = __chi_repl_fmt_type(types[n]); return '<function ' .. name .. '(' .. table.concat(params, ', ') .. '): ' .. ret .. '>' end end end; return '<function ' .. name .. '>' end end end; return '<function>' elseif t == 'table' then if seen[val] then return '<circular>' end; seen[val] = true; if rawget(val, '_tag') ~= nil then local tag = val._tag; local fields = {}; for k, v in pairs(val) do if k ~= '_tag' then fields[#fields+1] = {k, __chi_repl_format(v, seen)} end end; seen[val] = nil; if #fields == 0 then return tag end; table.sort(fields, function(a,b) return a[1] < b[1] end); local parts = {}; for _, f in ipairs(fields) do parts[#parts+1] = f[1] .. ': ' .. f[2] end; return tag .. '(' .. table.concat(parts, ', ') .. ')' end; local n = #val; local isArray = n > 0; if isArray then local cnt = 0; for _ in pairs(val) do cnt = cnt + 1 end; isArray = cnt == n end; if isArray then local parts = {}; for i = 1, n do parts[i] = __chi_repl_format(val[i], seen) end; seen[val] = nil; return '[' .. table.concat(parts, ', ') .. ']' end; local fields = {}; for k, v in pairs(val) do if type(k) == 'string' and k:sub(1,1) ~= '_' then fields[#fields+1] = {k, __chi_repl_format(v, seen)} end end; table.sort(fields, function(a,b) return a[1] < b[1] end); seen[val] = nil; if #fields == 0 then return '{}' end; local parts = {}; for _, f in ipairs(fields) do parts[#parts+1] = f[1] .. ': ' .. f[2] end; return '{ ' .. table.concat(parts, ', ') .. ' }' else return tostring(val) end end")
+
+pub fn runRepl(): int {
+    loadStdlib()
+    val ns = newReplCompilationEnv()
+    var accImports: string = ""
+
+    embedLua("io.write('> '); io.flush()")
+    var line: any = luaExpr("io.read('*l')")
+    while line != unit {
+        val lineStr = line as string
+        val isEmpty = luaExpr("lineStr:find('%S') == nil") as bool
+        if isEmpty == false {
+            val source: string = luaExpr("accImports .. lineStr") as string
+            val result = compileReplLine(source, ns)
+            val luaCode: any = luaExpr("result.luaCode")
+            val messages: any = luaExpr("result.messages")
+            val msgCount = luaExpr("#messages") as int
+            if luaCode == unit {
+                var i = 1
+                while i <= msgCount {
+                    val msg: any = luaExpr("messages[i]")
+                    val formatted = formatMessage(msg)
+                    println("Error: $formatted")
+                    i = i + 1
+                }
+            } else {
+                embedLua("__repl_chunk, __repl_err = load(luaCode, 'repl')")
+                val loadErr: any = luaExpr("__repl_err")
+                if loadErr != unit {
+                    val errStr = luaExpr("tostring(__repl_err)") as string
+                    println("Error: $errStr")
+                } else {
+                    embedLua("__repl_ok, __repl_val = pcall(__repl_chunk)")
+                    val runOk = luaExpr("__repl_ok") as bool
+                    if runOk == false {
+                        val errStr = luaExpr("tostring(__repl_val)") as string
+                        println("Runtime error: $errStr")
+                    } else {
+                        val sp = luaExpr("result.shouldPrint") as bool
+                        if sp {
+                            embedLua("if __repl_val ~= nil then local __rf = __chi_repl_format(__repl_val, {}); if __rf then print(__rf) end end")
+                        }
+                    }
+                }
+                val isImport = luaExpr("lineStr:match('^%s*import%s') ~= nil") as bool
+                if isImport {
+                    accImports = "${accImports}${lineStr}\n"
+                }
+            }
+        }
+        embedLua("io.write('> '); io.flush()")
+        line = luaExpr("io.read('*l')")
+    }
+    println("")
+    0
 }
 
 // ============================================================================
@@ -198,8 +265,7 @@ pub fn cliMain(args: any): int {
     val argc = luaExpr("args and #args or 0") as int
 
     if argc == 0 {
-        printUsage()
-        return 1
+        return runRepl()
     }
 
     // Parse the command
@@ -213,6 +279,10 @@ pub fn cliMain(args: any): int {
     if firstArg == "--help" {
         printUsage()
         return 0
+    }
+
+    if firstArg == "repl" {
+        return runRepl()
     }
 
     if firstArg == "compile" {

@@ -23,7 +23,7 @@ fn build() {
 
     val luaCode = compileModules(sourceFiles, ".cache")
 
-    val entry = "\n-- chicc entry point\nlocal _CLI = package.loaded['chicc/cli']\nlocal _COMPILER = package.loaded['chicc/compiler']\ncliMain = _CLI.cliMain\ncompileFile = _CLI.compileFile\nrunFile = _CLI.runFile\nloadStdlib = _CLI.loadStdlib\ncompileToLua = _COMPILER.compileToLua\nnewLuaCompilationEnv = _COMPILER.newLuaCompilationEnv\n\nif arg then\n  local exitCode = cliMain(arg)\n  if exitCode and exitCode ~= 0 then os.exit(exitCode) end\nend\n"
+    val entry = "\n-- chicc entry point\nlocal _CLI = package.loaded['chicc/cli']\nlocal _COMPILER = package.loaded['chicc/compiler']\ncliMain = _CLI.cliMain\ncompileFile = _CLI.compileFile\nrunFile = _CLI.runFile\nrunRepl = _CLI.runRepl\nloadStdlib = _CLI.loadStdlib\ncompileToLua = _COMPILER.compileToLua\nnewLuaCompilationEnv = _COMPILER.newLuaCompilationEnv\nnewReplCompilationEnv = _COMPILER.newReplCompilationEnv\ncompileReplLine = _COMPILER.compileReplLine\n\nif arg then\n  local exitCode = cliMain(arg)\n  if exitCode and exitCode ~= 0 then os.exit(exitCode) end\nend\n"
 
     val finalCode: string = luaExpr("luaCode .. entry")
     writeString("chicc.lua", finalCode)

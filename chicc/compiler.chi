@@ -644,6 +644,40 @@ pub fn compileToLua(source: string, ns: any): any {
 }
 
 // ============================================================================
+// REPL compilation support
+// ============================================================================
+
+// REPL compilation env factory: extends prelude with self-import + auto-imports
+// REPL prelude function: returns auto-imports + self-import, filtering conflicts
+embedLua("__chicc_replPrelude = function() local userPkg = package.loaded['user/default']; local userNames = {}; if userPkg and userPkg._package then for name, info in pairs(userPkg._package) do if type(info) == 'table' then userNames[name] = true end end end; local function mkE(n) return {name=n, alias=nil, section=nil} end; local function filterNames(names) local entries = {}; for _, n in ipairs(names) do if not userNames[n] then entries[#entries+1] = mkE(n) end end; return entries end; local imports = {}; local base = {}; for _, n in ipairs({'println','print','eval'}) do if not userNames[n] then base[#base+1] = mkE(n) end end; if #base > 0 then imports[#imports+1] = {moduleName='std', packageName='lang', packageAlias=nil, entries=base, section=nil} end; local selfE = {}; for name in pairs(userNames) do selfE[#selfE+1] = mkE(name) end; if #selfE > 0 then imports[#imports+1] = {moduleName='user', packageName='default', packageAlias=nil, entries=selfE, section=nil} end; local autoImps = {{'std','lang.array',{'size','push','pop','map','fold','reduce','sort','sortWith','reverse','any','all','count','indexOf','forEach','first','last','isEmpty','sum','joinToStringWithSeparator','intersperse'}},{'std','lang.string',{'len','find','substring','toLower','toUpper','trim','replace','replaceAll','split','contains','startsWith','endsWith','toInt','codePoints'}},{'std','lang.option',{'valueOr','ifPresent','orElse'}},{'std','math',{'abs','min','max','pow','sqrt','floor','ceil','sin','cos','tan','pi'}},{'std','io',{'readLine'}}}; for _, ai in ipairs(autoImps) do local entries = filterNames(ai[3]); if #entries > 0 then imports[#imports+1] = {moduleName=ai[1], packageName=ai[2], packageAlias=nil, entries=entries, section=nil} end end; return imports end")
+
+pub fn newReplCompilationEnv(): any {
+    val ns: any = luaExpr("__chicc_mkEnv()")
+    embedLua("ns.getPreludeImports = __chicc_replPrelude")
+    ns
+}
+
+pub fn compileReplLine(source: string, ns: any): any {
+    // Create fresh env each time to avoid stale symbol caches
+    val freshNs: any = luaExpr("__chicc_mkEnv()")
+    embedLua("freshNs.getPreludeImports = __chicc_replPrelude")
+    val result = compile(source, freshNs)
+    val hasErr = hasErrors(result)
+    if hasErr {
+        luaExpr("{ messages = result.messages, luaCode = nil, shouldPrint = false }") as any
+    } else {
+        val luaCode = emitProgram(result.program as Program, false)
+        val exprCount = luaExpr("#result.program.expressions") as int
+        var shouldPrint = false
+        if exprCount > 0 {
+            val lastKind = luaExpr("result.program.expressions[exprCount].kind") as string
+            shouldPrint = luaExpr("lastKind ~= 'name_declaration' and lastKind ~= 'assignment' and lastKind ~= 'effect_definition' and lastKind ~= 'field_assignment' and lastKind ~= 'indexed_assignment'") as bool
+        }
+        luaExpr("{ messages = result.messages, luaCode = luaCode, shouldPrint = shouldPrint }") as any
+    }
+}
+
+// ============================================================================
 // formatMessage — format a compilation message for display
 // ============================================================================
 
