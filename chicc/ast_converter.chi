@@ -611,7 +611,22 @@ fn convertFnCallImpl(node: any, pkg: any, tables: any): any {
         wi = wi + 1
     }
 
-    fnCallExpr(callee as Expr, convertedArgs as array[Expr], sec as Section | unit)
+    // Wrap block callee in zero-arg lambda (IIFE pattern: { ... }())
+    // When a block is immediately invoked with no arguments, treat it as a thunk.
+    var wrappedCallee: any = callee
+    if calleeTag == "ParseBlock" {
+        if argCount == 0 {
+            val calleeKind = luaExpr("callee.kind") as string
+            if calleeKind == "block" {
+                val emptyParams: array[FnParam] = []
+                val emptyDefaults: any = luaExpr("{}") as any
+                val calleeSec: any = luaExpr("callee.section") as any
+                wrappedCallee = fnExpr(emptyParams, emptyDefaults, callee as Expr, calleeSec as Section | unit)
+            }
+        }
+    }
+
+    fnCallExpr(wrappedCallee as Expr, convertedArgs as array[Expr], sec as Section | unit)
 }
 
 convertFnCall = convertFnCallImpl
