@@ -736,10 +736,19 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
             tBool
         } else {
             // Numeric widening: int op float -> float, float op int -> float
-            val lhsIsInt = isIntType(lhsType)
-            val lhsIsFloat = isFloatType(lhsType)
-            val rhsIsInt = isIntType(rhsType)
-            val rhsIsFloat = isFloatType(rhsType)
+            // Resolve type variables first (operands may be unresolved fn call results)
+            val resolvedLhs: any = if typerUf != unit {
+                unifyWithUf(constraints as array[any], typerUf)
+                embedLua("for i = 1, #constraints do constraints[i] = nil end")
+                ufResolve(typerUf, lhsType as Type)
+            } else { lhsType }
+            val resolvedRhs: any = if typerUf != unit {
+                ufResolve(typerUf, rhsType as Type)
+            } else { rhsType }
+            val lhsIsInt = isIntType(resolvedLhs)
+            val lhsIsFloat = isFloatType(resolvedLhs)
+            val rhsIsInt = isIntType(resolvedRhs)
+            val rhsIsFloat = isFloatType(resolvedRhs)
             if lhsIsInt && rhsIsFloat {
                 // int op float -> float (no equality constraint between operands)
                 tFloat
