@@ -28,8 +28,17 @@ pub fn nextTmpName(st: EmitterState): string {
     "tmp$id"
 }
 
+pub fn luaName(name: string): string {
+    val isReserved = luaExpr("({['and']=1,['break']=1,['do']=1,['else']=1,['elseif']=1,['end']=1,['false']=1,['for']=1,['function']=1,['goto']=1,['if']=1,['in']=1,['local']=1,['nil']=1,['not']=1,['or']=1,['repeat']=1,['return']=1,['then']=1,['true']=1,['until']=1,['while']=1,['type']=1,['error']=1,['load']=1,['require']=1,['select']=1,['pairs']=1,['ipairs']=1,['next']=1,['pcall']=1,['xpcall']=1,['tostring']=1,['tonumber']=1,['unpack']=1,['rawget']=1,['rawset']=1})[name] == 1") as bool
+    if isReserved {
+        "_chi_$name"
+    } else {
+        name
+    }
+}
+
 pub fn topLevelName(name: string): string {
-    "__P_.$name"
+    "__P_.${luaName(name)}"
 }
 
 pub fn modName(name: string): string {
@@ -49,7 +58,7 @@ pub fn localPackagePath(mod: string, pkg: string): string {
 }
 
 pub fn localQualifiedName(mod: string, pkg: string, name: string): string {
-    "${localPackagePath(mod, pkg)}.$name"
+    "${localPackagePath(mod, pkg)}.${luaName(name)}"
 }
 
 pub fn normaliseEffectName(name: string): string {
@@ -134,7 +143,7 @@ pub fn emitVariableAccess(st: EmitterState, expr: any): string {
     val tgtName = luaExpr("tgt.name") as string
     if tag == "local" {
         if st.inFunction {
-            tgtName
+            luaName(tgtName)
         } else {
             topLevelName(tgtName)
         }
@@ -153,7 +162,7 @@ pub fn emitVariableAccess(st: EmitterState, expr: any): string {
             localQualifiedName(tgtMod, tgtPkg, tgtName)
         }
     } else {
-        tgtName
+        luaName(tgtName)
     }
 }
 
@@ -162,16 +171,17 @@ pub fn emitFn(st: EmitterState, expr: any, name: string, isTopLevel: bool): stri
     if tmpName.len() == 0 {
         tmpName = nextTmpName(st)
     }
+    val safeTmpName = luaName(tmpName)
     if isTopLevel {
-        emit(st, "function __P_.$tmpName(")
+        emit(st, "function __P_.$safeTmpName(")
     } else {
-        emit(st, "local function $tmpName(")
+        emit(st, "local function $safeTmpName(")
     }
     val paramCount = luaExpr("#expr.parameters") as int
     var paramStr = ""
     var pi = 1
     while pi <= paramCount {
-        val pname = luaExpr("expr.parameters[pi].name") as string
+        val pname = luaName(luaExpr("expr.parameters[pi].name") as string)
         if pi > 1 { paramStr = "$paramStr," }
         paramStr = "$paramStr$pname"
         pi = pi + 1
@@ -181,7 +191,7 @@ pub fn emitFn(st: EmitterState, expr: any, name: string, isTopLevel: bool): stri
     val prevFunctionDepth = st.functionDepth
     st.inFunction = true
     st.functionDepth = prevFunctionDepth + 1
-    embedLua("if expr.defaultValues and type(expr.defaultValues) == 'table' then for dname, dval in pairs(expr.defaultValues) do __P_.emit(st, 'if ' .. dname .. ' == nil then ') local dResult = __P_.emitExpr(st, dval) __P_.emit(st, dname .. '=' .. dResult .. ';end;') end end")
+    embedLua("if expr.defaultValues and type(expr.defaultValues) == 'table' then for dname, dval in pairs(expr.defaultValues) do local sname = __P_.luaName(dname) __P_.emit(st, 'if ' .. sname .. ' == nil then ') local dResult = __P_.emitExpr(st, dval) __P_.emit(st, sname .. '=' .. dResult .. ';end;') end end")
     val fnBody = luaExpr("expr.body") as any
     val bodyResult = emitExpr(st, fnBody)
     val bodyCount = luaExpr("#fnBody.blockBody") as int
@@ -194,11 +204,12 @@ pub fn emitFn(st: EmitterState, expr: any, name: string, isTopLevel: bool): stri
     emit(st, " end;")
     st.inFunction = prevInFunction
     st.functionDepth = prevFunctionDepth
-    tmpName
+    safeTmpName
 }
 
 pub fn emitNameDeclaration(st: EmitterState, expr: any): string {
     val declName = luaExpr("expr.declName") as string
+    val safeDeclName = luaName(declName)
     val valueKind = luaExpr("expr.value and expr.value.kind or ''") as string
     if valueKind == "fn" {
         if st.functionDepth == 0 {
@@ -208,8 +219,8 @@ pub fn emitNameDeclaration(st: EmitterState, expr: any): string {
     val exprValue = luaExpr("expr.value") as any
     val value = emitExpr(st, exprValue)
     if st.functionDepth > 0 {
-        emit(st, "local $declName=$value;")
-        declName
+        emit(st, "local $safeDeclName=$value;")
+        safeDeclName
     } else {
         val tlName = topLevelName(declName)
         emit(st, "$tlName=$value;")
@@ -224,7 +235,7 @@ pub fn emitAssignment(st: EmitterState, expr: any): string {
     val tgtName = luaExpr("tgt.name") as string
     val varName = if tag == "local" {
         if st.inFunction {
-            tgtName
+            luaName(tgtName)
         } else {
             topLevelName(tgtName)
         }
@@ -243,7 +254,7 @@ pub fn emitAssignment(st: EmitterState, expr: any): string {
             localQualifiedName(tgtMod, tgtPkg, tgtName)
         }
     } else {
-        tgtName
+        luaName(tgtName)
     }
     val valueName = emitExpr(st, exprValue)
     emit(st, "$varName=$valueName;")
@@ -487,7 +498,7 @@ pub fn emitForLoop(st: EmitterState, expr: any): string {
     var varList = ""
     var vi = 1
     while vi <= varCount {
-        val v = luaExpr("expr.forVars[vi]") as string
+        val v = luaName(luaExpr("expr.forVars[vi]") as string)
         if vi > 1 { varList = "$varList," }
         varList = "$varList$v"
         vi = vi + 1
@@ -599,7 +610,7 @@ pub fn emitCreateRecord(st: EmitterState, expr: any): string {
     var contents = ""
     var i = 1
     while i <= count {
-        val fieldName = luaExpr("expr.recordFields[i].name") as string
+        val fieldName = luaName(luaExpr("expr.recordFields[i].name") as string)
         val fieldValue = luaExpr("expr.recordFields[i].value") as any
         val valueResult = emitExpr(st, fieldValue)
         if i > 1 { contents = "$contents," }
@@ -648,7 +659,7 @@ pub fn emitFieldAccess(st: EmitterState, expr: any): string {
     if targetTag == "field" {
         val receiver = luaExpr("expr.receiver") as any
         val receiverVar = emitExpr(st, receiver)
-        val fName = luaExpr("expr.fieldName") as string
+        val fName = luaName(luaExpr("expr.fieldName") as string)
         "$receiverVar.$fName"
     } else if targetTag == "package_fn" {
         // Fallback: emit qualified name if UFCS rewriting missed this
@@ -670,7 +681,7 @@ pub fn emitFieldAssignment(st: EmitterState, expr: any): string {
     val value = luaExpr("expr.value") as any
     val receiverVar = emitExpr(st, receiver)
     val valueVar = emitExpr(st, value)
-    val fName = luaExpr("expr.fieldName") as string
+    val fName = luaName(luaExpr("expr.fieldName") as string)
     emit(st, receiverVar)
     emit(st, ".")
     emit(st, fName)
@@ -757,7 +768,7 @@ pub fn emitHandle(st: EmitterState, expr: any): string {
         val argCount = luaExpr("#expr.handleCases[ci].argumentNames") as int
         var ai = 1
         while ai <= argCount {
-            val argName = luaExpr("expr.handleCases[ci].argumentNames[ai]") as string
+            val argName = luaName(luaExpr("expr.handleCases[ci].argumentNames[ai]") as string)
             emit(st, "local $argName=args[$ai];")
             ai = ai + 1
         }
@@ -792,7 +803,7 @@ pub fn emitPackageInfo(st: EmitterState): string {
     while i <= exprCount {
         val kind = luaExpr("st.program.expressions[i].kind") as string
         if kind == "name_declaration" {
-            val dName = luaExpr("st.program.expressions[i].declName") as string
+            val dName = luaName(luaExpr("st.program.expressions[i].declName") as string)
             val isPub = luaExpr("st.program.expressions[i].isPublic") as bool
             val isMut = luaExpr("st.program.expressions[i].isMutable") as bool
             emit(st, "$descPath.$dName={")
@@ -805,7 +816,7 @@ pub fn emitPackageInfo(st: EmitterState): string {
             }
             emit(st, "};")
         } else if kind == "effect_definition" {
-            val eName = luaExpr("st.program.expressions[i].effectName") as string
+            val eName = luaName(luaExpr("st.program.expressions[i].effectName") as string)
             val isPub = luaExpr("st.program.expressions[i].isPublic") as bool
             emit(st, "$descPath.$eName={")
             emit(st, "public=$isPub,")
@@ -886,7 +897,7 @@ pub fn emitProgram(prog: Program, emitModule: bool): string {
     val aliasCount = luaExpr("#prog.typeAliases") as int
     var ai = 1
     while ai <= aliasCount {
-        val aliasName = luaExpr("prog.typeAliases[ai].typeId.name") as string
+        val aliasName = luaName(luaExpr("prog.typeAliases[ai].typeId.name") as string)
         val aliasType = luaExpr("prog.typeAliases[ai].aliasType") as any
         val aliasTypeId = luaExpr("prog.typeAliases[ai].typeId") as any
         val encoded = luaExpr("require('chicc/type_writer').encodeTypeWithContext(aliasType, aliasTypeId)") as string
