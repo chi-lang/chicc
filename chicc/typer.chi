@@ -5,7 +5,7 @@ import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tString, tAn
 import chicc/source { Section, toCodePoint }
 import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget, atomExpr }
 import chicc/unification { unify, unifyWithUf, ufNew, ufResolve, ufAllBindings, newConstraint }
-import chicc/inference_context { icFreshVariable, icGetTargetType, icWithNewLocalScope, icDefineLocalSymbol, icListLocalFunctionsForType, icListCurrentPackageFunctionsForType, icListTypesPackageFunctionsForType }
+import chicc/inference_context { icFreshVariable, icGetTargetType, icWithNewLocalScope, icDefineLocalSymbol, icListLocalFunctionsForType, icListCurrentPackageFunctionsForType, icListTypesPackageFunctionsForType, icListAllLoadedFunctionsForType }
 
 // --- Helper: throw a typer error ---
 
@@ -358,7 +358,13 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
                     if typePkgCount == 1 {
                         luaExpr("typePkgFns[1]") as any
                     } else {
-                        unit
+                        val allFns = icListAllLoadedFunctionsForType(fieldName, finalReceiverType)
+                        val allCount = luaExpr("#allFns") as int
+                        if allCount == 1 {
+                            luaExpr("allFns[1]") as any
+                        } else {
+                            unit
+                        }
                     }
                 }
             }

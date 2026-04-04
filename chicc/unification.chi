@@ -313,6 +313,8 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             }
             ufBind(uf, actual, expected)
             // No queue rebuild needed — next iteration resolves via union-find
+        } else if luaExpr("actual.tag == 'primitive' and actual.ids and #actual.ids > 0 and actual.ids[1].name == 'any'") as bool {
+            // skip - actual is 'any' type (allows passing any-typed values to concrete params)
         } else if expected.isFunction() && actual.isFunction() {
             val expTypes = expected.typeTypes()
             val actTypes = actual.typeTypes()

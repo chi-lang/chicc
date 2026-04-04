@@ -167,9 +167,21 @@ pub fn icGetTargetType(tgt: any, level: int, section: any): any {
 // --- UFCS function resolution ---
 
 // Helper: check if a type scheme's first parameter matches receiver type via trial unification
-fn icTrialUnify(typeScheme: any, receiverType: any): bool {
+pub fn icTrialUnify(typeScheme: any, receiverType: any): bool {
+    // If the receiver is any-typed, accept any function with at least 1 param
+    val isAnyReceiver = luaExpr("receiverType.tag == 'primitive' and receiverType.ids and #receiverType.ids > 0 and receiverType.ids[1].name == 'any'") as bool
+    if isAnyReceiver {
+        val schemeTag2 = luaExpr("typeScheme.tag or ''") as string
+        var body2: any = typeScheme
+        if schemeTag2 == "poly" { body2 = luaExpr("typeScheme.body") }
+        val bt2 = luaExpr("body2.tag or ''") as string
+        if bt2 == "fn" {
+            val tc2 = luaExpr("#body2.types") as int
+            return tc2 >= 2
+        }
+        return false
+    }
     val schemeTag = luaExpr("typeScheme.tag or ''") as string
-    // Get the actual body type (unwrap poly if needed)
     var bodyType: any = typeScheme
     if schemeTag == "poly" {
         bodyType = luaExpr("typeScheme.body")
@@ -184,7 +196,6 @@ fn icTrialUnify(typeScheme: any, receiverType: any): bool {
         return false
     }
     val firstParam: any = luaExpr("types[1]")
-    // Use pcall to try unification
     embedLua("local _unif = require('chicc/unification'); local __trial_ok = pcall(function() _unif.unify({_unif.newConstraint(firstParam, receiverType, nil, {})}) end)")
     val trialOk = luaExpr("__trial_ok") as bool
     trialOk
@@ -285,5 +296,13 @@ pub fn icListTypesPackageFunctionsForType(name: string, receiverType: any): any 
         }
         i = i + 1
     }
+    results
+}
+
+// Tier 4: search ALL loaded packages for a matching UFCS function
+pub fn icListAllLoadedFunctionsForType(name: string, receiverType: any): any {
+    val results: any = luaExpr("{}")
+    if icNs == unit { return results }
+    embedLua("local _seen = {}; for qualifier, loaded in pairs(package.loaded) do if type(qualifier) == 'string' and type(loaded) == 'table' and loaded._package then local slashPos = qualifier:find('/'); if slashPos then local mod = qualifier:sub(1, slashPos - 1); local pkg = qualifier:sub(slashPos + 1); local sym = __P_.icNs.getSymbol(mod, pkg, name); if sym and sym.symbolType then local key = mod .. '/' .. pkg; if not _seen[key] then _seen[key] = true; local trialOk = require('chicc/inference_context').icTrialUnify(sym.symbolType, receiverType); if trialOk then table.insert(results, { dotTarget = require('chicc/ast').packageFnDotTarget(mod, pkg, name), typeScheme = sym.symbolType }) end end end end end end")
     results
 }
