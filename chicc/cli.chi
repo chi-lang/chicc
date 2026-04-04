@@ -22,7 +22,6 @@ pub fn loadStdlib(): bool {
     val libPath = luaExpr("chiHome .. '/lib/std.chim'") as string
     val exists = luaExpr("io.open(libPath, 'r') ~= nil") as bool
     if exists {
-        embedLua("if io.open(libPath, 'r') then local f = io.open(libPath, 'r'); f:close() end")
         val errCode: any = luaExpr("chi_load_module(libPath)")
         if errCode != unit {
             val errVal: any = luaExpr("errCode")
@@ -39,6 +38,20 @@ pub fn loadStdlib(): bool {
 }
 
 // ============================================================================
+// Helpers
+// ============================================================================
+
+fn printMessages(messages: any, msgCount: int) {
+    var i = 1
+    while i <= msgCount {
+        val msg: any = luaExpr("messages[i]")
+        val formatted = formatMessage(msg)
+        println(formatted)
+        i = i + 1
+    }
+}
+
+// ============================================================================
 // Compile mode: source -> Lua file
 // ============================================================================
 
@@ -50,14 +63,7 @@ pub fn compileFile(inputPath: string, outputPath: string): int {
     val messages: any = luaExpr("result.messages")
     val msgCount = luaExpr("#messages") as int
     if luaCode == unit {
-        // Compilation failed - print errors
-        var i = 1
-        while i <= msgCount {
-            val msg: any = luaExpr("messages[i]")
-            val formatted = formatMessage(msg)
-            println(formatted)
-            i = i + 1
-        }
+        printMessages(messages, msgCount)
         println("Compilation failed.")
         1
     } else {
@@ -79,13 +85,7 @@ pub fn runFile(inputPath: string): int {
     val messages: any = luaExpr("result.messages")
     val msgCount = luaExpr("#messages") as int
     if luaCode == unit {
-        var i = 1
-        while i <= msgCount {
-            val msg: any = luaExpr("messages[i]")
-            val formatted = formatMessage(msg)
-            println(formatted)
-            i = i + 1
-        }
+        printMessages(messages, msgCount)
         println("Compilation failed.")
         1
     } else {
@@ -102,46 +102,6 @@ pub fn runFile(inputPath: string): int {
         if runOk == false {
             val runErrStr = luaExpr("tostring(runErr)") as string
             println("Runtime error: $runErrStr")
-            return 1
-        }
-        0
-    }
-}
-
-// ============================================================================
-// Compile-module mode: compile source as a module and load it
-// ============================================================================
-
-pub fn compileAndLoadModule(inputPath: string): int {
-    val source = readString(inputPath)
-    val ns = newLuaCompilationEnv()
-    val result = compileToLua(source, ns)
-    val luaCode: any = luaExpr("result.luaCode")
-    val messages: any = luaExpr("result.messages")
-    val msgCount = luaExpr("#messages") as int
-    if luaCode == unit {
-        var i = 1
-        while i <= msgCount {
-            val msg: any = luaExpr("messages[i]")
-            val formatted = formatMessage(msg)
-            println(formatted)
-            i = i + 1
-        }
-        1
-    } else {
-        // Load and execute to register in package.loaded
-        embedLua("local chunk, err = load(luaCode, inputPath)")
-        val loadErr: any = luaExpr("err")
-        if loadErr != unit {
-            val errStr = luaExpr("tostring(err)") as string
-            println("Lua load error: $errStr")
-            return 1
-        }
-        embedLua("local ok, runErr = pcall(chunk)")
-        val runOk = luaExpr("ok") as bool
-        if runOk == false {
-            val runErrStr = luaExpr("tostring(runErr)") as string
-            println("Error loading module: $runErrStr")
             return 1
         }
         0
@@ -166,7 +126,6 @@ fn defaultOutputPath(inputPath: string): string {
 
 // Helper to check file extension
 fn hasExtension(path: string, ext: string): bool {
-    val pathLen = luaExpr("string.len(path)") as int
     val extLen = luaExpr("string.len(ext)") as int
     val neg: int = 0 - extLen
     val suffix = luaExpr("string.sub(path, neg)") as string
@@ -285,7 +244,12 @@ pub fn cliMain(args: any): int {
     }
 
     if firstArg == "--version" {
-        println("chi $CHI_VERSION")
+        val isNative = luaExpr("_CHI_NATIVE == true") as bool
+        if isNative {
+            println("chi $CHI_VERSION (native)")
+        } else {
+            println("chi $CHI_VERSION")
+        }
         return 0
     }
 
@@ -311,15 +275,15 @@ pub fn cliMain(args: any): int {
                     println("Error: -o requires an argument")
                     return 1
                 }
+                outputPath = luaExpr("args[i]") as string
+            } else {
+                if a == "--output" {
+                    i = i + 1
+                    if i > argc {
+                        println("Error: --output requires an argument")
+                        return 1
+                    }
                     outputPath = luaExpr("args[i]") as string
-                } else {
-                    if a == "--output" {
-                        i = i + 1
-                        if i > argc {
-                            println("Error: --output requires an argument")
-                            return 1
-                        }
-                        outputPath = luaExpr("args[i]") as string
                 } else {
                     inputPath = a
                 }

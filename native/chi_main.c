@@ -33,7 +33,6 @@
 #include "gen/chicc_bc.h"
 #include "gen/chi_build_bc.h"
 
-#define CHI_VERSION "0.1.0"
 #define PAYLOAD_MAGIC "CHIEXE"
 #define PAYLOAD_MAGIC_LEN 6
 #define PAYLOAD_TRAILER_LEN 14  /* 8 (size) + 6 (magic) */
