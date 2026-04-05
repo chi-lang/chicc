@@ -1,7 +1,5 @@
 # Chi Language Gaps: luaExpr/embedLua Usage in the Compiler
 
-Analysis of ~1700 `luaExpr` and ~635 `embedLua` calls across the self-hosted compiler.
-
 ## Remaining Language-Level Gaps
 
 ### 1. Record field access/mutation (~60% of all uses)
@@ -62,79 +60,37 @@ Deeply Lua-specific runtime bootstrapping. Should stay as FFI.
 
 ---
 
-## Stdlib Migration Opportunities
+## Stdlib Migration — Done
 
-The following stdlib functions **exist** but the compiler has not yet migrated to use them. These are pure migration tasks — no language changes needed.
+These migrations have been completed:
 
-### table.insert → push / insertAt (~159 uses)
+| File | What changed | Stdlib used |
+|------|-------------|-------------|
+| `types.chi` | `luaExpr("{}")` → `[]`, `#arr` → `.size()`, `table.insert` → `.push()` (~60 changes) | `std/lang.array { size }` |
+| `emitter.chi` | `string.byte`/`string.sub`/`#value` → stdlib, `table.insert` → `.push()` | `std/lang.string { charCodeAt, byteSub, len }` |
+| `cli.chi` | `os.getenv` → `getEnv`, `string.sub`/`string.len` → `byteSub`/`len` | `std/os { getEnv }`, `std/lang.string { len, byteSub }` |
+| `parser.chi` | `tonumber(tok.value) as int` → `tok.value.toInt()` | `std/lang.string { toInt }` |
+| `type_writer.chi` | `gsub` chain → `replaceAll` chain, `tostring(int)` → `"$lvl"` | `std/lang.string { replaceAll }` |
 
-```chi
-// Current:
-embedLua("table.insert(result, item)")
-embedLua("table.insert(queue, pos, nc)")
+---
 
-// Should become:
-import std/lang.array { push, insertAt }
-result.push(item)
-queue.insertAt(pos, nc)
-```
+## Stdlib Migration — Remaining
 
-### #array length → size() (~242 luaExpr uses)
-
-```chi
-// Current:
-val count = luaExpr("#types") as int
-
-// Should become:
-import std/lang.array { size }
-val count = types.size()
-```
-
-### String byte operations (~20 uses in lexer.chi)
+### Lexer.chi — string byte ops + escape chars (BLOCKED)
 
 ```chi
-// Current:
-luaExpr("string.byte(lex.source, lex.pos)")
-luaExpr("string.char(ch)")
-luaExpr("lex.source:sub(from, to)")
-
-// Should become:
-import std/lang.string { charCodeAt, fromCharCode, substring }
-lex.source.charCodeAt(lex.pos)
-fromCharCode(ch)
-lex.source.substring(from, to)
+// These changes compile but cause a fixed-point failure:
+// the new compiler truncates identifiers (e.g. freshVar → fresh).
+// See lexer_problem.md for details.
+luaExpr("string.byte(lex.source, lex.pos)")  // → lex.source.charCodeAt(lex.pos)
+luaExpr("string.char(ch)")                    // → fromCharCode(ch)
+luaExpr("lex.source:sub(from, to)")           // → lex.source.byteSub(from, to)
+luaExpr("'\\n'")                              // → "\n"
+luaExpr("string.char(34)")                    // → "\""
+luaExpr("string.char(36)")                    // → "\$"
 ```
 
-### Escape character literals (~15 uses in lexer.chi)
-
-```chi
-// Current:
-luaExpr("'\\n'")
-luaExpr("'\\t'")
-luaExpr("string.char(34)")
-
-// Should become:
-"\n"
-"\t"
-"\""
-```
-
-The lexer already handles escape sequences natively. These literal uses just need updating.
-
-### OS/IO operations (~15 uses in cli.chi)
-
-```chi
-// Current:
-luaExpr("os.getenv('CHI_HOME')")
-luaExpr("os.clock()")
-
-// Should become:
-import std/os { getEnv, clock }
-getEnv("CHI_HOME")
-clock()
-```
-
-### Map operations (~40 uses)
+### Map operations in symbols.chi (~40 uses)
 
 ```chi
 // Current:
@@ -149,50 +105,54 @@ symbols.get(name)
 symbols.remove(name)
 ```
 
-Note: requires changing the symbol table types from raw Lua tables to `Map[K,V]`.
+Requires changing `SymbolTable.symbols` from `any` (raw Lua table) to `Map[string, Symbol]`. The st* API functions provide a clean abstraction boundary — no callers access `.symbols` directly.
 
-### Number/type conversion (~10 uses)
+### Remaining table.insert / #array in unmigrated files
+
+These files still use `embedLua("table.insert(…)")` and `luaExpr("#arr")`:
+
+| File | `table.insert` | `#array` | Difficulty |
+|------|----------------|----------|------------|
+| `checks.chi` | 7 | 26 | Medium — untyped arrays |
+| `typer.chi` | 15 (incl. 2 position-based) | 26 | Medium — position-based inserts need `insertAt` |
+| `unification.chi` | 16 (incl. 8 position-based) | 11 | Hard — complex queue management |
+| `compiler.chi` | 15 | 17 | Hard — complex inline Lua blocks |
+| `inference_context.chi` | 4 | 4 | Hard — multi-statement embedLua |
+| `ast_converter.chi` | 0 | 2 | Easy |
+| `symbols.chi` | 1 | 4 | Medium |
+
+### tonumber for floats (1 use in parser.chi)
 
 ```chi
-// Current:
-luaExpr("tonumber(tok.value)") as int
-
-// Should become:
-import std/lang.string { toInt }
-tok.value.toInt()
+// Kept as FFI — toFloat was added to stdlib but not yet used
+val v = luaExpr("tonumber(tok.value)") as float  // → tok.value.toFloat()
 ```
 
 ---
 
 ## Summary
 
-### Remaining language-level gaps (cannot migrate without language changes)
+### Remaining language-level gaps
 
 | Feature | Impact |
 |---------|--------|
-| Proper Chi types for AST/Type/ParseAst | ~60% of all FFI calls (~1400+) |
+| Proper Chi types for AST/Type/ParseAst | ~60% of all FFI calls |
 | Error handling (`try`/`catch` or `Result`) | ~30 uses |
 | Reference equality operator/function | ~15 uses |
 | Empty array type inference | Minor ergonomic issue |
 
-### Stdlib migration (ready to do now)
+### Remaining stdlib migration
 
-| Migration | Approx. uses | Stdlib |
-|-----------|-------------|--------|
-| `table.insert` → `push`/`insertAt` | ~159 | `std/lang.array` |
-| `#array` → `size()` | ~242 | `std/lang.array` |
-| String byte ops → `charCodeAt`/`fromCharCode` | ~20 | `std/lang.string` |
-| Escape char literals | ~15 | Native Chi strings |
-| OS operations → `getEnv`/`clock` | ~15 | `std/os` |
-| Map operations → `std/lang.map` | ~40 | `std/lang.map` |
-| `tonumber` → `toInt` | ~10 | `std/lang.string` |
+| Migration | Approx. uses | Blocker |
+|-----------|-------------|---------|
+| Lexer string byte ops + escape chars | ~20 | Fixed-point bug (see `lexer_problem.md`) |
+| Map operations → `std/lang.map` | ~40 | Requires type changes |
+| `table.insert` / `#array` in remaining files | ~130 | Mixed typed/untyped arrays, complex inline Lua |
+| `tonumber` float → `toFloat` | 1 | None (just do it) |
 
-### Recommended priority
+### Recommended next steps
 
-1. **`#array` → `size()` + `table.insert` → `push`/`insertAt`** — highest count (~400 uses)
-2. **String byte ops + escape chars** — unblocks pure-Chi lexer (~35 uses)
-3. **OS operations** — unblocks pure-Chi CLI (~15 uses)
-4. **Map operations** — moderate count but requires type changes (~40 uses)
-5. **Proper Chi types for AST/Type** — eliminates the majority of remaining FFI but is a major refactor
-6. **Error handling** — language-level change needed
-7. **Reference equality** — language-level change needed
+1. **Investigate lexer fixed-point bug** — unblocks the biggest single-file win
+2. **Migrate remaining `table.insert`/`#array`** in easier files (`ast_converter.chi`, `checks.chi`)
+3. **Map operations in `symbols.chi`** — clean abstraction boundary makes this safe
+4. **Proper Chi types for AST/Type** — eliminates the majority of remaining FFI but is a major refactor
