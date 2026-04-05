@@ -5,9 +5,12 @@ local _COMPILER = package.loaded['chicc/compiler']
 cliMain = _CLI.cliMain
 compileFile = _CLI.compileFile
 runFile = _CLI.runFile
+runRepl = _CLI.runRepl
 loadStdlib = _CLI.loadStdlib
 compileToLua = _COMPILER.compileToLua
 newLuaCompilationEnv = _COMPILER.newLuaCompilationEnv
+newReplCompilationEnv = _COMPILER.newReplCompilationEnv
+compileReplLine = _COMPILER.compileReplLine
 
 if arg then
   local exitCode = cliMain(arg)
