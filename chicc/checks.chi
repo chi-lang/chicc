@@ -1,7 +1,7 @@
 // chicc/chicc/checks.chi
 package chicc/checks
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, tUnit, typeEquals, typeTag, sumListTypes }
+import chicc/types { Type, tUnit, typeEquals, sumListTypes }
 import chicc/unification { newConstraint }
 import chicc/messages { unrecognizedName, cannotAccessInternalName, notAFunction, cannotChangeImmutableVariable, typeMismatch, genericError }
 import chicc/ast { exprChildren }
@@ -571,7 +571,7 @@ fn rtWalkExprImpl(expr: any, messages: any) {
             }
             // Check if actualType is a subtype of a sum-typed expRet
             var sumMatch = false
-            if (expRet as Type).typeTag() == "sum" {
+            if (expRet as Type).tag == "sum" {
                 val branches = (expRet as Type).sumListTypes()
                 val branchCount = luaExpr("#branches") as int
                 var bi = 1

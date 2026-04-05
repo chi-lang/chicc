@@ -28,9 +28,9 @@ pub fn constraintWithReplacedVariable(c: Constraint, toReplace: Type, substituti
 
 // Simple type description for error messages
 fn typeDescr(t: Type): string {
-    val tag = t.typeTag()
+    val tag = t.tag
     if tag == "primitive" {
-        val ids = t.typeIds()
+        val ids = t.ids
         val first = ids[1]
         first.name
     } else if tag == "fn" {
@@ -42,7 +42,7 @@ fn typeDescr(t: Type): string {
     } else if tag == "array" {
         "array"
     } else if tag == "var" {
-        t.typeName()
+        t.name
     } else if tag == "recursive" {
         "recursive"
     } else {
@@ -93,8 +93,8 @@ pub fn ufNew(): any {
 
 // Variable key for union-find lookup
 fn varKey(v: Type): string {
-    val n = v.typeName()
-    val l = v.typeLevel()
+    val n = v.name
+    val l = v.level
     "$n:$l"
 }
 
@@ -113,7 +113,7 @@ pub fn ufFind(uf: any, variable: Type): Type {
     }
     val boundType = bound as Type
     var result: any = boundType
-    if boundType.isVariable() {
+    if boundType.tag == "var" {
         val bKey = varKey(boundType)
         if bKey == key {
             result = variable
@@ -132,11 +132,11 @@ pub fn ufFind(uf: any, variable: Type): Type {
 
 // Deeply resolve a type through the union-find, replacing all bound variables
 pub fn ufResolve(uf: any, t: Type): Type {
-    val tag = t.typeTag()
+    val tag = t.tag
     var result: any = t
     if tag == "var" {
         val found = ufFind(uf, t)
-        if found.isVariable() {
+        if found.tag == "var" {
             val fKey = varKey(found)
             val tKey = varKey(t)
             if fKey != tKey {
@@ -152,7 +152,7 @@ pub fn ufResolve(uf: any, t: Type): Type {
     } else if tag == "primitive" {
         result = t
     } else if tag == "fn" {
-        val types = t.typeTypes()
+        val types = t.types
         val count = luaExpr("#types") as int
         val newTypes = luaExpr("{}") as array[any]
         var changed = false
@@ -165,10 +165,10 @@ pub fn ufResolve(uf: any, t: Type): Type {
             i = i + 1
         }
         if changed {
-            result = functionType(newTypes as array[Type], t.typeTypeParams(), t.typeDefaults())
+            result = functionType(newTypes as array[Type], t.typeParams, t.defaults)
         }
     } else if tag == "record" {
-        val fields = t.typeFields()
+        val fields = t.fields
         val count = luaExpr("#fields") as int
         val newFields = luaExpr("{}") as array[any]
         var changed = false
@@ -187,7 +187,7 @@ pub fn ufResolve(uf: any, t: Type): Type {
             i = i + 1
         }
         if changed {
-            result = recordType(t.typeIds(), newFields as array[RecordField], t.typeTypeParams())
+            result = recordType(t.ids, newFields as array[RecordField], t.typeParams)
         }
     } else if tag == "sum" {
         val lhs = luaExpr("t.lhs") as Type
@@ -195,13 +195,13 @@ pub fn ufResolve(uf: any, t: Type): Type {
         val newLhs = ufResolve(uf, lhs)
         val newRhs = ufResolve(uf, rhs)
         if luaExpr("newLhs ~= lhs or newRhs ~= rhs") as bool {
-            result = sumCreate(t.typeIds(), newLhs, newRhs, t.typeTypeParams())
+            result = sumCreate(t.ids, newLhs, newRhs, t.typeParams)
         }
     } else if tag == "array" {
         val elem = luaExpr("t.elementType") as Type
         val newElem = ufResolve(uf, elem)
         if luaExpr("newElem ~= elem") as bool {
-            result = arrayType(newElem, t.typeTypeParams())
+            result = arrayType(newElem, t.typeParams)
         }
     } else if tag == "recursive" {
         val inner = luaExpr("t.innerType") as Type
@@ -214,7 +214,7 @@ pub fn ufResolve(uf: any, t: Type): Type {
         val b = luaExpr("t.body") as Type
         val newBody = ufResolve(uf, b)
         if luaExpr("newBody ~= b") as bool {
-            result = polyType(t.typeLevel(), newBody)
+            result = polyType(t.level, newBody)
         }
     }
     result as Type
@@ -282,42 +282,42 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             // skip - types are equal
         } else if expected.typeEquals(tAny) {
             // skip - expected is any
-        } else if expected.isPrimitive() && actual.isPrimitive() {
-            val expIds = expected.typeIds()
-            val actIds = actual.typeIds()
+        } else if expected.tag == "primitive" && actual.tag == "primitive" {
+            val expIds = expected.ids
+            val actIds = actual.ids
             if idsIntersect(expIds, actIds) == false {
                 val cp = sectionToCodePoint(section)
                 throwMessage(typeMismatch(typeDescr(expected), typeDescr(actual), cp))
             }
-        } else if expected.isRecursive() {
+        } else if expected.tag == "recursive" {
             val unfolded = expected.unfoldRecursive()
             val newHistory = copyHistoryWith(history, constraint)
             val nc = newConstraint(unfolded, actual, section, newHistory)
             embedLua("table.insert(queue, pos, nc)")
-        } else if actual.isRecursive() {
+        } else if actual.tag == "recursive" {
             val unfolded = actual.unfoldRecursive()
             val newHistory = copyHistoryWith(history, constraint)
             val nc = newConstraint(expected, unfolded, section, newHistory)
             embedLua("table.insert(queue, pos, nc)")
-        } else if expected.isVariable() {
+        } else if expected.tag == "var" {
             if expected.occursInExcludingSumBranches(actual) {
                 val cp = sectionToCodePoint(section)
-                throwMessage(infiniteType(expected.typeName(), typeDescr(actual), cp))
+                throwMessage(infiniteType(expected.name, typeDescr(actual), cp))
             }
             ufBind(uf, expected, actual)
             // No queue rebuild needed — next iteration resolves via union-find
-        } else if actual.isVariable() {
+        } else if actual.tag == "var" {
             if actual.occursInExcludingSumBranches(expected) {
                 val cp = sectionToCodePoint(section)
-                throwMessage(infiniteType(actual.typeName(), typeDescr(expected), cp))
+                throwMessage(infiniteType(actual.name, typeDescr(expected), cp))
             }
             ufBind(uf, actual, expected)
             // No queue rebuild needed — next iteration resolves via union-find
         } else if luaExpr("actual.tag == 'primitive' and actual.ids and #actual.ids > 0 and actual.ids[1].name == 'any'") as bool {
             // skip - actual is 'any' type (allows passing any-typed values to concrete params)
-        } else if expected.isFunction() && actual.isFunction() {
-            val expTypes = expected.typeTypes()
-            val actTypes = actual.typeTypes()
+        } else if expected.tag == "fn" && actual.tag == "fn" {
+            val expTypes = expected.types
+            val actTypes = actual.types
             val expLen = luaExpr("#expTypes") as int
             val actLen = luaExpr("#actTypes") as int
             if expLen != actLen {
@@ -329,7 +329,7 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             while fi <= expLen {
                 val expParam = luaExpr("expTypes[fi]") as Type
                 val actParam = luaExpr("actTypes[fi]") as Type
-                if fi == lastIndex && expParam.typeEquals(tUnit) && actParam.isVariable() == false {
+                if fi == lastIndex && expParam.typeEquals(tUnit) && actParam.tag != "var" {
                     // void return accepts anything - skip
                 } else {
                     val newHistory = copyHistoryWith(history, constraint)
@@ -338,9 +338,9 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
                 }
                 fi = fi + 1
             }
-        } else if expected.isRecord() && actual.isRecord() {
-            val expFields = expected.typeFields()
-            val actFields = actual.typeFields()
+        } else if expected.tag == "record" && actual.tag == "record" {
+            val expFields = expected.fields
+            val actFields = actual.fields
             val expFCount = luaExpr("#expFields") as int
             val actFCount = luaExpr("#actFields") as int
             var fi = 1
@@ -368,13 +368,13 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
                 embedLua("table.insert(queue, pos, nc)")
                 fi = fi + 1
             }
-        } else if expected.isArray() && actual.isArray() {
+        } else if expected.tag == "array" && actual.tag == "array" {
             val expElem = luaExpr("expected.elementType") as Type
             val actElem = luaExpr("actual.elementType") as Type
             val newHistory = copyHistoryWith(history, constraint)
             val nc = newConstraint(expElem, actElem, section, newHistory)
             embedLua("table.insert(queue, pos, nc)")
-        } else if expected.isSum() {
+        } else if expected.tag == "sum" {
             // Try unifying with rhs first, fall back to lhs
             val expRhs = luaExpr("expected.rhs") as Type
             val expLhs = luaExpr("expected.lhs") as Type
@@ -403,15 +403,15 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
                 val lhsConstraint = newConstraint(expLhs, actual, section, newHistory)
                 embedLua("table.insert(queue, pos, lhsConstraint)")
             }
-        } else if actual.isSum() {
-            val actLhs = actual.typeLhs()
-            val actRhs = actual.typeRhs()
+        } else if actual.tag == "sum" {
+            val actLhs = actual.lhs
+            val actRhs = actual.rhs
             val newHistory = copyHistoryWith(history, constraint)
             val nc1 = newConstraint(expected, actLhs, section, newHistory)
             val nc2 = newConstraint(expected, actRhs, section, newHistory)
             embedLua("table.insert(queue, pos, nc1)")
             embedLua("table.insert(queue, pos + 1, nc2)")
-        } else if expected.isFunction() && actual.isFunction() == false {
+        } else if expected.tag == "fn" && actual.tag != "fn" {
             val cp = sectionToCodePoint(section)
             throwMessage(notAFunction(cp))
         } else {

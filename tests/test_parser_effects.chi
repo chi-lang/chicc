@@ -20,12 +20,12 @@ test("parse simple effect definition") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseEffectDefinition")
-    assertEqual(result.paName(), "ask")
-    assertFalse(result.paIsPublic())
-    assertEqual(result.paFormalArguments().size(), 1)
-    assertEqual(result.paFormalArguments()[1].name, "prompt")
-    assertTrue(result.paReturnTypeRef() != unit)
+    assertEqual(result.tag, "ParseEffectDefinition")
+    assertEqual(result.name, "ask")
+    assertFalse(result.isPublic)
+    assertEqual(result.formalArguments.size(), 1)
+    assertEqual(result.formalArguments[1].name, "prompt")
+    assertTrue(result.returnTypeRef != unit)
 }
 
 test("parse pub effect definition") {
@@ -38,10 +38,10 @@ test("parse pub effect definition") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseEffectDefinition")
-    assertEqual(result.paName(), "log")
-    assertTrue(result.paIsPublic())
-    assertEqual(result.paFormalArguments().size(), 1)
+    assertEqual(result.tag, "ParseEffectDefinition")
+    assertEqual(result.name, "log")
+    assertTrue(result.isPublic)
+    assertEqual(result.formalArguments.size(), 1)
 }
 
 test("parse effect with no return type") {
@@ -53,10 +53,10 @@ test("parse effect with no return type") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseEffectDefinition")
-    assertEqual(result.paName(), "notify")
-    assertEqual(result.paFormalArguments().size(), 1)
-    assertTrue(result.paReturnTypeRef() == unit)
+    assertEqual(result.tag, "ParseEffectDefinition")
+    assertEqual(result.name, "notify")
+    assertEqual(result.formalArguments.size(), 1)
+    assertTrue(result.returnTypeRef == unit)
 }
 
 test("parse effect with type parameters") {
@@ -70,11 +70,11 @@ test("parse effect with type parameters") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseEffectDefinition")
-    assertEqual(result.paName(), "read")
-    assertEqual(result.paTypeParameters().size(), 1)
-    assertEqual(result.paFormalArguments().size(), 0)
-    assertTrue(result.paReturnTypeRef() != unit)
+    assertEqual(result.tag, "ParseEffectDefinition")
+    assertEqual(result.name, "read")
+    assertEqual(result.typeParameters.size(), 1)
+    assertEqual(result.formalArguments.size(), 0)
+    assertTrue(result.returnTypeRef != unit)
 }
 
 test("parse effect with multiple args") {
@@ -91,11 +91,11 @@ test("parse effect with multiple args") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseEffectDefinition")
-    assertEqual(result.paName(), "put")
-    assertEqual(result.paFormalArguments().size(), 2)
-    assertEqual(result.paFormalArguments()[1].name, "key")
-    assertEqual(result.paFormalArguments()[2].name, "value")
+    assertEqual(result.tag, "ParseEffectDefinition")
+    assertEqual(result.name, "put")
+    assertEqual(result.formalArguments.size(), 2)
+    assertEqual(result.formalArguments[1].name, "key")
+    assertEqual(result.formalArguments[2].name, "value")
 }
 
 test("parse effect with multiple type parameters") {
@@ -109,10 +109,10 @@ test("parse effect with multiple type parameters") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseEffectDefinition")
-    assertEqual(result.paName(), "transform")
-    assertEqual(result.paTypeParameters().size(), 2)
-    assertEqual(result.paFormalArguments().size(), 1)
+    assertEqual(result.tag, "ParseEffectDefinition")
+    assertEqual(result.name, "transform")
+    assertEqual(result.typeParameters.size(), 2)
+    assertEqual(result.formalArguments.size(), 1)
 }
 
 // ==============================
@@ -133,11 +133,11 @@ test("parse simple handle expression") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseHandle")
-    val hBody = result.paHandleBody()
-    assertEqual(hBody.paTag(), "ParseBlock")
-    assertEqual(hBody.paBody().size(), 1)
-    val cases = result.paEffectCases()
+    assertEqual(result.tag, "ParseHandle")
+    val hBody = result.handleBody as ParseAst
+    assertEqual(hBody.tag, "ParseBlock")
+    assertEqual(hBody.body.size(), 1)
+    val cases = result.effectCases
     assertEqual(cases.size(), 1)
     assertEqual(cases[1].effectName, "ask")
     assertEqual(cases[1].argumentNames.size(), 1)
@@ -161,8 +161,8 @@ test("parse handle with multiple cases") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseHandle")
-    val cases = result.paEffectCases()
+    assertEqual(result.tag, "ParseHandle")
+    val cases = result.effectCases
     assertEqual(cases.size(), 2)
     assertEqual(cases[1].effectName, "ask")
     assertEqual(cases[1].argumentNames[1], "p")
@@ -184,8 +184,8 @@ test("parse handle with multiple effect args") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseHandle")
-    val cases = result.paEffectCases()
+    assertEqual(result.tag, "ParseHandle")
+    val cases = result.effectCases
     assertEqual(cases.size(), 1)
     assertEqual(cases[1].effectName, "put")
     assertEqual(cases[1].argumentNames.size(), 2)
@@ -207,8 +207,8 @@ test("parse handle with no-arg effect") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseHandle")
-    val cases = result.paEffectCases()
+    assertEqual(result.tag, "ParseHandle")
+    val cases = result.effectCases
     assertEqual(cases.size(), 1)
     assertEqual(cases[1].effectName, "getState")
     assertEqual(cases[1].argumentNames.size(), 0)
@@ -229,8 +229,8 @@ test("parse handle with block body in case") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseHandle")
-    val cases = result.paEffectCases()
+    assertEqual(result.tag, "ParseHandle")
+    val cases = result.effectCases
     assertEqual(cases.size(), 1)
     // Case body should be a block/lambda
     val caseBody = cases[1].body
@@ -257,10 +257,10 @@ test("parse handle body with multiple expressions") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseHandle")
-    val hBody = result.paHandleBody()
-    assertEqual(hBody.paTag(), "ParseBlock")
-    assertEqual(hBody.paBody().size(), 2)
+    assertEqual(result.tag, "ParseHandle")
+    val hBody = result.handleBody as ParseAst
+    assertEqual(hBody.tag, "ParseBlock")
+    assertEqual(hBody.body.size(), 2)
 }
 
 summary()

@@ -12,61 +12,61 @@ test("parse integer literal") {
     val tokens = [tk(TK_INT, "42"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "LongValue")
-    assertEqual(result.paLongValue(), 42)
+    assertEqual(result.tag, "LongValue")
+    assertEqual(result.longValue, 42)
 }
 
 test("parse float literal") {
     val tokens = [tk(TK_FLOAT, "3.14"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "FloatValue")
+    assertEqual(result.tag, "FloatValue")
 }
 
 test("parse string literal") {
     val tokens = [tk(TK_STRING, "hello"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "StringValue")
-    assertEqual(result.paStringValue(), "hello")
+    assertEqual(result.tag, "StringValue")
+    assertEqual(result.stringValue, "hello")
 }
 
 test("parse true literal") {
     val tokens = [tk(TK_TRUE, "true"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "BoolValue")
-    assertEqual(result.paBoolValue(), true)
+    assertEqual(result.tag, "BoolValue")
+    assertEqual(result.boolValue, true)
 }
 
 test("parse false literal") {
     val tokens = [tk(TK_FALSE, "false"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "BoolValue")
-    assertEqual(result.paBoolValue(), false)
+    assertEqual(result.tag, "BoolValue")
+    assertEqual(result.boolValue, false)
 }
 
 test("parse unit literal") {
     val tokens = [tk(TK_UNIT, "unit"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "UnitValue")
+    assertEqual(result.tag, "UnitValue")
 }
 
 test("parse identifier") {
     val tokens = [tk(TK_ID, "myVar"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseVariableRead")
-    assertEqual(result.paVariableName(), "myVar")
+    assertEqual(result.tag, "ParseVariableRead")
+    assertEqual(result.variableName, "myVar")
 }
 
 test("parse weave placeholder") {
     val tokens = [tk(TK_UNDERSCORE, "_"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseWeavePlaceholder")
+    assertEqual(result.tag, "ParseWeavePlaceholder")
 }
 
 // --- Unary Operators ---
@@ -75,18 +75,18 @@ test("parse unary not") {
     val tokens = [tk(TK_NOT, "!"), tk(TK_TRUE, "true"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseNot")
-    assertEqual(paTag(result.paValue()), "BoolValue")
+    assertEqual(result.tag, "ParseNot")
+    assertEqual((result.value as ParseAst).tag, "BoolValue")
 }
 
 test("parse unary minus") {
     val tokens = [tk(TK_MINUS, "-"), tk(TK_INT, "5"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "-")
-    assertEqual(paLongValue(result.paLeft()), 0)
-    assertEqual(paLongValue(result.paRight()), 5)
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "-")
+    assertEqual((result.left as ParseAst).longValue, 0)
+    assertEqual((result.right as ParseAst).longValue, 5)
 }
 
 // --- Binary Operators ---
@@ -95,84 +95,84 @@ test("parse addition") {
     val tokens = [tk(TK_INT, "1"), tk(TK_PLUS, "+"), tk(TK_INT, "2"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "+")
-    assertEqual(paLongValue(result.paLeft()), 1)
-    assertEqual(paLongValue(result.paRight()), 2)
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "+")
+    assertEqual((result.left as ParseAst).longValue, 1)
+    assertEqual((result.right as ParseAst).longValue, 2)
 }
 
 test("parse subtraction") {
     val tokens = [tk(TK_INT, "5"), tk(TK_MINUS, "-"), tk(TK_INT, "3"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "-")
-    assertEqual(paLongValue(result.paLeft()), 5)
-    assertEqual(paLongValue(result.paRight()), 3)
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "-")
+    assertEqual((result.left as ParseAst).longValue, 5)
+    assertEqual((result.right as ParseAst).longValue, 3)
 }
 
 test("parse multiplication") {
     val tokens = [tk(TK_INT, "2"), tk(TK_STAR, "*"), tk(TK_INT, "3"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "*")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "*")
 }
 
 test("parse division") {
     val tokens = [tk(TK_INT, "10"), tk(TK_SLASH, "/"), tk(TK_INT, "2"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "/")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "/")
 }
 
 test("parse modulo") {
     val tokens = [tk(TK_INT, "10"), tk(TK_PERCENT, "%"), tk(TK_INT, "3"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "%")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "%")
 }
 
 test("parse equality") {
     val tokens = [tk(TK_ID, "x"), tk(TK_EQEQ, "=="), tk(TK_INT, "0"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "==")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "==")
 }
 
 test("parse not equal") {
     val tokens = [tk(TK_ID, "x"), tk(TK_NEQ, "!="), tk(TK_INT, "0"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "!=")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "!=")
 }
 
 test("parse less than") {
     val tokens = [tk(TK_ID, "x"), tk(TK_LT, "<"), tk(TK_INT, "5"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "<")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "<")
 }
 
 test("parse logical and") {
     val tokens = [tk(TK_TRUE, "true"), tk(TK_AND, "&&"), tk(TK_FALSE, "false"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "&&")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "&&")
 }
 
 test("parse logical or") {
     val tokens = [tk(TK_TRUE, "true"), tk(TK_OR, "||"), tk(TK_FALSE, "false"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "||")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "||")
 }
 
 // --- Operator Precedence ---
@@ -182,15 +182,15 @@ test("precedence: * binds tighter than +") {
     val tokens = [tk(TK_INT, "1"), tk(TK_PLUS, "+"), tk(TK_INT, "2"), tk(TK_STAR, "*"), tk(TK_INT, "3"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "+")
-    assertEqual(paLongValue(result.paLeft()), 1)
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "+")
+    assertEqual((result.left as ParseAst).longValue, 1)
     // Right side should be 2 * 3
-    val rhs = result.paRight()
-    assertEqual(rhs.paTag(), "ParseBinaryOp")
-    assertEqual(rhs.paOp(), "*")
-    assertEqual(paLongValue(rhs.paLeft()), 2)
-    assertEqual(paLongValue(rhs.paRight()), 3)
+    val rhs = result.right as ParseAst
+    assertEqual(rhs.tag, "ParseBinaryOp")
+    assertEqual(rhs.op, "*")
+    assertEqual((rhs.left as ParseAst).longValue, 2)
+    assertEqual((rhs.right as ParseAst).longValue, 3)
 }
 
 test("precedence: && binds tighter than ||") {
@@ -198,12 +198,12 @@ test("precedence: && binds tighter than ||") {
     val tokens = [tk(TK_ID, "a"), tk(TK_OR, "||"), tk(TK_ID, "b"), tk(TK_AND, "&&"), tk(TK_ID, "c"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "||")
-    assertEqual(paVariableName(result.paLeft()), "a")
-    val rhs = result.paRight()
-    assertEqual(rhs.paTag(), "ParseBinaryOp")
-    assertEqual(rhs.paOp(), "&&")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "||")
+    assertEqual((result.left as ParseAst).variableName, "a")
+    val rhs = result.right as ParseAst
+    assertEqual(rhs.tag, "ParseBinaryOp")
+    assertEqual(rhs.op, "&&")
 }
 
 test("precedence: left-to-right association for + ") {
@@ -211,14 +211,14 @@ test("precedence: left-to-right association for + ") {
     val tokens = [tk(TK_INT, "1"), tk(TK_PLUS, "+"), tk(TK_INT, "2"), tk(TK_PLUS, "+"), tk(TK_INT, "3"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "+")
-    assertEqual(paLongValue(result.paRight()), 3)
-    val lhs = result.paLeft()
-    assertEqual(lhs.paTag(), "ParseBinaryOp")
-    assertEqual(lhs.paOp(), "+")
-    assertEqual(paLongValue(lhs.paLeft()), 1)
-    assertEqual(paLongValue(lhs.paRight()), 2)
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "+")
+    assertEqual((result.right as ParseAst).longValue, 3)
+    val lhs = result.left as ParseAst
+    assertEqual(lhs.tag, "ParseBinaryOp")
+    assertEqual(lhs.op, "+")
+    assertEqual((lhs.left as ParseAst).longValue, 1)
+    assertEqual((lhs.right as ParseAst).longValue, 2)
 }
 
 // --- Grouped Expressions ---
@@ -228,11 +228,11 @@ test("parse grouped expression") {
     val tokens = [tk(TK_LPAREN, "("), tk(TK_INT, "1"), tk(TK_PLUS, "+"), tk(TK_INT, "2"), tk(TK_RPAREN, ")"), tk(TK_STAR, "*"), tk(TK_INT, "3"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "*")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "*")
     // left should be a group containing 1+2
-    val grp = result.paLeft()
-    assertEqual(grp.paTag(), "ParseGroup")
+    val grp = result.left as ParseAst
+    assertEqual(grp.tag, "ParseGroup")
 }
 
 // --- Array Literal ---
@@ -241,16 +241,16 @@ test("parse empty array") {
     val tokens = [tk(TK_LBRACKET, "["), tk(TK_RBRACKET, "]"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseCreateArray")
-    assertEqual(result.paArrayValues().size(), 0)
+    assertEqual(result.tag, "ParseCreateArray")
+    assertEqual(result.arrayValues.size(), 0)
 }
 
 test("parse array with values") {
     val tokens = [tk(TK_LBRACKET, "["), tk(TK_INT, "1"), tk(TK_COMMA, ","), tk(TK_INT, "2"), tk(TK_COMMA, ","), tk(TK_INT, "3"), tk(TK_RBRACKET, "]"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseCreateArray")
-    assertEqual(result.paArrayValues().size(), 3)
+    assertEqual(result.tag, "ParseCreateArray")
+    assertEqual(result.arrayValues.size(), 3)
 }
 
 // --- Record Literal ---
@@ -264,8 +264,8 @@ test("parse record literal") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseCreateRecord")
-    assertEqual(result.paRecordFields().size(), 2)
+    assertEqual(result.tag, "ParseCreateRecord")
+    assertEqual(result.recordFields.size(), 2)
 }
 
 // --- Field Access ---
@@ -275,9 +275,9 @@ test("parse field access") {
     val tokens = [tk(TK_ID, "x"), tk(TK_DOT, "."), tk(TK_ID, "name"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseFieldAccess")
-    assertEqual(result.paReceiverName(), "x")
-    assertEqual(result.paMemberName(), "name")
+    assertEqual(result.tag, "ParseFieldAccess")
+    assertEqual(result.receiverName, "x")
+    assertEqual(result.memberName, "name")
 }
 
 test("parse chained field access") {
@@ -285,11 +285,11 @@ test("parse chained field access") {
     val tokens = [tk(TK_ID, "a"), tk(TK_DOT, "."), tk(TK_ID, "b"), tk(TK_DOT, "."), tk(TK_ID, "c"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseFieldAccess")
-    assertEqual(result.paMemberName(), "c")
-    val recv = result.paReceiver()
-    assertEqual(recv.paTag(), "ParseFieldAccess")
-    assertEqual(recv.paMemberName(), "b")
+    assertEqual(result.tag, "ParseFieldAccess")
+    assertEqual(result.memberName, "c")
+    val recv = result.receiver as ParseAst
+    assertEqual(recv.tag, "ParseFieldAccess")
+    assertEqual(recv.memberName, "b")
 }
 
 // --- Index Access ---
@@ -299,9 +299,9 @@ test("parse index access") {
     val tokens = [tk(TK_ID, "arr"), tk(TK_LBRACKET, "["), tk(TK_INT, "1"), tk(TK_RBRACKET, "]"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseIndexOperator")
-    assertEqual(paTag(result.paVariable()), "ParseVariableRead")
-    assertEqual(paLongValue(result.paIndexExpr()), 1)
+    assertEqual(result.tag, "ParseIndexOperator")
+    assertEqual((result.variable as ParseAst).tag, "ParseVariableRead")
+    assertEqual((result.indexExpr as ParseAst).longValue, 1)
 }
 
 // --- Function Call ---
@@ -311,9 +311,9 @@ test("parse function call no args") {
     val tokens = [tk(TK_ID, "foo"), tk(TK_LPAREN, "("), tk(TK_RPAREN, ")"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseFnCall")
-    assertEqual(paVariableName(result.paCallee()), "foo")
-    assertEqual(result.paArguments().size(), 0)
+    assertEqual(result.tag, "ParseFnCall")
+    assertEqual((result.callee as ParseAst).variableName, "foo")
+    assertEqual(result.arguments.size(), 0)
 }
 
 test("parse function call with args") {
@@ -321,8 +321,8 @@ test("parse function call with args") {
     val tokens = [tk(TK_ID, "add"), tk(TK_LPAREN, "("), tk(TK_INT, "1"), tk(TK_COMMA, ","), tk(TK_INT, "2"), tk(TK_RPAREN, ")"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseFnCall")
-    assertEqual(result.paArguments().size(), 2)
+    assertEqual(result.tag, "ParseFnCall")
+    assertEqual(result.arguments.size(), 2)
 }
 
 test("parse UFCS call") {
@@ -331,11 +331,11 @@ test("parse UFCS call") {
     val p = newParser(tokens, "")
     val result = parseExpression(p)
     // x.foo is parsed as field access, then (1) makes it a fn call
-    assertEqual(result.paTag(), "ParseFnCall")
-    assertEqual(result.paArguments().size(), 1)
-    val callee = result.paCallee()
-    assertEqual(callee.paTag(), "ParseFieldAccess")
-    assertEqual(callee.paMemberName(), "foo")
+    assertEqual(result.tag, "ParseFnCall")
+    assertEqual(result.arguments.size(), 1)
+    val callee = result.callee as ParseAst
+    assertEqual(callee.tag, "ParseFieldAccess")
+    assertEqual(callee.memberName, "foo")
 }
 
 // --- Assignment ---
@@ -345,9 +345,9 @@ test("parse assignment") {
     val tokens = [tk(TK_ID, "x"), tk(TK_EQ, "="), tk(TK_INT, "42"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseAssignment")
-    assertEqual(result.paVariableName(), "x")
-    assertEqual(paLongValue(result.paValue()), 42)
+    assertEqual(result.tag, "ParseAssignment")
+    assertEqual(result.variableName, "x")
+    assertEqual((result.value as ParseAst).longValue, 42)
 }
 
 test("parse op-assignment +=") {
@@ -355,12 +355,12 @@ test("parse op-assignment +=") {
     val tokens = [tk(TK_ID, "x"), tk(TK_PLUSEQ, "+="), tk(TK_INT, "1"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseAssignment")
-    assertEqual(result.paVariableName(), "x")
+    assertEqual(result.tag, "ParseAssignment")
+    assertEqual(result.variableName, "x")
     // value should be a binary op: x + 1
-    val binOp = result.paValue()
-    assertEqual(binOp.paTag(), "ParseBinaryOp")
-    assertEqual(binOp.paOp(), "+")
+    val binOp = result.value as ParseAst
+    assertEqual(binOp.tag, "ParseBinaryOp")
+    assertEqual(binOp.op, "+")
 }
 
 test("parse field assignment") {
@@ -368,9 +368,9 @@ test("parse field assignment") {
     val tokens = [tk(TK_ID, "obj"), tk(TK_DOT, "."), tk(TK_ID, "x"), tk(TK_EQ, "="), tk(TK_INT, "10"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseFieldAssignment")
-    assertEqual(result.paReceiverName(), "obj")
-    assertEqual(result.paMemberName(), "x")
+    assertEqual(result.tag, "ParseFieldAssignment")
+    assertEqual(result.receiverName, "obj")
+    assertEqual(result.memberName, "x")
 }
 
 test("parse indexed assignment") {
@@ -378,7 +378,7 @@ test("parse indexed assignment") {
     val tokens = [tk(TK_ID, "arr"), tk(TK_LBRACKET, "["), tk(TK_INT, "1"), tk(TK_RBRACKET, "]"), tk(TK_EQ, "="), tk(TK_INT, "10"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseIndexedAssignment")
+    assertEqual(result.tag, "ParseIndexedAssignment")
 }
 
 // --- Weave ---
@@ -388,7 +388,7 @@ test("parse weave operator") {
     val tokens = [tk(TK_ID, "x"), tk(TK_WEAVE, "~>"), tk(TK_ID, "foo"), tk(TK_LPAREN, "("), tk(TK_UNDERSCORE, "_"), tk(TK_RPAREN, ")"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseWeave")
+    assertEqual(result.tag, "ParseWeave")
 }
 
 // --- Return, Break, Continue ---
@@ -397,30 +397,30 @@ test("parse return with value") {
     val tokens = [tk(TK_RETURN, "return"), tk(TK_INT, "42"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseReturn")
-    assertEqual(paLongValue(result.paReturnValue()), 42)
+    assertEqual(result.tag, "ParseReturn")
+    assertEqual((result.returnValue as ParseAst).longValue, 42)
 }
 
 test("parse return without value") {
     val tokens = [tk(TK_RETURN, "return"), tk(TK_NEWLINE, "\n"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseReturn")
-    assertEqual(paTag(result.paReturnValue()), "UnitValue")
+    assertEqual(result.tag, "ParseReturn")
+    assertEqual((result.returnValue as ParseAst).tag, "UnitValue")
 }
 
 test("parse break") {
     val tokens = [tk(TK_BREAK, "break"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBreak")
+    assertEqual(result.tag, "ParseBreak")
 }
 
 test("parse continue") {
     val tokens = [tk(TK_CONTINUE, "continue"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseContinue")
+    assertEqual(result.tag, "ParseContinue")
 }
 
 // --- Shift Operators ---
@@ -429,16 +429,16 @@ test("parse left shift") {
     val tokens = [tk(TK_INT, "1"), tk(TK_LSHIFT, "<<"), tk(TK_INT, "4"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "<<")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "<<")
 }
 
 test("parse right shift") {
     val tokens = [tk(TK_INT, "16"), tk(TK_RSHIFT, ">>"), tk(TK_INT, "2"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), ">>")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, ">>")
 }
 
 // --- Bitwise Operators ---
@@ -447,16 +447,16 @@ test("parse bitwise and") {
     val tokens = [tk(TK_INT, "5"), tk(TK_AMP, "&"), tk(TK_INT, "3"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "&")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "&")
 }
 
 test("parse bitwise or") {
     val tokens = [tk(TK_INT, "5"), tk(TK_PIPE, "|"), tk(TK_INT, "3"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "|")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "|")
 }
 
 // --- Complex Expressions ---
@@ -469,12 +469,12 @@ test("complex: 1 + 2 * 3 - 4") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "-")
-    assertEqual(paLongValue(result.paRight()), 4)
-    val lhs = result.paLeft()
-    assertEqual(lhs.paTag(), "ParseBinaryOp")
-    assertEqual(lhs.paOp(), "+")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "-")
+    assertEqual((result.right as ParseAst).longValue, 4)
+    val lhs = result.left as ParseAst
+    assertEqual(lhs.tag, "ParseBinaryOp")
+    assertEqual(lhs.op, "+")
 }
 
 test("method chain: x.foo().bar()") {
@@ -487,10 +487,10 @@ test("method chain: x.foo().bar()") {
     val p = newParser(tokens, "")
     val result = parseExpression(p)
     // Should be fnCall(fieldAccess(fnCall(fieldAccess(x, foo)), bar))
-    assertEqual(result.paTag(), "ParseFnCall")
-    val callee = result.paCallee()
-    assertEqual(callee.paTag(), "ParseFieldAccess")
-    assertEqual(callee.paMemberName(), "bar")
+    assertEqual(result.tag, "ParseFnCall")
+    val callee = result.callee as ParseAst
+    assertEqual(callee.tag, "ParseFieldAccess")
+    assertEqual(callee.memberName, "bar")
 }
 
 test("parse comparison operators") {
@@ -498,51 +498,51 @@ test("parse comparison operators") {
     val tokens = [tk(TK_ID, "x"), tk(TK_LTEQ, "<="), tk(TK_INT, "10"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), "<=")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, "<=")
 }
 
 test("parse >= operator") {
     val tokens = [tk(TK_ID, "x"), tk(TK_GTEQ, ">="), tk(TK_INT, "10"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), ">=")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, ">=")
 }
 
 test("parse > operator") {
     val tokens = [tk(TK_ID, "x"), tk(TK_GT, ">"), tk(TK_INT, "10"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseBinaryOp")
-    assertEqual(result.paOp(), ">")
+    assertEqual(result.tag, "ParseBinaryOp")
+    assertEqual(result.op, ">")
 }
 
 test("parse op-assignment -=") {
     val tokens = [tk(TK_ID, "x"), tk(TK_MINUSEQ, "-="), tk(TK_INT, "5"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseAssignment")
-    val binOp = result.paValue()
-    assertEqual(binOp.paOp(), "-")
+    assertEqual(result.tag, "ParseAssignment")
+    val binOp = result.value as ParseAst
+    assertEqual(binOp.op, "-")
 }
 
 test("parse op-assignment *=") {
     val tokens = [tk(TK_ID, "x"), tk(TK_STAREQ, "*="), tk(TK_INT, "2"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseAssignment")
-    val binOp = result.paValue()
-    assertEqual(binOp.paOp(), "*")
+    assertEqual(result.tag, "ParseAssignment")
+    val binOp = result.value as ParseAst
+    assertEqual(binOp.op, "*")
 }
 
 test("parse op-assignment /=") {
     val tokens = [tk(TK_ID, "x"), tk(TK_SLASHEQ, "/="), tk(TK_INT, "2"), eof()]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseAssignment")
-    val binOp = result.paValue()
-    assertEqual(binOp.paOp(), "/")
+    assertEqual(result.tag, "ParseAssignment")
+    val binOp = result.value as ParseAst
+    assertEqual(binOp.op, "/")
 }
 
 summary()

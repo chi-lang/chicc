@@ -1,5 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/types { Type, TypeId, RecordField, newTypeId, typeIdToString, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, optionTypeId, arrayTypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, polyType, typeChildren, mapType, sumCreate }
+import std/lang.array { size }
 import std/lang { luaExpr, embedLua }
 
 // --- typeEquals ---
@@ -458,7 +459,7 @@ test("occursInExcludingSumBranches: non-sum without variable") {
 
 test("sumCreate: basic creation") {
     val result = sumCreate([], tInt, tString, [])
-    assertTrue(result.isSum())
+    assertTrue(result.tag == "sum")
     val lhs: Type = luaExpr("result.lhs")
     val rhs: Type = luaExpr("result.rhs")
     assertTrue(lhs.typeEquals(tInt))
@@ -467,7 +468,7 @@ test("sumCreate: basic creation") {
 
 test("sumCreate: auto-adds optionTypeId when unit present") {
     val result = sumCreate([], tInt, tUnit, [])
-    val ids = result.typeIds()
+    val ids = result.ids
     var found = false
     val count = ids.size()
     var i = 1
@@ -480,7 +481,7 @@ test("sumCreate: auto-adds optionTypeId when unit present") {
 
 test("sumCreate: does not duplicate optionTypeId") {
     val result = sumCreate([optionTypeId], tInt, tUnit, [])
-    val ids = result.typeIds()
+    val ids = result.ids
     var optCount = 0
     val count = ids.size()
     var i = 1
@@ -493,7 +494,7 @@ test("sumCreate: does not duplicate optionTypeId") {
 
 test("sumCreate: no optionTypeId when no unit") {
     val result = sumCreate([], tInt, tString, [])
-    val ids = result.typeIds()
+    val ids = result.ids
     var found = false
     val count = ids.size()
     var i = 1
@@ -526,11 +527,11 @@ test("unfoldRecursive: replaces variable with recursive type") {
     val rec = recursiveType(v, inner)
     val unfolded = rec.unfoldRecursive()
     // The unfolded type should be a record where 'next' field is the recursive type itself
-    assertTrue(unfolded.isRecord())
-    val fields = unfolded.typeFields()
+    assertTrue(unfolded.tag == "record")
+    val fields = unfolded.fields
     val f2: RecordField = luaExpr("fields[2]")
     val f2Type: Type = luaExpr("f2.fieldType")
-    assertTrue(f2Type.isRecursive())
+    assertTrue(f2Type.tag == "recursive")
 }
 
 // --- instantiate ---
@@ -549,13 +550,13 @@ test("instantiate: replaces variables above level") {
         counter = counter + 1
         variableType("fresh${counter}", lvl)
     })
-    assertTrue(result.isFunction())
+    assertTrue(result.tag == "fn")
     // The variable T at level 2 is above startingLevel 1, so it should be replaced
-    val types = result.typeTypes()
+    val types = result.types
     val firstType: Type = luaExpr("types[1]")
     assertFalse(firstType.typeEquals(v))
-    assertTrue(firstType.isVariable())
-    assertEqual(firstType.typeLevel(), 5)
+    assertTrue(firstType.tag == "var")
+    assertEqual(firstType.level, 5)
 }
 
 test("instantiate: keeps variables at or below level") {
@@ -568,8 +569,8 @@ test("instantiate: keeps variables at or below level") {
         counter = counter + 1
         variableType("fresh${counter}", lvl)
     })
-    assertTrue(result.isFunction())
-    val types = result.typeTypes()
+    assertTrue(result.tag == "fn")
+    val types = result.types
     val firstType: Type = luaExpr("types[1]")
     val secondType: Type = luaExpr("types[2]")
     // v1 is at level 1 which equals startingLevel 1, so it should NOT be replaced
@@ -587,8 +588,8 @@ test("instantiate: caches same variable") {
         counter = counter + 1
         variableType("fresh${counter}", lvl)
     })
-    assertTrue(result.isFunction())
-    val types = result.typeTypes()
+    assertTrue(result.tag == "fn")
+    val types = result.types
     val firstType: Type = luaExpr("types[1]")
     val secondType: Type = luaExpr("types[2]")
     // Both occurrences of T should map to the same fresh variable

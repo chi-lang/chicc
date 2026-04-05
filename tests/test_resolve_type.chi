@@ -1,8 +1,9 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import chicc/types { tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType }
+import chicc/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType }
 import chicc/symbols { newTypeTable, ttAdd, ttAddByName, ttGet, resolveType, resolveTypeAndWrapRecursive, arrayContains }
 import chicc/parse_ast { typeParameterRef, typeNameRef, functionTypeRef, recordTypeRef, sumTypeRef, typeConstructorRef, newTypeRefField }
 import std/lang { luaExpr }
+import std/lang.array { size }
 
 // --- arrayContains tests ---
 
@@ -29,43 +30,43 @@ test("resolveType - int") {
     val tt = newTypeTable(unit)
     val ref = typeNameRef("", "", "int", unit)
     val result = resolveType(tt, [], ref, 0)
-    assertTrue(result.isPrimitive())
-    assertEqual(result.typeTag(), "primitive")
+    assertTrue((result as Type).tag == "primitive")
+    assertEqual((result as Type).tag, "primitive")
 }
 
 test("resolveType - string") {
     val tt = newTypeTable(unit)
     val ref = typeNameRef("", "", "string", unit)
     val result = resolveType(tt, [], ref, 0)
-    assertTrue(result.isPrimitive())
+    assertTrue((result as Type).tag == "primitive")
 }
 
 test("resolveType - bool") {
     val tt = newTypeTable(unit)
     val ref = typeNameRef("", "", "bool", unit)
     val result = resolveType(tt, [], ref, 0)
-    assertTrue(result.isPrimitive())
+    assertTrue((result as Type).tag == "primitive")
 }
 
 test("resolveType - float") {
     val tt = newTypeTable(unit)
     val ref = typeNameRef("", "", "float", unit)
     val result = resolveType(tt, [], ref, 0)
-    assertTrue(result.isPrimitive())
+    assertTrue((result as Type).tag == "primitive")
 }
 
 test("resolveType - unit") {
     val tt = newTypeTable(unit)
     val ref = typeNameRef("", "", "unit", unit)
     val result = resolveType(tt, [], ref, 0)
-    assertTrue(result.isPrimitive())
+    assertTrue((result as Type).tag == "primitive")
 }
 
 test("resolveType - any") {
     val tt = newTypeTable(unit)
     val ref = typeNameRef("", "", "any", unit)
     val result = resolveType(tt, [], ref, 0)
-    assertTrue(result.isPrimitive())
+    assertTrue((result as Type).tag == "primitive")
 }
 
 // --- Type parameter resolution ---
@@ -74,9 +75,9 @@ test("resolveType - type parameter ref") {
     val tt = newTypeTable(unit)
     val ref = typeParameterRef("T", unit)
     val result = resolveType(tt, [], ref, 1)
-    assertTrue(result.isVariable())
-    assertEqual(result.typeName(), "T")
-    assertEqual(result.typeLevel(), 1)
+    assertTrue((result as Type).tag == "var")
+    assertEqual((result as Type).name, "T")
+    assertEqual((result as Type).level, 1)
 }
 
 // --- Type scheme variable resolution ---
@@ -85,16 +86,16 @@ test("resolveType - type name in typeSchemeVars becomes variableType") {
     val tt = newTypeTable(unit)
     val ref = typeNameRef("", "", "T", unit)
     val result = resolveType(tt, ["T", "U"], ref, 2)
-    assertTrue(result.isVariable())
-    assertEqual(result.typeName(), "T")
-    assertEqual(result.typeLevel(), 2)
+    assertTrue((result as Type).tag == "var")
+    assertEqual((result as Type).name, "T")
+    assertEqual((result as Type).level, 2)
 }
 
 test("resolveType - type name NOT in typeSchemeVars resolves normally") {
     val tt = newTypeTable(unit)
     val ref = typeNameRef("", "", "int", unit)
     val result = resolveType(tt, ["T"], ref, 0)
-    assertTrue(result.isPrimitive())
+    assertTrue((result as Type).tag == "primitive")
 }
 
 // --- Function type resolution ---
@@ -106,9 +107,9 @@ test("resolveType - function type (int, string) -> bool") {
     val retRef = typeNameRef("", "", "bool", unit)
     val ref = functionTypeRef([], [argRef1, argRef2], retRef, unit)
     val result = resolveType(tt, [], ref, 0)
-    assertTrue(result.isFunction())
+    assertTrue((result as Type).tag == "fn")
     // Should have 3 types: int, string, bool (params + return)
-    assertEqual(result.typeTypesCount(), 3)
+    assertEqual((result as Type).types.size(), 3)
 }
 
 test("resolveType - function type () -> unit") {
@@ -116,9 +117,9 @@ test("resolveType - function type () -> unit") {
     val retRef = typeNameRef("", "", "unit", unit)
     val ref = functionTypeRef([], [], retRef, unit)
     val result = resolveType(tt, [], ref, 0)
-    assertTrue(result.isFunction())
+    assertTrue((result as Type).tag == "fn")
     // Should have 1 type: just the return type
-    assertEqual(result.typeTypesCount(), 1)
+    assertEqual((result as Type).types.size(), 1)
 }
 
 // --- Record type resolution ---
@@ -129,9 +130,9 @@ test("resolveType - record type { x: int, y: string }") {
     val field2 = newTypeRefField("y", typeNameRef("", "", "string", unit))
     val ref = recordTypeRef([field1, field2], unit)
     val result = resolveType(tt, [], ref, 0)
-    assertTrue(result.isRecord())
-    assertEqual(result.typeFieldsCount(), 2)
-    val fields = result.typeFields()
+    assertTrue((result as Type).tag == "record")
+    assertEqual((result as Type).fields.size(), 2)
+    val fields = (result as Type).fields
     val f1Name: string = luaExpr("fields[1].name")
     assertEqual(f1Name, "x")
     val f2Name: string = luaExpr("fields[2].name")
@@ -146,13 +147,13 @@ test("resolveType - sum type int | string") {
     val rhsRef = typeNameRef("", "", "string", unit)
     val ref = sumTypeRef(lhsRef, rhsRef, unit)
     val result = resolveType(tt, [], ref, 0)
-    assertTrue(result.isSum())
-    val lhs = result.typeLhs()
-    val rhs = result.typeRhs()
+    assertTrue((result as Type).tag == "sum")
+    val lhs = (result as Type).lhs
+    val rhs = (result as Type).rhs
     assertTrue(lhs != unit)
     assertTrue(rhs != unit)
-    assertTrue(lhs.isPrimitive())
-    assertTrue(rhs.isPrimitive())
+    assertTrue((lhs as Type).tag == "primitive")
+    assertTrue((rhs as Type).tag == "primitive")
 }
 
 // --- Array type constructor ---
@@ -163,10 +164,10 @@ test("resolveType - array[int]") {
     val baseRef = typeNameRef("", "", "array", unit)
     val ref = typeConstructorRef(baseRef, [elemRef], unit)
     val result = resolveType(tt, [], ref, 0)
-    assertTrue(result.isArray())
-    val elem = result.typeElementType()
+    assertTrue((result as Type).tag == "array")
+    val elem = (result as Type).elementType
     assertTrue(elem != unit)
-    assertTrue(elem.isPrimitive())
+    assertTrue((elem as Type).tag == "primitive")
 }
 
 // --- Type alias lookup from TypeTable ---
@@ -177,14 +178,14 @@ test("resolveType - type alias from TypeTable") {
     ttAdd(tt, alias)
     val ref = typeNameRef("", "", "MyType", unit)
     val result = resolveType(tt, [], ref, 0)
-    assertTrue(result.isPrimitive())
+    assertTrue((result as Type).tag == "primitive")
 }
 
 test("resolveType - unknown type returns tAny") {
     val tt = newTypeTable(unit)
     val ref = typeNameRef("", "", "UnknownType", unit)
     val result = resolveType(tt, [], ref, 0)
-    assertTrue(result.isPrimitive())
+    assertTrue((result as Type).tag == "primitive")
 }
 
 // --- resolveTypeAndWrapRecursive ---
@@ -193,7 +194,7 @@ test("resolveTypeAndWrapRecursive - simple case delegates to resolveType") {
     val tt = newTypeTable(unit)
     val ref = typeNameRef("", "", "int", unit)
     val result = resolveTypeAndWrapRecursive(tt, [], ref, unit, 0)
-    assertTrue(result.isPrimitive())
+    assertTrue((result as Type).tag == "primitive")
 }
 
 summary()

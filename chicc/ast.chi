@@ -316,62 +316,62 @@ pub fn newExprField(name: string, value: Expr): ExprField {
     { name: name, value: value }
 }
 
-pub fn exprKind(e: Expr): string { luaExpr("e.kind") }
-pub fn exprExprType(e: Expr): Type | unit { luaExpr("e.exprType") }
-pub fn exprUsed(e: Expr): bool { luaExpr("e.used") }
-pub fn exprSection(e: Expr): Section | unit { luaExpr("e.section") }
-pub fn exprAtomValue(e: Expr): string { luaExpr("e.atomValue") }
-pub fn exprParts(e: Expr): array[Expr] { luaExpr("e.parts") }
-pub fn exprRecordFields(e: Expr): array[ExprField] { luaExpr("e.recordFields") }
-pub fn exprArrayValues(e: Expr): array[Expr] { luaExpr("e.arrayValues") }
-pub fn exprTarget(e: Expr): Target | unit { luaExpr("e.target") }
-pub fn exprReceiver(e: Expr): Expr | unit { luaExpr("e.receiver") }
-pub fn exprFieldName(e: Expr): string { luaExpr("e.fieldName") }
-pub fn exprMemberSection(e: Expr): Section | unit { luaExpr("e.memberSection") }
-pub fn exprDotTarget(e: Expr): DotTarget | unit { luaExpr("e.dotTarget") }
-pub fn exprValue(e: Expr): Expr | unit { luaExpr("e.value") }
-pub fn exprIsPublic(e: Expr): bool { luaExpr("e.isPublic") }
-pub fn exprDeclName(e: Expr): string { luaExpr("e.declName") }
-pub fn exprIsMutable(e: Expr): bool { luaExpr("e.isMutable") }
-pub fn exprExpectedType(e: Expr): Type | unit { luaExpr("e.expectedType") }
-pub fn exprParameters(e: Expr): array[FnParam] { luaExpr("e.parameters") }
-pub fn exprDefaultValues(e: Expr): any { luaExpr("e.defaultValues") }
-pub fn exprBody(e: Expr): Expr | unit { luaExpr("e.body") }
-pub fn exprFunction(e: Expr): Expr | unit { luaExpr("e.callee") }
-pub fn exprCallParams(e: Expr): array[Expr] { luaExpr("e.callParams") }
-pub fn exprCondition(e: Expr): Expr | unit { luaExpr("e.condition") }
-pub fn exprThenBranch(e: Expr): Expr | unit { luaExpr("e.thenBranch") }
-pub fn exprElseBranch(e: Expr): Expr | unit { luaExpr("e.elseBranch") }
-pub fn exprOp(e: Expr): string { luaExpr("e.op") }
-pub fn exprLeft(e: Expr): Expr | unit { luaExpr("e.left") }
-pub fn exprRight(e: Expr): Expr | unit { luaExpr("e.right") }
-pub fn exprPrefixExpr(e: Expr): Expr | unit { luaExpr("e.prefixExpr") }
-pub fn exprCastExpr(e: Expr): Expr | unit { luaExpr("e.castExpr") }
-pub fn exprTargetType(e: Expr): Type | unit { luaExpr("e.targetType") }
-pub fn exprCheckedType(e: Expr): Type | unit { luaExpr("e.checkedType") }
-pub fn exprLoopCondition(e: Expr): Expr | unit { luaExpr("e.loopCondition") }
-pub fn exprLoopBody(e: Expr): Expr | unit { luaExpr("e.loopBody") }
-pub fn exprForVars(e: Expr): array[string] { luaExpr("e.forVars") }
-pub fn exprIterable(e: Expr): Expr | unit { luaExpr("e.iterable") }
-pub fn exprForState(e: Expr): Expr | unit { luaExpr("e.forState") }
-pub fn exprForInit(e: Expr): Expr | unit { luaExpr("e.forInit") }
-pub fn exprForBody(e: Expr): Expr | unit { luaExpr("e.forBody") }
-pub fn exprIndexVariable(e: Expr): Expr | unit { luaExpr("e.indexVariable") }
-pub fn exprIndexExpr(e: Expr): Expr | unit { luaExpr("e.indexExpr") }
-pub fn exprIndexValue(e: Expr): Expr | unit { luaExpr("e.indexValue") }
-pub fn exprEffectModuleName(e: Expr): string { luaExpr("e.effectModuleName") }
-pub fn exprEffectPackageName(e: Expr): string { luaExpr("e.effectPackageName") }
-pub fn exprEffectName(e: Expr): string { luaExpr("e.effectName") }
-pub fn exprEffectParams(e: Expr): array[FnParam] { luaExpr("e.effectParams") }
-pub fn exprHandleBody(e: Expr): Expr | unit { luaExpr("e.handleBody") }
-pub fn exprHandleCases(e: Expr): array[HandleCase] { luaExpr("e.handleCases") }
-pub fn exprReturnValue(e: Expr): Expr | unit { luaExpr("e.returnValue") }
-pub fn exprBlockBody(e: Expr): array[Expr] { luaExpr("e.blockBody") }
+pub fn exprKind(e: Expr): string { e.kind }
+pub fn exprExprType(e: Expr): Type | unit { e.exprType }
+pub fn exprUsed(e: Expr): bool { e.used }
+pub fn exprSection(e: Expr): Section | unit { e.section }
+pub fn exprAtomValue(e: Expr): string { e.atomValue }
+pub fn exprParts(e: Expr): array[Expr] { e.parts }
+pub fn exprRecordFields(e: Expr): array[ExprField] { e.recordFields }
+pub fn exprArrayValues(e: Expr): array[Expr] { e.arrayValues }
+pub fn exprTarget(e: Expr): Target | unit { e.target }
+pub fn exprReceiver(e: Expr): Expr | unit { e.receiver }
+pub fn exprFieldName(e: Expr): string { e.fieldName }
+pub fn exprMemberSection(e: Expr): Section | unit { e.memberSection }
+pub fn exprDotTarget(e: Expr): DotTarget | unit { e.dotTarget }
+pub fn exprValue(e: Expr): Expr | unit { e.value }
+pub fn exprIsPublic(e: Expr): bool { e.isPublic }
+pub fn exprDeclName(e: Expr): string { e.declName }
+pub fn exprIsMutable(e: Expr): bool { e.isMutable }
+pub fn exprExpectedType(e: Expr): Type | unit { e.expectedType }
+pub fn exprParameters(e: Expr): array[FnParam] { e.parameters }
+pub fn exprDefaultValues(e: Expr): any { e.defaultValues }
+pub fn exprBody(e: Expr): Expr | unit { e.body }
+pub fn exprFunction(e: Expr): Expr | unit { e.callee }
+pub fn exprCallParams(e: Expr): array[Expr] { e.callParams }
+pub fn exprCondition(e: Expr): Expr | unit { e.condition }
+pub fn exprThenBranch(e: Expr): Expr | unit { e.thenBranch }
+pub fn exprElseBranch(e: Expr): Expr | unit { e.elseBranch }
+pub fn exprOp(e: Expr): string { e.op }
+pub fn exprLeft(e: Expr): Expr | unit { e.left }
+pub fn exprRight(e: Expr): Expr | unit { e.right }
+pub fn exprPrefixExpr(e: Expr): Expr | unit { e.prefixExpr }
+pub fn exprCastExpr(e: Expr): Expr | unit { e.castExpr }
+pub fn exprTargetType(e: Expr): Type | unit { e.targetType }
+pub fn exprCheckedType(e: Expr): Type | unit { e.checkedType }
+pub fn exprLoopCondition(e: Expr): Expr | unit { e.loopCondition }
+pub fn exprLoopBody(e: Expr): Expr | unit { e.loopBody }
+pub fn exprForVars(e: Expr): array[string] { e.forVars }
+pub fn exprIterable(e: Expr): Expr | unit { e.iterable }
+pub fn exprForState(e: Expr): Expr | unit { e.forState }
+pub fn exprForInit(e: Expr): Expr | unit { e.forInit }
+pub fn exprForBody(e: Expr): Expr | unit { e.forBody }
+pub fn exprIndexVariable(e: Expr): Expr | unit { e.indexVariable }
+pub fn exprIndexExpr(e: Expr): Expr | unit { e.indexExpr }
+pub fn exprIndexValue(e: Expr): Expr | unit { e.indexValue }
+pub fn exprEffectModuleName(e: Expr): string { e.effectModuleName }
+pub fn exprEffectPackageName(e: Expr): string { e.effectPackageName }
+pub fn exprEffectName(e: Expr): string { e.effectName }
+pub fn exprEffectParams(e: Expr): array[FnParam] { e.effectParams }
+pub fn exprHandleBody(e: Expr): Expr | unit { e.handleBody }
+pub fn exprHandleCases(e: Expr): array[HandleCase] { e.handleCases }
+pub fn exprReturnValue(e: Expr): Expr | unit { e.returnValue }
+pub fn exprBlockBody(e: Expr): array[Expr] { e.blockBody }
 
-pub fn setExprType(e: Expr, t: Type | unit) { embedLua("e.exprType = t") }
-pub fn setExprUsed(e: Expr, u: bool) { embedLua("e.used = u") }
-pub fn setExprDotTarget(e: Expr, dt: DotTarget | unit) { embedLua("e.dotTarget = dt") }
-pub fn setExprTarget(e: Expr, tgt: Target | unit) { embedLua("e.target = tgt") }
+pub fn setExprType(e: Expr, t: Type | unit) { e.exprType = t }
+pub fn setExprUsed(e: Expr, u: bool) { e.used = u }
+pub fn setExprDotTarget(e: Expr, dt: DotTarget | unit) { e.dotTarget = dt }
+pub fn setExprTarget(e: Expr, tgt: Target | unit) { e.target = tgt }
 
 pub fn exprChildren(expr: any): array[any] {
     val result: array[any] = luaExpr("(function() local r = {} local k = expr.kind; if k == 'atom' or k == 'variable_access' or k == 'break' or k == 'continue' or k == 'effect_definition' then return r end; if k == 'interpolated_string' then return expr.parts end; if k == 'create_record' then for _, f in ipairs(expr.recordFields) do r[#r+1] = f.value end; return r end; if k == 'create_array' then return expr.arrayValues end; if k == 'field_access' then if expr.receiver then r[#r+1] = expr.receiver end; return r end; if k == 'field_assignment' then if expr.receiver then r[#r+1] = expr.receiver end; if expr.value then r[#r+1] = expr.value end; return r end; if k == 'assignment' or k == 'name_declaration' then if expr.value then r[#r+1] = expr.value end; return r end; if k == 'fn' then if expr.body then r[#r+1] = expr.body end; return r end; if k == 'block' then return expr.blockBody end; if k == 'fn_call' then if expr.callee then r[#r+1] = expr.callee end; for _, p in ipairs(expr.callParams) do r[#r+1] = p end; return r end; if k == 'if_else' then if expr.condition then r[#r+1] = expr.condition end; if expr.thenBranch then r[#r+1] = expr.thenBranch end; if expr.elseBranch then r[#r+1] = expr.elseBranch end; return r end; if k == 'infix_op' then if expr.left then r[#r+1] = expr.left end; if expr.right then r[#r+1] = expr.right end; return r end; if k == 'prefix_op' then if expr.prefixExpr then r[#r+1] = expr.prefixExpr end; return r end; if k == 'cast' or k == 'is' then if expr.castExpr then r[#r+1] = expr.castExpr end; return r end; if k == 'while_loop' then if expr.loopCondition then r[#r+1] = expr.loopCondition end; if expr.loopBody then r[#r+1] = expr.loopBody end; return r end; if k == 'for_loop' then if expr.iterable then r[#r+1] = expr.iterable end; if expr.forBody then r[#r+1] = expr.forBody end; return r end; if k == 'index_op' then if expr.indexVariable then r[#r+1] = expr.indexVariable end; if expr.indexExpr then r[#r+1] = expr.indexExpr end; return r end; if k == 'indexed_assignment' then if expr.indexVariable then r[#r+1] = expr.indexVariable end; if expr.indexExpr then r[#r+1] = expr.indexExpr end; if expr.indexValue then r[#r+1] = expr.indexValue end; return r end; if k == 'handle' then if expr.handleBody then r[#r+1] = expr.handleBody end; for _, c in ipairs(expr.handleCases) do r[#r+1] = c.body end; return r end; if k == 'return' then if expr.returnValue then r[#r+1] = expr.returnValue end; return r end; return r end)()")

@@ -18,11 +18,11 @@ test("parse interpolated string with text only") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseInterpolatedString")
-    val parts = result.paParts()
+    assertEqual(result.tag, "ParseInterpolatedString")
+    val parts = result.parts
     assertEqual(parts.size(), 1)
-    assertEqual(paTag(parts[1]), "StringText")
-    assertEqual(paStringValue(parts[1]), "hello world")
+    assertEqual((parts[1] as ParseAst).tag, "StringText")
+    assertEqual((parts[1] as ParseAst).stringValue, "hello world")
 }
 
 test("parse interpolated string with single variable") {
@@ -38,15 +38,15 @@ test("parse interpolated string with single variable") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseInterpolatedString")
-    val parts = result.paParts()
+    assertEqual(result.tag, "ParseInterpolatedString")
+    val parts = result.parts
     assertEqual(parts.size(), 2)
-    assertEqual(paTag(parts[1]), "StringText")
-    assertEqual(paStringValue(parts[1]), "hello ")
-    assertEqual(paTag(parts[2]), "ParseInterpolation")
-    val expr = paInterpValue(parts[2])
-    assertEqual(expr.paTag(), "ParseVariableRead")
-    assertEqual(expr.paVariableName(), "name")
+    assertEqual((parts[1] as ParseAst).tag, "StringText")
+    assertEqual((parts[1] as ParseAst).stringValue, "hello ")
+    assertEqual((parts[2] as ParseAst).tag, "ParseInterpolation")
+    val expr = (parts[2] as ParseAst).interpValue as ParseAst
+    assertEqual(expr.tag, "ParseVariableRead")
+    assertEqual(expr.variableName, "name")
 }
 
 test("parse interpolated string with expression") {
@@ -63,15 +63,15 @@ test("parse interpolated string with expression") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseInterpolatedString")
-    val parts = result.paParts()
+    assertEqual(result.tag, "ParseInterpolatedString")
+    val parts = result.parts
     assertEqual(parts.size(), 1)
-    assertEqual(paTag(parts[1]), "ParseInterpolation")
-    val expr = paInterpValue(parts[1])
-    assertEqual(expr.paTag(), "ParseBinaryOp")
-    assertEqual(expr.paOp(), "+")
-    assertEqual(paLongValue(expr.paLeft()), 1)
-    assertEqual(paLongValue(expr.paRight()), 2)
+    assertEqual((parts[1] as ParseAst).tag, "ParseInterpolation")
+    val expr = (parts[1] as ParseAst).interpValue as ParseAst
+    assertEqual(expr.tag, "ParseBinaryOp")
+    assertEqual(expr.op, "+")
+    assertEqual((expr.left as ParseAst).longValue, 1)
+    assertEqual((expr.right as ParseAst).longValue, 2)
 }
 
 test("parse interpolated string with text and expression") {
@@ -94,28 +94,28 @@ test("parse interpolated string with text and expression") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseInterpolatedString")
-    val parts = result.paParts()
+    assertEqual(result.tag, "ParseInterpolatedString")
+    val parts = result.parts
     assertEqual(parts.size(), 5)
     // "hello "
-    assertEqual(paTag(parts[1]), "StringText")
-    assertEqual(paStringValue(parts[1]), "hello ")
+    assertEqual((parts[1] as ParseAst).tag, "StringText")
+    assertEqual((parts[1] as ParseAst).stringValue, "hello ")
     // $name
-    assertEqual(paTag(parts[2]), "ParseInterpolation")
-    val nameExpr = paInterpValue(parts[2])
-    assertEqual(nameExpr.paTag(), "ParseVariableRead")
-    assertEqual(nameExpr.paVariableName(), "name")
+    assertEqual((parts[2] as ParseAst).tag, "ParseInterpolation")
+    val nameExpr = (parts[2] as ParseAst).interpValue as ParseAst
+    assertEqual(nameExpr.tag, "ParseVariableRead")
+    assertEqual(nameExpr.variableName, "name")
     // ", "
-    assertEqual(paTag(parts[3]), "StringText")
-    assertEqual(paStringValue(parts[3]), ", ")
+    assertEqual((parts[3] as ParseAst).tag, "StringText")
+    assertEqual((parts[3] as ParseAst).stringValue, ", ")
     // ${1+2}
-    assertEqual(paTag(parts[4]), "ParseInterpolation")
-    val addExpr = paInterpValue(parts[4])
-    assertEqual(addExpr.paTag(), "ParseBinaryOp")
-    assertEqual(addExpr.paOp(), "+")
+    assertEqual((parts[4] as ParseAst).tag, "ParseInterpolation")
+    val addExpr = (parts[4] as ParseAst).interpValue as ParseAst
+    assertEqual(addExpr.tag, "ParseBinaryOp")
+    assertEqual(addExpr.op, "+")
     // "!"
-    assertEqual(paTag(parts[5]), "StringText")
-    assertEqual(paStringValue(parts[5]), "!")
+    assertEqual((parts[5] as ParseAst).tag, "StringText")
+    assertEqual((parts[5] as ParseAst).stringValue, "!")
 }
 
 test("parse empty interpolated string") {
@@ -127,8 +127,8 @@ test("parse empty interpolated string") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseInterpolatedString")
-    val parts = result.paParts()
+    assertEqual(result.tag, "ParseInterpolatedString")
+    val parts = result.parts
     assertEqual(parts.size(), 0)
 }
 
@@ -147,13 +147,13 @@ test("parse interpolated string with multiple adjacent expressions") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.paTag(), "ParseInterpolatedString")
-    val parts = result.paParts()
+    assertEqual(result.tag, "ParseInterpolatedString")
+    val parts = result.parts
     assertEqual(parts.size(), 2)
-    assertEqual(paTag(parts[1]), "ParseInterpolation")
-    assertEqual(paVariableName(paInterpValue(parts[1])), "a")
-    assertEqual(paTag(parts[2]), "ParseInterpolation")
-    assertEqual(paVariableName(paInterpValue(parts[2])), "b")
+    assertEqual((parts[1] as ParseAst).tag, "ParseInterpolation")
+    assertEqual(((parts[1] as ParseAst).interpValue as ParseAst).variableName, "a")
+    assertEqual((parts[2] as ParseAst).tag, "ParseInterpolation")
+    assertEqual(((parts[2] as ParseAst).interpValue as ParseAst).variableName, "b")
 }
 
 summary()

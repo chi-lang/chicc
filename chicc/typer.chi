@@ -1,7 +1,7 @@
 // chicc/chicc/typer.chi
 package chicc/typer
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tFloat, tString, tAny, sumCreate, recordType, arrayType, functionType, polyType, mapType, optionTypeId, intTypeId, floatTypeId }
+import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tFloat, tString, tAny, sumCreate, recordType, arrayType, functionType, polyType, mapType, optionTypeId, intTypeId, floatTypeId, unfoldRecursive }
 import chicc/source { Section, toCodePoint }
 import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget, atomExpr }
 import chicc/unification { unify, unifyWithUf, ufNew, ufResolve, ufAllBindings, newConstraint }
@@ -93,8 +93,8 @@ fn addConstraint(constraints: any, expected: any, actual: any, section: any) {
 
 fn isIntType(t: any): bool {
     val typ = t as Type
-    if typ.isPrimitive() {
-        val ids = typ.typeIds()
+    if typ.tag == "primitive" {
+        val ids = typ.ids
         val count = luaExpr("#ids") as int
         var i = 1
         while i <= count {
@@ -107,8 +107,8 @@ fn isIntType(t: any): bool {
 
 fn isFloatType(t: any): bool {
     val typ = t as Type
-    if typ.isPrimitive() {
-        val ids = typ.typeIds()
+    if typ.tag == "primitive" {
+        val ids = typ.ids
         val count = luaExpr("#ids") as int
         var i = 1
         while i <= count {
@@ -343,11 +343,17 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
         val fieldName = luaExpr("term.fieldName") as string
         val memberSection = luaExpr("term.memberSection") as any
 
-        val isRec = luaExpr("finalReceiverType.tag == 'record'") as bool
+        // Unwrap recursive types to access record fields (e.g. Expr, Type)
+        val effectiveReceiverType: any = if luaExpr("finalReceiverType.tag == 'recursive'") as bool {
+            unfoldRecursive(finalReceiverType as Type)
+        } else {
+            finalReceiverType
+        }
+        val isRec = luaExpr("effectiveReceiverType.tag == 'record'") as bool
         var foundField = false
         if isRec {
             // Check if record has the field
-            val recFields = luaExpr("finalReceiverType.fields") as any
+            val recFields = luaExpr("effectiveReceiverType.fields") as any
             val recFieldCount = luaExpr("#recFields") as int
             var fi = 1
             while fi <= recFieldCount {

@@ -22,22 +22,22 @@ test("packageTarget") {
 test("atomExpr") {
     val sec = newSection(1, 1, 1, 5)
     val e = atomExpr("42", tInt, sec)
-    assertEqual(e.exprKind(), "atom")
-    assertEqual(e.exprAtomValue(), "42")
+    assertEqual(e.kind, "atom")
+    assertEqual(e.atomValue, "42")
 }
 
 test("blockExpr") {
     val a1 = atomExpr("1", tInt, unit)
     val a2 = atomExpr("2", tInt, unit)
     val b = blockExpr([a1, a2], unit)
-    assertEqual(b.exprKind(), "block")
+    assertEqual(b.kind, "block")
 }
 
 test("fnCallExpr") {
     val func = variableAccessExpr(localTarget("foo"), unit)
     val arg = atomExpr("1", tInt, unit)
     val call = fnCallExpr(func, [arg], unit)
-    assertEqual(call.exprKind(), "fn_call")
+    assertEqual(call.kind, "fn_call")
 }
 
 test("exprChildren - atom") {

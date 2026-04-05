@@ -1,39 +1,39 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/source { newSection }
-import chicc/parse_ast { typeParameterRef, typeNameRef, functionTypeRef, sumTypeRef, typeConstructorRef, recordTypeRef, newFormalArgument, newFormalField, newParseHandleCase, newParseWhenCase, newParseElseCase, newParseRecordField, newTypeRefField, newPackageDefinition, newParseImportEntry, newParseImport, parseUnitValue, parseLongValue, parseFloatValue, parseBoolValue, parseStringValue, parseStringText, parseInterpolation, parseInterpolatedString, parseLambda, parseFuncWithName, parseFnCall, parseVariableRead, parseAssignment, parseIndexOperator, parseIndexedAssignment, parseNameDeclaration, parseBlock, parseGroup, parseIfElse, parseWhile, parseFor, parseWhen, parseReturn, parseBreak, parseContinue, parseNot, parseBinaryOp, parseCast, parseIs, parseFieldAccess, parseFieldAssignment, parseEffectDefinition, parseHandle, parseWeave, parseWeavePlaceholder, parseCreateArray, parseCreateRecord }
+import chicc/parse_ast { ParseAst, TypeRef, typeParameterRef, typeNameRef, functionTypeRef, sumTypeRef, typeConstructorRef, recordTypeRef, newFormalArgument, newFormalField, newParseHandleCase, newParseWhenCase, newParseElseCase, newParseRecordField, newTypeRefField, newPackageDefinition, newParseImportEntry, newParseImport, parseUnitValue, parseLongValue, parseFloatValue, parseBoolValue, parseStringValue, parseStringText, parseInterpolation, parseInterpolatedString, parseLambda, parseFuncWithName, parseFnCall, parseVariableRead, parseAssignment, parseIndexOperator, parseIndexedAssignment, parseNameDeclaration, parseBlock, parseGroup, parseIfElse, parseWhile, parseFor, parseWhen, parseReturn, parseBreak, parseContinue, parseNot, parseBinaryOp, parseCast, parseIs, parseFieldAccess, parseFieldAssignment, parseEffectDefinition, parseHandle, parseWeave, parseWeavePlaceholder, parseCreateArray, parseCreateRecord }
 
 
 test("TypeRef - TypeParameterRef") {
     val tr = typeParameterRef("T", unit)
-    assertEqual(tr.trTag(), "TypeParameterRef")
-    assertEqual(tr.trName(), "T")
+    assertEqual(tr.tag, "TypeParameterRef")
+    assertEqual(tr.name, "T")
 }
 
 test("TypeRef - TypeNameRef") {
     val tr = typeNameRef("std", "lang", "int", unit)
-    assertEqual(tr.trTag(), "TypeNameRef")
-    assertEqual(tr.trModuleName(), "std")
-    assertEqual(tr.trPackageName(), "lang")
-    assertEqual(tr.trName(), "int")
+    assertEqual(tr.tag, "TypeNameRef")
+    assertEqual(tr.moduleName, "std")
+    assertEqual(tr.packageName, "lang")
+    assertEqual(tr.name, "int")
 }
 
 test("TypeRef - SumTypeRef") {
     val left = typeNameRef("", "", "int", unit)
     val right = typeNameRef("", "", "string", unit)
     val tr = sumTypeRef(left, right, unit)
-    assertEqual(tr.trTag(), "SumTypeRef")
-    val l: any = tr.trLhs()
-    val r: any = tr.trRhs()
-    assertEqual(l.trTag(), "TypeNameRef")
-    assertEqual(r.trTag(), "TypeNameRef")
+    assertEqual(tr.tag, "SumTypeRef")
+    val l = tr.lhs as TypeRef
+    val r = tr.rhs as TypeRef
+    assertEqual(l.tag, "TypeNameRef")
+    assertEqual(r.tag, "TypeNameRef")
 }
 
 test("TypeRef - TypeConstructorRef") {
     val base = typeNameRef("", "", "array", unit)
     val param = typeNameRef("", "", "int", unit)
     val tr = typeConstructorRef(base, [param], unit)
-    assertEqual(tr.trTag(), "TypeConstructorRef")
-    assertEqual(tr.trTypeParameters().size(), 1)
+    assertEqual(tr.tag, "TypeConstructorRef")
+    assertEqual(tr.typeParameters.size(), 1)
 }
 
 test("Supporting types - FormalArgument") {
@@ -50,26 +50,26 @@ test("Supporting types - ParseRecordField") {
 
 test("ParseAst - literals") {
     val u = parseUnitValue(unit)
-    assertEqual(u.paTag(), "UnitValue")
+    assertEqual(u.tag, "UnitValue")
 
     val sec = newSection(1, 1, 1, 3)
     val lv = parseLongValue(42, sec)
-    assertEqual(lv.paTag(), "LongValue")
-    assertEqual(lv.paLongValue(), 42)
+    assertEqual(lv.tag, "LongValue")
+    assertEqual(lv.longValue, 42)
 
     val bv = parseBoolValue(true, unit)
-    assertEqual(bv.paTag(), "BoolValue")
-    assertTrue(bv.paBoolValue())
+    assertEqual(bv.tag, "BoolValue")
+    assertTrue(bv.boolValue)
 
     val sv = parseStringValue("hello", unit)
-    assertEqual(sv.paTag(), "StringValue")
-    assertEqual(sv.paStringValue(), "hello")
+    assertEqual(sv.tag, "StringValue")
+    assertEqual(sv.stringValue, "hello")
 }
 
 test("ParseAst - ParseVariableRead") {
     val vr = parseVariableRead("myVar", unit)
-    assertEqual(vr.paTag(), "ParseVariableRead")
-    assertEqual(vr.paVariableName(), "myVar")
+    assertEqual(vr.tag, "ParseVariableRead")
+    assertEqual(vr.variableName, "myVar")
 }
 
 test("ParseAst - ParseFnCall") {
@@ -77,8 +77,8 @@ test("ParseAst - ParseFnCall") {
     val arg1 = parseLongValue(1, unit)
     val arg2 = parseLongValue(2, unit)
     val call = parseFnCall(fn_, [], [arg1, arg2], unit)
-    assertEqual(call.paTag(), "ParseFnCall")
-    assertEqual(call.paArguments().size(), 2)
+    assertEqual(call.tag, "ParseFnCall")
+    assertEqual(call.arguments.size(), 2)
 }
 
 test("ParseAst - ParseIfElse") {
@@ -86,57 +86,57 @@ test("ParseAst - ParseIfElse") {
     val thenB = parseLongValue(1, unit)
     val elseB = parseLongValue(2, unit)
     val ie = parseIfElse(cond, thenB, elseB, unit)
-    assertEqual(ie.paTag(), "ParseIfElse")
-    assertEqual(paTag(ie.paCondition()), "BoolValue")
-    assertEqual(paTag(ie.paThenBody()), "LongValue")
-    assertEqual(paTag(ie.paElseBody()), "LongValue")
+    assertEqual(ie.tag, "ParseIfElse")
+    assertEqual((ie.condition as ParseAst).tag, "BoolValue")
+    assertEqual((ie.thenBody as ParseAst).tag, "LongValue")
+    assertEqual((ie.elseBody as ParseAst).tag, "LongValue")
 }
 
 test("ParseAst - ParseBlock") {
     val s1 = parseLongValue(1, unit)
     val s2 = parseLongValue(2, unit)
     val blk = parseBlock([s1, s2], unit)
-    assertEqual(blk.paTag(), "ParseBlock")
-    assertEqual(blk.paBody().size(), 2)
+    assertEqual(blk.tag, "ParseBlock")
+    assertEqual(blk.body.size(), 2)
 }
 
 test("ParseAst - ParseBinaryOp") {
     val l = parseLongValue(1, unit)
     val r = parseLongValue(2, unit)
     val binop = parseBinaryOp("+", l, r, unit)
-    assertEqual(binop.paTag(), "ParseBinaryOp")
-    assertEqual(binop.paOp(), "+")
-    assertEqual(paTag(binop.paLeft()), "LongValue")
-    assertEqual(paTag(binop.paRight()), "LongValue")
+    assertEqual(binop.tag, "ParseBinaryOp")
+    assertEqual(binop.op, "+")
+    assertEqual((binop.left as ParseAst).tag, "LongValue")
+    assertEqual((binop.right as ParseAst).tag, "LongValue")
 }
 
 test("ParseAst - ParseNameDeclaration") {
     val v = parseLongValue(10, unit)
     val decl = parseNameDeclaration(false, "x", true, unit, v, unit, unit)
-    assertEqual(decl.paTag(), "ParseNameDeclaration")
-    assertEqual(decl.paSymbolName(), "x")
-    assertTrue(decl.paIsMutable())
-    assertFalse(decl.paIsPublic())
+    assertEqual(decl.tag, "ParseNameDeclaration")
+    assertEqual(decl.symbolName, "x")
+    assertTrue(decl.isMutable)
+    assertFalse(decl.isPublic)
 }
 
 test("ParseAst - break and continue") {
     val brk = parseBreak(unit)
-    assertEqual(brk.paTag(), "ParseBreak")
+    assertEqual(brk.tag, "ParseBreak")
     val cont = parseContinue(unit)
-    assertEqual(cont.paTag(), "ParseContinue")
+    assertEqual(cont.tag, "ParseContinue")
 }
 
 test("ParseAst - ParseCreateArray and ParseCreateRecord") {
     val v1 = parseLongValue(1, unit)
     val v2 = parseLongValue(2, unit)
     val arr = parseCreateArray([v1, v2], unit)
-    assertEqual(arr.paTag(), "ParseCreateArray")
-    assertEqual(arr.paArrayValues().size(), 2)
+    assertEqual(arr.tag, "ParseCreateArray")
+    assertEqual(arr.arrayValues.size(), 2)
 
     val f1 = newParseRecordField("a", v1)
     val rec = parseCreateRecord([f1], unit)
-    assertEqual(rec.paTag(), "ParseCreateRecord")
-    assertEqual(rec.paRecordFields().size(), 1)
+    assertEqual(rec.tag, "ParseCreateRecord")
+    assertEqual(rec.recordFields.size(), 1)
 }
 
 summary()

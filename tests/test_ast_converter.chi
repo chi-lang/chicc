@@ -20,16 +20,16 @@ test("convert UnitValue") {
     val ctx = makeTestContext()
     val node = parseUnitValue(unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "atom")
-    assertEqual(result.exprAtomValue(), "unit")
+    assertEqual((result as Expr).kind, "atom")
+    assertEqual((result as Expr).atomValue, "unit")
 }
 
 test("convert LongValue") {
     val ctx = makeTestContext()
     val node = parseLongValue(42, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "atom")
-    assertEqual(result.exprAtomValue(), "42")
+    assertEqual((result as Expr).kind, "atom")
+    assertEqual((result as Expr).atomValue, "42")
 }
 
 test("convert FloatValue") {
@@ -37,7 +37,7 @@ test("convert FloatValue") {
     val v: float = 3.14
     val node = parseFloatValue(v, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "atom")
+    assertEqual((result as Expr).kind, "atom")
     // Float formatting may vary, just check it's an atom
 }
 
@@ -45,32 +45,32 @@ test("convert BoolValue true") {
     val ctx = makeTestContext()
     val node = parseBoolValue(true, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "atom")
-    assertEqual(result.exprAtomValue(), "true")
+    assertEqual((result as Expr).kind, "atom")
+    assertEqual((result as Expr).atomValue, "true")
 }
 
 test("convert BoolValue false") {
     val ctx = makeTestContext()
     val node = parseBoolValue(false, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "atom")
-    assertEqual(result.exprAtomValue(), "false")
+    assertEqual((result as Expr).kind, "atom")
+    assertEqual((result as Expr).atomValue, "false")
 }
 
 test("convert StringValue") {
     val ctx = makeTestContext()
     val node = parseStringValue("hello", unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "atom")
-    assertEqual(result.exprAtomValue(), "hello")
+    assertEqual((result as Expr).kind, "atom")
+    assertEqual((result as Expr).atomValue, "hello")
 }
 
 test("convert StringText") {
     val ctx = makeTestContext()
     val node = parseStringText("world", unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "atom")
-    assertEqual(result.exprAtomValue(), "world")
+    assertEqual((result as Expr).kind, "atom")
+    assertEqual((result as Expr).atomValue, "world")
 }
 
 // --- String interpolation ---
@@ -80,7 +80,7 @@ test("convert ParseInterpolation") {
     val inner = parseLongValue(42, unit)
     val node = parseInterpolation(inner, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "cast")
+    assertEqual((result as Expr).kind, "cast")
 }
 
 test("convert ParseInterpolatedString") {
@@ -89,8 +89,8 @@ test("convert ParseInterpolatedString") {
     val part2 = parseInterpolation(parseLongValue(42, unit), unit)
     val node = parseInterpolatedString([part1, part2], unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "interpolated_string")
-    val parts = result.exprParts()
+    assertEqual((result as Expr).kind, "interpolated_string")
+    val parts = (result as Expr).parts
     assertEqual(parts.size(), 2)
 }
 
@@ -102,8 +102,8 @@ test("convert ParseVariableRead - local symbol") {
     ctDefineSymbol(ctx.tables, sym)
     val node = parseVariableRead("x", unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "variable_access")
-    val tgt = result.exprTarget()
+    assertEqual((result as Expr).kind, "variable_access")
+    val tgt = (result as Expr).target
     assertTrue(tgt != unit)
     val tgtTag: string = luaExpr("tgt.tag")
     assertEqual(tgtTag, "package")
@@ -116,7 +116,7 @@ test("convert ParseAssignment") {
     val valNode = parseLongValue(10, unit)
     val node = parseAssignment("y", valNode, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "assignment")
+    assertEqual((result as Expr).kind, "assignment")
 }
 
 // --- Operators ---
@@ -127,8 +127,8 @@ test("convert ParseBinaryOp") {
     val right = parseLongValue(2, unit)
     val node = parseBinaryOp("+", left, right, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "infix_op")
-    assertEqual(result.exprOp(), "+")
+    assertEqual((result as Expr).kind, "infix_op")
+    assertEqual((result as Expr).op, "+")
 }
 
 test("convert ParseNot") {
@@ -136,8 +136,8 @@ test("convert ParseNot") {
     val inner = parseBoolValue(true, unit)
     val node = parseNot(inner, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "prefix_op")
-    assertEqual(result.exprOp(), "!")
+    assertEqual((result as Expr).kind, "prefix_op")
+    assertEqual((result as Expr).op, "!")
 }
 
 // --- Block and Group ---
@@ -148,8 +148,8 @@ test("convert ParseBlock") {
     val e2 = parseLongValue(2, unit)
     val node = parseBlock([e1, e2], unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "block")
-    val body = result.exprBlockBody()
+    assertEqual((result as Expr).kind, "block")
+    val body = (result as Expr).blockBody
     assertEqual(body.size(), 2)
 }
 
@@ -158,8 +158,8 @@ test("convert ParseGroup - unwraps inner") {
     val inner = parseLongValue(42, unit)
     val node = parseGroup(inner, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "atom")
-    assertEqual(result.exprAtomValue(), "42")
+    assertEqual((result as Expr).kind, "atom")
+    assertEqual((result as Expr).atomValue, "42")
 }
 
 // --- Control flow ---
@@ -171,10 +171,10 @@ test("convert ParseIfElse") {
     val elseB = parseLongValue(2, unit)
     val node = parseIfElse(cond, thenB, elseB, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "if_else")
-    assertTrue(result.exprCondition() != unit)
-    assertTrue(result.exprThenBranch() != unit)
-    assertTrue(result.exprElseBranch() != unit)
+    assertEqual((result as Expr).kind, "if_else")
+    assertTrue((result as Expr).condition != unit)
+    assertTrue((result as Expr).thenBranch != unit)
+    assertTrue((result as Expr).elseBranch != unit)
 }
 
 test("convert ParseIfElse - no else") {
@@ -183,8 +183,8 @@ test("convert ParseIfElse - no else") {
     val thenB = parseLongValue(1, unit)
     val node = parseIfElse(cond, thenB, unit, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "if_else")
-    assertTrue(result.exprElseBranch() == unit)
+    assertEqual((result as Expr).kind, "if_else")
+    assertTrue((result as Expr).elseBranch == unit)
 }
 
 test("convert ParseWhile") {
@@ -193,7 +193,7 @@ test("convert ParseWhile") {
     val body = parseLongValue(1, unit)
     val node = parseWhile(cond, body, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "while_loop")
+    assertEqual((result as Expr).kind, "while_loop")
 }
 
 test("convert ParseReturn") {
@@ -201,22 +201,22 @@ test("convert ParseReturn") {
     val retVal = parseLongValue(42, unit)
     val node = parseReturn(retVal, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "return")
-    assertTrue(result.exprReturnValue() != unit)
+    assertEqual((result as Expr).kind, "return")
+    assertTrue((result as Expr).returnValue != unit)
 }
 
 test("convert ParseBreak") {
     val ctx = makeTestContext()
     val node = parseBreak(unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "break")
+    assertEqual((result as Expr).kind, "break")
 }
 
 test("convert ParseContinue") {
     val ctx = makeTestContext()
     val node = parseContinue(unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "continue")
+    assertEqual((result as Expr).kind, "continue")
 }
 
 // --- When conversion ---
@@ -225,8 +225,8 @@ test("convert ParseWhen - empty") {
     val ctx = makeTestContext()
     val node = parseWhen([], unit, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "atom")
-    assertEqual(result.exprAtomValue(), "unit")
+    assertEqual((result as Expr).kind, "atom")
+    assertEqual((result as Expr).atomValue, "unit")
 }
 
 test("convert ParseWhen - single case") {
@@ -236,7 +236,7 @@ test("convert ParseWhen - single case") {
     val wc = newParseWhenCase(cond, body, unit)
     val node = parseWhen([wc], unit, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "if_else")
+    assertEqual((result as Expr).kind, "if_else")
 }
 
 test("convert ParseWhen - with else") {
@@ -248,8 +248,8 @@ test("convert ParseWhen - with else") {
     val ec = newParseElseCase(elseBody, unit)
     val node = parseWhen([wc], ec, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "if_else")
-    assertTrue(result.exprElseBranch() != unit)
+    assertEqual((result as Expr).kind, "if_else")
+    assertTrue((result as Expr).elseBranch != unit)
 }
 
 test("convert ParseWhen - multiple cases fold into nested IfElse") {
@@ -258,11 +258,11 @@ test("convert ParseWhen - multiple cases fold into nested IfElse") {
     val c2 = newParseWhenCase(parseBoolValue(false, unit), parseLongValue(2, unit), unit)
     val node = parseWhen([c1, c2], unit, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "if_else")
+    assertEqual((result as Expr).kind, "if_else")
     // The else branch should be the inner if_else
-    val inner: any = result.exprElseBranch()
+    val inner: any = (result as Expr).elseBranch
     assertTrue(inner != unit)
-    assertEqual(inner.exprKind(), "if_else")
+    assertEqual((inner as Expr).kind, "if_else")
 }
 
 // --- Lambda conversion ---
@@ -272,8 +272,8 @@ test("convert ParseLambda - no args") {
     val body = parseLongValue(42, unit)
     val node = parseLambda([], [body], unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "fn")
-    val params = result.exprParameters()
+    assertEqual((result as Expr).kind, "fn")
+    val params = (result as Expr).parameters
     assertEqual(params.size(), 0)
 }
 
@@ -283,8 +283,8 @@ test("convert ParseLambda - with args") {
     val body = parseVariableRead("x", unit)
     val node = parseLambda([arg1], [body], unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "fn")
-    val params = result.exprParameters()
+    assertEqual((result as Expr).kind, "fn")
+    val params = (result as Expr).parameters
     assertEqual(params.size(), 1)
 }
 
@@ -297,9 +297,9 @@ test("convert ParseFuncWithName") {
     val body = parseBlock([parseLongValue(1, unit)], unit)
     val node = parseFuncWithName(false, "myFn", [], [arg], retType, body, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "name_declaration")
-    assertEqual(result.exprDeclName(), "myFn")
-    assertFalse(result.exprIsPublic())
+    assertEqual((result as Expr).kind, "name_declaration")
+    assertEqual((result as Expr).declName, "myFn")
+    assertFalse((result as Expr).isPublic)
 
     // Should have registered symbol
     val sym = ctGetLocalSymbol(ctx.tables, "myFn")
@@ -313,8 +313,8 @@ test("convert ParseFuncWithName - public") {
     val body = parseBlock([parseVariableRead("s", unit)], unit)
     val node = parseFuncWithName(true, "pubFn", [], [arg], retType, body, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "name_declaration")
-    assertTrue(result.exprIsPublic())
+    assertEqual((result as Expr).kind, "name_declaration")
+    assertTrue((result as Expr).isPublic)
 }
 
 // --- FnCall conversion ---
@@ -327,8 +327,8 @@ test("convert ParseFnCall") {
     val arg = parseLongValue(1, unit)
     val node = parseFnCall(callee, [], [arg], unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "fn_call")
-    val callParams = result.exprCallParams()
+    assertEqual((result as Expr).kind, "fn_call")
+    val callParams = (result as Expr).callParams
     assertEqual(callParams.size(), 1)
 }
 
@@ -339,9 +339,9 @@ test("convert ParseNameDeclaration - val") {
     val valNode = parseLongValue(42, unit)
     val node = parseNameDeclaration(false, "x", false, unit, valNode, unit, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "name_declaration")
-    assertEqual(result.exprDeclName(), "x")
-    assertFalse(result.exprIsMutable())
+    assertEqual((result as Expr).kind, "name_declaration")
+    assertEqual((result as Expr).declName, "x")
+    assertFalse((result as Expr).isMutable)
 
     // Should register in symbol table
     val sym = ctGetLocalSymbol(ctx.tables, "x")
@@ -353,8 +353,8 @@ test("convert ParseNameDeclaration - var mutable") {
     val valNode = parseLongValue(0, unit)
     val node = parseNameDeclaration(false, "counter", true, unit, valNode, unit, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "name_declaration")
-    assertTrue(result.exprIsMutable())
+    assertEqual((result as Expr).kind, "name_declaration")
+    assertTrue((result as Expr).isMutable)
 }
 
 // --- Index operations ---
@@ -367,7 +367,7 @@ test("convert ParseIndexOperator") {
     val idx = parseLongValue(1, unit)
     val node = parseIndexOperator(var_, idx, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "index_op")
+    assertEqual((result as Expr).kind, "index_op")
 }
 
 test("convert ParseIndexedAssignment") {
@@ -379,7 +379,7 @@ test("convert ParseIndexedAssignment") {
     val val_ = parseLongValue(99, unit)
     val node = parseIndexedAssignment(var_, idx, val_, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "indexed_assignment")
+    assertEqual((result as Expr).kind, "indexed_assignment")
 }
 
 // --- Cast and Is ---
@@ -390,7 +390,7 @@ test("convert ParseCast") {
     val tRef = typeNameRef("", "", "string", unit)
     val node = parseCast(inner, tRef, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "cast")
+    assertEqual((result as Expr).kind, "cast")
 }
 
 test("convert ParseIs") {
@@ -399,7 +399,7 @@ test("convert ParseIs") {
     val tRef = typeNameRef("", "", "int", unit)
     val node = parseIs(inner, tRef, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "is")
+    assertEqual((result as Expr).kind, "is")
 }
 
 // --- Collections ---
@@ -410,8 +410,8 @@ test("convert ParseCreateArray") {
     val v2 = parseLongValue(2, unit)
     val node = parseCreateArray([v1, v2], unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "create_array")
-    val vals = result.exprArrayValues()
+    assertEqual((result as Expr).kind, "create_array")
+    val vals = (result as Expr).arrayValues
     assertEqual(vals.size(), 2)
 }
 
@@ -421,8 +421,8 @@ test("convert ParseCreateRecord") {
     val f2 = newParseRecordField("age", parseLongValue(30, unit))
     val node = parseCreateRecord([f1, f2], unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "create_record")
-    val fields = result.exprRecordFields()
+    assertEqual((result as Expr).kind, "create_record")
+    val fields = (result as Expr).recordFields
     assertEqual(fields.size(), 2)
 }
 
@@ -435,8 +435,8 @@ test("convert ParseFieldAccess - regular") {
     val recv = parseVariableRead("obj", unit)
     val node = parseFieldAccess("obj", "name", recv, unit, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "field_access")
-    assertEqual(result.exprFieldName(), "name")
+    assertEqual((result as Expr).kind, "field_access")
+    assertEqual((result as Expr).fieldName, "name")
 }
 
 test("convert ParseFieldAssignment") {
@@ -447,8 +447,8 @@ test("convert ParseFieldAssignment") {
     val val_ = parseStringValue("Bob", unit)
     val node = parseFieldAssignment("obj", "name", recv, val_, unit, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "field_assignment")
-    assertEqual(result.exprFieldName(), "name")
+    assertEqual((result as Expr).kind, "field_assignment")
+    assertEqual((result as Expr).fieldName, "name")
 }
 
 // --- For loop ---
@@ -461,8 +461,8 @@ test("convert ParseFor") {
     val body = parseLongValue(1, unit)
     val node = parseFor(["item"], iter, unit, unit, body, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "for_loop")
-    val vars = result.exprForVars()
+    assertEqual((result as Expr).kind, "for_loop")
+    val vars = (result as Expr).forVars
     assertEqual(vars.size(), 1)
     assertEqual(vars[1], "item")
 }
@@ -475,13 +475,13 @@ test("convert ParseWeave") {
     val template = parseWeavePlaceholder(unit)
     val node = parseWeave(valNode, template, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "block")
-    val body = result.exprBlockBody()
+    assertEqual((result as Expr).kind, "block")
+    val body = (result as Expr).blockBody
     assertEqual(body.size(), 2)
     // First should be name_declaration (temp var)
-    assertEqual(exprKind(body[1]), "name_declaration")
+    assertEqual((body[1] as Expr).kind, "name_declaration")
     // Second should be the placeholder resolved to variable_access
-    assertEqual(exprKind(body[2]), "variable_access")
+    assertEqual((body[2] as Expr).kind, "variable_access")
 }
 
 // --- Effect definition ---
@@ -492,10 +492,10 @@ test("convert ParseEffectDefinition") {
     val retType = typeNameRef("", "", "unit", unit)
     val node = parseEffectDefinition(false, "log", [], [arg], retType, unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "effect_definition")
-    assertEqual(result.exprEffectName(), "log")
-    assertEqual(result.exprEffectModuleName(), "test")
-    assertEqual(result.exprEffectPackageName(), "main")
+    assertEqual((result as Expr).kind, "effect_definition")
+    assertEqual((result as Expr).effectName, "log")
+    assertEqual((result as Expr).effectModuleName, "test")
+    assertEqual((result as Expr).effectPackageName, "main")
 
     // Should register the effect in the symbol table
     val sym = ctGetLocalSymbol(ctx.tables, "log")
@@ -517,8 +517,8 @@ test("convert ParseHandle") {
     val hc = newParseHandleCase("log", ["msg"], caseBody, unit)
     val node = parseHandle(bodyNode, [hc], unit)
     val result: any = convert(node, ctx.pkg, ctx.tables)
-    assertEqual(result.exprKind(), "handle")
-    val cases = result.exprHandleCases()
+    assertEqual((result as Expr).kind, "handle")
+    val cases = (result as Expr).handleCases
     assertEqual(cases.size(), 1)
 }
 

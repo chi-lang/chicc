@@ -1,5 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import chicc/types { newTypeId, typeIdToString, anyTypeId, intTypeId, stringTypeId, tInt, tString, tUnit, tBool, tAny, primitiveType, functionType, recordType, sumType, arrayType, variableType }
+import chicc/types { Type, newTypeId, typeIdToString, anyTypeId, intTypeId, stringTypeId, tInt, tString, tUnit, tBool, tAny, primitiveType, functionType, recordType, sumType, arrayType, variableType }
+import std/lang.array { size }
 
 test("newTypeId") {
     val id = newTypeId("std", "lang.int", "int")
@@ -22,38 +23,38 @@ test("typeIdEquals") {
 }
 
 test("primitiveType") {
-    assertTrue(tInt.isPrimitive())
-    assertTrue(tString.isPrimitive())
-    assertEqual(tInt.typeTag(), "primitive")
+    assertTrue(tInt.tag == "primitive")
+    assertTrue(tString.tag == "primitive")
+    assertEqual(tInt.tag, "primitive")
 }
 
 test("functionType") {
     val ft = functionType([tInt, tString], [], 0)
-    assertTrue(ft.isFunction())
-    assertEqual(ft.typeTypesCount(), 2)
-    assertEqual(ft.typeDefaults(), 0)
+    assertTrue(ft.tag == "fn")
+    assertEqual(ft.types.size(), 2)
+    assertEqual(ft.defaults, 0)
 }
 
 test("recordType") {
     val r = recordType([], [{ name: "x", fieldType: tInt }], [])
-    assertTrue(r.isRecord())
-    assertEqual(r.typeFieldsCount(), 1)
+    assertTrue(r.tag == "record")
+    assertEqual(r.fields.size(), 1)
 }
 
 test("sumType") {
     val s = sumType([], tInt, tString, [])
-    assertTrue(s.isSum())
+    assertTrue(s.tag == "sum")
 }
 
 test("arrayType") {
     val a = arrayType(tInt, [])
-    assertTrue(a.isArray())
+    assertTrue(a.tag == "array")
 }
 
 test("variableType") {
     val v = variableType("T", 0)
-    assertTrue(v.isVariable())
-    assertEqual(v.typeName(), "T")
+    assertTrue(v.tag == "var")
+    assertEqual(v.name, "T")
 }
 
 summary()
