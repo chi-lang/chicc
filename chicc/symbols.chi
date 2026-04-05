@@ -1,5 +1,6 @@
 package chicc/symbols
 import std/lang { luaExpr, embedLua }
+import std/lang.map { emptyMap }
 import chicc/types { Type, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType }
 import chicc/parse_ast { TypeRef }
 
@@ -31,7 +32,7 @@ pub fn newFnSymbol(name: string, symType: any, isMut: bool): FnSymbol {
 type SymbolTable = { symbols: any }
 
 pub fn newSymbolTable(): SymbolTable {
-    val symbols: any = luaExpr("{}")
+    val symbols = emptyMap[string, Symbol]()
     { symbols: symbols }
 }
 
@@ -68,7 +69,7 @@ pub fn stHas(st: SymbolTable, name: string): bool {
 type FnSymbolTable = { parent: any, locals: any }
 
 pub fn newFnSymbolTable(parent: any): FnSymbolTable {
-    val locals: any = luaExpr("{}")
+    val locals = emptyMap[string, FnSymbol]()
     { parent: parent, locals: locals }
 }
 
@@ -107,7 +108,7 @@ pub fn fstRemove(fst: FnSymbolTable, name: string): unit {
 type TypeTable = { aliases: any, parentPkg: any }
 
 pub fn newTypeTable(parentPkg: any): TypeTable {
-    val aliases: any = luaExpr("{}")
+    val aliases = emptyMap[string, any]()
     { aliases: aliases, parentPkg: parentPkg }
 }
 
