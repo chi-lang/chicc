@@ -4,6 +4,7 @@ import chicc/token { Token, newToken, lookupKeyword, TK_INT, TK_FLOAT, TK_STRING
 import chicc/source { newSection }
 import chicc/util { newStringBuilder, append, toString }
 import std/lang { luaExpr }
+import std/lang.string { charCodeAt, byteSub, fromCharCode }
 
 type Lexer = {
     source: string,
@@ -22,7 +23,7 @@ pub fn newLexer(source: string): Lexer {
 // Peek at current character (returns byte value, 0 for EOF)
 pub fn lexPeek(lex: Lexer): int {
     if lex.pos > lex.length { return 0 }
-    luaExpr("string.byte(lex.source, lex.pos)")
+    lex.source.charCodeAt(lex.pos)
 }
 
 // Peek at character at offset from current position (0 is current)
@@ -30,7 +31,7 @@ pub fn lexPeekAt(lex: Lexer, offset: int): int {
     val p = lex.pos + offset
     if p > lex.length { return 0 }
     if p < 1 { return 0 }
-    luaExpr("string.byte(lex.source, p)")
+    lex.source.charCodeAt(p)
 }
 
 // Advance by one byte, tracking line and column
@@ -49,7 +50,7 @@ pub fn lexAdvance(lex: Lexer) {
 
 // Extract substring from source (byte positions, 1-based, inclusive)
 pub fn substringFrom(lex: Lexer, from: int, to: int): string {
-    luaExpr("lex.source:sub(from, to)")
+    lex.source.byteSub(from, to)
 }
 
 // --- Character classification helpers ---
@@ -391,22 +392,22 @@ pub fn readOperatorOrDelimiter(lex: Lexer) {
 // --- Helper: convert escape character code to the actual character string ---
 fn escapeChar(ch: int): string {
     if ch == 110 { // 'n'
-        luaExpr("'\\n'")
+        "\n"
     } else if ch == 114 { // 'r'
-        luaExpr("'\\r'")
+        "\r"
     } else if ch == 116 { // 't'
-        luaExpr("'\\t'")
+        "\t"
     } else if ch == 48 { // '0'
-        luaExpr("'\\0'")
+        "\0"
     } else if ch == 34 { // double quote
-        luaExpr("string.char(34)")
+        "\""
     } else if ch == 92 { // backslash
-        luaExpr("'\\\\'")
+        "\\"
     } else if ch == 36 { // dollar sign
-        luaExpr("string.char(36)")
+        "$"
     } else {
         // Unknown escape - return the backslash + char as-is
-        val c: string = luaExpr("string.char(ch)")
+        val c: string = fromCharCode(ch)
         val result: string = luaExpr("'\\\\' .. c")
         result
     }
@@ -419,7 +420,7 @@ fn readEscape(lex: Lexer): string {
     val ch = lexPeek(lex)
     if ch == 0 {
         // Backslash at end of string - just return backslash
-        return luaExpr("'\\\\'")
+        return "\\"
     }
     lexAdvance(lex) // consume the escape character
     escapeChar(ch)
@@ -460,7 +461,7 @@ fn readTextSegment(lex: Lexer, sb: { parts: array[string], length: int }) {
             val escaped = readEscape(lex)
             sb.append(escaped)
         } else {
-            val c: string = luaExpr("string.char(ch)")
+            val c: string = fromCharCode(ch)
             sb.append(c)
             lexAdvance(lex)
         }
@@ -494,7 +495,7 @@ pub fn lexReadString(lex: Lexer) {
                 val escaped = readEscape(lex)
                 sb.append(escaped)
             } else {
-                val c: string = luaExpr("string.char(ch)")
+                val c: string = fromCharCode(ch)
                 sb.append(c)
                 lexAdvance(lex)
             }
