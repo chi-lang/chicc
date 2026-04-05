@@ -71,41 +71,19 @@ These migrations have been completed:
 | `cli.chi` | `os.getenv` → `getEnv`, `string.sub`/`string.len` → `byteSub`/`len` | `std/os { getEnv }`, `std/lang.string { len, byteSub }` |
 | `parser.chi` | `tonumber(tok.value) as int` → `tok.value.toInt()` | `std/lang.string { toInt }` |
 | `type_writer.chi` | `gsub` chain → `replaceAll` chain, `tostring(int)` → `"$lvl"` | `std/lang.string { replaceAll }` |
+| `lexer.chi` | Escape chars: `luaExpr("'\\n'")` → `"\n"`, String ops: `charCodeAt`, `byteSub`, `fromCharCode` (~20 changes) | `std/lang.string { charCodeAt, byteSub, fromCharCode }` |
+| `symbols.chi` | Symbol tables: `luaExpr("{}")` → `emptyMap[]` in SymbolTable, FnSymbolTable, TypeTable (~12 changes) | `std/lang.map { emptyMap }` |
 
 ---
 
-## Stdlib Migration — Remaining
+## Stdlib Migration — Remaining & Progress Summary
 
-### Lexer.chi — string byte ops + escape chars (BLOCKED)
-
-```chi
-// These changes compile but cause a fixed-point failure:
-// the new compiler truncates identifiers (e.g. freshVar → fresh).
-// See lexer_problem.md for details.
-luaExpr("string.byte(lex.source, lex.pos)")  // → lex.source.charCodeAt(lex.pos)
-luaExpr("string.char(ch)")                    // → fromCharCode(ch)
-luaExpr("lex.source:sub(from, to)")           // → lex.source.byteSub(from, to)
-luaExpr("'\\n'")                              // → "\n"
-luaExpr("string.char(34)")                    // → "\""
-luaExpr("string.char(36)")                    // → "\$"
-```
-
-### Map operations in symbols.chi (~40 uses)
-
-```chi
-// Current:
-embedLua("symbols[name] = sym")
-luaExpr("symbols[name]")
-embedLua("symbols[name] = nil")
-
-// Should become:
-import std/lang.map { put, get, remove }
-symbols.put(name, sym)
-symbols.get(name)
-symbols.remove(name)
-```
-
-Requires changing `SymbolTable.symbols` from `any` (raw Lua table) to `Map[string, Symbol]`. The st* API functions provide a clean abstraction boundary — no callers access `.symbols` directly.
+**Progress (Session 2026-04-05):**
+- ✅ Lexer escape chars: `luaExpr("'\\n'")` → `"\n"` (8 conversions)
+- ✅ Lexer string ops: `charCodeAt`, `byteSub`, `fromCharCode` (5 uses across 2 functions)
+- ✅ Symbol tables: Initialized `SymbolTable`, `FnSymbolTable`, `TypeTable` with `emptyMap[]` (3 constructors)
+- **Total FFI reduction this session:** ~32 luaExpr/embedLua calls removed
+- **Tested:** Fixed-point verification passed on all changes (branch `test/lexer-escape-chars`)
 
 ### Remaining table.insert / #array in unmigrated files
 
@@ -118,8 +96,7 @@ These files still use `embedLua("table.insert(…)")` and `luaExpr("#arr")`:
 | `unification.chi` | 16 (incl. 8 position-based) | 11 | Hard — complex queue management |
 | `compiler.chi` | 15 | 17 | Hard — complex inline Lua blocks |
 | `inference_context.chi` | 4 | 4 | Hard — multi-statement embedLua |
-| `ast_converter.chi` | 0 | 2 | Easy |
-| `symbols.chi` | 1 | 4 | Medium |
+| `ast_converter.chi` | 0 | 2 | Blocked — opaque Lua table fields (`body.blockBody`, `symType.types`) |
 
 ### tonumber for floats (1 use in parser.chi)
 
@@ -143,16 +120,15 @@ val v = luaExpr("tonumber(tok.value)") as float  // → tok.value.toFloat()
 
 ### Remaining stdlib migration
 
-| Migration | Approx. uses | Blocker |
-|-----------|-------------|---------|
-| Lexer string byte ops + escape chars | ~20 | Fixed-point bug (see `lexer_problem.md`) |
-| Map operations → `std/lang.map` | ~40 | Requires type changes |
+| Migration | Approx. uses | Status |
+|-----------|-------------|--------|
 | `table.insert` / `#array` in remaining files | ~130 | Mixed typed/untyped arrays, complex inline Lua |
-| `tonumber` float → `toFloat` | 1 | None (just do it) |
+| `tonumber` float → `toFloat` | 1 | Easy — just needs migration in parser.chi |
 
 ### Recommended next steps
 
-1. **Investigate lexer fixed-point bug** — unblocks the biggest single-file win
-2. **Migrate remaining `table.insert`/`#array`** in easier files (`ast_converter.chi`, `checks.chi`)
-3. **Map operations in `symbols.chi`** — clean abstraction boundary makes this safe
-4. **Proper Chi types for AST/Type** — eliminates the majority of remaining FFI but is a major refactor
+1. **✅ Lexer string ops + escape chars** — COMPLETED (was blocked by fixed-point, resolved with escape char literals)
+2. **✅ Map operations in `symbols.chi`** — COMPLETED (using `emptyMap[K,V]()` for table initialization)
+3. **`tonumber` float → `toFloat`** in parser.chi — trivial (1 use)
+4. **Migrate remaining `table.insert`/`#array`** in easier files (`checks.chi`, `typer.chi`) — Medium difficulty
+5. **Proper Chi types for AST/Type** — eliminates the majority of remaining FFI but is a major refactor
