@@ -4,6 +4,8 @@
 // stdlib loading, and dispatching to compile or run modes.
 package chicc/cli
 import std/lang { luaExpr, embedLua }
+import std/lang.string { len, byteSub }
+import std/os { getEnv }
 import std/io.file { readString, writeString }
 import chicc/compiler { newLuaCompilationEnv, newReplCompilationEnv, compileToLua, compileReplLine, formatMessage }
 
@@ -14,12 +16,12 @@ import chicc/compiler { newLuaCompilationEnv, newReplCompilationEnv, compileToLu
 // Load the standard library from CHI_HOME/lib/std.chim
 // Returns true if successfully loaded, false otherwise.
 pub fn loadStdlib(): bool {
-    val chiHome: any = luaExpr("os.getenv('CHI_HOME')")
+    val chiHome = getEnv("CHI_HOME")
     if chiHome == unit {
         println("WARN: CHI_HOME not set. Things might not work as expected!")
         return false
     }
-    val libPath = luaExpr("chiHome .. '/lib/std.chim'") as string
+    val libPath = "${chiHome}/lib/std.chim"
     val exists = luaExpr("io.open(libPath, 'r') ~= nil") as bool
     if exists {
         val errCode: any = luaExpr("chi_load_module(libPath)")
@@ -114,10 +116,9 @@ pub fn runFile(inputPath: string): int {
 
 // Helper to resolve output path from input path (replace .chi with .lua)
 fn defaultOutputPath(inputPath: string): string {
-    val len = luaExpr("string.len(inputPath)") as int
-    val suffix = luaExpr("string.sub(inputPath, -4)") as string
+    val suffix = inputPath.byteSub(inputPath.len() - 3, inputPath.len())
     if suffix == ".chi" {
-        val base = luaExpr("string.sub(inputPath, 1, -5)") as string
+        val base = inputPath.byteSub(1, inputPath.len() - 4)
         "$base.lua"
     } else {
         "$inputPath.lua"
@@ -126,9 +127,9 @@ fn defaultOutputPath(inputPath: string): string {
 
 // Helper to check file extension
 fn hasExtension(path: string, ext: string): bool {
-    val extLen = luaExpr("string.len(ext)") as int
+    val extLen = ext.len()
     val neg: int = 0 - extLen
-    val suffix = luaExpr("string.sub(path, neg)") as string
+    val suffix = path.byteSub(neg, path.len())
     suffix == ext
 }
 

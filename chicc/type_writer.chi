@@ -1,6 +1,7 @@
 // chicc/chicc/type_writer.chi
 package chicc/type_writer
 import std/lang { luaExpr, embedLua }
+import std/lang.string { replaceAll }
 import chicc/types { Type, TypeId, RecordField, newTypeId, primitiveType, functionType, recordType, sumType, sumCreate, arrayType, variableType, recursiveType, polyType, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, tAny, tUnit, tBool, tInt, tFloat, tString }
 import chicc/util { StringBuilder, newStringBuilder, append, toString }
 
@@ -8,7 +9,7 @@ embedLua("local __defining_type_id = nil")
 embedLua("local __typeref_cache = {}")
 
 fn escapeLua(s: string): string {
-    luaExpr("s:gsub('\\\\', '\\\\\\\\'):gsub('\"', '\\\\\"')")
+    s.replaceAll("\\", "\\\\").replaceAll("\"", "\\\"")
 }
 
 fn primitiveTag(t: Type): string {
@@ -159,7 +160,7 @@ fn writeLuaTypeImpl(sb: StringBuilder, t: Type) {
         sb.append(escapeLua(t.name))
         sb.append("\",level=")
         val lvl = t.level
-        val lvlStr = luaExpr("tostring(lvl)") as string
+        val lvlStr = "$lvl"
         sb.append(lvlStr)
         sb.append("}")
     } else if tag == "array" {
@@ -178,7 +179,7 @@ fn writeLuaTypeImpl(sb: StringBuilder, t: Type) {
     } else if tag == "poly" {
         sb.append("{tag=\"scheme\",level=")
         val lvl = t.level
-        val lvlStr = luaExpr("tostring(lvl)") as string
+        val lvlStr = "$lvl"
         sb.append(lvlStr)
         sb.append(",body=")
         val b = luaExpr("t.body") as Type

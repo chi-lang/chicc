@@ -1,6 +1,7 @@
 // chicc/chicc/emitter.chi
 package chicc/emitter
 import std/lang { luaExpr, embedLua }
+import std/lang.string { charCodeAt, byteSub, len }
 import chicc/util { newStringBuilder, StringBuilder, append, toString }
 import chicc/ast { Program, Expr, HandleCase, FnParam, ExprField }
 
@@ -69,11 +70,11 @@ pub fn normaliseEffectName(name: string): string {
 pub var emitExpr: (EmitterState, Expr) -> string = { st, expr -> "" }
 
 pub fn escapeLuaString(value: string): string {
-    val sLen = luaExpr("#value") as int
+    val sLen = value.len()
     var result = ""
     var i = 1
     while i <= sLen {
-        val ch = luaExpr("string.sub(value, i, i)") as string
+        val ch = value.byteSub(i, i)
         if ch == "\\" {
             result = "$result\\\\"
         } else if ch == "'" {
@@ -85,7 +86,7 @@ pub fn escapeLuaString(value: string): string {
         } else if ch == "\t" {
             result = "${result}\\t"
         } else {
-            val isNull = luaExpr("string.byte(value, i) == 0") as bool
+            val isNull = value.charCodeAt(i) == 0
             if isNull {
                 result = "${result}\\0"
             } else {
@@ -115,14 +116,14 @@ pub fn emitAtom(st: EmitterState, expr: Expr): string {
 
 pub fn emitInterpolatedString(st: EmitterState, expr: Expr): string {
     val parts = expr.parts
-    val partCount = luaExpr("#parts") as int
+    val partCount = (parts as array[any]).size()
     // Emit all parts first (they may allocate their own tmps)
     var partResults: array[string] = []
     var i = 1
     while i <= partCount {
         val part = parts[i] as Expr
         val partResult = emitExpr(st, part)
-        embedLua("table.insert(partResults, partResult)")
+        partResults.push(partResult)
         i = i + 1
     }
     // Now allocate the result name (after all parts)
