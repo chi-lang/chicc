@@ -21,3 +21,4 @@ Use `spec` program with markdown backend for specifications. Run `spec prime` in
 Specification is the 'WHAT' and 'WHY'. It also describes how the feature works. It does NOT describe how to build the feature.
 
 After you finish change implementation make sure to verify the self-hosted compiler fixed point before finishing.
+Remember to remove `.cache` folder so that recompilation can be trusted!
