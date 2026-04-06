@@ -1,6 +1,12 @@
-# Chi Language Gaps: luaExpr/embedLua Usage in the Compiler
+# Chi Language Gaps & FFI Removal Progress
 
-## Remaining Language-Level Gaps
+This document tracks language features Chi is missing and the effort to remove Lua FFI (`luaExpr`/`embedLua`) from the compiler codebase.
+
+---
+
+## Part 1: Fundamental Language Gaps
+
+These are language features that Chi doesn't yet support, forcing the compiler to use FFI.
 
 ### 1. Record field access/mutation (~60% of all uses)
 
@@ -60,9 +66,19 @@ Deeply Lua-specific runtime bootstrapping. Should stay as FFI.
 
 ---
 
-## Stdlib Migration — Done
+## Part 2: FFI Removal Progress
 
-These migrations have been completed:
+### Session History (2026-04-05)
+
+- ✅ Lexer escape chars: `luaExpr("'\\n'")` → `"\n"` (8 conversions)
+- ✅ Lexer string ops: `charCodeAt`, `byteSub`, `fromCharCode` (5 uses across 2 functions)
+- ✅ Symbol tables: Initialized `SymbolTable`, `FnSymbolTable`, `TypeTable` with `emptyMap[]` (3 constructors)
+- **Total FFI reduction:** ~32 luaExpr/embedLua calls removed
+- **Tested:** Fixed-point verification passed on all changes (branch `test/lexer-escape-chars`)
+
+### Completed Migrations
+
+These migrations have been fully completed:
 
 | File | What changed | Stdlib used |
 |------|-------------|-------------|
@@ -74,18 +90,9 @@ These migrations have been completed:
 | `lexer.chi` | Escape chars: `luaExpr("'\\n'")` → `"\n"`, String ops: `charCodeAt`, `byteSub`, `fromCharCode` (~20 changes) | `std/lang.string { charCodeAt, byteSub, fromCharCode }` |
 | `symbols.chi` | Symbol tables: `luaExpr("{}")` → `emptyMap[]` in SymbolTable, FnSymbolTable, TypeTable (~12 changes) | `std/lang.map { emptyMap }` |
 
----
+### Remaining Work: table.insert / #array migrations
 
-## Stdlib Migration — Remaining & Progress Summary
-
-**Progress (Session 2026-04-05):**
-- ✅ Lexer escape chars: `luaExpr("'\\n'")` → `"\n"` (8 conversions)
-- ✅ Lexer string ops: `charCodeAt`, `byteSub`, `fromCharCode` (5 uses across 2 functions)
-- ✅ Symbol tables: Initialized `SymbolTable`, `FnSymbolTable`, `TypeTable` with `emptyMap[]` (3 constructors)
-- **Total FFI reduction this session:** ~32 luaExpr/embedLua calls removed
-- **Tested:** Fixed-point verification passed on all changes (branch `test/lexer-escape-chars`)
-
-### Remaining table.insert / #array in unmigrated files
+**Status:** ~130 FFI calls remaining in 6 files, mixed difficulty
 
 These files still use `embedLua("table.insert(…)")` and `luaExpr("#arr")`:
 
@@ -98,37 +105,34 @@ These files still use `embedLua("table.insert(…)")` and `luaExpr("#arr")`:
 | `inference_context.chi` | 4 | 4 | Hard — multi-statement embedLua |
 | `ast_converter.chi` | 0 | 2 | Blocked — opaque Lua table fields (`body.blockBody`, `symType.types`) |
 
-### tonumber for floats (1 use in parser.chi)
+### Remaining Work: tonumber for floats
 
-```chi
-// Kept as FFI — toFloat was added to stdlib but not yet used
-val v = luaExpr("tonumber(tok.value)") as float  // → tok.value.toFloat()
-```
+**Status:** 1 easy use in `parser.chi` — `tok.value.toFloat()` is available in stdlib
 
 ---
 
-## Summary
+## Part 3: Recommended Path Forward
 
-### Remaining language-level gaps
+### Next priorities (in order)
 
-| Feature | Impact |
-|---------|--------|
-| Proper Chi types for AST/Type/ParseAst | ~60% of all FFI calls |
-| Error handling (`try`/`catch` or `Result`) | ~30 uses |
-| Reference equality operator/function | ~15 uses |
-| Empty array type inference | Minor ergonomic issue |
+1. **✅ DONE:** Lexer string ops + escape chars
+2. **✅ DONE:** Map operations in `symbols.chi`  
+3. **Easy:** `tonumber` float → `toFloat` in parser.chi (1 use)
+4. **Medium:** Migrate remaining `table.insert`/`#array` in easier files (`checks.chi`, `typer.chi`)
+5. **Hard:** Migrate complex inline Lua in `unification.chi`, `compiler.chi`, `inference_context.chi`
+6. **Blocked:** `ast_converter.chi` needs opaque Lua table fields resolved
+7. **Fundamental refactor:** Proper Chi types for AST/Type (eliminates ~60% of remaining FFI)
 
-### Remaining stdlib migration
+---
 
-| Migration | Approx. uses | Status |
-|-----------|-------------|--------|
-| `table.insert` / `#array` in remaining files | ~130 | Mixed typed/untyped arrays, complex inline Lua |
-| `tonumber` float → `toFloat` | 1 | Easy — just needs migration in parser.chi |
+## Summary: Current State
 
-### Recommended next steps
+| Category | Impact | Status |
+|----------|--------|--------|
+| **Proper Chi types for AST/Type/ParseAst** | ~60% of all FFI calls | Language feature needed |
+| **Error handling** (`try`/`catch` or `Result`) | ~30 uses | Language feature needed |
+| **Reference equality** operator/function | ~15 uses | Language feature needed |
+| **table.insert / #array migrations** | ~130 uses | Mixed difficulty, in progress |
+| **tonumber float → toFloat** | 1 use | Easy, not started |
 
-1. **✅ Lexer string ops + escape chars** — COMPLETED (was blocked by fixed-point, resolved with escape char literals)
-2. **✅ Map operations in `symbols.chi`** — COMPLETED (using `emptyMap[K,V]()` for table initialization)
-3. **`tonumber` float → `toFloat`** in parser.chi — trivial (1 use)
-4. **Migrate remaining `table.insert`/`#array`** in easier files (`checks.chi`, `typer.chi`) — Medium difficulty
-5. **Proper Chi types for AST/Type** — eliminates the majority of remaining FFI but is a major refactor
+**Total FFI calls removed to date:** ~32 (session 2026-04-05)
