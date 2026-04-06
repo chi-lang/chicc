@@ -243,7 +243,49 @@ if loader then loader() end
 
 - **Issue discovered:** 2026-04-06 (make test-lexer branch)
 - **Root cause identified:** __P__ initialization timing in compileModules
-- **Status:** Awaiting implementation
+- **Option 4 attempted:** Pre-initialize __P__ in __compile_modules before loader()
+- **Option 4 result:** UNSUCCESSFUL - error persists
+
+### Why Option 4 Failed
+
+Testing showed the error occurs even when:
+1. __P__ is pre-initialized before loader() 
+2. Module-level embedLua in messages.chi is disabled
+3. run_chicc.sh is used instead of bootstrap compiler
+
+This indicates the problem is NOT the initial __P__ table creation, but rather:
+- One of the OTHER modules with module-level embedLua (inference_context, emitter, unification, compiler, type_writer) is trying to access cross-module __P_ references
+- These references expect __P_ tables to be fully populated (with symbols) BEFORE the embedLua code runs
+- Serial module loading + serial embedLua execution violates this assumption
+- Multiple modules have circular or interdependent embedLua code that references symbols from OTHER modules that haven't been initialized yet
+
+### Architectural Issue
+
+The core problem: **compileModules is incompatible with the current design of embedLua usage in chicc modules**.
+
+- `__compile_modules` loads modules serially: m1(), m2(), m3(), ...
+- Each module's embedLua executes immediately when its loader() runs
+- But embedLua code in later modules may reference symbols in __P_ of EARLIER modules that haven't been fully initialized yet
+- The test for "is __P_ initialized" needs to check not just that __P_ exists, but that __P_._package is fully populated with all exported symbols
+
+### Real Solution Required: Option 2
+
+Need to modify the **compiler emitter** to delay embedLua execution until after all module symbol exports are registered:
+
+```lua
+-- Instead of: embedLua code runs at module load time
+-- Do this: defer embedLua until end of all modules
+function m1() ... __S_.symbol = ... end; m1()
+-- Register all exports first, then:
+executeAllPendingEmbedLua()
+```
+
+This requires changes to `chicc/emitter.chi` to generate module initialization code that:
+1. Loads modules sequentially
+2. Registers ALL __S_ exports for all modules
+3. THEN executes any module-level embedLua that depends on cross-module references
+
+- **Status:** Awaiting Option 2 implementation (requires compiler changes)
 
 ---
 
