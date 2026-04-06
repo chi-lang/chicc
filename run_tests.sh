@@ -4,10 +4,13 @@
 # If no arguments given, runs all tests/test_*.chi files.
 #
 # How it works:
-#   1. Ensures chicc modules are cached (builds if needed)
+#   1. Ensures chicc modules are cached using bootstrap compiler
 #   2. For each test file, prepends a package declaration, then uses
 #      compileModules to compile the test together with all chicc modules
-#   3. Runs the compiled test via dofile
+#   3. Runs the compiled test via the bootstrap compiler
+#
+# Environment variables:
+#   CHI_BOOTSTRAP  Bootstrap compiler to use (default: chi)
 
 set -euo pipefail
 
@@ -17,7 +20,7 @@ cd "$SCRIPT_DIR"
 CHI_HOME="${CHI_HOME:-$HOME/.chi}"
 # The test runner requires compileModules which is only in the bootstrap compiler.
 # Override with CHI_BOOTSTRAP env var if the bootstrap compiler is elsewhere.
-CHI_BOOTSTRAP="${CHI_BOOTSTRAP:-/home/marad/dev/chi/compiler/chi}"
+CHI_BOOTSTRAP="${CHI_BOOTSTRAP:-chi}"
 CACHE_DIR=".cache"
 
 # All chicc source modules (order matches compile.chi)
@@ -90,7 +93,14 @@ for test_file in "${TEST_FILES[@]}"; do
     # Prepend a temporary package declaration so compileModules can handle it
     { echo "package chicc/test_runner"; cat "$test_file"; } > /tmp/_chicc_test_tmp.chi
 
-    if OUTPUT=$(timeout 600 "$CHI_BOOTSTRAP" "$RUNNER" 2>&1); then
+    # Use timeout if available (Linux), otherwise run directly (macOS)
+    if command -v timeout &> /dev/null; then
+        TIMEOUT_CMD="timeout 600"
+    else
+        TIMEOUT_CMD=""
+    fi
+
+    if OUTPUT=$($TIMEOUT_CMD "$CHI_BOOTSTRAP" "$RUNNER" 2>&1); then
         echo "PASS"
         PASSED=$((PASSED + 1))
     else
