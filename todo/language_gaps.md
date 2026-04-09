@@ -85,6 +85,19 @@ Deeply Lua-specific runtime bootstrapping. Should stay as FFI.
 - ✅ Improved `fixed_point_verification.sh` (Lua syntax validation, backup/restore)
 - **Tested:** 44/44 chicc tests pass, fixed-point verified, stdlib self-compilation verified
 
+### Session History (2026-04-09, continued)
+
+- ✅ Completed full `luaExpr` removal from `lexer.chi` (6 remaining calls):
+  - `luaExpr("string.byte(lex.source, scanPos)")` → `lex.source.charCodeAt(scanPos)`
+  - `luaExpr("'\\\\' .. c")` → `"\\" + c`
+  - `luaExpr("string.char(36) .. '{'")` → `"\${"`
+  - `luaExpr("string.char(36)")` → `"\$"` (two locations)
+  - `luaExpr("#source")` → `source.byteLen()` (required new stdlib function)
+- ✅ Added `string.byteLen` to `std/lang.string.chi` — wraps Lua `#s` (byte count, distinct from `len` which uses `utf8.len`)
+- ✅ Discovered `len` vs `byteLen` distinction: `len()` = Unicode codepoint count, `byteLen()` = byte count. Lexer needs byte-level operations.
+- **Total FFI reduction this session:** 6 luaExpr calls removed, lexer.chi now FFI-free
+- **Tested:** 44/44 chicc tests pass, fixed-point verified
+
 ### Completed Migrations
 
 These migrations have been fully completed:
@@ -96,7 +109,7 @@ These migrations have been fully completed:
 | `cli.chi` | `os.getenv` → `getEnv`, `string.sub`/`string.len` → `byteSub`/`len` | `std/os { getEnv }`, `std/lang.string { len, byteSub }` |
 | `parser.chi` | `tonumber(tok.value) as int` → `tok.value.toInt()` | `std/lang.string { toInt }` |
 | `type_writer.chi` | `gsub` chain → `replaceAll` chain, `tostring(int)` → `"$lvl"` | `std/lang.string { replaceAll }` |
-| `lexer.chi` | Escape chars: `luaExpr("'\\n'")` → `"\n"`, String ops: `charCodeAt`, `byteSub`, `fromCharCode` (~20 changes) | `std/lang.string { charCodeAt, byteSub, fromCharCode }` |
+| `lexer.chi` | **FFI-free.** Escape chars, string ops (`charCodeAt`, `byteSub`, `fromCharCode`, `byteLen`), string concat (`+`), dollar escapes (`"\$"`, `"\${"`) — all `luaExpr` removed | `std/lang.string { charCodeAt, byteSub, fromCharCode, byteLen }` |
 | `symbols.chi` | Symbol tables: `luaExpr("{}")` → `emptyMap[]` in SymbolTable, FnSymbolTable, TypeTable (~12 changes) | `std/lang.map { emptyMap }` |
 | `messages.chi` | Re-enabled `_G.__index` metatable (was disabled during compileModules debugging) | N/A |
 | `emitter.chi` | Reverted deferred embedLua mechanism — no longer needed after stdlib compileModules fix | N/A |
@@ -140,7 +153,7 @@ These files still use `embedLua("table.insert(…)")` and `luaExpr("#arr")`:
 
 Available for future migrations:
 - `std/lang.map`: `remove[K,V](m, key)`, `has[K,V](m, key): bool`
-- `std/lang.string`: `toFloat(s): float`
+- `std/lang.string`: `toFloat(s): float`, `byteLen(s): int` (byte count via Lua `#s`)
 
 ---
 
@@ -154,6 +167,7 @@ Available for future migrations:
 | **table.insert / #array migrations** | ~130 uses | Mixed difficulty, in progress |
 | **tonumber float → toFloat** | 1 use | Easy, not started |
 
-**Total FFI calls removed to date:** ~32 (session 2026-04-05)
-**Stdlib additions:** map.remove, map.has, string.toFloat (session 2026-04-09)
+**Total FFI calls removed to date:** ~38 (32 from session 2026-04-05, 6 from session 2026-04-09)
+**Stdlib additions:** map.remove, map.has, string.toFloat, string.byteLen
 **Infrastructure fixes:** compileModules rewritten with toposort + cache (session 2026-04-09)
+**Fully FFI-free files:** `lexer.chi`

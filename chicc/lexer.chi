@@ -3,8 +3,7 @@ package chicc/lexer
 import chicc/token { Token, newToken, lookupKeyword, TK_INT, TK_FLOAT, TK_STRING, TK_INTERP_START, TK_INTERP_TEXT, TK_INTERP_EXPR_START, TK_INTERP_EXPR_END, TK_INTERP_END, TK_ID, TK_PLUS, TK_MINUS, TK_STAR, TK_SLASH, TK_PERCENT, TK_EQ, TK_EQEQ, TK_NEQ, TK_LT, TK_LTEQ, TK_GT, TK_GTEQ, TK_NOT, TK_AND, TK_OR, TK_AMP, TK_PIPE, TK_LSHIFT, TK_RSHIFT, TK_ARROW, TK_WEAVE, TK_UNDERSCORE, TK_DOT, TK_COMMA, TK_COLON, TK_PLUSEQ, TK_MINUSEQ, TK_STAREQ, TK_SLASHEQ, TK_LPAREN, TK_RPAREN, TK_LBRACE, TK_RBRACE, TK_LBRACKET, TK_RBRACKET, TK_NEWLINE, TK_EOF }
 import chicc/source { newSection }
 import chicc/util { newStringBuilder, append, toString }
-import std/lang { luaExpr }
-import std/lang.string { charCodeAt, byteSub, fromCharCode }
+import std/lang.string { charCodeAt, byteSub, fromCharCode, byteLen }
 
 type Lexer = {
     source: string,
@@ -16,7 +15,7 @@ type Lexer = {
 }
 
 pub fn newLexer(source: string): Lexer {
-    val len: int = luaExpr("#source")
+    val len: int = source.byteLen()
     { source: source, pos: 1, line: 1, col: 1, length: len, tokens: [] }
 }
 
@@ -408,7 +407,7 @@ fn escapeChar(ch: int): string {
     } else {
         // Unknown escape - return the backslash + char as-is
         val c: string = fromCharCode(ch)
-        val result: string = luaExpr("'\\\\' .. c")
+        val result: string = "\\" + c
         result
     }
 }
@@ -430,7 +429,7 @@ fn readEscape(lex: Lexer): string {
 fn stringHasDollar(lex: Lexer): bool {
     var scanPos = lex.pos
     while scanPos <= lex.length {
-        val ch: int = luaExpr("string.byte(lex.source, scanPos)")
+        val ch: int = lex.source.charCodeAt(scanPos)
         if ch == 34 { // '"' - end of string
             return false
         }
@@ -523,8 +522,7 @@ pub fn lexReadString(lex: Lexer) {
                 if nextCh == 123 { // '{' - expression interpolation
                     lexAdvance(lex) // consume '{'
                     val exprStartSec = newSection(dollarLine, dollarCol, lex.line, lex.col - 1)
-                    val exprStartStr: string = luaExpr("string.char(36) .. '{'")
-                    lex.tokens.push(newToken(TK_INTERP_EXPR_START, exprStartStr, exprStartSec))
+                    val exprStartStr: string = "\${"                    lex.tokens.push(newToken(TK_INTERP_EXPR_START, exprStartStr, exprStartSec))
                     // Lex expression tokens until matching '}'
                     readExpressionTokensImpl(lex)
                     // Consume closing '}'
@@ -544,7 +542,7 @@ pub fn lexReadString(lex: Lexer) {
                         lexAdvance(lex)
                     }
                     val idText = substringFrom(lex, idStartPos, lex.pos - 1)
-                    val dollarStr: string = luaExpr("string.char(36)")
+                    val dollarStr: string = "\$"
                     val exprStartSec = newSection(dollarLine, dollarCol, dollarLine, dollarCol)
                     lex.tokens.push(newToken(TK_INTERP_EXPR_START, dollarStr, exprStartSec))
                     val idSec = newSection(idStartLine, idStartCol, lex.line, lex.col - 1)
@@ -554,7 +552,7 @@ pub fn lexReadString(lex: Lexer) {
                 } else {
                     // dollar not followed by brace or letter - treat as literal
                     // Already consumed the dollar, so push it as text
-                    val dollarText: string = luaExpr("string.char(36)")
+                    val dollarText: string = "\$"
                     val textSec = newSection(dollarLine, dollarCol, dollarLine, dollarCol)
                     lex.tokens.push(newToken(TK_INTERP_TEXT, dollarText, textSec))
                 }
