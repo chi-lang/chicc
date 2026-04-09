@@ -12,12 +12,11 @@ type EmitterState = {
     nextTmpId: int,
     nextLoopId: int,
     currentLoopId: int,
-    program: Program,
-    deferredEmbedLua: array[string]
+    program: Program
 }
 
 pub fn newState(prog: Program): EmitterState {
-    { sb: newStringBuilder(), inFunction: false, functionDepth: 0, nextTmpId: 0, nextLoopId: 0, currentLoopId: 0, program: prog, deferredEmbedLua: [] }
+    { sb: newStringBuilder(), inFunction: false, functionDepth: 0, nextTmpId: 0, nextLoopId: 0, currentLoopId: 0, program: prog }
 }
 
 pub fn emit(st: EmitterState, code: string) {
@@ -299,9 +298,7 @@ pub fn emitFnCall(st: EmitterState, expr: Expr): string {
                     val codeParam = expr.callParams[1] as Expr
                     val luaCode = codeParam.atomValue
                     val cleanCode: string = luaCode.replace("\n", ";")
-                    // Defer all embedLua until after all module symbols are registered
-                    // This allows embedLua to safely access __P_ from all loaded modules
-                    st.deferredEmbedLua.push(cleanCode)
+                    emit(st, "$cleanCode;")
                     return "nil"
                 } else if cName == "luaExpr" {
                     val codeParam = expr.callParams[1] as Expr
@@ -946,15 +943,6 @@ pub fn emitProgram(prog: Program, emitModule: bool): string {
         val expr = progExprs[ei] as Expr
         val result = emitExpr(st, expr)
         if ei == exprCount {
-            // Before returning, emit deferred module-level embedLua
-            // (after all symbols are registered in __S_)
-            val deferredCount = st.deferredEmbedLua.size()
-            var di = 1
-            while di <= deferredCount {
-                emit(st, st.deferredEmbedLua[di])
-                di = di + 1
-            }
-
             if emitModule {
                 emit(st, "return __P_")
             } else {
