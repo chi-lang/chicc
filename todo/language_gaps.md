@@ -76,6 +76,15 @@ Deeply Lua-specific runtime bootstrapping. Should stay as FFI.
 - **Total FFI reduction:** ~32 luaExpr/embedLua calls removed
 - **Tested:** Fixed-point verification passed on all changes (branch `test/lexer-escape-chars`)
 
+### Session History (2026-04-06 — 2026-04-09)
+
+- ✅ Fixed `compileModules` in stdlib (`std/lang.chi`): rewrote as IIFE `luaExpr` with topological sort, per-package cache, `$` escape fix
+- ✅ Added `map.remove[K,V]`, `map.has[K,V]` to `std/lang.map.chi`
+- ✅ Added `string.toFloat` to `std/lang.string.chi`
+- ✅ Reverted deferred embedLua in emitter, re-enabled `_G.__index` metatable in `messages.chi`
+- ✅ Improved `fixed_point_verification.sh` (Lua syntax validation, backup/restore)
+- **Tested:** 44/44 chicc tests pass, fixed-point verified, stdlib self-compilation verified
+
 ### Completed Migrations
 
 These migrations have been fully completed:
@@ -89,6 +98,8 @@ These migrations have been fully completed:
 | `type_writer.chi` | `gsub` chain → `replaceAll` chain, `tostring(int)` → `"$lvl"` | `std/lang.string { replaceAll }` |
 | `lexer.chi` | Escape chars: `luaExpr("'\\n'")` → `"\n"`, String ops: `charCodeAt`, `byteSub`, `fromCharCode` (~20 changes) | `std/lang.string { charCodeAt, byteSub, fromCharCode }` |
 | `symbols.chi` | Symbol tables: `luaExpr("{}")` → `emptyMap[]` in SymbolTable, FnSymbolTable, TypeTable (~12 changes) | `std/lang.map { emptyMap }` |
+| `messages.chi` | Re-enabled `_G.__index` metatable (was disabled during compileModules debugging) | N/A |
+| `emitter.chi` | Reverted deferred embedLua mechanism — no longer needed after stdlib compileModules fix | N/A |
 
 ### Remaining Work: table.insert / #array migrations
 
@@ -107,7 +118,7 @@ These files still use `embedLua("table.insert(…)")` and `luaExpr("#arr")`:
 
 ### Remaining Work: tonumber for floats
 
-**Status:** 1 easy use in `parser.chi` — `tok.value.toFloat()` is available in stdlib
+**Status:** 1 easy use in `parser.chi` — `tok.value.toFloat()` now available in stdlib (added 2026-04-09), migration not yet done
 
 ---
 
@@ -125,6 +136,14 @@ These files still use `embedLua("table.insert(…)")` and `luaExpr("#arr")`:
 
 ---
 
+### New stdlib additions (2026-04-09)
+
+Available for future migrations:
+- `std/lang.map`: `remove[K,V](m, key)`, `has[K,V](m, key): bool`
+- `std/lang.string`: `toFloat(s): float`
+
+---
+
 ## Summary: Current State
 
 | Category | Impact | Status |
@@ -136,3 +155,5 @@ These files still use `embedLua("table.insert(…)")` and `luaExpr("#arr")`:
 | **tonumber float → toFloat** | 1 use | Easy, not started |
 
 **Total FFI calls removed to date:** ~32 (session 2026-04-05)
+**Stdlib additions:** map.remove, map.has, string.toFloat (session 2026-04-09)
+**Infrastructure fixes:** compileModules rewritten with toposort + cache (session 2026-04-09)
