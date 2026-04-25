@@ -2,6 +2,7 @@
 package chicc/unification
 import std/lang { luaExpr, embedLua }
 import chicc/types { Type, TypeId, RecordField, tAny, tUnit, functionType, recordType, sumCreate, arrayType, recursiveType, polyType, typeIdEquals }
+import std/lang.array { size, push, insertAt }
 import chicc/messages { Message, typeMismatch, notAFunction, functionArityError, infiniteType }
 import chicc/source { Section, toCodePoint }
 
@@ -153,41 +154,41 @@ pub fn ufResolve(uf: any, t: Type): Type {
         result = t
     } else if tag == "fn" {
         val types = t.types
-        val count = luaExpr("#types") as int
-        val newTypes = luaExpr("{}") as array[any]
+        val count = types.size()
+        val newTypes: array[Type] = []
         var changed = false
         var i = 1
         while i <= count {
-            val child = luaExpr("types[i]") as Type
+            val child = types[i]
             val resolved = ufResolve(uf, child)
-            embedLua("table.insert(newTypes, resolved)")
+            newTypes.push(resolved)
             if luaExpr("resolved ~= child") as bool { changed = true }
             i = i + 1
         }
         if changed {
-            result = functionType(newTypes as array[Type], t.typeParams, t.defaults)
+            result = functionType(newTypes, t.typeParams, t.defaults)
         }
     } else if tag == "record" {
         val fields = t.fields
-        val count = luaExpr("#fields") as int
-        val newFields = luaExpr("{}") as array[any]
+        val count = fields.size()
+        val newFields: array[RecordField] = []
         var changed = false
         var i = 1
         while i <= count {
-            val f = luaExpr("fields[i]") as RecordField
+            val f = fields[i]
             val ft = luaExpr("f.fieldType") as Type
             val resolved = ufResolve(uf, ft)
             if luaExpr("resolved ~= ft") as bool {
                 changed = true
                 val newField = { name: f.name, fieldType: resolved }
-                embedLua("table.insert(newFields, newField)")
+                newFields.push(newField)
             } else {
-                embedLua("table.insert(newFields, f)")
+                newFields.push(f)
             }
             i = i + 1
         }
         if changed {
-            result = recordType(t.ids, newFields as array[RecordField], t.typeParams)
+            result = recordType(t.ids, newFields, t.typeParams)
         }
     } else if tag == "sum" {
         val lhs = luaExpr("t.lhs") as Type
@@ -243,33 +244,33 @@ fn ufResolveConstraint(uf: any, c: Constraint): Constraint {
 
 // Helper to copy history and append a constraint
 fn copyHistoryWith(history: array[any], constraint: any): array[any] {
-    val newHistory: array[any] = luaExpr("{}")
-    val hLen = luaExpr("#history") as int
+    val newHistory: array[any] = []
+    val hLen = history.size()
     var hi = 1
     while hi <= hLen {
-        val hItem = luaExpr("history[hi]") as any
-        embedLua("table.insert(newHistory, hItem)")
+        val hItem = history[hi]
+        newHistory.push(hItem)
         hi = hi + 1
     }
-    embedLua("table.insert(newHistory, constraint)")
+    newHistory.push(constraint)
     newHistory
 }
 
 // Unify constraints using a pre-existing union-find
 pub fn unifyWithUf(constraints: array[any], uf: any) {
-    val queue: array[any] = luaExpr("{}") as array[any]
-    val initialCount = luaExpr("#constraints") as int
+    val queue: array[any] = []
+    val initialCount = constraints.size()
     var i = 1
     while i <= initialCount {
-        val c = luaExpr("constraints[i]") as any
-        embedLua("table.insert(queue, c)")
+        val c = constraints[i]
+        queue.push(c)
         i = i + 1
     }
 
     var pos = 1
 
-    while pos <= luaExpr("#queue") as int {
-        val rawConstraint = luaExpr("queue[pos]") as Constraint
+    while pos <= queue.size() {
+        val rawConstraint = queue[pos] as Constraint
         pos = pos + 1
         // Resolve both sides through the union-find
         val constraint = ufResolveConstraint(uf, rawConstraint)
@@ -293,12 +294,12 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             val unfolded = expected.unfoldRecursive()
             val newHistory = copyHistoryWith(history, constraint)
             val nc = newConstraint(unfolded, actual, section, newHistory)
-            embedLua("table.insert(queue, pos, nc)")
+            queue.insertAt(pos, nc)
         } else if actual.tag == "recursive" {
             val unfolded = actual.unfoldRecursive()
             val newHistory = copyHistoryWith(history, constraint)
             val nc = newConstraint(expected, unfolded, section, newHistory)
-            embedLua("table.insert(queue, pos, nc)")
+            queue.insertAt(pos, nc)
         } else if expected.tag == "var" {
             if expected.occursInExcludingSumBranches(actual) {
                 val cp = sectionToCodePoint(section)
@@ -318,8 +319,8 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
         } else if expected.tag == "fn" && actual.tag == "fn" {
             val expTypes = expected.types
             val actTypes = actual.types
-            val expLen = luaExpr("#expTypes") as int
-            val actLen = luaExpr("#actTypes") as int
+            val expLen = expTypes.size()
+            val actLen = actTypes.size()
             if expLen != actLen {
                 val cp = sectionToCodePoint(section)
                 throwMessage(functionArityError(expLen - 1, actLen - 1, cp))
@@ -327,32 +328,32 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             val lastIndex = expLen
             var fi = 1
             while fi <= expLen {
-                val expParam = luaExpr("expTypes[fi]") as Type
-                val actParam = luaExpr("actTypes[fi]") as Type
+                val expParam = expTypes[fi]
+                val actParam = actTypes[fi]
                 if fi == lastIndex && expParam.typeEquals(tUnit) && actParam.tag != "var" {
                     // void return accepts anything - skip
                 } else {
                     val newHistory = copyHistoryWith(history, constraint)
                     val nc = newConstraint(expParam, actParam, section, newHistory)
-                    embedLua("table.insert(queue, pos, nc)")
+                    queue.insertAt(pos, nc)
                 }
                 fi = fi + 1
             }
         } else if expected.tag == "record" && actual.tag == "record" {
             val expFields = expected.fields
             val actFields = actual.fields
-            val expFCount = luaExpr("#expFields") as int
-            val actFCount = luaExpr("#actFields") as int
+            val expFCount = expFields.size()
+            val actFCount = actFields.size()
             var fi = 1
             while fi <= expFCount {
-                val expField = luaExpr("expFields[fi]") as RecordField
+                val expField = expFields[fi]
                 val expFieldName = expField.name
                 val expFieldType = luaExpr("expField.fieldType") as Type
                 var found = false
                 var actFieldType: Type = tUnit
                 var aj = 1
                 while aj <= actFCount {
-                    val af = luaExpr("actFields[aj]") as RecordField
+                    val af = actFields[aj]
                     if af.name == expFieldName {
                         found = true
                         actFieldType = luaExpr("af.fieldType") as Type
@@ -365,7 +366,7 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
                 }
                 val newHistory = copyHistoryWith(history, constraint)
                 val nc = newConstraint(expFieldType, actFieldType, section, newHistory)
-                embedLua("table.insert(queue, pos, nc)")
+                queue.insertAt(pos, nc)
                 fi = fi + 1
             }
         } else if expected.tag == "array" && actual.tag == "array" {
@@ -380,8 +381,8 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             val expLhs = luaExpr("expected.lhs") as Type
             val newHistory = copyHistoryWith(history, constraint)
             val rhsConstraint = newConstraint(expRhs, actual, section, newHistory)
-            val rhsConstraints: array[any] = luaExpr("{}")
-            embedLua("table.insert(rhsConstraints, rhsConstraint)")
+            val rhsConstraints: array[any] = []
+            rhsConstraints.push(rhsConstraint)
 
             // Use pcall to try rhs first
             embedLua("local __pcall_ok, __pcall_result = pcall(__P_.unify, rhsConstraints)")
@@ -389,10 +390,10 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             if pcallOk {
                 // Merge partial solutions into our union-find
                 val partialSolutions: array[any] = luaExpr("__pcall_result")
-                val psLen = luaExpr("#partialSolutions") as int
+                val psLen = partialSolutions.size()
                 var si = 1
                 while si <= psLen {
-                    val psEntry = luaExpr("partialSolutions[si]") as any
+                    val psEntry = partialSolutions[si]
                     val psVar = luaExpr("psEntry.variable") as Type
                     val psRepl = luaExpr("psEntry.replacement") as Type
                     ufBind(uf, psVar, psRepl)
@@ -401,7 +402,7 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             } else {
                 // rhs failed, try lhs
                 val lhsConstraint = newConstraint(expLhs, actual, section, newHistory)
-                embedLua("table.insert(queue, pos, lhsConstraint)")
+                queue.insertAt(pos, lhsConstraint)
             }
         } else if actual.tag == "sum" {
             val actLhs = actual.lhs
@@ -409,8 +410,8 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             val newHistory = copyHistoryWith(history, constraint)
             val nc1 = newConstraint(expected, actLhs, section, newHistory)
             val nc2 = newConstraint(expected, actRhs, section, newHistory)
-            embedLua("table.insert(queue, pos, nc1)")
-            embedLua("table.insert(queue, pos + 1, nc2)")
+            queue.insertAt(pos, nc1)
+            queue.insertAt(pos + 1, nc2)
         } else if expected.tag == "fn" && actual.tag != "fn" {
             val cp = sectionToCodePoint(section)
             throwMessage(notAFunction(cp))

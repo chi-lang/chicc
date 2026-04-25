@@ -1,6 +1,7 @@
 // chicc/chicc/typer.chi
 package chicc/typer
 import std/lang { luaExpr, embedLua }
+import std/lang.array { size, push }
 import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tFloat, tString, tAny, sumCreate, recordType, arrayType, functionType, polyType, mapType, optionTypeId, intTypeId, floatTypeId, unfoldRecursive }
 import chicc/source { Section, toCodePoint }
 import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget, atomExpr }
@@ -24,26 +25,26 @@ fn typerErr(message: any, section: any) {
 
 fn sumRemoveType(sumT: any, toRemove: any): any {
     val allTypes = (sumT as Type).sumListTypes()
-    val count = luaExpr("#allTypes") as int
-    val filtered = luaExpr("{}") as any
+    val count = allTypes.size()
+    val filtered: array[any] = []
     var i = 1
     while i <= count {
-        val item = luaExpr("allTypes[i]") as Type
+        val item = allTypes[i] as Type
         if item.typeEquals(toRemove as Type) == false {
-            embedLua("table.insert(filtered, item)")
+            filtered.push(item)
         }
         i = i + 1
     }
-    val filteredCount = luaExpr("#filtered") as int
+    val filteredCount = filtered.size()
     if filteredCount == 0 {
         return tUnit
     }
-    val first = luaExpr("filtered[1]") as Type
+    val first = filtered[1] as Type
     var result: Type = first
     var j = 2
     while j <= filteredCount {
-        val next = luaExpr("filtered[j]") as Type
-        result = sumCreate(luaExpr("{}") as array[TypeId], result, next, luaExpr("{}") as array[string])
+        val next = filtered[j] as Type
+        result = sumCreate([] as array[TypeId], result, next, [] as array[string])
         j = j + 1
     }
     result
@@ -147,14 +148,14 @@ pub var typeTerm: (any, int, any) -> any = { term: any, level: int, constraints:
 
 // --- Main API ---
 
-pub fn typeTerms(terms: any, constraints: any, level: int): any {
+pub fn typeTerms(terms: any, constraints: any, level: int): array[any] {
     val count = luaExpr("#terms") as int
-    val results = luaExpr("{}") as any
+    val results: array[any] = []
     var i = 1
     while i <= count {
         val term = luaExpr("terms[i]") as any
         val t = typeTerm(term, level, constraints)
-        embedLua("table.insert(results, t)")
+        results.push(t)
         i = i + 1
     }
     results
@@ -186,39 +187,39 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
         // 3. create_record: build record type from field values
         val fields = luaExpr("term.recordFields") as any
         val fieldCount = luaExpr("#fields") as int
-        val newFields = luaExpr("{}") as any
+        val newFields: array[RecordField] = []
         var i = 1
         while i <= fieldCount {
             val f = luaExpr("fields[i]") as any
             val fName = luaExpr("f.name") as string
             val fValue = luaExpr("f.value") as any
             val fType = typeTerm(fValue, level, constraints)
-            val rf = luaExpr("{ name = fName, fieldType = fType }") as any
-            embedLua("table.insert(newFields, rf)")
+            val rf: RecordField = { name: fName, fieldType: fType as Type }
+            newFields.push(rf)
             i = i + 1
         }
-        recordType(luaExpr("{}") as array[TypeId], newFields as array[RecordField], luaExpr("{}") as array[string])
+        recordType([] as array[TypeId], newFields, [] as array[string])
     } else if kind == "create_array" {
         // 4. create_array: fresh elementType, constrain all values
         val elementType = icFreshVariable(level)
         val values = luaExpr("term.arrayValues") as any
         val valueTypes = typeTerms(values, constraints, level)
-        val vtCount = luaExpr("#valueTypes") as int
+        val vtCount = valueTypes.size()
         var i = 1
         while i <= vtCount {
-            val vt = luaExpr("valueTypes[i]") as any
+            val vt = valueTypes[i]
             val section = luaExpr("term.section") as any
             addConstraint(constraints, elementType, vt, section)
             i = i + 1
         }
-        arrayType(elementType as Type, luaExpr("{}") as array[string])
+        arrayType(elementType as Type, [] as array[string])
     } else if kind == "fn" {
         // 5. fn: process params, type body in new scope
         val fnResult: any = icWithNewLocalScope({
             val returnType = icFreshVariable(level)
             val params = luaExpr("term.parameters") as any
             val paramCount = luaExpr("#params") as int
-            val paramTypes = luaExpr("{}") as any
+            val paramTypes: array[Type] = []
             var i = 1
             while i <= paramCount {
                 val p = luaExpr("params[i]") as any
@@ -240,13 +241,13 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
                     }
                 }
                 icDefineLocalSymbol(pName, paramType)
-                embedLua("table.insert(paramTypes, paramType)")
+                paramTypes.push(paramType as Type)
                 i = i + 1
             }
             val body = luaExpr("term.body") as any
             val bodyType = typeTerm(body, level, constraints)
-            embedLua("table.insert(paramTypes, returnType)")
-            val fnType = functionType(paramTypes as array[Type], luaExpr("{}") as array[string], 0)
+            paramTypes.push(returnType as Type)
+            val fnType = functionType(paramTypes, [] as array[string], 0)
             val bodySection = luaExpr("body.section") as any
             addConstraint(constraints, returnType, bodyType, bodySection)
             fnType
@@ -260,7 +261,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
             tUnit
         } else {
             val types = typeTerms(bodyExprs, constraints, level + 1)
-            val lastType = luaExpr("types[#types]") as any
+            val lastType = types[types.size()]
             lastType
         }
     } else if kind == "fn_call" {
@@ -323,8 +324,8 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
         // Type all call params and build callType
         val callParams = luaExpr("term.callParams") as any
         val callParamTypes = typeTerms(callParams, constraints, level)
-        embedLua("table.insert(callParamTypes, fnCallResult)")
-        val callType = functionType(callParamTypes as array[Type], luaExpr("{}") as array[string], 0)
+        callParamTypes.push(fnCallResult as Type)
+        val callType = functionType(callParamTypes as array[Type], [] as array[string], 0)
         val termSection = luaExpr("term.section") as any
         addConstraint(constraints, definedFunctionType, callType, termSection)
         fnCallResult
@@ -371,33 +372,33 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
             val faResult = icFreshVariable(level)
             setExprDotTarget(term as Expr, fieldDotTarget(fieldName))
             // Create constraint: record({fieldName: faResult}) = receiverType
-            val rf = luaExpr("{ name = fieldName, fieldType = faResult }") as RecordField
-            val rfields = luaExpr("{}") as array[RecordField]
-            embedLua("table.insert(rfields, rf)")
-            val expectedRecType = recordType(luaExpr("{}") as array[TypeId], rfields, luaExpr("{}") as array[string])
+            val rf: RecordField = { name: fieldName, fieldType: faResult as Type }
+            val rfields: array[RecordField] = []
+            rfields.push(rf)
+            val expectedRecType = recordType([] as array[TypeId], rfields, [] as array[string])
             addConstraint(constraints, expectedRecType, receiverType, memberSection)
             faResult
         } else {
             // UFCS: look for functions
             val localFns = icListLocalFunctionsForType(fieldName, finalReceiverType)
-            val localCount = luaExpr("#localFns") as int
+            val localCount = localFns.size()
             val fn_: any = if localCount == 1 {
-                luaExpr("localFns[1]") as any
+                localFns[1]
             } else {
                 val pkgFns = icListCurrentPackageFunctionsForType(fieldName, finalReceiverType)
-                val pkgCount = luaExpr("#pkgFns") as int
+                val pkgCount = pkgFns.size()
                 if pkgCount == 1 {
-                    luaExpr("pkgFns[1]") as any
+                    pkgFns[1]
                 } else {
                     val typePkgFns = icListTypesPackageFunctionsForType(fieldName, finalReceiverType)
-                    val typePkgCount = luaExpr("#typePkgFns") as int
+                    val typePkgCount = typePkgFns.size()
                     if typePkgCount == 1 {
-                        luaExpr("typePkgFns[1]") as any
+                        typePkgFns[1]
                     } else {
                         val allFns = icListAllLoadedFunctionsForType(fieldName, finalReceiverType)
-                        val allCount = luaExpr("#allFns") as int
+                        val allCount = allFns.size()
                         if allCount == 1 {
-                            luaExpr("allFns[1]") as any
+                            allFns[1]
                         } else {
                             unit
                         }
@@ -515,13 +516,13 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
         }
         val forVars = luaExpr("term.forVars") as any
         val varCount = luaExpr("#forVars") as int
-        val varTypes = luaExpr("{}") as any
+        val varTypes: array[any] = []
         var vi = 1
         while vi <= varCount {
             val varName = luaExpr("forVars[vi]") as string
             val varType = icFreshVariable(level)
             val entry = luaExpr("{ name = varName, varType = varType }") as any
-            embedLua("table.insert(varTypes, entry)")
+            varTypes.push(entry)
             vi = vi + 1
         }
 
@@ -678,10 +679,10 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
                     // Define "resume" function
                     val effectReturnType = luaExpr("etTypes[#etTypes]") as any
                     val resumeRetType = icFreshVariable(level)
-                    val resumeTypes = luaExpr("{}") as any
-                    embedLua("table.insert(resumeTypes, effectReturnType)")
-                    embedLua("table.insert(resumeTypes, resumeRetType)")
-                    val resumeType = functionType(resumeTypes as array[Type], luaExpr("{}") as array[string], 0)
+                    val resumeTypes: array[Type] = []
+                    resumeTypes.push(effectReturnType as Type)
+                    resumeTypes.push(resumeRetType as Type)
+                    val resumeType = functionType(resumeTypes, [] as array[string], 0)
                     icDefineLocalSymbol("resume", resumeType)
                     val caseBody = luaExpr("case_.body") as any
                     val caseBodyType = typeTerm(caseBody, level, constraints)

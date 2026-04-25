@@ -1,7 +1,8 @@
 // chicc/chicc/inference_context.chi
 package chicc/inference_context
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, variableType }
+import std/lang.array { size, push }
+import chicc/types { Type, TypeId, variableType }
 import chicc/ast { DotTarget }
 
 // --- Module-level state ---
@@ -168,34 +169,31 @@ pub fn icGetTargetType(tgt: any, level: int, section: any): any {
 
 // Helper: check if a type scheme's first parameter matches receiver type via trial unification
 pub fn icTrialUnify(typeScheme: any, receiverType: any): bool {
+    val recType = receiverType as Type
     // If the receiver is any-typed, accept any function with at least 1 param
-    val isAnyReceiver = luaExpr("receiverType.tag == 'primitive' and receiverType.ids and #receiverType.ids > 0 and receiverType.ids[1].name == 'any'") as bool
+    val isAnyReceiver = recType.tag == "primitive" && recType.ids.size() > 0 && recType.ids[1].name == "any"
     if isAnyReceiver {
-        val schemeTag2 = luaExpr("typeScheme.tag or ''") as string
-        var body2: any = typeScheme
-        if schemeTag2 == "poly" { body2 = luaExpr("typeScheme.body") }
-        val bt2 = luaExpr("body2.tag or ''") as string
-        if bt2 == "fn" {
-            val tc2 = luaExpr("#body2.types") as int
-            return tc2 >= 2
+        val scheme = typeScheme as Type
+        var body2 = scheme
+        if scheme.tag == "poly" { body2 = scheme.body }
+        if body2.tag == "fn" {
+            return body2.types.size() >= 2
         }
         return false
     }
-    val schemeTag = luaExpr("typeScheme.tag or ''") as string
-    var bodyType: any = typeScheme
-    if schemeTag == "poly" {
-        bodyType = luaExpr("typeScheme.body")
+    val scheme = typeScheme as Type
+    var bodyType = scheme
+    if scheme.tag == "poly" {
+        bodyType = scheme.body
     }
-    val bodyTag = luaExpr("bodyType.tag or ''") as string
-    if bodyTag != "fn" {
+    if bodyType.tag != "fn" {
         return false
     }
-    val types: any = luaExpr("bodyType.types")
-    val count = luaExpr("#types") as int
-    if count < 2 {
+    val types = bodyType.types
+    if types.size() < 2 {
         return false
     }
-    val firstParam: any = luaExpr("types[1]")
+    val firstParam = types[1]
     embedLua("local _unif = require('chicc/unification'); local __trial_ok = pcall(function() _unif.unify({_unif.newConstraint(firstParam, receiverType, nil, {})}) end)")
     val trialOk = luaExpr("__trial_ok") as bool
     trialOk
@@ -240,8 +238,8 @@ pub fn icListLocalFunctionsForType(name: string, receiverType: any): any {
 }
 
 // List current package functions matching a UFCS call
-pub fn icListCurrentPackageFunctionsForType(name: string, receiverType: any): any {
-    val results: any = luaExpr("{}")
+pub fn icListCurrentPackageFunctionsForType(name: string, receiverType: any): array[any] {
+    val results: array[any] = []
     if icCompileTables == unit { return results }
     val ct = icCompileTables
     val sym: any = luaExpr("require('chicc/symbols').ctGetLocalSymbol(ct, name)")
@@ -260,7 +258,7 @@ pub fn icListCurrentPackageFunctionsForType(name: string, receiverType: any): an
                 } else {
                     luaExpr("{ dotTarget = require('chicc/ast').packageFnDotTarget(symMod, symPkg, name), typeScheme = symType }")
                 }
-                embedLua("table.insert(results, entry)")
+                results.push(entry)
             }
         }
     }
@@ -268,21 +266,21 @@ pub fn icListCurrentPackageFunctionsForType(name: string, receiverType: any): an
 }
 
 // List functions from the type's own package matching a UFCS call
-pub fn icListTypesPackageFunctionsForType(name: string, receiverType: any): any {
-    val results: any = luaExpr("{}")
+pub fn icListTypesPackageFunctionsForType(name: string, receiverType: any): array[any] {
+    val results: array[any] = []
     if icNs == unit { return results }
     // Get type IDs from the receiver type
-    val recTag = luaExpr("receiverType.tag or ''") as string
-    var typeIds: any = luaExpr("{}")
-    if recTag == "primitive" || recTag == "record" || recTag == "sum" || recTag == "array" {
-        embedLua("typeIds = receiverType.ids or {}")
+    val recType = receiverType as Type
+    var typeIds: array[TypeId] = []
+    if recType.tag == "primitive" || recType.tag == "record" || recType.tag == "sum" || recType.tag == "array" {
+        typeIds = recType.ids
     }
-    val idCount = luaExpr("#typeIds") as int
+    val idCount = typeIds.size()
     var i = 1
     while i <= idCount {
-        val typeId: any = luaExpr("typeIds[i]")
-        val idMod = luaExpr("typeId.moduleName") as string
-        val idPkg = luaExpr("typeId.packageName") as string
+        val typeId = typeIds[i]
+        val idMod = typeId.moduleName
+        val idPkg = typeId.packageName
         // Look up the function in that package via ns
         val sym: any = luaExpr("__P_.icNs.getSymbol and __P_.icNs.getSymbol(idMod, idPkg, name) or nil")
         if sym != unit {
@@ -290,7 +288,7 @@ pub fn icListTypesPackageFunctionsForType(name: string, receiverType: any): any 
             if symType != unit {
                 if icTrialUnify(symType, receiverType) {
                     val entry: any = luaExpr("{ dotTarget = require('chicc/ast').packageFnDotTarget(idMod, idPkg, name), typeScheme = symType }")
-                    embedLua("table.insert(results, entry)")
+                    results.push(entry)
                 }
             }
         }
@@ -300,8 +298,8 @@ pub fn icListTypesPackageFunctionsForType(name: string, receiverType: any): any 
 }
 
 // Tier 4: search ALL loaded packages for a matching UFCS function
-pub fn icListAllLoadedFunctionsForType(name: string, receiverType: any): any {
-    val results: any = luaExpr("{}")
+pub fn icListAllLoadedFunctionsForType(name: string, receiverType: any): array[any] {
+    val results: array[any] = []
     if icNs == unit { return results }
     embedLua("local _seen = {}; for qualifier, loaded in pairs(package.loaded) do if type(qualifier) == 'string' and type(loaded) == 'table' and loaded._package then local slashPos = qualifier:find('/'); if slashPos then local mod = qualifier:sub(1, slashPos - 1); local pkg = qualifier:sub(slashPos + 1); local sym = __P_.icNs.getSymbol(mod, pkg, name); if sym and sym.symbolType then local key = mod .. '/' .. pkg; if not _seen[key] then _seen[key] = true; local trialOk = require('chicc/inference_context').icTrialUnify(sym.symbolType, receiverType); if trialOk then table.insert(results, { dotTarget = require('chicc/ast').packageFnDotTarget(mod, pkg, name), typeScheme = sym.symbolType }) end end end end end end")
     results

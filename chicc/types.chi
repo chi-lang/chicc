@@ -183,8 +183,8 @@ pub fn typeEquals(a: Type, b: Type): bool {
         if aLen != bLen { return false }
         var i = 1
         while i <= aLen {
-            val ai = luaExpr("aTypes[i]") as Type
-            val bi = luaExpr("bTypes[i]") as Type
+            val ai = aTypes[i]
+            val bi = bTypes[i]
             if ai.typeEquals(bi) == false { return false }
             i = i + 1
         }
@@ -197,36 +197,36 @@ pub fn typeEquals(a: Type, b: Type): bool {
         if aLen != bLen { return false }
         var i = 1
         while i <= aLen {
-            val af = luaExpr("aFields[i]") as RecordField
-            val bf = luaExpr("bFields[i]") as RecordField
+            val af = aFields[i]
+            val bf = bFields[i]
             if af.name != bf.name { return false }
-            val aft = luaExpr("af.fieldType") as Type
-            val bft = luaExpr("bf.fieldType") as Type
+            val aft = af.fieldType
+            val bft = bf.fieldType
             if aft.typeEquals(bft) == false { return false }
             i = i + 1
         }
         true
     } else if tagA == "sum" {
-        val aLhs = luaExpr("a.lhs") as Type
-        val bLhs = luaExpr("b.lhs") as Type
-        val aRhs = luaExpr("a.rhs") as Type
-        val bRhs = luaExpr("b.rhs") as Type
+        val aLhs = a.lhs as Type
+        val bLhs = b.lhs as Type
+        val aRhs = a.rhs as Type
+        val bRhs = b.rhs as Type
         aLhs.typeEquals(bLhs) && aRhs.typeEquals(bRhs)
     } else if tagA == "array" {
-        val aElem = luaExpr("a.elementType") as Type
-        val bElem = luaExpr("b.elementType") as Type
+        val aElem = a.elementType as Type
+        val bElem = b.elementType as Type
         aElem.typeEquals(bElem)
     } else if tagA == "var" {
         a.name == b.name && a.level == b.level
     } else if tagA == "recursive" {
         // Only compare self-ref variables — the variable name (qualified type alias name)
         // uniquely identifies the recursive type. Comparing inner types would infinite-loop.
-        val aVar = luaExpr("a.variable") as Type
-        val bVar = luaExpr("b.variable") as Type
+        val aVar = a.variable as Type
+        val bVar = b.variable as Type
         aVar.typeEquals(bVar)
     } else if tagA == "poly" {
-        val aBody = luaExpr("a.body") as Type
-        val bBody = luaExpr("b.body") as Type
+        val aBody = a.body as Type
+        val bBody = b.body as Type
         a.level == b.level && aBody.typeEquals(bBody)
     } else {
         false
@@ -241,28 +241,28 @@ pub fn typeChildren(t: Type): array[any] {
         empty
     } else if tag == "fn" {
         val types = t.types
-        luaExpr("types") as array[any]
+        types as array[any]
     } else if tag == "record" {
         val fields = t.fields
         val result: array[any] = []
         val count = fields.size()
         var i = 1
         while i <= count {
-            val f = luaExpr("fields[i]") as RecordField
-            val ft = luaExpr("f.fieldType") as Type
+            val f = fields[i]
+            val ft = f.fieldType
             result.push(ft)
             i = i + 1
         }
         result
     } else if tag == "sum" {
-        val lhs = luaExpr("t.lhs") as Type
-        val rhs = luaExpr("t.rhs") as Type
+        val lhs = t.lhs as Type
+        val rhs = t.rhs as Type
         val result: array[any] = []
         result.push(lhs)
         result.push(rhs)
         result
     } else if tag == "array" {
-        val elem = luaExpr("t.elementType") as Type
+        val elem = t.elementType as Type
         val result: array[any] = []
         result.push(elem)
         result
@@ -270,12 +270,12 @@ pub fn typeChildren(t: Type): array[any] {
         val empty: array[any] = []
         empty
     } else if tag == "recursive" {
-        val inner = luaExpr("t.innerType") as Type
+        val inner = t.innerType as Type
         val result: array[any] = []
         result.push(inner)
         result
     } else if tag == "poly" {
-        val b = luaExpr("t.body") as Type
+        val b = t.body as Type
         val result: array[any] = []
         result.push(b)
         result
@@ -289,22 +289,22 @@ pub fn typeChildren(t: Type): array[any] {
 pub fn sumListTypes(t: Type): array[any] {
     val tag = t.tag
     if tag == "sum" {
-        val lhs = luaExpr("t.lhs") as Type
-        val rhs = luaExpr("t.rhs") as Type
+        val lhs = t.lhs as Type
+        val rhs = t.rhs as Type
         val lhsList = lhs.sumListTypes()
         val rhsList = rhs.sumListTypes()
         val result: array[any] = []
         val lLen = lhsList.size()
         var i = 1
         while i <= lLen {
-            val item = luaExpr("lhsList[i]") as Type
+            val item = lhsList[i]
             result.push(item)
             i = i + 1
         }
         val rLen = rhsList.size()
         var j = 1
         while j <= rLen {
-            val item2 = luaExpr("rhsList[j]") as Type
+            val item2 = rhsList[j]
             result.push(item2)
             j = j + 1
         }
@@ -321,7 +321,7 @@ fn typeExistsInArray(arr: array[any], t: Type): bool {
     val count = arr.size()
     var i = 1
     while i <= count {
-        val item = luaExpr("arr[i]") as Type
+        val item = arr[i] as Type
         if item.typeEquals(t) { return true }
         i = i + 1
     }
@@ -347,7 +347,7 @@ pub fn sumCreate(ids: array[TypeId], l: Type, r: Type, tps: array[string]): Type
     val lLen = lTypes.size()
     var i = 1
     while i <= lLen {
-        val item = luaExpr("lTypes[i]") as Type
+        val item = lTypes[i] as Type
         if typeExistsInArray(allTypes, item) == false {
             allTypes.push(item)
         }
@@ -356,7 +356,7 @@ pub fn sumCreate(ids: array[TypeId], l: Type, r: Type, tps: array[string]): Type
     val rLen = rTypes.size()
     var j = 1
     while j <= rLen {
-        val item2 = luaExpr("rTypes[j]") as Type
+        val item2 = rTypes[j] as Type
         if typeExistsInArray(allTypes, item2) == false {
             allTypes.push(item2)
         }
@@ -367,7 +367,7 @@ pub fn sumCreate(ids: array[TypeId], l: Type, r: Type, tps: array[string]): Type
     val totalCount = allTypes.size()
     var k = 1
     while k <= totalCount {
-        val tp = luaExpr("allTypes[k]") as Type
+        val tp = allTypes[k] as Type
         if tp.typeEquals(tUnit) { hasUnit = true }
         k = k + 1
     }
@@ -384,11 +384,11 @@ pub fn sumCreate(ids: array[TypeId], l: Type, r: Type, tps: array[string]): Type
         finalIds = newIds
     }
     // Reduce the unique types into a single sum using fold
-    val first = luaExpr("allTypes[1]") as Type
+    val first = allTypes[1] as Type
     var result = first
     var n = 2
     while n <= totalCount {
-        val next = luaExpr("allTypes[n]") as Type
+        val next = allTypes[n] as Type
         result = sumType(finalIds, result, next, tps)
         n = n + 1
     }
@@ -411,8 +411,8 @@ pub fn replaceVariable(t: Type, toReplace: Type, substitution: Type): Type {
         val count = types.size()
         var i = 1
         while i <= count {
-            val child: any = luaExpr("types[i]")
-            val replaced = (child as Type).replaceVariable(toReplace, substitution)
+            val child = types[i]
+            val replaced = child.replaceVariable(toReplace, substitution)
             newTypes.push(replaced)
             i = i + 1
         }
@@ -423,32 +423,32 @@ pub fn replaceVariable(t: Type, toReplace: Type, substitution: Type): Type {
         val count = fields.size()
         var i = 1
         while i <= count {
-            val f: any = luaExpr("fields[i]")
-            val ft: any = luaExpr("f.fieldType")
-            val replaced = (ft as Type).replaceVariable(toReplace, substitution)
-            val newField = { name: luaExpr("f.name") as string, fieldType: replaced }
+            val f = fields[i]
+            val ft = f.fieldType
+            val replaced = ft.replaceVariable(toReplace, substitution)
+            val newField = { name: f.name, fieldType: replaced }
             newFields.push(newField)
             i = i + 1
         }
         result = recordType(t.ids, newFields as array[RecordField], t.typeParams)
     } else if tag == "sum" {
-        val lhs: any = luaExpr("t.lhs")
-        val rhs: any = luaExpr("t.rhs")
-        val newLhs = (lhs as Type).replaceVariable(toReplace, substitution)
-        val newRhs = (rhs as Type).replaceVariable(toReplace, substitution)
+        val lhs = t.lhs as Type
+        val rhs = t.rhs as Type
+        val newLhs = lhs.replaceVariable(toReplace, substitution)
+        val newRhs = rhs.replaceVariable(toReplace, substitution)
         result = sumCreate(t.ids, newLhs, newRhs, t.typeParams)
     } else if tag == "array" {
-        val elem: any = luaExpr("t.elementType")
-        val newElem = (elem as Type).replaceVariable(toReplace, substitution)
+        val elem = t.elementType as Type
+        val newElem = elem.replaceVariable(toReplace, substitution)
         result = arrayType(newElem, t.typeParams)
     } else if tag == "recursive" {
-        val inner: any = luaExpr("t.innerType")
-        val newInner = (inner as Type).replaceVariable(toReplace, substitution)
-        val v: any = luaExpr("t.variable")
-        result = recursiveType(v as Type, newInner)
+        val inner = t.innerType as Type
+        val newInner = inner.replaceVariable(toReplace, substitution)
+        val v = t.variable as Type
+        result = recursiveType(v, newInner)
     } else if tag == "poly" {
-        val b: any = luaExpr("t.body")
-        val newBody = (b as Type).replaceVariable(toReplace, substitution)
+        val b = t.body as Type
+        val newBody = b.replaceVariable(toReplace, substitution)
         result = polyType(t.level, newBody)
     }
     result as Type
@@ -476,7 +476,7 @@ fn bulkReplace(t: Type, lookup: any): Type {
         var changed = false
         var fi = 1
         while fi <= len {
-            val child = luaExpr("types[fi]") as Type
+            val child = types[fi]
             val replaced = bulkReplace(child, lookup)
             newTypes.push(replaced)
             if luaExpr("replaced ~= child") as bool { changed = true }
@@ -492,8 +492,8 @@ fn bulkReplace(t: Type, lookup: any): Type {
         var changed = false
         var fi = 1
         while fi <= len {
-            val f = luaExpr("fields[fi]") as RecordField
-            val ft = luaExpr("f.fieldType") as Type
+            val f = fields[fi]
+            val ft = f.fieldType
             val replaced = bulkReplace(ft, lookup)
             if luaExpr("replaced ~= ft") as bool {
                 changed = true
@@ -508,28 +508,28 @@ fn bulkReplace(t: Type, lookup: any): Type {
             result = recordType(t.ids, newFields as array[RecordField], t.typeParams)
         }
     } else if tag == "sum" {
-        val lhs = luaExpr("t.lhs") as Type
-        val rhs = luaExpr("t.rhs") as Type
+        val lhs = t.lhs as Type
+        val rhs = t.rhs as Type
         val newLhs = bulkReplace(lhs, lookup)
         val newRhs = bulkReplace(rhs, lookup)
         if luaExpr("newLhs ~= lhs or newRhs ~= rhs") as bool {
             result = sumCreate(t.ids, newLhs, newRhs, t.typeParams)
         }
     } else if tag == "array" {
-        val elem = luaExpr("t.elementType") as Type
+        val elem = t.elementType as Type
         val newElem = bulkReplace(elem, lookup)
         if luaExpr("newElem ~= elem") as bool {
             result = arrayType(newElem, t.typeParams)
         }
     } else if tag == "recursive" {
-        val inner = luaExpr("t.innerType") as Type
+        val inner = t.innerType as Type
         val newInner = bulkReplace(inner, lookup)
         if luaExpr("newInner ~= inner") as bool {
-            val v = luaExpr("t.variable") as Type
+            val v = t.variable as Type
             result = recursiveType(v, newInner)
         }
     } else if tag == "poly" {
-        val b = luaExpr("t.body") as Type
+        val b = t.body as Type
         val newBody = bulkReplace(b, lookup)
         if luaExpr("newBody ~= b") as bool {
             result = polyType(t.level, newBody)
@@ -563,7 +563,7 @@ pub fn occursIn(variable: Type, t: Type): bool {
         val count = children.size()
         var i = 1
         while i <= count {
-            val child = luaExpr("children[i]") as Type
+            val child = children[i] as Type
             if variable.occursIn(child) { return true }
             i = i + 1
         }
@@ -581,7 +581,7 @@ pub fn occursInExcludingSumBranches(variable: Type, t: Type): bool {
         val count = branches.size()
         var i = 1
         while i <= count {
-            val branch = luaExpr("branches[i]") as Type
+            val branch = branches[i] as Type
             val branchTag = branch.tag
             if branchTag == "var" && branch.name == variable.name && branch.level == variable.level {
                 i = i + 1
@@ -596,7 +596,7 @@ pub fn occursInExcludingSumBranches(variable: Type, t: Type): bool {
         val count = children.size()
         var i = 1
         while i <= count {
-            val child = luaExpr("children[i]") as Type
+            val child = children[i] as Type
             if variable.occursIn(child) { return true }
             i = i + 1
         }
@@ -606,8 +606,8 @@ pub fn occursInExcludingSumBranches(variable: Type, t: Type): bool {
 
 // 9. Unfold a recursive type by substituting the variable with the recursive type itself
 pub fn unfoldRecursive(t: Type): Type {
-    val inner = luaExpr("t.innerType") as Type
-    val v = luaExpr("t.variable") as Type
+    val inner = t.innerType as Type
+    val v = t.variable as Type
     val replacements: array[any] = []
     val entry = { variable: v, replacement: t }
     replacements.push(entry)
@@ -642,8 +642,8 @@ fn instantiateInner(t: Type, startingLevel: int, targetLevel: int, freshVar: (in
         val count = types.size()
         var i = 1
         while i <= count {
-            val child: any = luaExpr("types[i]")
-            val replaced = instantiateInner(child as Type, startingLevel, targetLevel, freshVar)
+            val child = types[i]
+            val replaced = instantiateInner(child, startingLevel, targetLevel, freshVar)
             newTypes.push(replaced)
             i = i + 1
         }
@@ -654,32 +654,32 @@ fn instantiateInner(t: Type, startingLevel: int, targetLevel: int, freshVar: (in
         val count = fields.size()
         var i = 1
         while i <= count {
-            val f: any = luaExpr("fields[i]")
-            val ft: any = luaExpr("f.fieldType")
-            val replaced = instantiateInner(ft as Type, startingLevel, targetLevel, freshVar)
-            val newField = { name: luaExpr("f.name") as string, fieldType: replaced }
+            val f = fields[i]
+            val ft = f.fieldType
+            val replaced = instantiateInner(ft, startingLevel, targetLevel, freshVar)
+            val newField = { name: f.name, fieldType: replaced }
             newFields.push(newField)
             i = i + 1
         }
         result = recordType(t.ids, newFields as array[RecordField], t.typeParams)
     } else if tag == "sum" {
-        val lhs: any = luaExpr("t.lhs")
-        val rhs: any = luaExpr("t.rhs")
-        val newLhs = instantiateInner(lhs as Type, startingLevel, targetLevel, freshVar)
-        val newRhs = instantiateInner(rhs as Type, startingLevel, targetLevel, freshVar)
+        val lhs = t.lhs as Type
+        val rhs = t.rhs as Type
+        val newLhs = instantiateInner(lhs, startingLevel, targetLevel, freshVar)
+        val newRhs = instantiateInner(rhs, startingLevel, targetLevel, freshVar)
         result = sumType(t.ids, newLhs, newRhs, t.typeParams)
     } else if tag == "array" {
-        val elem: any = luaExpr("t.elementType")
-        val newElem = instantiateInner(elem as Type, startingLevel, targetLevel, freshVar)
+        val elem = t.elementType as Type
+        val newElem = instantiateInner(elem, startingLevel, targetLevel, freshVar)
         result = arrayType(newElem, t.typeParams)
     } else if tag == "recursive" {
-        val inner: any = luaExpr("t.innerType")
-        val newInner = instantiateInner(inner as Type, startingLevel, targetLevel, freshVar)
-        val v: any = luaExpr("t.variable")
-        result = recursiveType(v as Type, newInner)
+        val inner = t.innerType as Type
+        val newInner = instantiateInner(inner, startingLevel, targetLevel, freshVar)
+        val v = t.variable as Type
+        result = recursiveType(v, newInner)
     } else if tag == "poly" {
-        val b: any = luaExpr("t.body")
-        val newBody = instantiateInner(b as Type, startingLevel, targetLevel, freshVar)
+        val b = t.body as Type
+        val newBody = instantiateInner(b, startingLevel, targetLevel, freshVar)
         result = polyType(t.level, newBody)
     }
     result as Type
@@ -690,7 +690,7 @@ pub fn instantiate(t: Type, level: int, freshVar: (int) -> Type): Type {
     val tag = t.tag
     if tag != "poly" { return t }
     val startingLevel = t.level
-    val b: Type = luaExpr("t.body")
+    val b = t.body as Type
     // Create a Lua table as cache for variable mappings
     embedLua("__inst_cache = {}")
     instantiateInner(b, startingLevel, level, freshVar)

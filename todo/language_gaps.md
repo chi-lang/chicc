@@ -98,40 +98,57 @@ Deeply Lua-specific runtime bootstrapping. Should stay as FFI.
 - **Total FFI reduction this session:** 6 luaExpr calls removed, lexer.chi now FFI-free
 - **Tested:** 44/44 chicc tests pass, fixed-point verified
 
-### Completed Migrations
+### Session History (2026-04-25)
 
-These migrations have been fully completed:
+- ✅ `parser.chi`: `luaExpr("tonumber(tok.value)")` → `tok.value.toFloat()` (1 FFI removed)
+- ✅ `unification.chi`: Migrated `#arr` → `.size()`, `table.insert` → `.push()`/`insertAt`, `luaExpr("arr[i]")` → `arr[i]` where types are known (39 FFI calls removed)
+- ✅ `typer.chi`: Migrated `sumRemoveType` to use `.size()`, `.push()`, direct indexing (8 FFI calls removed)
+- **Total FFI reduction this session:** ~174 calls removed
+  - `parser.chi`: 1 (tonumber → toFloat)
+  - `unification.chi`: 39 (`#`/`table.insert`/`[i]` → `.size()`/`.push()`/`.insertAt()`/direct index)
+  - `typer.chi`: 42 (`sumRemoveType`, `typeTerms`, local arrays, UFCS call sites)
+  - `inference_context.chi`: 23 (`icTrialUnify`, `icList*FunctionsForType` return types, direct `Type` access)
+  - `types.chi`: 69 (massive field access migration: `t.lhs`, `t.rhs`, `t.elementType`, `t.variable`, `t.body`, `t.innerType`, array indexing)
+- **Tested:** Key tests pass (types, typer, checks, compiler, unification), fixed-point verification blocked by pre-existing `chicc.lua` generation issue (see below)
 
-| File | What changed | Stdlib used |
-|------|-------------|-------------|
-| `types.chi` | `luaExpr("{}")` → `[]`, `#arr` → `.size()`, `table.insert` → `.push()` (~60 changes) | `std/lang.array { size }` |
-| `emitter.chi` | `string.byte`/`string.sub`/`#value` → stdlib, `table.insert` → `.push()` | `std/lang.string { charCodeAt, byteSub, len }` |
-| `cli.chi` | `os.getenv` → `getEnv`, `string.sub`/`string.len` → `byteSub`/`len` | `std/os { getEnv }`, `std/lang.string { len, byteSub }` |
-| `parser.chi` | `tonumber(tok.value) as int` → `tok.value.toInt()` | `std/lang.string { toInt }` |
-| `type_writer.chi` | `gsub` chain → `replaceAll` chain, `tostring(int)` → `"$lvl"` | `std/lang.string { replaceAll }` |
-| `lexer.chi` | **FFI-free.** Escape chars, string ops (`charCodeAt`, `byteSub`, `fromCharCode`, `byteLen`), string concat (`+`), dollar escapes (`"\$"`, `"\${"`) — all `luaExpr` removed | `std/lang.string { charCodeAt, byteSub, fromCharCode, byteLen }` |
-| `symbols.chi` | Symbol tables: `luaExpr("{}")` → `emptyMap[]` in SymbolTable, FnSymbolTable, TypeTable (~12 changes) | `std/lang.map { emptyMap }` |
-| `messages.chi` | Re-enabled `_G.__index` metatable (was disabled during compileModules debugging) | N/A |
-| `emitter.chi` | Reverted deferred embedLua mechanism — no longer needed after stdlib compileModules fix | N/A |
+### Current FFI Counts by File (as of 2026-04-25)
 
-### Remaining Work: table.insert / #array migrations
+| File | `luaExpr` + `embedLua` | Notes |
+|------|------------------------|-------|
+| `compiler.chi` | 243 | Complex inline Lua blocks, pcall wrappers, env builder |
+| `typer.chi` | 193 | Array clearing (`for i = 1, #constraints do constraints[i] = nil end`), position-based inserts; `sumRemoveType`, `typeTerms`, local arrays, UFCS call sites migrated |
+| `checks.chi` | 174 | Massive untyped node field access (`node.tag`, `node.value`, etc.) |
+| `inference_context.chi` | 66 | Multi-statement embedLua, package.loaded scanning; `icTrialUnify`, `icList*FunctionsForType` migrated |
+| `parse_ast.chi` | 88 | Opaque Lua table field access |
+| `ast_converter.chi` | 88 | Opaque Lua table fields (`body.blockBody`, `symType.types`) |
+| `types.chi` | 17 | Heavy field access migrated to direct record access; remaining: ref equality, cache table mutation |
+| `symbols.chi` | 61 | Symbol table manipulation; only 3 constructors migrated to `emptyMap` |
+| `type_writer.chi` | 59 | Inline Lua helpers (`deep_copy_type`, `error` calls) |
+| `ast.chi` | 59 | Large inline Lua block for `exprChildren` |
+| `emitter.chi` | 57 | Field access on AST nodes, large inline Lua cross-ref walker |
+| `cli.chi` | 46 | REPL formatting functions, `pcall`, `#messages` |
+| `unification.chi` | 48 | Complex queue management, pcall, `pairs()` iteration; `#`/`table.insert`/`[i]` migrated |
+| `parser.chi` | 5 | Float `tonumber` migrated to `toFloat` |
+| `util.chi` | 3 | `#s` string length |
+| `messages.chi` | 3 | `_G.__index` metatable (intentional) |
+| `lexer.chi` | **0** | **FFI-free** ✅ |
 
-**Status:** ~130 FFI calls remaining in 6 files, mixed difficulty
+### Partial Migrations
 
-These files still use `embedLua("table.insert(…)")` and `luaExpr("#arr")`:
+These files had some work done but still contain significant FFI:
 
-| File | `table.insert` | `#array` | Difficulty |
-|------|----------------|----------|------------|
-| `checks.chi` | 7 | 26 | Medium — untyped arrays |
-| `typer.chi` | 15 (incl. 2 position-based) | 26 | Medium — position-based inserts need `insertAt` |
-| `unification.chi` | 16 (incl. 8 position-based) | 11 | Hard — complex queue management |
-| `compiler.chi` | 15 | 17 | Hard — complex inline Lua blocks |
-| `inference_context.chi` | 4 | 4 | Hard — multi-statement embedLua |
-| `ast_converter.chi` | 0 | 2 | Blocked — opaque Lua table fields (`body.blockBody`, `symType.types`) |
+| File | What was done | What remains |
+|------|---------------|--------------|
+| `types.chi` | Array operations: `#arr` → `.size()`, `table.insert` → `.push()` | ~86 FFI calls: field access (`t.lhs`, `t.elementType`), reference equality, cache management |
+| `symbols.chi` | 3 constructors: `luaExpr("{}")` → `emptyMap[]` | ~61 FFI calls: table mutation, field access on symbols/imports |
+| `parser.chi` | `tonumber(tok.value) as int` → `tok.value.toInt()` | `luaExpr("tonumber(tok.value)")` for float literals (1 call) |
+| `emitter.chi` | Some string ops moved to stdlib | ~57 FFI calls: field access, inline Lua blocks, `#params`, `#body` |
+| `cli.chi` | `os.getenv` → `getEnv`, some string ops | ~46 FFI calls: REPL formatting, pcall, `#messages` |
+| `type_writer.chi` | `gsub` chain → `replaceAll` chain | ~59 FFI calls: `error()` wrappers, `deep_copy_type` Lua block |
 
-### Remaining Work: tonumber for floats
+### Remaining Work: `tonumber` for floats
 
-**Status:** 1 easy use in `parser.chi` — `tok.value.toFloat()` now available in stdlib (added 2026-04-09), migration not yet done
+**Status:** ✅ Migrated in `parser.chi` — `luaExpr("tonumber(tok.value)")` → `tok.value.toFloat()`.
 
 ---
 
@@ -140,10 +157,10 @@ These files still use `embedLua("table.insert(…)")` and `luaExpr("#arr")`:
 ### Next priorities (in order)
 
 1. **✅ DONE:** Lexer string ops + escape chars
-2. **✅ DONE:** Map operations in `symbols.chi`  
-3. **Easy:** `tonumber` float → `toFloat` in parser.chi (1 use)
-4. **Medium:** Migrate remaining `table.insert`/`#array` in easier files (`checks.chi`, `typer.chi`)
-5. **Hard:** Migrate complex inline Lua in `unification.chi`, `compiler.chi`, `inference_context.chi`
+2. **✅ DONE:** Map operations in `symbols.chi` (3 constructors)
+3. **Easy:** `tonumber` float → `toFloat` in `parser.chi` (1 use)
+4. **Medium:** Migrate `table.insert` / `#array` in `checks.chi`, `typer.chi`, `unification.chi`
+5. **Hard:** Migrate complex inline Lua in `compiler.chi`, `inference_context.chi`
 6. **Blocked:** `ast_converter.chi` needs opaque Lua table fields resolved
 7. **Fundamental refactor:** Proper Chi types for AST/Type (eliminates ~60% of remaining FFI)
 
@@ -164,10 +181,14 @@ Available for future migrations:
 | **Proper Chi types for AST/Type/ParseAst** | ~60% of all FFI calls | Language feature needed |
 | **Error handling** (`try`/`catch` or `Result`) | ~30 uses | Language feature needed |
 | **Reference equality** operator/function | ~15 uses | Language feature needed |
-| **table.insert / #array migrations** | ~130 uses | Mixed difficulty, in progress |
+| **table.insert / #array migrations** | ~120 uses across 6 files | In progress |
 | **tonumber float → toFloat** | 1 use | Easy, not started |
 
-**Total FFI calls removed to date:** ~38 (32 from session 2026-04-05, 6 from session 2026-04-09)
-**Stdlib additions:** map.remove, map.has, string.toFloat, string.byteLen
-**Infrastructure fixes:** compileModules rewritten with toposort + cache (session 2026-04-09)
-**Fully FFI-free files:** `lexer.chi`
+**Total FFI calls remaining:** ~1,138 across 15 files  
+**Fully FFI-free files:** `lexer.chi`  
+**Stdlib additions to date:** `map.remove`, `map.has`, `string.toFloat`, `string.byteLen`  
+**Infrastructure fixes:** `compileModules` rewritten with toposort + cache (session 2026-04-09)
+
+### Known Infrastructure Issue
+
+`chicc.lua` generation via `make build` / `compile.chi` currently produces an output **missing `chicc/inference_context`** because `compileModules` (in the host stdlib) skips modules already loaded in `package.loaded`. Since the host `chi` binary pre-loads `inference_context`, it gets silently dropped from the self-hosting compiler output. This is a pre-existing issue — the committed `chicc.lua` also lacks `inference_context` but works for host-compiled tests. Use `bootstrap.lua` (which bypasses `compileModules`) for a complete rebuild if needed.
