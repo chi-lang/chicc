@@ -4,7 +4,7 @@
 # If no arguments given, runs all tests/test_*.chi files.
 #
 # How it works:
-#   1. Ensures chicc modules are cached using bootstrap compiler
+#   1. Ensures chicc.lua is built
 #   2. For each test file, prepends a package declaration, then uses
 #      compileModules to compile the test together with all chicc modules
 #   3. Runs the compiled test via the bootstrap compiler
@@ -21,8 +21,6 @@ CHI_HOME="${CHI_HOME:-$HOME/.chi}"
 # The test runner requires compileModules which is only in the bootstrap compiler.
 # Override with CHI_BOOTSTRAP env var if the bootstrap compiler is elsewhere.
 CHI_BOOTSTRAP="${CHI_BOOTSTRAP:-chi}"
-CACHE_DIR=".cache"
-
 # All chicc source modules (order matches compile.chi)
 CHICC_SOURCES=(
     "chicc/messages.chi"
@@ -47,9 +45,9 @@ CHICC_SOURCES=(
     "tests/test_util.chi"
 )
 
-# Ensure chicc is built (populates cache)
-if [ ! -d "$CACHE_DIR/chicc" ]; then
-    echo "Cache not found, building chicc first..."
+# Ensure chicc is built
+if [ ! -f "chicc.lua" ]; then
+    echo "chicc.lua not found, building first..."
     "$CHI_BOOTSTRAP" compile.chi
 fi
 
@@ -68,7 +66,7 @@ trap "rm -f '$RUNNER' /tmp/_chicc_test_tmp.chi" EXIT
 
 cat > "$RUNNER" << CHIEOF
 import std/lang { compileModules }
-compileModules(["/tmp/_chicc_test_tmp.chi",${SOURCES_LIST}], ".cache")
+compileModules(["/tmp/_chicc_test_tmp.chi",${SOURCES_LIST}])
 CHIEOF
 
 # Determine which test files to run

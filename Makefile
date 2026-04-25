@@ -29,7 +29,6 @@ SHELL := /bin/bash
 
 chicc.lua: compile.chi
 	@echo "Building chicc.lua..."
-	rm -rf .cache
 	$(CHI) compile.chi
 	@echo "✓ chicc.lua built successfully"
 
