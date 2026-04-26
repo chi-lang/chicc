@@ -16,7 +16,7 @@
 #
 # Environment variables:
 #   CHI_BOOTSTRAP  Bootstrap compiler to use (default: chi)
-#   JOBS           Number of parallel test jobs (default: 1)
+#   JOBS           Number of parallel test jobs (default: CPU count)
 
 set -euo pipefail
 
@@ -27,7 +27,14 @@ CHI_HOME="${CHI_HOME:-$HOME/.chi}"
 # The test runner requires compileModules which is only in the bootstrap compiler.
 # Override with CHI_BOOTSTRAP env var if the bootstrap compiler is elsewhere.
 CHI_BOOTSTRAP="${CHI_BOOTSTRAP:-chi}"
-# Number of parallel jobs
+# Number of parallel jobs (default to CPU count, fallback to 1)
+if [ -z "${JOBS+x}" ]; then
+    if command -v nproc &> /dev/null; then
+        JOBS=$(nproc)
+    else
+        JOBS=1
+    fi
+fi
 JOBS="${JOBS:-1}"
 
 # All chicc source modules (order matches compile.chi)
