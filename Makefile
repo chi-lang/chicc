@@ -3,6 +3,7 @@
 # Main targets:
 #   make              Build chicc.lua (default)
 #   make test         Run all tests
+#   make test JOBS=4  Run all tests in parallel
 #   make test-<file>  Run specific test file (e.g. make test-lexer)
 #   make native       Build native chi binary (requires CHI_HOME set)
 #   make verify       Verify fixed-point compilation
@@ -105,6 +106,7 @@ help:
 	@echo "Main targets:"
 	@echo "  make              Build chicc.lua (default)"
 	@echo "  make test         Run all tests"
+	@echo "  make test JOBS=4  Run tests in parallel"
 	@echo "  make test-<file>  Run specific test (e.g., make test-lexer)"
 	@echo "  make native       Build native chi binary"
 	@echo "  make install      Install native binary"
