@@ -92,7 +92,7 @@ Deeply Lua-specific runtime bootstrapping. Should stay as FFI.
 | `lexer.chi` | **0** | **FFI-free** ✅ |
 
 **Total FFI calls remaining:** ~1,138 across 15 files  
-**Fully FFI-free files:** `lexer.chi`
+**Fully FFI-free files:** `lexer.chi`, `parser.chi`
 
 ---
 
@@ -121,6 +121,10 @@ Deeply Lua-specific runtime bootstrapping. Should stay as FFI.
 
 ---
 
-## Known Infrastructure Issue
+## Resolved Infrastructure Issues
 
-`chicc.lua` generation via `make build` / `compile.chi` currently produces an output **missing `chicc/inference_context`** because `compileModules` (in the host stdlib) skips modules already loaded in `package.loaded`. Since the host `chi` binary pre-loads `inference_context`, it gets silently dropped from the self-hosting compiler output. This is a pre-existing issue — the committed `chicc.lua` also lacks `inference_context` but works for host-compiled tests. Use `bootstrap.lua` (which bypasses `compileModules`) for a complete rebuild if needed.
+### `chicc/inference_context` missing from `chicc.lua` — ✅ FIXED
+
+**Root cause:** `inference_context.chi` had a `TYPE_MISMATCH` error (`Type | unit` field access without `as Type` cast) that caused `compileToLua` to return `nil`. `compileModules` silently replaced the failed compilation with an empty string, dropping the module from `chicc.lua`.
+
+**Fix:** Added `as Type` casts to `scheme.body` accesses in `icTrialUnify` (lines 178, 187). Fixed-point verification (`make verify`) now passes.

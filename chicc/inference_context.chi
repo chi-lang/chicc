@@ -175,7 +175,7 @@ pub fn icTrialUnify(typeScheme: any, receiverType: any): bool {
     if isAnyReceiver {
         val scheme = typeScheme as Type
         var body2 = scheme
-        if scheme.tag == "poly" { body2 = scheme.body }
+        if scheme.tag == "poly" { body2 = scheme.body as Type }
         if body2.tag == "fn" {
             return body2.types.size() >= 2
         }
@@ -184,7 +184,7 @@ pub fn icTrialUnify(typeScheme: any, receiverType: any): bool {
     val scheme = typeScheme as Type
     var bodyType = scheme
     if scheme.tag == "poly" {
-        bodyType = scheme.body
+        bodyType = scheme.body as Type
     }
     if bodyType.tag != "fn" {
         return false
