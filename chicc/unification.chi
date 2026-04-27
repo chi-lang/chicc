@@ -405,13 +405,34 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
                 queue.insertAt(pos, lhsConstraint)
             }
         } else if actual.tag == "sum" {
+            // Width subtyping: a sum actual matches expected if ANY branch matches.
+            // Try lhs first, fall back to rhs (mirrors expected-sum handling).
             val actLhs = actual.lhs
             val actRhs = actual.rhs
             val newHistory = copyHistoryWith(history, constraint)
-            val nc1 = newConstraint(expected, actLhs, section, newHistory)
-            val nc2 = newConstraint(expected, actRhs, section, newHistory)
-            queue.insertAt(pos, nc1)
-            queue.insertAt(pos + 1, nc2)
+            val lhsConstraint = newConstraint(expected, actLhs, section, newHistory)
+            val lhsConstraints: array[any] = []
+            lhsConstraints.push(lhsConstraint)
+
+            embedLua("local __pcall_ok, __pcall_result = pcall(__P_.unify, lhsConstraints)")
+            val pcallOk = luaExpr("__pcall_ok") as bool
+            if pcallOk {
+                // Merge partial solutions into our union-find
+                val partialSolutions: array[any] = luaExpr("__pcall_result")
+                val psLen = partialSolutions.size()
+                var si = 1
+                while si <= psLen {
+                    val psEntry = partialSolutions[si]
+                    val psVar = luaExpr("psEntry.variable") as Type
+                    val psRepl = luaExpr("psEntry.replacement") as Type
+                    ufBind(uf, psVar, psRepl)
+                    si = si + 1
+                }
+            } else {
+                // lhs failed, try rhs
+                val rhsConstraint = newConstraint(expected, actRhs, section, newHistory)
+                queue.insertAt(pos, rhsConstraint)
+            }
         } else if expected.tag == "fn" && actual.tag != "fn" {
             val cp = sectionToCodePoint(section)
             throwMessage(notAFunction(cp))

@@ -561,7 +561,19 @@ fn convertFnCallImpl(node: any, pkg: any, tables: any): any {
     val argCount = argNodes.size()
     while i <= argCount {
         val argNode = argNodes[i]
-        val ca: any = convert(argNode, pkg, tables)
+        val argTag = argNode.paTag()
+        var ca: any = unit
+        if argTag == "ParseBlock" {
+            // Block arguments become zero-arg lambdas. Give them a temporary
+            // symbol table so locals defined inside resolve correctly.
+            val prevFst = currentFnSymbolTable
+            val tmpFst = newFnSymbolTable(prevFst)
+            currentFnSymbolTable = tmpFst
+            ca = convert(argNode, pkg, tables)
+            currentFnSymbolTable = prevFst
+        } else {
+            ca = convert(argNode, pkg, tables)
+        }
         convertedArgs.push(ca)
         i = i + 1
     }
