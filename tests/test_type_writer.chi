@@ -113,7 +113,11 @@ test("encode recursive type") {
     val r = recordType([newTypeId("test", "pkg", "List")], [{ name: "head", fieldType: tInt }, { name: "tail", fieldType: v }], [])
     val rec = recursiveType(v, r)
     val encoded = encodeType(rec)
-    assertEqual(encoded, "{tag=\"rec\",var={tag=\"var\",name=\"X\",level=0},type={tag=\"typeref\",ids={{\"test\",\"pkg\",\"List\"}}}}")
+    // A named recursive type encodes (without its defining context) as a bare
+    // typeref to the named type — emitting the full `rec` structure here would
+    // recurse infinitely on self-referential types. The defining occurrence
+    // (encodeTypeWithContext) is what serialises the structure; see roundtrip below.
+    assertEqual(encoded, "{tag=\"typeref\",ids={{\"test\",\"pkg\",\"List\"}}}")
 }
 
 test("decode primitive int") {

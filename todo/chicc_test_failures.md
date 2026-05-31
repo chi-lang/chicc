@@ -5,10 +5,14 @@ Branch `fix/self-hosted-test-failures`. Self-hosted `chi` runner.
 | Snapshot                          | Pass  | Fail |
 | --------------------------------- | ----- | ---- |
 | Before this work                  | ~25   | ~19  |
-| After compiler fixes (this work)  | 38/44 | 6    |
+| After compiler fixes              | 38/44 | 6    |
+| After test/parser fixes (current) | 44/44 | 0    |
 | JVM bootstrap baseline            | 44/44 | 0    |
 
-Fixed point holds (`make verify` → identical generations).
+**All 44 unit tests pass.** Fixed point holds (`make verify` → identical
+generations). Golden suite unchanged: 49 pass, 3 pre-existing failures
+(`functions/return_sum_type`, `stdlib/io/read`, `strings/unicode`) that are
+unrelated to this work and predate it.
 
 ## Fixed (compiler changes)
 
@@ -53,49 +57,60 @@ All the original *compilation* failures plus several runtime bugs:
 > when serializing self-referential types (e.g. `Type`, `Expr`). It hangs the
 > whole build. Reverted. See test_type_writer below — do NOT reapply naively.
 
-## Remaining failures (6) — to handle later
+## Previously-remaining failures (6) — now all FIXED
 
-### A. Test bugs (test asserts behaviour contrary to spec / chicc representation)
+### A. Test bugs (test asserted behaviour contrary to spec / chicc representation)
 
-These should be fixed on the **test side** (or the spec clarified), not the compiler:
+Fixed on the **test side** (chicc behaviour was correct):
 
-1. **test_cli** — `cliMain with no args returns 1` expects exit code 1, but
-   `specs/cli` says explicitly *"No arguments: starts the REPL"*. chicc correctly
-   runs the REPL (returns 0). The test contradicts the spec.
-2. **test_emitter_program** — `emitExpr dispatches is` manually builds an `is`
-   node with fields `isValue` / `isType` (JVM-internal names). chicc consistently
-   uses `castExpr` / `checkedType` (both the `isExpr` constructor in `ast.chi` and
-   `emitIs` in `emitter.chi` agree). The test should use chicc's field names.
-3. **test_type_writer** — `encode recursive type` expects `encodeType` to emit the
-   full `{tag="rec",...}` wrapper. The compiler intentionally emits a typeref for
-   named recursive types to avoid infinite recursion during symbol serialization
-   (see warning above). Test expectation conflicts with a required strategy.
-4. **test_emitter_fns** — test isolation. All 14 sub-tests pass, but the file does
-   `emitExpr = { st, e -> ... }` at top level, which compiles to
-   `__chicc__emitter.emitExpr = ...` — i.e. it **mutates the global `emitExpr`
-   that the self-hosted compiler itself uses**. Under `compileModules` the test
-   runs in the same process as the compiler, so once test_runner loads, every
-   package compiled afterwards uses the test's stub and fails (cascading nil
-   derefs in checks/symbols). On the JVM bootstrap the compiler was a separate
-   binary, so the reassignment was harmless. Fix on the test/runner side
-   (save/restore `emitExpr`, or isolate), or rework the compiler's mutable-global
-   wiring (`pub var emitExpr`/`parseExpression`/...).
+1. **test_cli** — `cliMain with no args` expected exit code 1, but `specs/cli`
+   says *"No arguments: starts the REPL"*. chicc correctly runs the REPL
+   (returns 0). Fixed the test to start the REPL and assert 0; it redirects
+   stdin to `/dev/null` so the REPL sees immediate EOF and exits deterministically.
+2. **test_emitter_program** — `emitExpr dispatches is` built an `is` node with the
+   JVM-internal field names `isValue` / `isType`. chicc consistently uses
+   `castExpr` / `checkedType` (both `isExpr` in `ast.chi` and `emitIs` in
+   `emitter.chi`). Fixed the test to use chicc's field names.
+3. **test_type_writer** — `encode recursive type` expected the full `{tag="rec",...}`
+   wrapper. The compiler intentionally emits a bare typeref for named recursive
+   types to avoid infinite recursion during symbol serialisation (see warning
+   above); the defining occurrence (`encodeTypeWithContext`) is what serialises the
+   structure. Fixed the test to expect `{tag="typeref",ids={{"test","pkg","List"}}}`.
+4. **test_emitter_fns** — test isolation. All 14 sub-tests passed, but the file did
+   `emitExpr = { st, e -> ... }` at top level, mutating the global `emitExpr`
+   (`pub var` of `chicc/emitter`) that the self-hosted compiler dispatches through.
+   Under `compileModules` the test runs in the same process as the compiler, and
+   this package sorts **early** (it only depends on emitter/ast/types/util), so the
+   remaining chicc packages are compiled *after* the stub is installed → broken Lua
+   → `#nodes` nil error in checks. Fixed by saving the real dispatcher and restoring
+   it before `summary()`.
 
 ### B. Environment
 
-4. **test_parser_compat** — reads `golden/control_flow/...` relative to cwd, but
-   `golden/` lives at the meta-repo root (`../golden`), not under `chicc/`. Native
-   `chi` can't open the file. Needs a symlink `chicc/golden -> ../golden`, or the
-   test should resolve the path differently. Not a compiler bug.
+5. **test_parser_compat** — read `golden/control_flow/...` relative to cwd, but the
+   golden corpus lives at the meta-repo root (`../golden`), not under `chicc/`.
+   Fixed `tryParseGolden` to resolve the path (try `golden/`, then fall back to
+   `../golden/`) — no cross-repo symlink, repos stay separate.
 
-### C. Compiler design choice (risky to change)
+### C. Test bug — `{}` is context-dependent, and chicc was already correct
 
-5. **test_parser_stmts** — `parse empty block`: chicc parses `{}` as an empty
-   *record* (`ParseCreateRecord`); the test/JVM expect an empty *block*
-   (`ParseBlock`). Changing the disambiguation in `parser.chi:parseBraceExpr`
-   (line ~189) risks breaking code that uses `{}` as an empty record. Decide intent.
+6. **test_parser_stmts** — `parse empty block` expected `{}` to parse as an empty
+   *block* (`ParseBlock`). That expectation is wrong: `{}` is disambiguated by
+   **syntactic position**, and in *expression* position it is an empty **record**.
 
-(#5 test_types_ops — FIXED, see above.)
+   - In *body* positions (`fn f() {}`, `if/else`, `while`, `for`, `when`, `handle`)
+     `{}` is always a block — a dedicated parser path (`parseBlockFwd`) handles it.
+   - In *expression* position (`val x = {}`, an argument, a trailing lambda) `{}` is
+     an empty record. This matches the JVM compiler, whose ANTLR grammar does not
+     even list `block` as an `expression` alternative; `CreateRecord` (with optional
+     fields) wins. JVM test `FuncReaderTest`:
+     `testParse("{}")` → `ParseCreateRecord`, and `testParse("{ 0 }")` → `ParseLambda`.
+
+   chicc's `parser.chi:parseBraceExpr` already produced `ParseCreateRecord` for `{}`,
+   i.e. it was correct. Fixed the **test** to expect `ParseCreateRecord` (for both
+   `{}` and `{ \n }`) instead of changing the parser.
+
+(#5 test_types_ops — fixed earlier, see above.)
 
 ## Reproducing
 

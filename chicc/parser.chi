@@ -187,7 +187,10 @@ fn parseBraceExpr(p: Parser): any {
 
     // Check for empty braces: { }
     if firstKind == TK_RBRACE {
-        // Empty record literal (creates empty table)
+        // Empty record literal (creates empty table), matching the JVM compiler:
+        // `block` is not an expression-position alternative there, so `{}` in
+        // expression position is a ParseCreateRecord. Bodies (fn/if/while/...)
+        // never reach here — they parse their `{}` as a block via parseBlockFwd.
         advance(p) // consume {
         expect(p, TK_RBRACE)
         return parseCreateRecord([], startSec)

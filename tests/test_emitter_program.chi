@@ -129,7 +129,7 @@ test("emitExpr dispatches is") {
     val pkg = newPackage("m", "p")
     val prog = newProgram(pkg, [], [], [], unit)
     val st = newState(prog)
-    embedLua("__is_expr = {kind='is', isValue={kind='atom', atomValue='x', exprType={tag='primitive',ids={{name='int'}}}}, isType={tag='primitive',ids={{name='int'}}}}")
+    embedLua("__is_expr = {kind='is', castExpr={kind='atom', atomValue='x', exprType={tag='primitive',ids={{name='int'}}}}, checkedType={tag='primitive',ids={{name='int'}}}}")
     val expr: any = luaExpr("__is_expr")
     val result = emitExpr(st, expr)
     assertEqual(result, "true")

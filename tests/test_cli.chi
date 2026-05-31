@@ -15,10 +15,14 @@ import chicc/cli { cliMain }
 // Tests for hasErrors integration
 // ============================================================================
 
-test("cliMain with no args returns 1") {
+test("cliMain with no args starts the REPL and returns 0") {
+    // Per specs/cli, no arguments starts the interactive REPL.
+    // Redirect stdin to /dev/null so the REPL sees immediate EOF and exits
+    // cleanly with 0 (deterministic regardless of how the suite is invoked).
+    embedLua("io.input('/dev/null')")
     val args: any = luaExpr("{}")
     val result = cliMain(args)
-    assertEqual(result, 1)
+    assertEqual(result, 0)
 }
 
 test("cliMain with -h returns 0") {
