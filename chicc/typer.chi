@@ -20,6 +20,62 @@ fn typerErr(message: any, section: any) {
     }
 }
 
+// --- Helper: deterministically pick one UFCS candidate ---
+// When a method is called on an `any`-typed receiver, several loaded packages
+// may expose a same-named function (e.g. array/map/set all have `size`). Pick
+// the candidate whose package qualifier sorts first so resolution is stable
+// and matches the JVM bootstrap (which resolves e.g. `any.size()` to array).
+fn pickDeterministicUfcs(candidates: any): any {
+    val count = luaExpr("#candidates") as int
+    if count == 0 {
+        return unit
+    }
+    var best: any = luaExpr("candidates[1]")
+    var bestKey: string = luaExpr("(function() local dt = candidates[1].dotTarget; return (dt.moduleName or '') .. '/' .. (dt.packageName or '') .. '/' .. (dt.name or '') end)()") as string
+    var i = 2
+    while i <= count {
+        val cand: any = luaExpr("candidates[i]")
+        val key: string = luaExpr("(function() local dt = candidates[i].dotTarget; return (dt.moduleName or '') .. '/' .. (dt.packageName or '') .. '/' .. (dt.name or '') end)()") as string
+        if key < bestKey {
+            best = cand
+            bestKey = key
+        }
+        i = i + 1
+    }
+    best
+}
+
+// --- Helper: find a field's type within a sum type's variants ---
+// Narrows a sum (e.g. `Section | unit`) for field access by scanning its
+// variants for a record (unfolding recursive variants) that declares the
+// field. Returns the field's declared type, or unit if no variant has it.
+fn sumFieldType(sumT: Type, fieldName: string): any {
+    val variants = sumT.sumListTypes()
+    val count = variants.size()
+    var result: any = unit
+    var i = 1
+    while i <= count {
+        if result == unit {
+            val v = variants[i] as Type
+            val uv: Type = if v.tag == "recursive" { unfoldRecursive(v) } else { v }
+            if uv.tag == "record" {
+                val flds = uv.fields
+                val fcount = flds.size()
+                var fj = 1
+                while fj <= fcount {
+                    val f = flds[fj]
+                    if luaExpr("f.name") as string == fieldName {
+                        result = luaExpr("f.fieldType")
+                    }
+                    fj = fj + 1
+                }
+            }
+        }
+        i = i + 1
+    }
+    result
+}
+
 // --- Helper: remove a type from a sum type ---
 // Flatten sum via sumListTypes, filter out matching type, fold remaining back
 
@@ -317,7 +373,9 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
         // Fill default args for direct function calls (variable_access callee)
         if calleeKind == "variable_access" {
             val calleeName = luaExpr("term.callee.target.name") as string
-            val symbol = luaExpr("require('chicc/symbols').ctGetLocalSymbol(require('chicc/inference_context').icCompileTables, calleeName)") as any
+            // icCompileTables may be unset (e.g. when typing in isolation); guard
+            // the lookup so a missing symbol simply means "no default args".
+            val symbol = luaExpr("(function() local ct = require('chicc/inference_context').icCompileTables; return ct and require('chicc/symbols').ctGetLocalSymbol(ct, calleeName) or nil end)()") as any
             fillDefaultArgs(luaExpr("term.callParams") as any, symbol)
         }
 
@@ -349,6 +407,15 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
             unfoldRecursive(finalReceiverType as Type)
         } else {
             finalReceiverType
+        }
+        // Sum-type narrowing: if the receiver is a sum (e.g. `Section | unit`),
+        // resolve the field against the variant that declares it.
+        if luaExpr("effectiveReceiverType.tag == 'sum'") as bool {
+            val sumFt = sumFieldType(effectiveReceiverType as Type, fieldName)
+            if sumFt != unit {
+                setExprDotTarget(term as Expr, fieldDotTarget(fieldName))
+                return (sumFt as Type).instantiate(level, icFreshVariable as (int) -> Type)
+            }
         }
         val isRec = luaExpr("effectiveReceiverType.tag == 'record'") as bool
         var foundField = false
@@ -411,10 +478,38 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
                 setExprDotTarget(term as Expr, dotTarget)
                 (fnType as Type).instantiate(level, icFreshVariable as (int) -> Type)
             } else {
-                // No function found
-                val cp = luaExpr("memberSection and require('chicc/source').toCodePoint(memberSection) or nil") as any
-                embedLua("error(require('chicc/messages').memberDoesNotExist(finalReceiverType.tag or 'unknown', fieldName, cp))")
-                unit // unreachable
+                // When the receiver type is unknown — either the top type `any`
+                // or an unresolved type variable — allow dynamic field access
+                // (the JVM bootstrap treats `any` as a top type with structural
+                // field access permitted at runtime). The field type is unknown,
+                // so produce a fresh variable and emit a plain field lookup.
+                val rTag = luaExpr("effectiveReceiverType.tag") as string
+                val isAnyReceiver = rTag == "primitive" && luaExpr("(function() local ids = effectiveReceiverType.ids; return ids and #ids > 0 and ids[1] and ids[1].name == 'any' end)()") as bool
+                if rTag == "var" || isAnyReceiver {
+                    // A method call on an any/var receiver may match a same-named
+                    // function in several loaded packages. Pick one deterministically
+                    // so UFCS resolves (the fn_call handler then rewrites it); fall
+                    // back to a dynamic field access when no function matches.
+                    val loadedCandidates = icListAllLoadedFunctionsForType(fieldName, finalReceiverType)
+                    val ufcsCandidate = pickDeterministicUfcs(loadedCandidates)
+                    if ufcsCandidate != unit {
+                        val dotTarget2 = luaExpr("ufcsCandidate.dotTarget") as DotTarget | unit
+                        val fnType2 = luaExpr("ufcsCandidate.typeScheme") as any
+                        setExprDotTarget(term as Expr, dotTarget2)
+                        (fnType2 as Type).instantiate(level, icFreshVariable as (int) -> Type)
+                    } else {
+                        setExprDotTarget(term as Expr, fieldDotTarget(fieldName))
+                        // The field type is unknown; yield `any` (not a fresh var) so
+                        // that chained accesses and UFCS calls on the result still
+                        // resolve via the any-receiver rule, matching JVM semantics.
+                        tAny
+                    }
+                } else {
+                    // No matching field or function found
+                    val cp = luaExpr("memberSection and require('chicc/source').toCodePoint(memberSection) or nil") as any
+                    embedLua("error(require('chicc/messages').memberDoesNotExist(finalReceiverType.tag or 'unknown', fieldName, cp))")
+                    unit // unreachable
+                }
             }
         }
     } else if kind == "name_declaration" {

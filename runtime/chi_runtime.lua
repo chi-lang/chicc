@@ -179,7 +179,7 @@ end
 local _T_fn_any_unit       = '{tag="fn",types={{tag="any"},{tag="unit"}},typeParams={},defaults=0}'
 local _T_fn_string_string  = '{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'
 local _T_fn_string_any     = '{tag="fn",types={{tag="string"},{tag="any"}},typeParams={},defaults=0}'
-local _T_fn_string_a       = '{tag="fn",types={{tag="string"},{tag="var",name="a",level=1}},typeParams={},defaults=0}'
+local _T_fn_string_a       = '{tag="fn",types={{tag="string"},{tag="var",name="a",level=1}},typeParams={"a"},defaults=0}'
 local _T_fn_string_unit    = '{tag="fn",types={{tag="string"},{tag="unit"}},typeParams={},defaults=0}'
 local _T_fn_any_string     = '{tag="fn",types={{tag="any"},{tag="string"}},typeParams={},defaults=0}'
 

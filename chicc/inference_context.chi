@@ -249,15 +249,13 @@ pub fn icListCurrentPackageFunctionsForType(name: string, receiverType: any): ar
             if icTrialUnify(symType, receiverType) {
                 // Use the symbol's own module/package for the dot target
                 // (it may be imported from a different package)
+                // UFCS functions are always reached package-qualified (they need
+                // the `__P_` prefix when called inside a function body), so emit a
+                // package_fn dot target even for the current package. The fn_call
+                // handler relies on this tag to rewrite the call correctly.
                 val symMod = luaExpr("sym.moduleName") as string
                 val symPkg = luaExpr("sym.packageName") as string
-                val pkgMod = luaExpr("__P_.icPkg.moduleName") as string
-                val pkgPkg = luaExpr("__P_.icPkg.packageName") as string
-                val entry: any = if symMod == pkgMod && symPkg == pkgPkg {
-                    luaExpr("{ dotTarget = require('chicc/ast').localFnDotTarget(name), typeScheme = symType }")
-                } else {
-                    luaExpr("{ dotTarget = require('chicc/ast').packageFnDotTarget(symMod, symPkg, name), typeScheme = symType }")
-                }
+                val entry: any = luaExpr("{ dotTarget = require('chicc/ast').packageFnDotTarget(symMod, symPkg, name), typeScheme = symType }")
                 results.push(entry)
             }
         }

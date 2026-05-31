@@ -72,9 +72,14 @@ fn cnWalkParseAst(node: any) {
             if aliased == unit {
                 val localSym = luaExpr("ct ~= nil and require('chicc/symbols').ctGetLocalSymbol(ct, varName) or nil") as any
                 if localSym == unit {
-                    val sec = luaExpr("node.section") as any
-                    val cp = cnSectionToCp(sec)
-                    cnAddMessage(unrecognizedName(varName, cp))
+                    // Fallback: a public symbol from any loaded package is
+                    // reachable without an explicit import (JVM-style).
+                    val loadedSym = luaExpr("require('chicc/symbols').lookupLoadedPublicSymbol(varName)") as any
+                    if loadedSym == unit {
+                        val sec = luaExpr("node.section") as any
+                        val cp = cnSectionToCp(sec)
+                        cnAddMessage(unrecognizedName(varName, cp))
+                    }
                 }
             }
         }

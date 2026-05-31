@@ -157,7 +157,7 @@ pub fn newCompileTables(pkg: any, ns: any, imports: any): CompileTables {
     val importedSymbols = luaExpr("{}") as any
 
     // Process imports
-    val importCount = luaExpr("#imports") as int
+    val importCount = luaExpr("imports and #imports or 0") as int
     var i = 1
     while i <= importCount {
         val imp = luaExpr("imports[i]") as any
@@ -243,6 +243,14 @@ pub fn ctGetAliasedPackage(ct: CompileTables, name: string): any {
     val pat = ct.packageAliasTable
     val result: any = luaExpr("pat[name]")
     result
+}
+
+// Fallback symbol resolution: search every loaded package for a public
+// symbol with the given name. Mirrors the JVM bootstrap behaviour where a
+// public declaration is reachable without an explicit import. Returns a
+// record { moduleName, packageName, name } or unit when not found.
+pub fn lookupLoadedPublicSymbol(name: string): any {
+    luaExpr("(function() for qualifier, loaded in pairs(package.loaded) do if type(qualifier) == 'string' and type(loaded) == 'table' and loaded._package then local props = loaded._package[name]; if type(props) == 'table' and props.public == true then local slashPos = qualifier:find('/'); if slashPos then return { moduleName = qualifier:sub(1, slashPos - 1), packageName = qualifier:sub(slashPos + 1), name = name } end end end end; return nil end)()")
 }
 
 pub fn ctDefineTypeAlias(ct: CompileTables, alias: any): unit {
@@ -375,6 +383,10 @@ pub fn resolveType(typeTable: TypeTable, typeSchemeVars: array[string], ref: any
 }
 
 pub fn resolveTypeAndWrapRecursive(typeTable: TypeTable, typeSchemeVars: array[string], ref: any, typeId: any, level: int): any {
+    // Simple case: no type id to wrap against — just resolve the type directly.
+    if typeId == unit {
+        return resolveType(typeTable, typeSchemeVars, ref, level)
+    }
     // Create a self-referencing type variable for this type name
     val qualifiedName = luaExpr("typeId.moduleName .. '::' .. typeId.packageName .. '::' .. typeId.name") as string
     val selfRefVar = variableType(qualifiedName, 0 - 1)
