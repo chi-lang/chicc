@@ -1,6 +1,6 @@
 import std/lang { embedLua, luaExpr }
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import chicc/symbols { newSymbol, newFnSymbol, newSymbolTable, stAdd, stAddAlias, stGet, stRemove, stHas, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newTypeTable, ttAdd, ttAddByName, ttGet, newCompileTables, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, ctDefineTypeAlias }
+import chicc/symbols { newSymbol, newFnSymbol, newSymbolTable, stAdd, stAddAlias, stGet, stRemove, stHas, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newTypeTable, ttAdd, ttAddByName, ttGet, newCompileTables, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, ctDefineTypeAlias, lookupLoadedPublicSymbol }
 
 // --- Symbol tests ---
 
@@ -295,6 +295,47 @@ test("ctDefineTypeAlias") {
     ctDefineTypeAlias(ct, alias)
     val result = ttGet(ct.localTypeTable, "Foo")
     assertTrue(result != unit)
+}
+
+// --- lookupLoadedPublicSymbol (import-free public resolution) ---
+// These tests inject fake entries into package.loaded, capture the result, and
+// clean up *before* asserting so a failed assertion can't leak state into the
+// shared compiler running under compileModules.
+
+test("lookupLoadedPublicSymbol - resolves a public symbol without import") {
+    embedLua("package.loaded['zzz_test/alpha'] = { _package = { gizmo = { public = true } } }")
+    val sym: any = lookupLoadedPublicSymbol("gizmo")
+    val mod = luaExpr("sym and sym.moduleName or ''") as string
+    val pkg = luaExpr("sym and sym.packageName or ''") as string
+    val nm = luaExpr("sym and sym.name or ''") as string
+    embedLua("package.loaded['zzz_test/alpha'] = nil")
+    assertEqual(mod, "zzz_test")
+    assertEqual(pkg, "alpha")
+    assertEqual(nm, "gizmo")
+}
+
+test("lookupLoadedPublicSymbol - ignores private symbols") {
+    embedLua("package.loaded['zzz_test/gamma'] = { _package = { secret = { public = false } } }")
+    val sym: any = lookupLoadedPublicSymbol("secret")
+    val found = luaExpr("sym ~= nil") as bool
+    embedLua("package.loaded['zzz_test/gamma'] = nil")
+    assertFalse(found)
+}
+
+test("lookupLoadedPublicSymbol - returns unit when no package exports the name") {
+    val sym: any = lookupLoadedPublicSymbol("no_such_symbol_qwerty")
+    assertTrue(luaExpr("sym == nil") as bool)
+}
+
+test("lookupLoadedPublicSymbol - tie-break is deterministic (smallest qualifier)") {
+    // Two packages export the same public name; resolution must be stable
+    // regardless of pairs() iteration order: the smallest module/package wins.
+    embedLua("package.loaded['zzz_test/beta'] = { _package = { widget = { public = true } } }")
+    embedLua("package.loaded['aaa_test/beta'] = { _package = { widget = { public = true } } }")
+    val sym: any = lookupLoadedPublicSymbol("widget")
+    val mod = luaExpr("sym and sym.moduleName or ''") as string
+    embedLua("package.loaded['zzz_test/beta'] = nil; package.loaded['aaa_test/beta'] = nil")
+    assertEqual(mod, "aaa_test")
 }
 
 summary()

@@ -357,4 +357,43 @@ test("unify: empty constraints returns empty solutions") {
     assertEqual(count, 0)
 }
 
+// --- unit-as-nullable and any-intersection (JVM-compatible relaxations) ---
+
+test("unify: unit is accepted where a record is expected (nullable)") {
+    val rec = recordType([], [{ name: "x", fieldType: tInt }], [])
+    val c = newConstraint(rec, tUnit, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    // Should not throw, and produces no binding.
+    val solutions = unify(constraints)
+    assertEqual(luaExpr("#solutions") as int, 0)
+}
+
+test("unify: a record is accepted where unit is expected (nullable, reversed)") {
+    val rec = recordType([], [{ name: "x", fieldType: tInt }], [])
+    val c = newConstraint(tUnit, rec, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    val solutions = unify(constraints)
+    assertEqual(luaExpr("#solutions") as int, 0)
+}
+
+test("unify: unit is accepted where a sum type is expected (nullable)") {
+    val sumT = sumType([], tInt, tString, [])
+    val c = newConstraint(sumT, tUnit, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    val solutions = unify(constraints)
+    assertEqual(luaExpr("#solutions") as int, 0)
+}
+
+test("unify: actual any intersects a concrete primitive (no mismatch)") {
+    // any is the top type; expected=int, actual=any must not error.
+    val c = newConstraint(tInt, tAny, testSection, [])
+    val constraints: array[any] = luaExpr("{}")
+    embedLua("table.insert(constraints, c)")
+    val solutions = unify(constraints)
+    assertEqual(luaExpr("#solutions") as int, 0)
+}
+
 summary()

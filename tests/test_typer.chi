@@ -593,4 +593,37 @@ test("incremental UF: fallback path works when UF is not set") {
     assertTrue(sym != unit)
 }
 
+// --- field access: sum narrowing and any dynamic access (JVM-compatible) ---
+
+test("typeTerm: field access narrows a sum to the variant declaring the field") {
+    initTestCtx()
+    // s : { f: int } | unit  — accessing .f narrows to the record variant.
+    val recVariant = recordType([], [{ name: "f", fieldType: tInt }], [])
+    val sumT = sumType([], recVariant, tUnit, [])
+    icDefineLocalSymbol("s", sumT)
+    val uf = ufNew()
+    typerSetUf(uf)
+    val constraints = newConstraints()
+    val receiver = variableAccessExpr(localTarget("s"), testSection)
+    val expr = fieldAccessExpr(receiver, "f", testSection, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    typerSetUf(unit)
+    assertTrue(result.typeEquals(tInt))
+}
+
+test("typeTerm: field access on an any receiver yields any (dynamic access)") {
+    initTestCtx()
+    icDefineLocalSymbol("a", tAny)
+    val uf = ufNew()
+    typerSetUf(uf)
+    val constraints = newConstraints()
+    val receiver = variableAccessExpr(localTarget("a"), testSection)
+    // A field name that matches no loaded function, so UFCS finds nothing and
+    // the access falls back to a dynamic field lookup typed as `any`.
+    val expr = fieldAccessExpr(receiver, "no_such_field_qwerty", testSection, testSection)
+    val result = typeTerm(expr, 0, constraints)
+    typerSetUf(unit)
+    assertTrue(result.typeEquals(tAny))
+}
+
 summary()

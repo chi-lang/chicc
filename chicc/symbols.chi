@@ -249,8 +249,15 @@ pub fn ctGetAliasedPackage(ct: CompileTables, name: string): any {
 // symbol with the given name. Mirrors the JVM bootstrap behaviour where a
 // public declaration is reachable without an explicit import. Returns a
 // record { moduleName, packageName, name } or unit when not found.
+//
+// `pairs(package.loaded)` has no defined order, so when several loaded
+// packages export a public symbol with the same name we must break the tie
+// deterministically — otherwise resolution (and the self-hosted fixed point)
+// would depend on hash iteration order. We pick the lexicographically smallest
+// `module/package` qualifier, the same convention used by the UFCS resolver
+// (`pickDeterministicUfcs` in typer.chi).
 pub fn lookupLoadedPublicSymbol(name: string): any {
-    luaExpr("(function() for qualifier, loaded in pairs(package.loaded) do if type(qualifier) == 'string' and type(loaded) == 'table' and loaded._package then local props = loaded._package[name]; if type(props) == 'table' and props.public == true then local slashPos = qualifier:find('/'); if slashPos then return { moduleName = qualifier:sub(1, slashPos - 1), packageName = qualifier:sub(slashPos + 1), name = name } end end end end; return nil end)()")
+    luaExpr("(function() local bestQ = nil; for qualifier, loaded in pairs(package.loaded) do if type(qualifier) == 'string' and type(loaded) == 'table' and loaded._package then local props = loaded._package[name]; if type(props) == 'table' and props.public == true then if bestQ == nil or qualifier < bestQ then bestQ = qualifier end end end end; if bestQ == nil then return nil end; local slashPos = bestQ:find('/'); if not slashPos then return nil end; return { moduleName = bestQ:sub(1, slashPos - 1), packageName = bestQ:sub(slashPos + 1), name = name } end)()")
 }
 
 pub fn ctDefineTypeAlias(ct: CompileTables, alias: any): unit {

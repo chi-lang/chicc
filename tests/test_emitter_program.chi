@@ -299,4 +299,23 @@ test("emitProgram - package qualifier uses module and package name") {
     assertTrue(luaExpr("__ep8_hasPkg") as bool)
 }
 
+test("emitProgram - non-final top-level statements are scoped in do-end") {
+    // Two value declarations: the first (non-final) is wrapped in `do ... end`
+    // to free its transient locals (Lua's 200-locals-per-function limit); the
+    // last stays unwrapped so the module return follows it. Vals bind onto __P_,
+    // so the scoping is transparent.
+    val pkg = newPackage("mymod", "mypkg")
+    val v1 = nameDeclarationExpr(false, "a", false, unit, atomExpr("1", tInt, unit), unit)
+    embedLua("v1.exprType = {tag='primitive', ids={{moduleName='std',packageName='lang.int',name='int'}}}")
+    val v2 = nameDeclarationExpr(false, "b", false, unit, atomExpr("2", tInt, unit), unit)
+    embedLua("v2.exprType = {tag='primitive', ids={{moduleName='std',packageName='lang.int',name='int'}}}")
+    val prog = newProgram(pkg, [], [], [v1, v2], unit)
+    val output = emitProgram(prog, true)
+    // First decl wrapped: `do __P_.a=(1); end;`
+    embedLua("__ep9_hasDo = string.find(output, 'do ', 1, true) ~= nil and string.find(output, ' end;', 1, true) ~= nil")
+    assertTrue(luaExpr("__ep9_hasDo") as bool)
+    embedLua("__ep9_hasA = string.find(output, '__P_.a=(1)', 1, true) ~= nil")
+    assertTrue(luaExpr("__ep9_hasA") as bool)
+}
+
 summary()
