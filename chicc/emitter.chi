@@ -905,6 +905,23 @@ emitExpr = { st: EmitterState, expr: Expr ->
 
 // --- Top-level program emitter ---
 
+// A top-level statement is safe to wrap in a `do ... end` scope iff it does not
+// introduce a chunk-local that later statements rely on. Value/function
+// declarations and ordinary calls bind onto __P_ (or use transient temps), so
+// they are safe. Raw embedLua/luaExpr may declare persistent chunk locals (e.g.
+// `local __defining_type_id` in type_writer), so they must stay unwrapped.
+fn topLevelWrappable(expr: Expr): bool {
+    val kind = luaExpr("expr.kind") as string
+    if kind == "name_declaration" || kind == "assignment" {
+        true
+    } else if kind == "fn_call" {
+        val cname = luaExpr("(function() local c = expr.callee; if c and c.target and c.target.name then return c.target.name end; return '' end)()") as string
+        cname != "embedLua" && cname != "luaExpr"
+    } else {
+        false
+    }
+}
+
 pub fn emitProgram(prog: Program, emitModule: bool): string {
     val st = newState(prog)
     val progMod = prog.packageDef.moduleName
@@ -941,12 +958,27 @@ pub fn emitProgram(prog: Program, emitModule: bool): string {
     var ei = 1
     while ei <= exprCount {
         val expr = progExprs[ei] as Expr
-        val result = emitExpr(st, expr)
-        if ei == exprCount {
-            if emitModule {
-                emit(st, "return __P_")
-            } else {
-                emit(st, "return $result")
+        val isLast = ei == exprCount
+        // Scope each top-level statement's transient locals in a `do ... end`
+        // block to stay under Lua's 200-locals-per-function limit on large
+        // modules. Only safe statement kinds are wrapped: a raw embedLua/luaExpr
+        // may declare a chunk-local that later statements reference (e.g.
+        // `local __defining_type_id` in type_writer), so those stay unwrapped.
+        // The last statement is left unwrapped so non-module emission can return
+        // its result. Top-level vals/fns live on __P_, so wrapping is transparent.
+        val wrappable = emitModule && (isLast == false) && topLevelWrappable(expr)
+        if wrappable {
+            emit(st, "do ")
+            emitExpr(st, expr)
+            emit(st, " end;")
+        } else {
+            val result = emitExpr(st, expr)
+            if isLast {
+                if emitModule {
+                    emit(st, "return __P_")
+                } else {
+                    emit(st, "return $result")
+                }
             }
         }
         ei = ei + 1
