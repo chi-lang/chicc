@@ -1,6 +1,6 @@
 import std/lang { embedLua, luaExpr }
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import chicc/symbols { newSymbol, newFnSymbol, newSymbolTable, stAdd, stAddAlias, stGet, stRemove, stHas, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newTypeTable, ttAdd, ttAddByName, ttGet, newCompileTables, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, ctDefineTypeAlias, lookupLoadedPublicSymbol }
+import chicc/symbols { newSymbol, newFnSymbol, newSymbolTable, stAdd, stAddAlias, stGet, stRemove, stHas, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newTypeTable, ttAdd, ttAddByName, ttGet, newCompileTables, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, ctDefineTypeAlias, lookupLoadedPublicSymbol, lookupLoadedPublicSymbolQualifiers }
 
 // --- Symbol tests ---
 
@@ -336,6 +336,22 @@ test("lookupLoadedPublicSymbol - tie-break is deterministic (smallest qualifier)
     val mod = luaExpr("sym and sym.moduleName or ''") as string
     embedLua("package.loaded['zzz_test/beta'] = nil; package.loaded['aaa_test/beta'] = nil")
     assertEqual(mod, "aaa_test")
+}
+
+test("lookupLoadedPublicSymbolQualifiers - lists every exporter, sorted") {
+    embedLua("package.loaded['zzz_test/q1'] = { _package = { gadget = { public = true } } }")
+    embedLua("package.loaded['aaa_test/q2'] = { _package = { gadget = { public = true } } }")
+    val quals = lookupLoadedPublicSymbolQualifiers("gadget")
+    val n = luaExpr("#quals") as int
+    val first = luaExpr("quals[1] or ''") as string
+    embedLua("package.loaded['zzz_test/q1'] = nil; package.loaded['aaa_test/q2'] = nil")
+    assertEqual(n, 2)
+    assertEqual(first, "aaa_test/q2")
+}
+
+test("lookupLoadedPublicSymbolQualifiers - empty when no package exports the name") {
+    val quals = lookupLoadedPublicSymbolQualifiers("no_such_symbol_zxcv")
+    assertEqual(luaExpr("#quals") as int, 0)
 }
 
 summary()

@@ -1,6 +1,7 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, functionType }
-import chicc/ast { localTarget, packageTarget, atomExpr, variableAccessExpr, fnCallExpr, nameDeclarationExpr, assignmentExpr, fnExpr, blockExpr, returnExpr, newFnParam }
+import chicc/ast { localTarget, packageTarget, atomExpr, variableAccessExpr, fnCallExpr, nameDeclarationExpr, assignmentExpr, fnExpr, blockExpr, returnExpr, newFnParam, newImport, newImportEntry }
+import chicc/checks { importConflictCheck }
 import chicc/parse_ast { parseVariableRead, parseNameDeclaration, parseLambda, parseFor, parseFuncWithName, parseEffectDefinition, parseHandle, parseFnCall, parseBlock, parseBinaryOp, parseIfElse, newFormalArgument, newParseHandleCase }
 import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol }
 import chicc/messages { Message, unrecognizedName, cannotAccessInternalName, notAFunction, cannotChangeImmutableVariable, typeMismatch, genericError }
@@ -496,6 +497,67 @@ test("returnTypeCheck: name_declaration with fn value sets expected return type"
     val msgCount: int = luaExpr("#messages")
     // The return "hello" should produce a type mismatch (int vs string)
     assertEqual(msgCount, 1)
+}
+
+// =========================================================================
+// Ambiguity diagnostics
+// =========================================================================
+
+// Path B: the same effective name imported from two different packages.
+test("importConflictCheck: same name from two packages is ambiguous") {
+    val imp1 = newImport("std", "lang.map", unit, [newImportEntry("size", unit, testSection)], testSection)
+    val imp2 = newImport("std", "lang.set", unit, [newImportEntry("size", unit, testSection)], testSection)
+    val imports: any = luaExpr("{}")
+    embedLua("table.insert(imports, imp1); table.insert(imports, imp2)")
+    val messages: any = luaExpr("{}")
+    importConflictCheck(imports, messages)
+    assertEqual(luaExpr("#messages") as int, 1)
+    assertEqual(luaExpr("messages[1].code") as string, "AMBIGUOUS_NAME")
+}
+
+test("importConflictCheck: aliasing one import resolves the collision") {
+    val imp1 = newImport("std", "lang.map", unit, [newImportEntry("size", "msize", testSection)], testSection)
+    val imp2 = newImport("std", "lang.set", unit, [newImportEntry("size", unit, testSection)], testSection)
+    val imports: any = luaExpr("{}")
+    embedLua("table.insert(imports, imp1); table.insert(imports, imp2)")
+    val messages: any = luaExpr("{}")
+    importConflictCheck(imports, messages)
+    assertEqual(luaExpr("#messages") as int, 0)
+}
+
+test("importConflictCheck: a single import is fine") {
+    val imp1 = newImport("std", "lang.map", unit, [newImportEntry("size", unit, testSection)], testSection)
+    val imports: any = luaExpr("{}")
+    embedLua("table.insert(imports, imp1)")
+    val messages: any = luaExpr("{}")
+    importConflictCheck(imports, messages)
+    assertEqual(luaExpr("#messages") as int, 0)
+}
+
+test("importConflictCheck: same name from the same package is not a conflict") {
+    // Duplicate entry within one import -> same qualifier, deduped, no ambiguity.
+    val imp1 = newImport("std", "lang.map", unit, [newImportEntry("size", unit, testSection), newImportEntry("size", unit, testSection)], testSection)
+    val imports: any = luaExpr("{}")
+    embedLua("table.insert(imports, imp1)")
+    val messages: any = luaExpr("{}")
+    importConflictCheck(imports, messages)
+    assertEqual(luaExpr("#messages") as int, 0)
+}
+
+// Path A: a bare name reachable import-free in more than one loaded package.
+test("checkNames: import-free name in multiple loaded packages is ambiguous") {
+    embedLua("package.loaded['zzz_test/c1'] = { _package = { gadget = { public = true } } }")
+    embedLua("package.loaded['aaa_test/c2'] = { _package = { gadget = { public = true } } }")
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val messages: any = luaExpr("{}")
+    val readG = parseVariableRead("gadget", testSection)
+    val nodes: any = luaExpr("{}")
+    embedLua("table.insert(nodes, readG)")
+    checkNames(nodes, ct, messages)
+    val code = luaExpr("messages[1] and messages[1].code or ''") as string
+    embedLua("package.loaded['zzz_test/c1'] = nil; package.loaded['aaa_test/c2'] = nil")
+    assertEqual(code, "AMBIGUOUS_NAME")
 }
 
 summary()

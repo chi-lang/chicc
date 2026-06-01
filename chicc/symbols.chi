@@ -260,6 +260,14 @@ pub fn lookupLoadedPublicSymbol(name: string): any {
     luaExpr("(function() local bestQ = nil; for qualifier, loaded in pairs(package.loaded) do if type(qualifier) == 'string' and type(loaded) == 'table' and loaded._package then local props = loaded._package[name]; if type(props) == 'table' and props.public == true then if bestQ == nil or qualifier < bestQ then bestQ = qualifier end end end end; if bestQ == nil then return nil end; local slashPos = bestQ:find('/'); if not slashPos then return nil end; return { moduleName = bestQ:sub(1, slashPos - 1), packageName = bestQ:sub(slashPos + 1), name = name } end)()")
 }
 
+// Every loaded package exporting a public symbol with the given name, as a
+// sorted array of `module/package` qualifiers. Used to detect ambiguity:
+// when this returns more than one entry, an import-free reference cannot be
+// resolved unambiguously and should be reported rather than silently picked.
+pub fn lookupLoadedPublicSymbolQualifiers(name: string): array[string] {
+    luaExpr("(function() local hits = {}; for qualifier, loaded in pairs(package.loaded) do if type(qualifier) == 'string' and type(loaded) == 'table' and loaded._package then local props = loaded._package[name]; if type(props) == 'table' and props.public == true then hits[#hits+1] = qualifier end end end; table.sort(hits); return hits end)()") as array[string]
+}
+
 pub fn ctDefineTypeAlias(ct: CompileTables, alias: any): unit {
     ttAdd(ct.localTypeTable, alias)
 }

@@ -55,6 +55,14 @@ pub fn unrecognizedName(name: string, cp: { line: int, column: int } | unit): Me
     newMessage("UNRECOGNIZED_NAME", "Name '$name' was not recognized", cp)
 }
 
+// Reported when a name resolves to a public symbol in more than one package
+// (either imported from several packages, or reachable import-free in several
+// loaded packages). `candidates` is a human-readable list like
+// "std/lang.array, std/lang.map".
+pub fn ambiguousName(name: string, candidates: string, cp: { line: int, column: int } | unit): Message {
+    newMessage("AMBIGUOUS_NAME", "Ambiguous reference '$name': found in $candidates. Qualify it, import one (optionally with an alias), or call it as a method (value.$name()).", cp)
+}
+
 pub fn cannotAccessInternalName(name: string, cp: { line: int, column: int } | unit): Message {
     newMessage("CANNOT_ACCESS_INTERNAL", "$name is not public and is not from this module", cp)
 }

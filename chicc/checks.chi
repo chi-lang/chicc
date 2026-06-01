@@ -3,7 +3,7 @@ package chicc/checks
 import std/lang { luaExpr, embedLua }
 import chicc/types { Type, tUnit, typeEquals, sumListTypes }
 import chicc/unification { newConstraint }
-import chicc/messages { unrecognizedName, cannotAccessInternalName, notAFunction, cannotChangeImmutableVariable, typeMismatch, genericError }
+import chicc/messages { unrecognizedName, ambiguousName, cannotAccessInternalName, notAFunction, cannotChangeImmutableVariable, typeMismatch, genericError }
 import chicc/ast { exprChildren }
 
 // --- Module-level state for checkNames ---
@@ -73,13 +73,21 @@ fn cnWalkParseAst(node: any) {
                 val localSym = luaExpr("ct ~= nil and require('chicc/symbols').ctGetLocalSymbol(ct, varName) or nil") as any
                 if localSym == unit {
                     // Fallback: a public symbol from any loaded package is
-                    // reachable without an explicit import (JVM-style).
-                    val loadedSym = luaExpr("require('chicc/symbols').lookupLoadedPublicSymbol(varName)") as any
-                    if loadedSym == unit {
-                        val sec = luaExpr("node.section") as any
-                        val cp = cnSectionToCp(sec)
+                    // reachable without an explicit import (JVM-style). When more
+                    // than one loaded package exports the name we must not pick
+                    // one silently — report the ambiguity so the user qualifies,
+                    // aliases, or uses UFCS.
+                    val quals = luaExpr("require('chicc/symbols').lookupLoadedPublicSymbolQualifiers(varName)") as array[string]
+                    val qcount = luaExpr("#quals") as int
+                    val sec = luaExpr("node.section") as any
+                    val cp = cnSectionToCp(sec)
+                    if qcount == 0 {
                         cnAddMessage(unrecognizedName(varName, cp))
+                    } else if qcount > 1 {
+                        val joined = luaExpr("table.concat(quals, ', ')") as string
+                        cnAddMessage(ambiguousName(varName, joined, cp))
                     }
+                    // qcount == 1: resolves unambiguously, no message
                 }
             }
         }
@@ -311,6 +319,24 @@ fn cnWalkParseAst(node: any) {
 // nodes: array of ParseAst (the code field from ParseProgram)
 // ct: CompileTables
 // messages: array[any] (output parameter)
+
+// Report explicit-import collisions: when two `import` entries bind the same
+// effective name (alias if given, else the imported name) from different
+// packages, the reference is ambiguous. Aliasing one of them resolves it.
+pub fn importConflictCheck(imports: any, messages: any): unit {
+    val conflicts: any = luaExpr("(function() local byName = {}; local order = {}; for _, imp in ipairs(imports or {}) do local qual = imp.moduleName .. '/' .. imp.packageName; for _, e in ipairs(imp.entries or {}) do local eff = (e.alias ~= nil and e.alias ~= '') and e.alias or e.name; local rec = byName[eff]; if rec == nil then rec = { quals = {}, qualSet = {}, section = e.section or imp.section }; byName[eff] = rec; order[#order+1] = eff end; if not rec.qualSet[qual] then rec.qualSet[qual] = true; rec.quals[#rec.quals+1] = qual end end end; local out = {}; for _, eff in ipairs(order) do local rec = byName[eff]; if #rec.quals > 1 then table.sort(rec.quals); out[#out+1] = { name = eff, quals = table.concat(rec.quals, ', '), section = rec.section } end end; return out end)()")
+    val count = luaExpr("#conflicts") as int
+    var i = 1
+    while i <= count {
+        val c = luaExpr("conflicts[i]") as any
+        val cname = luaExpr("c.name") as string
+        val cquals = luaExpr("c.quals") as string
+        val cp = cnSectionToCp(luaExpr("c.section") as any)
+        val msg = ambiguousName(cname, cquals, cp)
+        embedLua("table.insert(messages, msg)")
+        i = i + 1
+    }
+}
 
 pub fn checkNames(nodes: any, ct: any, messages: any): unit {
     cnInit(ct, messages)
