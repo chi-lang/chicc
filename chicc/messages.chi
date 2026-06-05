@@ -63,6 +63,14 @@ pub fn ambiguousName(name: string, candidates: string, cp: { line: int, column: 
     newMessage("AMBIGUOUS_NAME", "Ambiguous reference '$name': found in $candidates. Qualify it, import one (optionally with an alias), or call it as a method (value.$name()).", cp)
 }
 
+// Reported for a UFCS method call on a receiver of unknown type (`any` or an
+// unresolved type variable) when the method name is provided by more than one
+// loaded package. Unlike `ambiguousName`, advising "call it as a method" makes
+// no sense here (it already is one) — the receiver's type must be pinned down.
+pub fn ambiguousMethod(name: string, candidates: string, cp: { line: int, column: int } | unit): Message {
+    newMessage("AMBIGUOUS_METHOD", "Ambiguous method '$name' on a receiver of unknown type: found in $candidates. Annotate or cast the receiver to a concrete type, or call it as a free function with an explicit import.", cp)
+}
+
 pub fn cannotAccessInternalName(name: string, cp: { line: int, column: int } | unit): Message {
     newMessage("CANNOT_ACCESS_INTERNAL", "$name is not public and is not from this module", cp)
 }
