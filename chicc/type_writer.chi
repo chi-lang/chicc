@@ -1,7 +1,6 @@
 // chicc/chicc/type_writer.chi
 package chicc/type_writer
 import std/lang { luaExpr, embedLua }
-import std/lang.string { replaceAll }
 import chicc/types { Type, TypeId, RecordField, newTypeId, primitiveType, functionType, recordType, sumType, sumCreate, arrayType, variableType, recursiveType, polyType, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, tAny, tUnit, tBool, tInt, tFloat, tString }
 import chicc/util { StringBuilder, newStringBuilder, append, toString }
 
