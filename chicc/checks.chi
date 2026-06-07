@@ -44,7 +44,7 @@ fn cnAddMessage(msg: any) {
     embedLua("table.insert(msgs, msg)")
 }
 
-fn cnSectionToCp(sec: any): any {
+fn cnSectionToCp(sec: any): { line: int, column: int } | unit {
     if sec == unit { unit }
     else {
         val line: int = luaExpr("sec.startLine")
@@ -382,7 +382,7 @@ fn walkExprList(exprs: any, visitFn: (any) -> bool) {
     }
 }
 
-fn exprSectionToCp(expr: any): any {
+fn exprSectionToCp(expr: any): { line: int, column: int } | unit {
     val sec = luaExpr("expr.section") as any
     if sec == unit { unit }
     else {
@@ -498,7 +498,7 @@ pub fn immutabilityCheck(exprs: any, currentModule: string, currentPackage: stri
 
 var rtExpectedReturnType: any = unit
 
-fn rtSectionToCp(sec: any): any {
+fn rtSectionToCp(sec: any): { line: int, column: int } | unit {
     if sec == unit { unit }
     else {
         val line: int = luaExpr("sec.startLine")

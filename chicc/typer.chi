@@ -57,7 +57,7 @@ fn ufcsCandidateQualifiers(candidates: any): array[string] {
 // Narrows a sum (e.g. `Section | unit`) for field access by scanning its
 // variants for a record (unfolding recursive variants) that declares the
 // field. Returns the field's declared type, or unit if no variant has it.
-fn sumFieldType(sumT: Type, fieldName: string): any {
+fn sumFieldType(sumT: Type, fieldName: string): Type | unit {
     val variants = sumT.sumListTypes()
     val count = variants.size()
     var result: any = unit
@@ -87,7 +87,7 @@ fn sumFieldType(sumT: Type, fieldName: string): any {
 // --- Helper: remove a type from a sum type ---
 // Flatten sum via sumListTypes, filter out matching type, fold remaining back
 
-fn sumRemoveType(sumT: any, toRemove: any): any {
+fn sumRemoveType(sumT: any, toRemove: any): Type {
     val allTypes = (sumT as Type).sumListTypes()
     val count = allTypes.size()
     val filtered: array[any] = []
@@ -208,7 +208,7 @@ pub fn typerGetUf(): any {
 }
 
 // --- Forward declaration for typeTerm (needed before typeTerms references it) ---
-pub var typeTerm: (any, int, any) -> any = { term: any, level: int, constraints: any -> unit }
+pub var typeTerm: (any, int, any) -> Type = { term: any, level: int, constraints: any -> tUnit }
 
 // --- Main API ---
 
@@ -225,7 +225,7 @@ pub fn typeTerms(terms: any, constraints: any, level: int): array[any] {
     results
 }
 
-fn typeTermImpl(term: any, level: int, constraints: any): any {
+fn typeTermImpl(term: any, level: int, constraints: any): Type {
     val kind = luaExpr("term.kind") as string
 
     val result: any = if kind == "atom" {
@@ -422,7 +422,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
             val sumFt = sumFieldType(effectiveReceiverType as Type, fieldName)
             if sumFt != unit {
                 setExprDotTarget(term as Expr, fieldDotTarget(fieldName))
-                return (sumFt as Type).instantiate(level, icFreshVariable as (int) -> Type)
+                return (sumFt as Type).instantiate(level, icFreshVariable)
             }
         }
         val isRec = luaExpr("effectiveReceiverType.tag == 'record'") as bool
@@ -484,7 +484,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
                 val dotTarget = luaExpr("fn_.dotTarget") as DotTarget | unit
                 val fnType = luaExpr("fn_.typeScheme") as any
                 setExprDotTarget(term as Expr, dotTarget)
-                (fnType as Type).instantiate(level, icFreshVariable as (int) -> Type)
+                (fnType as Type).instantiate(level, icFreshVariable)
             } else {
                 // When the receiver type is unknown — either the top type `any`
                 // or an unresolved type variable — allow dynamic field access
@@ -514,7 +514,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): any {
                         val dotTarget2 = luaExpr("ufcsCandidate.dotTarget") as DotTarget | unit
                         val fnType2 = luaExpr("ufcsCandidate.typeScheme") as any
                         setExprDotTarget(term as Expr, dotTarget2)
-                        (fnType2 as Type).instantiate(level, icFreshVariable as (int) -> Type)
+                        (fnType2 as Type).instantiate(level, icFreshVariable)
                     } else {
                         setExprDotTarget(term as Expr, fieldDotTarget(fieldName))
                         // The field type is unknown; yield `any` (not a fresh var) so

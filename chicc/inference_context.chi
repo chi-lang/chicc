@@ -70,7 +70,7 @@ pub fn icInit(pkg: any, ns: any, compileTables: any) {
     icLocalSymbols = icPackageSymbols
 }
 
-pub fn icFreshVariable(level: int): any {
+pub fn icFreshVariable(level: int): Type {
     val id = icNextVariableId
     icNextVariableId = id + 1
     variableType("a$id", level)
@@ -116,7 +116,7 @@ pub fn icGetLocalSymbol(name: string): any {
     icLocalSymbolsGet(icLocalSymbols, name)
 }
 
-pub fn icGetTargetType(tgt: any, level: int, section: any): any {
+pub fn icGetTargetType(tgt: any, level: int, section: any): Type {
     val tag = luaExpr("tgt.tag") as string
     if tag == "local" {
         val name = luaExpr("tgt.name") as string
@@ -125,7 +125,7 @@ pub fn icGetTargetType(tgt: any, level: int, section: any): any {
             embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Identifier ' .. tgt.name .. ' not found!' })")
             unit // unreachable
         } else {
-            (scheme as Type).instantiate(level, icFreshVariable as (int) -> Type)
+            (scheme as Type).instantiate(level, icFreshVariable)
         }
     } else if tag == "package" {
         val tgtMod = luaExpr("tgt.moduleName") as string
@@ -140,7 +140,7 @@ pub fn icGetTargetType(tgt: any, level: int, section: any): any {
                 embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Identifier ' .. tgt.name .. ' not found!' })")
                 unit // unreachable
             } else {
-                (scheme as Type).instantiate(level, icFreshVariable as (int) -> Type)
+                (scheme as Type).instantiate(level, icFreshVariable)
             }
         } else {
             // Different package — look up via ns
@@ -154,7 +154,7 @@ pub fn icGetTargetType(tgt: any, level: int, section: any): any {
                     embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Type not found for identifier ' .. tgt.name })")
                     unit // unreachable
                 } else {
-                    (symType as Type).instantiate(level, icFreshVariable as (int) -> Type)
+                    (symType as Type).instantiate(level, icFreshVariable)
                 }
             }
         }
