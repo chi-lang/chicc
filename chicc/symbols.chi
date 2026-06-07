@@ -286,7 +286,7 @@ pub fn arrayContains(arr: array[string], name: string): bool {
     false
 }
 
-pub fn resolveType(typeTable: TypeTable, typeSchemeVars: array[string], ref: any, level: int): any {
+pub fn resolveType(typeTable: TypeTable, typeSchemeVars: array[string], ref: any, level: int): Type {
     val tag = ref.trTag()
 
     if tag == "TypeParameterRef" {
@@ -397,7 +397,7 @@ pub fn resolveType(typeTable: TypeTable, typeSchemeVars: array[string], ref: any
     }
 }
 
-pub fn resolveTypeAndWrapRecursive(typeTable: TypeTable, typeSchemeVars: array[string], ref: any, typeId: any, level: int): any {
+pub fn resolveTypeAndWrapRecursive(typeTable: TypeTable, typeSchemeVars: array[string], ref: any, typeId: any, level: int): Type {
     // Simple case: no type id to wrap against — just resolve the type directly.
     if typeId == unit {
         return resolveType(typeTable, typeSchemeVars, ref, level)
