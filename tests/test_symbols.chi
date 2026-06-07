@@ -195,7 +195,7 @@ test("newCompileTables - with imports") {
     val ct = newCompileTables(pkg, unit, [imp])
     // importedSymbols should have "foo" and "baz" (aliased from "bar")
     val importedSymbols = ct.importedSymbols
-    val fooImport: any = luaExpr("importedSymbols['foo']")
+    val fooImport: any = importedSymbols.get("foo")
     assertTrue(fooImport != unit)
     val fooMod: string = luaExpr("fooImport.moduleName")
     assertEqual(fooMod, "std")
@@ -204,7 +204,7 @@ test("newCompileTables - with imports") {
     val fooOrig: string = luaExpr("fooImport.originalName")
     assertEqual(fooOrig, "foo")
 
-    val bazImport: any = luaExpr("importedSymbols['baz']")
+    val bazImport: any = importedSymbols.get("baz")
     assertTrue(bazImport != unit)
     val bazOrig: string = luaExpr("bazImport.originalName")
     assertEqual(bazOrig, "bar")

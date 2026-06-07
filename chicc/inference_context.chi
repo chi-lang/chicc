@@ -1,6 +1,7 @@
 // chicc/chicc/inference_context.chi
 package chicc/inference_context
 import std/lang { luaExpr, embedLua }
+import std/lang.map { emptyMap, forEach }
 import chicc/types { Type, TypeId, variableType }
 import chicc/ast { DotTarget }
 
@@ -17,21 +18,21 @@ var icPackageSymbols: any = unit
 // Each node is a Lua table: { parent: node|nil, compileTables: ct|nil, symbols: luaTable }
 
 fn icNewLocalSymbols(parent: any, ct: any): any {
-    val symbols: any = luaExpr("{}")
+    val symbols: any = emptyMap[string, any]()
     luaExpr("{ parent = parent, compileTables = ct, symbols = symbols }")
 }
 
 fn icLocalSymbolsGet(ls: any, name: string): any {
     val ct: any = luaExpr("ls.compileTables")
     val symbols: any = luaExpr("ls.symbols")
-    val existing: any = luaExpr("symbols[name]")
+    val existing: any = symbols.get(name)
     if ct != unit && existing == unit {
         // Fall back to compileTables
         val sym: any = luaExpr("require('chicc/symbols').ctGetLocalSymbol(ct, name)")
         if sym != unit {
             val symType: any = luaExpr("sym.symbolType")
             if symType != unit {
-                embedLua("symbols[name] = symType")
+                symbols.put(name, symType)
                 symType
             } else { unit }
         } else { unit }
@@ -50,13 +51,13 @@ fn icLocalSymbolsGet(ls: any, name: string): any {
 
 fn icLocalSymbolsDefine(ls: any, name: string, typeScheme: any) {
     val symbols: any = luaExpr("ls.symbols")
-    embedLua("symbols[name] = typeScheme")
+    symbols.put(name, typeScheme)
 }
 
 // Iterate all symbols in a scope node (not parents) — calls visitor(name, typeScheme)
 fn icLocalSymbolsForEach(ls: any, visitor: (string, any) -> unit) {
     val symbols: any = luaExpr("ls.symbols")
-    embedLua("for k, v in pairs(symbols) do visitor(k, v) end")
+    symbols.forEach(visitor)
 }
 
 // --- Public API ---

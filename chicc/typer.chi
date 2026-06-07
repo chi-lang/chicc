@@ -141,7 +141,7 @@ fn fillDefaultArgs(callParams: any, symbol: any) {
     while idx <= paramCount {
         val paramType = luaExpr("types[idx]") as any
         val filler = atomExpr("unit", paramType as Type, unit)
-        embedLua("table.insert(callParams, filler)")
+        (callParams as array[any]).push(filler)
         idx = idx + 1
     }
     unit
@@ -151,7 +151,18 @@ fn fillDefaultArgs(callParams: any, symbol: any) {
 
 fn addConstraint(constraints: any, expected: any, actual: any, section: any) {
     val c = newConstraint(expected, actual, section, luaExpr("{}") as array[any])
-    embedLua("table.insert(constraints, c)")
+    (constraints as array[any]).push(c)
+}
+
+// --- Helper: clear a constraints list IN PLACE (preserves aliasing; the same
+// list is threaded by reference through recursive typeTerm, so it must be
+// mutated, not rebound to a fresh array) ---
+
+fn clearConstraints(constraints: any) {
+    val c = constraints as array[any]
+    while c.size() > 0 {
+        c.removeLast()
+    }
 }
 
 // --- Helpers: check for numeric primitive types ---
@@ -348,7 +359,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
                     // Use packageTarget (not localTarget) because UFCS functions are
                     // package-level and need __P_ prefix when accessed inside functions.
                     val dotOp_receiver = luaExpr("dotOp.receiver") as any
-                    embedLua("table.insert(term.callParams, 1, dotOp_receiver)")
+                    (luaExpr("term.callParams") as array[any]).insertAt(1, dotOp_receiver)
                     val dtName = luaExpr("dotTarget.name") as string
                     val symbol = luaExpr("require('chicc/symbols').ctGetLocalSymbol(require('chicc/inference_context').icCompileTables, dtName)") as any
                      fillDefaultArgs(luaExpr("term.callParams") as any, symbol)
@@ -358,11 +369,11 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
                      val newCallee = variableAccessExpr(packageTarget(curMod, curPkg, dtName), memberSec)
                      val calleeType = luaExpr("dotOp.exprType") as Type | unit
                      newCallee.setExprType(calleeType)
-                     embedLua("term.callee = newCallee")
+                     term.callee = newCallee
                  } else if dtTag == "package_fn" {
                      // package_fn: prepend receiver, look up via ns, fill defaults
                      val dotOp_receiver = luaExpr("dotOp.receiver") as any
-                     embedLua("table.insert(term.callParams, 1, dotOp_receiver)")
+                     (luaExpr("term.callParams") as array[any]).insertAt(1, dotOp_receiver)
                      val dtMod = luaExpr("dotTarget.moduleName") as string
                      val dtPkg = luaExpr("dotTarget.packageName") as string
                      val dtName = luaExpr("dotTarget.name") as string
@@ -373,7 +384,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
                     val newCallee = variableAccessExpr(tgt, memberSec)
                     val calleeType = luaExpr("dotOp.exprType") as Type | unit
                     newCallee.setExprType(calleeType)
-                    embedLua("term.callee = newCallee")
+                    term.callee = newCallee
                 }
             }
         }
@@ -401,7 +412,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         val receiverType = typeTerm(receiver, level, constraints)
         val finalReceiverType: any = if typerUf != unit {
             unifyWithUf(constraints as array[any], typerUf)
-            embedLua("for i = 1, #constraints do constraints[i] = nil end")
+            clearConstraints(constraints)
             ufResolve(typerUf, receiverType as Type)
         } else {
             val solutions = unify(constraints as array[any])
@@ -544,7 +555,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         addConstraint(constraints, expectedType, valueType, valueSection)
         val mappedType: any = if typerUf != unit {
             unifyWithUf(constraints as array[any], typerUf)
-            embedLua("for i = 1, #constraints do constraints[i] = nil end")
+            clearConstraints(constraints)
             ufResolve(typerUf, expectedType as Type)
         } else {
             val solution = unify(constraints as array[any])
@@ -621,7 +632,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         }
         val finalIterableType: any = if typerUf != unit {
             unifyWithUf(constraints as array[any], typerUf)
-            embedLua("for i = 1, #constraints do constraints[i] = nil end")
+            clearConstraints(constraints)
             ufResolve(typerUf, iterableType as Type)
         } else {
             val solution = unify(constraints as array[any])
@@ -741,7 +752,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         // Build expected record type
         val rf = luaExpr("{ name = fieldName, fieldType = valueType }") as RecordField
         val rfields = luaExpr("{}") as array[RecordField]
-        embedLua("table.insert(rfields, rf)")
+        rfields.push(rf)
         val expectedRecType = recordType(luaExpr("{}") as array[TypeId], rfields, luaExpr("{}") as array[string])
 
         val faResult = icFreshVariable(level)
@@ -859,7 +870,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
             // Resolve type variables first (operands may be unresolved fn call results)
             val resolvedLhs: any = if typerUf != unit {
                 unifyWithUf(constraints as array[any], typerUf)
-                embedLua("for i = 1, #constraints do constraints[i] = nil end")
+                clearConstraints(constraints)
                 ufResolve(typerUf, lhsType as Type)
             } else { lhsType }
             val resolvedRhs: any = if typerUf != unit {

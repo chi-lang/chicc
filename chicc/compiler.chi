@@ -5,7 +5,8 @@
 package chicc/compiler
 import std/lang { luaExpr, embedLua }
 import chicc/source { Section }
-import chicc/ast { Expr, Import, TypeAlias, Program, newPackage, newProgram }
+import chicc/ast { Expr, Import, ImportEntry, TypeAlias, Program, newPackage, newProgram, newImport, newImportEntry, newTypeAlias }
+import chicc/types { Type, TypeId }
 import chicc/messages { invalidModuleName, invalidPackageName, cannotAccessInternalName, unrecognizedName }
 import chicc/symbols { newCompileTables, ctDefineTypeAlias }
 import chicc/checks { checkNames, importConflictCheck, visibilityCheck, fnCallCheck, immutabilityCheck, returnTypeCheck }
@@ -45,31 +46,104 @@ pub fn newLuaCompilationEnv(): any {
 // Lua helper: merge two import arrays
 // ============================================================================
 
-embedLua("__chicc_mergeImports = function(a, b) local result = {}; for _, imp in ipairs(a) do result[#result+1] = imp end; for _, imp in ipairs(b) do result[#result+1] = imp end; return result end")
+fn mergeImports(a: any, b: any): array[any] {
+    val result: array[any] = []
+    val an = luaExpr("#a") as int
+    var i = 1
+    while i <= an {
+        result.push(luaExpr("a[i]") as any)
+        i = i + 1
+    }
+    val bn = luaExpr("#b") as int
+    i = 1
+    while i <= bn {
+        result.push(luaExpr("b[i]") as any)
+        i = i + 1
+    }
+    result
+}
 
 // ============================================================================
 // Lua helper: build type scheme var name array from type parameters
 // ============================================================================
 
-embedLua("__chicc_typeParamNames = function(params) local vars = {}; for _, tp in ipairs(params) do vars[#vars+1] = tp.name end; return vars end")
+fn typeParamNames(params: any): array[string] {
+    val result: array[string] = []
+    val n = luaExpr("#params") as int
+    var i = 1
+    while i <= n {
+        result.push(luaExpr("params[i].name") as string)
+        i = i + 1
+    }
+    result
+}
 
 // ============================================================================
 // Lua helper: split expressions into functions vs code
 // ============================================================================
 
-embedLua("__chicc_splitExprs = function(expressions) local functions = {}; local code = {}; for _, expr in ipairs(expressions) do if (expr.kind == 'name_declaration' and expr.value and expr.value.kind == 'fn' and expr.expectedType ~= nil) or expr.kind == 'effect_definition' then functions[#functions+1] = expr else code[#code+1] = expr end end; return { functions = functions, code = code } end")
+fn splitExprs(expressions: any): { functions: array[any], code: array[any] } {
+    val functions: array[any] = []
+    val code: array[any] = []
+    val n = luaExpr("#expressions") as int
+    var i = 1
+    while i <= n {
+        val expr = luaExpr("expressions[i]") as any
+        val kind = luaExpr("expr.kind") as string
+        val isFn = if kind == "name_declaration" {
+            luaExpr("expr.value ~= nil and expr.value.kind == 'fn' and expr.expectedType ~= nil") as bool
+        } else { false }
+        if isFn || kind == "effect_definition" {
+            functions.push(expr)
+        } else {
+            code.push(expr)
+        }
+        i = i + 1
+    }
+    { functions: functions, code: code }
+}
 
 // ============================================================================
 // Lua helper: convert raw imports to typed Import records
 // ============================================================================
 
-embedLua("__chicc_convertImports = function(rawImports) local _ast = require('chicc/ast'); local r = {}; for _, imp in ipairs(rawImports) do local entries = {}; if imp.entries then for _, e in ipairs(imp.entries) do entries[#entries+1] = _ast.newImportEntry(e.name, e.alias, e.section) end end; r[#r+1] = _ast.newImport(imp.moduleName, imp.packageName, imp.packageAlias, entries, imp.section) end; return r end")
+fn convertImports(rawImports: any): array[Import] {
+    val result: array[Import] = []
+    val n = luaExpr("#rawImports") as int
+    var i = 1
+    while i <= n {
+        val imp = luaExpr("rawImports[i]") as any
+        val entries: array[ImportEntry] = []
+        if luaExpr("imp.entries ~= nil") as bool {
+            val ec = luaExpr("#imp.entries") as int
+            var j = 1
+            while j <= ec {
+                val e = luaExpr("imp.entries[j]") as any
+                entries.push(newImportEntry(luaExpr("e.name") as string, luaExpr("e.alias") as string | unit, luaExpr("e.section") as Section | unit))
+                j = j + 1
+            }
+        }
+        result.push(newImport(luaExpr("imp.moduleName") as string, luaExpr("imp.packageName") as string, luaExpr("imp.packageAlias") as string | unit, entries, luaExpr("imp.section") as Section | unit))
+        i = i + 1
+    }
+    result
+}
 
 // ============================================================================
 // Lua helper: convert raw type aliases to typed TypeAlias records
 // ============================================================================
 
-embedLua("__chicc_convertTypeAliases = function(rawAliases) local _ast = require('chicc/ast'); local r = {}; for _, alias in ipairs(rawAliases) do r[#r+1] = _ast.newTypeAlias(alias.typeId, alias.aliasType) end; return r end")
+fn convertTypeAliases(rawAliases: any): array[TypeAlias] {
+    val result: array[TypeAlias] = []
+    val n = luaExpr("#rawAliases") as int
+    var i = 1
+    while i <= n {
+        val alias = luaExpr("rawAliases[i]") as any
+        result.push(newTypeAlias(luaExpr("alias.typeId") as TypeId, luaExpr("alias.aliasType") as Type))
+        i = i + 1
+    }
+    result
+}
 
 // ============================================================================
 // Lua helper: print per-phase profile timing (gated by CHI_PROFILE)
@@ -101,13 +175,13 @@ fn markUsedWalkImpl(expr: any) {
     if kind == "name_declaration" {
         val value = luaExpr("expr.value") as any
         if value != unit {
-            embedLua("value.used = true")
+            value.used = true
             markUsedWalk(value)
         }
     } else if kind == "assignment" {
         val value = luaExpr("expr.value") as any
         if value != unit {
-            embedLua("value.used = true")
+            value.used = true
             markUsedWalk(value)
         }
     } else if kind == "block" {
@@ -117,7 +191,7 @@ fn markUsedWalkImpl(expr: any) {
             val used = luaExpr("expr.used == true") as bool
             val lastExpr = luaExpr("body[#body]") as any
             if used {
-                embedLua("lastExpr.used = true")
+                lastExpr.used = true
             }
             var bi = 1
             while bi <= bodyCount {
@@ -129,7 +203,7 @@ fn markUsedWalkImpl(expr: any) {
     } else if kind == "fn_call" {
         val callee = luaExpr("expr.callee") as any
         if callee != unit {
-            embedLua("callee.used = true")
+            callee.used = true
             markUsedWalk(callee)
         }
         val params = luaExpr("expr.callParams") as any
@@ -137,7 +211,7 @@ fn markUsedWalkImpl(expr: any) {
         var pi = 1
         while pi <= paramCount {
             val p = luaExpr("params[pi]") as any
-            embedLua("p.used = true")
+            p.used = true
             markUsedWalk(p)
             pi = pi + 1
         }
@@ -145,50 +219,50 @@ fn markUsedWalkImpl(expr: any) {
         val used = luaExpr("expr.used == true") as bool
         val cond = luaExpr("expr.condition") as any
         if cond != unit {
-            embedLua("cond.used = true")
+            cond.used = true
             markUsedWalk(cond)
         }
         val thenB = luaExpr("expr.thenBranch") as any
         if thenB != unit {
-            if used { embedLua("thenB.used = true") }
+            if used { thenB.used = true }
             markUsedWalk(thenB)
         }
         val elseB = luaExpr("expr.elseBranch") as any
         if elseB != unit {
-            if used { embedLua("elseB.used = true") }
+            if used { elseB.used = true }
             markUsedWalk(elseB)
         }
     } else if kind == "infix_op" {
         val used = luaExpr("expr.used == true") as bool
         val left = luaExpr("expr.left") as any
         if left != unit {
-            if used { embedLua("left.used = true") }
+            if used { left.used = true }
             markUsedWalk(left)
         }
         val right = luaExpr("expr.right") as any
         if right != unit {
-            if used { embedLua("right.used = true") }
+            if used { right.used = true }
             markUsedWalk(right)
         }
     } else if kind == "prefix_op" {
         val used = luaExpr("expr.used == true") as bool
         val inner = luaExpr("expr.prefixExpr") as any
         if inner != unit {
-            if used { embedLua("inner.used = true") }
+            if used { inner.used = true }
             markUsedWalk(inner)
         }
     } else if kind == "cast" {
         val used = luaExpr("expr.used == true") as bool
         val inner = luaExpr("expr.castExpr") as any
         if inner != unit {
-            if used { embedLua("inner.used = true") }
+            if used { inner.used = true }
             markUsedWalk(inner)
         }
     } else if kind == "is" {
         val used = luaExpr("expr.used == true") as bool
         val inner = luaExpr("expr.castExpr") as any
         if inner != unit {
-            if used { embedLua("inner.used = true") }
+            if used { inner.used = true }
             markUsedWalk(inner)
         }
     } else if kind == "create_record" {
@@ -200,7 +274,7 @@ fn markUsedWalkImpl(expr: any) {
             val f = luaExpr("fields[fi]") as any
             val fVal = luaExpr("f.value") as any
             if fVal != unit {
-                if used { embedLua("fVal.used = true") }
+                if used { fVal.used = true }
                 markUsedWalk(fVal)
             }
             fi = fi + 1
@@ -212,42 +286,42 @@ fn markUsedWalkImpl(expr: any) {
         var vi = 1
         while vi <= valCount {
             val v = luaExpr("values[vi]") as any
-            if used { embedLua("v.used = true") }
+            if used { v.used = true }
             markUsedWalk(v)
             vi = vi + 1
         }
     } else if kind == "index_op" {
         val indexVar = luaExpr("expr.indexVariable") as any
         if indexVar != unit {
-            embedLua("indexVar.used = true")
+            indexVar.used = true
             markUsedWalk(indexVar)
         }
         val indexExpr = luaExpr("expr.indexExpr") as any
         if indexExpr != unit {
-            embedLua("indexExpr.used = true")
+            indexExpr.used = true
             markUsedWalk(indexExpr)
         }
     } else if kind == "indexed_assignment" {
         val indexVar = luaExpr("expr.indexVariable") as any
         if indexVar != unit {
-            embedLua("indexVar.used = true")
+            indexVar.used = true
             markUsedWalk(indexVar)
         }
         val indexExpr = luaExpr("expr.indexExpr") as any
         if indexExpr != unit {
-            embedLua("indexExpr.used = true")
+            indexExpr.used = true
             markUsedWalk(indexExpr)
         }
         val indexVal = luaExpr("expr.indexValue") as any
         if indexVal != unit {
-            embedLua("indexVal.used = true")
+            indexVal.used = true
             markUsedWalk(indexVal)
         }
     } else if kind == "handle" {
         val used = luaExpr("expr.used == true") as bool
         val body = luaExpr("expr.handleBody") as any
         if body != unit {
-            if used { embedLua("body.used = true") }
+            if used { body.used = true }
             markUsedWalk(body)
         }
         val cases = luaExpr("expr.handleCases") as any
@@ -264,13 +338,13 @@ fn markUsedWalkImpl(expr: any) {
     } else if kind == "return" {
         val retVal = luaExpr("expr.returnValue") as any
         if retVal != unit {
-            embedLua("retVal.used = true")
+            retVal.used = true
             markUsedWalk(retVal)
         }
     } else if kind == "for_loop" {
         val iter = luaExpr("expr.iterable") as any
         if iter != unit {
-            embedLua("iter.used = true")
+            iter.used = true
             markUsedWalk(iter)
         }
         val forBody = luaExpr("expr.forBody") as any
@@ -280,7 +354,7 @@ fn markUsedWalkImpl(expr: any) {
     } else if kind == "while_loop" {
         val cond = luaExpr("expr.loopCondition") as any
         if cond != unit {
-            embedLua("cond.used = true")
+            cond.used = true
             markUsedWalk(cond)
         }
         val loopBody = luaExpr("expr.loopBody") as any
@@ -295,18 +369,18 @@ fn markUsedWalkImpl(expr: any) {
     } else if kind == "field_assignment" {
         val recv = luaExpr("expr.receiver") as any
         if recv != unit {
-            embedLua("recv.used = true")
+            recv.used = true
             markUsedWalk(recv)
         }
         val value = luaExpr("expr.value") as any
         if value != unit {
-            embedLua("value.used = true")
+            value.used = true
             markUsedWalk(value)
         }
     } else if kind == "field_access" {
         val recv = luaExpr("expr.receiver") as any
         if recv != unit {
-            embedLua("recv.used = true")
+            recv.used = true
             markUsedWalk(recv)
         }
     } else if kind == "interpolated_string" {
@@ -316,7 +390,7 @@ fn markUsedWalkImpl(expr: any) {
         var pi = 1
         while pi <= partCount {
             val p = luaExpr("parts[pi]") as any
-            if used { embedLua("p.used = true") }
+            if used { p.used = true }
             markUsedWalk(p)
             pi = pi + 1
         }
@@ -333,7 +407,7 @@ pub fn replaceTypes(expr: any, solutions: any) {
     val exprType = luaExpr("expr.exprType") as any
     if exprType != unit {
         val replaced = luaExpr("require('chicc/types').mapType(exprType, solutions)") as any
-        embedLua("expr.exprType = replaced")
+        expr.exprType = replaced
     }
     val children = luaExpr("require('chicc/ast').exprChildren(expr)") as any
     val childCount = luaExpr("#children") as int
@@ -389,7 +463,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
     var mi = 1
     while mi <= parseMsgCount {
         val msg = luaExpr("parseMessages[mi]") as any
-        embedLua("table.insert(resultMessages, msg)")
+        resultMessages.push(msg)
         mi = mi + 1
     }
 
@@ -409,12 +483,12 @@ pub fn compile(source: string, ns: any): CompilationResult {
     val emptyModName = luaExpr("moduleName == ''") as bool
     if emptyModName {
         val msg = invalidModuleName(moduleName, { line: 1, column: 0 })
-        embedLua("table.insert(resultMessages, msg)")
+        resultMessages.push(msg)
     }
     val emptyPkgName = luaExpr("packageName == ''") as bool
     if emptyPkgName {
         val msg = invalidPackageName(packageName, { line: 1, column: 0 })
-        embedLua("table.insert(resultMessages, msg)")
+        resultMessages.push(msg)
     }
 
     // Validate imported names exist and are public
@@ -443,7 +517,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
                         luaExpr("{ line = line, column = col }") as any
                     } else { unit }
                     val msg = cannotAccessInternalName(entryName, cp as {line: int, column: int} | unit)
-                    embedLua("table.insert(resultMessages, msg)")
+                    resultMessages.push(msg)
                 }
             } else if sym == unit && typeAlias == unit {
                 val cp = if entrySec != unit {
@@ -452,7 +526,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
                     luaExpr("{ line = line, column = col }") as any
                 } else { unit }
                 val msg = unrecognizedName(entryName, cp as {line: int, column: int} | unit)
-                embedLua("table.insert(resultMessages, msg)")
+                resultMessages.push(msg)
             }
             ei = ei + 1
         }
@@ -463,7 +537,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
 
     // PHASE 3: BUILD COMPILE TABLES
     val preludeImports = luaExpr("ns ~= nil and ns.getPreludeImports and ns.getPreludeImports() or {}") as any
-    val allImports = luaExpr("__chicc_mergeImports(preludeImports, sourceImports)") as any
+    val allImports = mergeImports(preludeImports, sourceImports)
     val tables = newCompileTables(pkg, ns, allImports)
 
     // Resolve type aliases from source
@@ -476,7 +550,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
         val aliasName = luaExpr("aliasDef.name") as string
         val aliasTypeRef = luaExpr("aliasDef.typeRef") as any
         val aliasTypeParams = luaExpr("aliasDef.typeParameters") as any
-        val typeSchemeVars = luaExpr("__chicc_typeParamNames(aliasTypeParams)") as any
+        val typeSchemeVars = typeParamNames(aliasTypeParams)
         val typeId = luaExpr("{ moduleName = moduleName, packageName = packageName, name = aliasName }") as any
         val resolved = luaExpr("require('chicc/symbols').resolveTypeAndWrapRecursive(tables.localTypeTable, typeSchemeVars, aliasTypeRef, typeId, 1)") as any
         // Ensure the resolved type carries its own typeId in ids (needed for typeref encoding)
@@ -484,7 +558,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
         // For records/sums, prepend so ids[1] is the alias typeId
         embedLua("local rt = resolved; if rt.tag == 'recursive' then rt = rt.innerType end; if rt.ids then if rt.tag == 'primitive' then table.insert(rt.ids, typeId) else table.insert(rt.ids, 1, typeId) end end")
         val typeAlias = luaExpr("{ typeId = typeId, aliasType = resolved }") as any
-        embedLua("table.insert(definedTypeAliases, typeAlias)")
+        (definedTypeAliases as array[any]).push(typeAlias)
         ctDefineTypeAlias(tables, typeAlias)
         ai = ai + 1
     }
@@ -503,8 +577,8 @@ pub fn compile(source: string, ns: any): CompilationResult {
         val emptyExprs = luaExpr("{}") as array[Expr]
         val section = luaExpr("parsedProgram.section") as Section | unit
         val pkgR = newPackage(moduleName, packageName)
-        val impsR = luaExpr("__chicc_convertImports(allImports)") as array[Import]
-        val aliasesR = luaExpr("__chicc_convertTypeAliases(definedTypeAliases)") as array[TypeAlias]
+        val impsR = convertImports(allImports)
+        val aliasesR = convertTypeAliases(definedTypeAliases)
         val program = newProgram(pkgR, impsR, aliasesR, emptyExprs, section)
         embedLua("__chicc_printProfile(__ts, packageName)")
         return newCompilationResult(resultMessages, program)
@@ -518,9 +592,9 @@ pub fn compile(source: string, ns: any): CompilationResult {
     } else {
         val isMsg = luaExpr("type(__chicc_conv_result) == 'table' and __chicc_conv_result.code ~= nil") as bool
         if isMsg {
-            embedLua("table.insert(resultMessages, __chicc_conv_result)")
+            resultMessages.push(luaExpr("__chicc_conv_result") as any)
         } else {
-            embedLua("table.insert(resultMessages, { code = 'ERROR', text = tostring(__chicc_conv_result), codePoint = nil })")
+            resultMessages.push(luaExpr("{ code = 'ERROR', text = tostring(__chicc_conv_result), codePoint = nil }") as any)
         }
         luaExpr("{}") as any
     }
@@ -533,9 +607,9 @@ pub fn compile(source: string, ns: any): CompilationResult {
     embedLua("if __prof then __ts[6] = os.clock() end")
 
     // PHASE 6: TYPE INFERENCE (Hindley-Milner)
-    val groups = luaExpr("__chicc_splitExprs(expressions)") as any
-    val functions = luaExpr("groups.functions") as any
-    val code = luaExpr("groups.code") as any
+    val groups = splitExprs(expressions)
+    val functions = groups.functions
+    val code = groups.code
 
     // Initialize inference context
     icInit(pkg, ns, tables)
@@ -572,9 +646,9 @@ pub fn compile(source: string, ns: any): CompilationResult {
         embedLua("require('chicc/typer').typerSetUf(nil)")
         val isTcMsg = luaExpr("type(__chicc_tc_err) == 'table' and __chicc_tc_err.code ~= nil") as bool
         if isTcMsg {
-            embedLua("table.insert(resultMessages, __chicc_tc_err)")
+            resultMessages.push(luaExpr("__chicc_tc_err") as any)
         } else {
-            embedLua("table.insert(resultMessages, { code = 'ERROR', text = tostring(__chicc_tc_err), codePoint = nil })")
+            resultMessages.push(luaExpr("{ code = 'ERROR', text = tostring(__chicc_tc_err), codePoint = nil }") as any)
         }
     }
 
@@ -588,9 +662,9 @@ pub fn compile(source: string, ns: any): CompilationResult {
             embedLua("require('chicc/typer').typerSetUf(nil)")
             val isFnMsg = luaExpr("type(__chicc_fn_err) == 'table' and __chicc_fn_err.code ~= nil") as bool
             if isFnMsg {
-                embedLua("table.insert(resultMessages, __chicc_fn_err)")
+                resultMessages.push(luaExpr("__chicc_fn_err") as any)
             } else {
-                embedLua("table.insert(resultMessages, { code = 'ERROR', text = tostring(__chicc_fn_err), codePoint = nil })")
+                resultMessages.push(luaExpr("{ code = 'ERROR', text = tostring(__chicc_fn_err), codePoint = nil }") as any)
             }
         }
         fi = fi + 1
@@ -602,8 +676,8 @@ pub fn compile(source: string, ns: any): CompilationResult {
     if msgCountAfterTyping > 0 {
         val section = luaExpr("parsedProgram.section") as Section | unit
         val pkgT = newPackage(moduleName, packageName)
-        val impsT = luaExpr("__chicc_convertImports(allImports)") as array[Import]
-        val aliasesT = luaExpr("__chicc_convertTypeAliases(definedTypeAliases)") as array[TypeAlias]
+        val impsT = convertImports(allImports)
+        val aliasesT = convertTypeAliases(definedTypeAliases)
         val program = newProgram(pkgT, impsT, aliasesT, expressions as array[Expr], section)
         embedLua("__chicc_printProfile(__ts, packageName)")
         return newCompilationResult(resultMessages, program)
@@ -620,8 +694,8 @@ pub fn compile(source: string, ns: any): CompilationResult {
     // PHASE 8: BUILD AND RETURN RESULT
     val section = luaExpr("parsedProgram.section") as Section | unit
     val pkgF = newPackage(moduleName, packageName)
-    val impsF = luaExpr("__chicc_convertImports(allImports)") as array[Import]
-    val aliasesF = luaExpr("__chicc_convertTypeAliases(definedTypeAliases)") as array[TypeAlias]
+    val impsF = convertImports(allImports)
+    val aliasesF = convertTypeAliases(definedTypeAliases)
     val program = newProgram(pkgF, impsF, aliasesF, expressions as array[Expr], section)
     embedLua("__chicc_printProfile(__ts, packageName)")
     newCompilationResult(resultMessages, program)

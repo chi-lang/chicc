@@ -41,7 +41,7 @@ fn cnWithNewScope(f: () -> unit) {
 
 fn cnAddMessage(msg: any) {
     val msgs = cnMessages
-    embedLua("table.insert(msgs, msg)")
+    (msgs as array[any]).push(msg)
 }
 
 fn cnSectionToCp(sec: any): { line: int, column: int } | unit {
@@ -333,7 +333,7 @@ pub fn importConflictCheck(imports: any, messages: any): unit {
         val cquals = luaExpr("c.quals") as string
         val cp = cnSectionToCp(luaExpr("c.section") as any)
         val msg = ambiguousName(cname, cquals, cp)
-        embedLua("table.insert(messages, msg)")
+        (messages as array[any]).push(msg)
         i = i + 1
     }
 }
@@ -413,7 +413,7 @@ pub fn visibilityCheck(exprs: any, currentModule: string, ns: any, messages: any
                                 val targetStr: string = "$tMod/$tPkg.$tName"
                                 val cp = exprSectionToCp(expr)
                                 val msg = cannotAccessInternalName(targetStr, cp)
-                                embedLua("table.insert(messages, msg)")
+                                (messages as array[any]).push(msg)
                             }
                         }
                     }
@@ -438,7 +438,7 @@ pub fn fnCallCheck(exprs: any, messages: any): unit {
                     if ctTag != "fn" {
                         val cp = exprSectionToCp(callee)
                         val msg = notAFunction(cp)
-                        embedLua("table.insert(messages, msg)")
+                        (messages as array[any]).push(msg)
                     }
                 }
             }
@@ -484,7 +484,7 @@ pub fn immutabilityCheck(exprs: any, currentModule: string, currentPackage: stri
                     if mutBool == false {
                         val cp = exprSectionToCp(expr)
                         val msg = cannotChangeImmutableVariable(cp)
-                        embedLua("table.insert(messages, msg)")
+                        (messages as array[any]).push(msg)
                     }
                 }
             }
@@ -590,7 +590,7 @@ fn rtWalkExprImpl(expr: any, messages: any) {
             val sec = luaExpr("expr.section") as any
             val cp = rtSectionToCp(sec)
             val msg = genericError("Return used outside of function body.", cp)
-            embedLua("table.insert(messages, msg)")
+            (messages as array[any]).push(msg)
         } else {
             val retVal = luaExpr("expr.returnValue") as any
             var actualType: any = unit
@@ -618,7 +618,7 @@ fn rtWalkExprImpl(expr: any, messages: any) {
                 // Try unification to see if types are compatible
                 val constraint = newConstraint(expRet, actualType, luaExpr("expr.section") as any, luaExpr("{}") as array[any])
                 val testConstraints = luaExpr("{}") as any
-                embedLua("table.insert(testConstraints, constraint)")
+                (testConstraints as array[any]).push(constraint)
                 embedLua("local __rt_ok = pcall(require('chicc/unification').unify, testConstraints)")
                 val unifyOk = luaExpr("__rt_ok") as bool
                 if unifyOk == false {
@@ -643,7 +643,7 @@ fn rtWalkExprImpl(expr: any, messages: any) {
                     val sec = luaExpr("expr.section") as any
                     val cp = rtSectionToCp(sec)
                     val msg = typeMismatch(expDescr, actDescr, cp)
-                    embedLua("table.insert(messages, msg)")
+                    (messages as array[any]).push(msg)
                 }
             }
         }
