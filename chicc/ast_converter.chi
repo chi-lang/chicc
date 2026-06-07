@@ -37,7 +37,7 @@ fn getTypeTable(tables: any): any {
 
 // --- Symbol management ---
 
-pub fn getSymbol(name: string, tables: any): any {
+pub fn getSymbol(name: string, tables: any): Target {
     val fst: any = currentFnSymbolTable
     if fst != unit {
         val fnSym: any = fstGet(fst as FnSymbolTable, name)
@@ -87,20 +87,23 @@ pub fn removeLocalSymbol(name: string, tables: any) {
 
 // --- Forward declarations for mutually-recursive convert helpers ---
 
-var convertLambda: (any, any, any) -> any = { node, pkg, tables -> unit }
-var convertFuncWithName: (any, any, any) -> any = { node, pkg, tables -> unit }
-var convertFnCall: (any, any, any) -> any = { node, pkg, tables -> unit }
-var convertNameDeclaration: (any, any, any) -> any = { node, pkg, tables -> unit }
-var convertBlock: (any, any, any) -> any = { node, pkg, tables -> unit }
-var convertFor: (any, any, any) -> any = { node, pkg, tables -> unit }
-var convertWhen: (any, any, any) -> any = { node, pkg, tables -> unit }
-var convertFieldAccess: (any, any, any) -> any = { node, pkg, tables -> unit }
-var convertHandle: (any, any, any) -> any = { node, pkg, tables -> unit }
-var convertWeave: (any, any, any) -> any = { node, pkg, tables -> unit }
+// Initializers are placeholder stubs; each is reassigned to its *Impl below
+// before any call. They return a real Expr (not unit) so the narrowed
+// (any, any, any) -> Expr type holds without relying on unit/record unification.
+var convertLambda: (any, any, any) -> Expr = { node, pkg, tables -> atomExpr("unit", tUnit, unit) }
+var convertFuncWithName: (any, any, any) -> Expr = { node, pkg, tables -> atomExpr("unit", tUnit, unit) }
+var convertFnCall: (any, any, any) -> Expr = { node, pkg, tables -> atomExpr("unit", tUnit, unit) }
+var convertNameDeclaration: (any, any, any) -> Expr = { node, pkg, tables -> atomExpr("unit", tUnit, unit) }
+var convertBlock: (any, any, any) -> Expr = { node, pkg, tables -> atomExpr("unit", tUnit, unit) }
+var convertFor: (any, any, any) -> Expr = { node, pkg, tables -> atomExpr("unit", tUnit, unit) }
+var convertWhen: (any, any, any) -> Expr = { node, pkg, tables -> atomExpr("unit", tUnit, unit) }
+var convertFieldAccess: (any, any, any) -> Expr = { node, pkg, tables -> atomExpr("unit", tUnit, unit) }
+var convertHandle: (any, any, any) -> Expr = { node, pkg, tables -> atomExpr("unit", tUnit, unit) }
+var convertWeave: (any, any, any) -> Expr = { node, pkg, tables -> atomExpr("unit", tUnit, unit) }
 
 // --- Effect definition conversion (no mutual recursion with convert) ---
 
-fn convertEffectDefinition(node: any, pkg: any, tables: any): any {
+fn convertEffectDefinition(node: any, pkg: any, tables: any): Expr {
     val sec = node.paSection()
     val isPub = node.paIsPublic()
     val effName = node.paName()
@@ -172,7 +175,7 @@ fn convertEffectDefinition(node: any, pkg: any, tables: any): any {
 
 // --- Main converter ---
 
-pub fn convert(node: any, pkg: any, tables: any): any {
+pub fn convert(node: any, pkg: any, tables: any): Expr {
     val tag = node.paTag()
     val sec = node.paSection()
 
@@ -334,7 +337,7 @@ pub fn convert(node: any, pkg: any, tables: any): any {
 
 // --- Lambda conversion ---
 
-fn convertLambdaImpl(node: any, pkg: any, tables: any): any {
+fn convertLambdaImpl(node: any, pkg: any, tables: any): Expr {
     val sec = node.paSection()
     val args = node.paFormalArguments()
     val bodyNodes = node.paBody()
@@ -412,7 +415,7 @@ convertLambda = convertLambdaImpl
 
 // --- FuncWithName conversion ---
 
-fn convertFuncWithNameImpl(node: any, pkg: any, tables: any): any {
+fn convertFuncWithNameImpl(node: any, pkg: any, tables: any): Expr {
     val sec = node.paSection()
     val fnName = node.paName()
     val isPub = node.paIsPublic()
@@ -557,7 +560,7 @@ convertFuncWithName = convertFuncWithNameImpl
 
 // --- FnCall conversion ---
 
-fn convertFnCallImpl(node: any, pkg: any, tables: any): any {
+fn convertFnCallImpl(node: any, pkg: any, tables: any): Expr {
     val sec = node.paSection()
     val calleeNode: any = node.paCallee()
     val argNodes = node.paArguments()
@@ -653,7 +656,7 @@ convertFnCall = convertFnCallImpl
 
 // --- Block conversion ---
 
-fn convertBlockImpl(node: any, pkg: any, tables: any): any {
+fn convertBlockImpl(node: any, pkg: any, tables: any): Expr {
     val sec = node.paSection()
     val bodyNodes = node.paBody()
 
@@ -668,14 +671,14 @@ fn convertBlockImpl(node: any, pkg: any, tables: any): any {
     }
     currentTypeLevel = currentTypeLevel - 1
 
-    blockExpr(bodyExprs as array[Expr], sec as Section | unit) as any
+    blockExpr(bodyExprs as array[Expr], sec as Section | unit)
 }
 
 convertBlock = convertBlockImpl
 
 // --- NameDeclaration conversion ---
 
-fn convertNameDeclarationImpl(node: any, pkg: any, tables: any): any {
+fn convertNameDeclarationImpl(node: any, pkg: any, tables: any): Expr {
     val sec = node.paSection()
     val isPub = node.paIsPublic()
     val symName = node.paSymbolName()
@@ -703,14 +706,14 @@ fn convertNameDeclarationImpl(node: any, pkg: any, tables: any): any {
     addLocalSymbol(symName, isMut, isPub, symType, pkg, tables)
     currentTypeLevel = currentTypeLevel - 1
 
-    nameDeclarationExpr(isPub, symName, isMut, expType as Type | unit, val_ as Expr, sec as Section | unit) as any
+    nameDeclarationExpr(isPub, symName, isMut, expType as Type | unit, val_ as Expr, sec as Section | unit)
 }
 
 convertNameDeclaration = convertNameDeclarationImpl
 
 // --- When conversion (fold into nested IfElse) ---
 
-fn convertWhenImpl(node: any, pkg: any, tables: any): any {
+fn convertWhenImpl(node: any, pkg: any, tables: any): Expr {
     val sec = node.paSection()
     val cases = node.paWhenCases()
     val elseCase: any = node.paElseCase()
@@ -768,7 +771,7 @@ convertWhen = convertWhenImpl
 
 // --- For loop conversion ---
 
-fn convertForImpl(node: any, pkg: any, tables: any): any {
+fn convertForImpl(node: any, pkg: any, tables: any): Expr {
     val sec = node.paSection()
     val vars = node.paForVars()
     val iterNode: any = node.paIterable()
@@ -795,14 +798,14 @@ fn convertForImpl(node: any, pkg: any, tables: any): any {
     val body: any = convert(bodyNode, pkg, tables)
     currentFnSymbolTable = prevFst
 
-    forLoopExpr(vars, iter as Expr, state as Expr | unit, init as Expr | unit, body as Expr, sec as Section | unit) as any
+    forLoopExpr(vars, iter as Expr, state as Expr | unit, init as Expr | unit, body as Expr, sec as Section | unit)
 }
 
 convertFor = convertForImpl
 
 // --- FieldAccess conversion ---
 
-fn convertFieldAccessImpl(node: any, pkg: any, tables: any): any {
+fn convertFieldAccessImpl(node: any, pkg: any, tables: any): Expr {
     val sec = node.paSection()
     val receiverName = node.paReceiverName()
     val memberName = node.paMemberName()
@@ -838,7 +841,7 @@ convertFieldAccess = convertFieldAccessImpl
 
 // --- Weave conversion ---
 
-fn convertWeaveImpl(node: any, pkg: any, tables: any): any {
+fn convertWeaveImpl(node: any, pkg: any, tables: any): Expr {
     val sec = node.paSection()
     val valNode: any = node.paValue()
     val templateNode: any = node.paOpTemplate()
@@ -859,14 +862,14 @@ fn convertWeaveImpl(node: any, pkg: any, tables: any): any {
     val filledTemplate: any = convert(templateNode, pkg, tables)
     weaveInput = prevWeaveInput
 
-    blockExpr([tempDecl as Expr, filledTemplate as Expr], sec as Section | unit) as any
+    blockExpr([tempDecl as Expr, filledTemplate as Expr], sec as Section | unit)
 }
 
 convertWeave = convertWeaveImpl
 
 // --- Handle conversion ---
 
-fn convertHandleImpl(node: any, pkg: any, tables: any): any {
+fn convertHandleImpl(node: any, pkg: any, tables: any): Expr {
     val sec = node.paSection()
     val bodyNode: any = node.paHandleBody()
     val casesArr = node.paEffectCases()
@@ -931,7 +934,7 @@ convertHandle = convertHandleImpl
 
 // --- Program conversion ---
 
-pub fn convertProgram(parseProg: any, pkg: any, tables: any): any {
+pub fn convertProgram(parseProg: any, pkg: any, tables: any): array[Expr] {
     val progSection = luaExpr("parseProg.section") as any
 
     // Process type aliases
@@ -983,5 +986,5 @@ pub fn convertProgram(parseProg: any, pkg: any, tables: any): any {
         i = i + 1
     }
 
-    converted
+    converted as array[Expr]
 }
