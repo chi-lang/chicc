@@ -5,9 +5,35 @@ practical, replacing it with native Chi. `embedLua` that wraps genuinely
 irreducible Lua FFI stays — but is documented as such, so what remains is
 intentional, not accidental.
 
-Status snapshot (this branch): **chicc `embedLua` calls: 331 → 154 (−177, −53%)**.
-Tier 1 (record field mutation) is **done and fixed-point-verified**. Everything
-below Tier 1 is planned, not yet applied.
+Status snapshot (this branch): **chicc `embedLua` calls: 331 → 96 (−235, −71%)**.
+All cleanly-migratable cases are done and **fixed-point-verified after every
+step**; the remaining 96 are intentional `KEEP` (genuine FFI, perf-critical raw
+tables, and the error-handling design spike). See §10 for the final state.
+
+## 0. Final outcome (what actually shipped)
+
+Done, each its own commit, each `make verify`-clean (43/44; the 1 fail is the
+worktree golden-dir issue):
+
+| Step | What | embedLua |
+|------|------|----------|
+| Tier 1 | record field mutation → native `x.field = y` (ast, parse_ast, compiler markUsed, typer, type_writer) | −177 |
+| Tier 2a | `table.insert` → `.push` / `.insertAt` | −24 |
+| Tier 2b | `mergeImports`/`typeParamNames`/`splitExprs` → native fns; `io.open` probe → `std/io.file.open` | −3 |
+| Tier 3 | constraints clear-array → native `clearConstraints` helper | −4 |
+| Tier 3 | symbol/type tables (symbols/locals/aliases) → real `std/lang.map` API (also fixed the latent "Map costume" bug) | −10 |
+| Tier 3 | `convertImports`/`convertTypeAliases` → native fns | −2 |
+| Tier 3 | `collectRequires` → native AST walker reusing `exprChildren` | −1 (big block) |
+| Tier 4 | union-find `uf` → `std/lang.map` (measured: ~13.0s vs ~12.8s baseline = noise) | −4 |
+| Tier 3 | local-scope symbols, `packageAliasTable`, `importedSymbols` → `std/lang.map` | −5 |
+
+**Perf boundary found (evidence-based KEEP):** converting the `mapType` `lookup`
+and `instantiate` `__inst_cache` raw tables to `std/lang.map` measured a **~8–11%
+clean-compile regression** (13.8–14.3s vs 12.8s baseline) — these are the hottest
+inner-loop substitution/instantiation paths. **Reverted and kept as raw-table
+FFI.** The union-find `uf`, by contrast, was negligible (~2%) and was kept
+converted. Lesson: `std/lang.map`'s `m.map` indirection + per-access function call
+is fine everywhere except the type-substitution hot loop.
 
 > Note: `luaExpr` (raw Lua *expressions*) is a separate, larger surface (~930
 > calls) and is **out of scope** here — this plan targets `embedLua` only, per
@@ -269,3 +295,41 @@ hot-path changes (Tier 4, §4c) compare `make verify` build time, optionally wit
 
 Rough remaining reducible surface after §6 is excluded: of the 154 current calls,
 ~60–90 are Tier 2/3 reducible; the rest are KEEP or gated behind a design spike.
+
+---
+
+## 10. Final state of the remaining 96 `embedLua`
+
+Buckets of what is left (all intentional):
+
+- **~29 — D, error control flow (KEEP / design spike):** the top-level parse/
+  convert/typecheck `pcall` guards (also catch LuaJIT crashes), the
+  `icWithNewLocalScope` try/finally scope-restore, the `error({code,text})` throws,
+  and the trial-probe pcalls (`icTrialUnify`, sum-branch speculation,
+  `returnTypeCheck`). The trial probes *could* be nativised via a non-throwing
+  `canUnify`/`tryUnifyBranch`, but that needs a second, behaviourally-identical
+  copy of the unifier and is the **value-based-error design spike (§7)**, not a
+  mechanical edit — deferred.
+- **~24 — E, irreducible FFI (KEEP):** `_G` metatable substrate (messages.chi),
+  all `package.loaded` reflection (`__chicc_mkEnv`, `__chicc_replPrelude`, the
+  loaded-package scans), `require('chicc/…')` cross-module dispatch (blocked by
+  import cycles), `load`/`loadstring`, `os.*`/`io.*`, `string.format`/`string.char`,
+  `tostring`.
+- **~5 — B, hot-path raw tables (KEEP for perf):** `mapType` `lookup` +
+  `instantiate` `__inst_cache`. Measured ~8–11% compile regression if wrapped in
+  `std/lang.map` (see §0). Legitimate perf-FFI, like stdlib's own map/array impls.
+- **~3 — profiling (KEEP):** `__chicc_printProfile` + the `__ts`/`__prof`
+  chunk-locals (os.clock/io.stderr/string.format + a 0-indexed table Chi arrays
+  can't hold).
+- **~3 — B, `defaultValues` (DEFER):** producer (`ast_converter` `defaultArgs`) +
+  consumer (`emitter:197` `pairs`) must change together; cross-cutting, low value.
+- **remainder — misc (DEFER/KEEP):** `checks.chi` name-set (better as
+  `std/lang.set`, but the pairs-copy is awkward), `type_writer` decode chunk-locals
+  (`__defining_type_id`, `__typeref_cache` — coupled to the loadstring decode),
+  a couple of array-index assignments, `cli.chi` REPL formatter, the mixed
+  `rt.ids` reflection block.
+
+Net: every `embedLua` that was a plain field mutation, array append, dynamic-key
+map (outside the type-substitution hot loop), or pure-logic helper is now native
+Chi. What remains is genuine Lua interop, a perf-critical exception, or work that
+belongs to a separate error-handling redesign.
