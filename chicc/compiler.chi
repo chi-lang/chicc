@@ -5,7 +5,8 @@
 package chicc/compiler
 import std/lang { luaExpr, embedLua }
 import chicc/source { Section }
-import chicc/ast { Expr, Import, TypeAlias, Program, newPackage, newProgram }
+import chicc/ast { Expr, Import, ImportEntry, TypeAlias, Program, newPackage, newProgram, newImport, newImportEntry, newTypeAlias }
+import chicc/types { Type, TypeId }
 import chicc/messages { invalidModuleName, invalidPackageName, cannotAccessInternalName, unrecognizedName }
 import chicc/symbols { newCompileTables, ctDefineTypeAlias }
 import chicc/checks { checkNames, importConflictCheck, visibilityCheck, fnCallCheck, immutabilityCheck, returnTypeCheck }
@@ -106,13 +107,43 @@ fn splitExprs(expressions: any): { functions: array[any], code: array[any] } {
 // Lua helper: convert raw imports to typed Import records
 // ============================================================================
 
-embedLua("__chicc_convertImports = function(rawImports) local _ast = require('chicc/ast'); local r = {}; for _, imp in ipairs(rawImports) do local entries = {}; if imp.entries then for _, e in ipairs(imp.entries) do entries[#entries+1] = _ast.newImportEntry(e.name, e.alias, e.section) end end; r[#r+1] = _ast.newImport(imp.moduleName, imp.packageName, imp.packageAlias, entries, imp.section) end; return r end")
+fn convertImports(rawImports: any): array[Import] {
+    val result: array[Import] = []
+    val n = luaExpr("#rawImports") as int
+    var i = 1
+    while i <= n {
+        val imp = luaExpr("rawImports[i]") as any
+        val entries: array[ImportEntry] = []
+        if luaExpr("imp.entries ~= nil") as bool {
+            val ec = luaExpr("#imp.entries") as int
+            var j = 1
+            while j <= ec {
+                val e = luaExpr("imp.entries[j]") as any
+                entries.push(newImportEntry(luaExpr("e.name") as string, luaExpr("e.alias") as string | unit, luaExpr("e.section") as Section | unit))
+                j = j + 1
+            }
+        }
+        result.push(newImport(luaExpr("imp.moduleName") as string, luaExpr("imp.packageName") as string, luaExpr("imp.packageAlias") as string | unit, entries, luaExpr("imp.section") as Section | unit))
+        i = i + 1
+    }
+    result
+}
 
 // ============================================================================
 // Lua helper: convert raw type aliases to typed TypeAlias records
 // ============================================================================
 
-embedLua("__chicc_convertTypeAliases = function(rawAliases) local _ast = require('chicc/ast'); local r = {}; for _, alias in ipairs(rawAliases) do r[#r+1] = _ast.newTypeAlias(alias.typeId, alias.aliasType) end; return r end")
+fn convertTypeAliases(rawAliases: any): array[TypeAlias] {
+    val result: array[TypeAlias] = []
+    val n = luaExpr("#rawAliases") as int
+    var i = 1
+    while i <= n {
+        val alias = luaExpr("rawAliases[i]") as any
+        result.push(newTypeAlias(luaExpr("alias.typeId") as TypeId, luaExpr("alias.aliasType") as Type))
+        i = i + 1
+    }
+    result
+}
 
 // ============================================================================
 // Lua helper: print per-phase profile timing (gated by CHI_PROFILE)
@@ -546,8 +577,8 @@ pub fn compile(source: string, ns: any): CompilationResult {
         val emptyExprs = luaExpr("{}") as array[Expr]
         val section = luaExpr("parsedProgram.section") as Section | unit
         val pkgR = newPackage(moduleName, packageName)
-        val impsR = luaExpr("__chicc_convertImports(allImports)") as array[Import]
-        val aliasesR = luaExpr("__chicc_convertTypeAliases(definedTypeAliases)") as array[TypeAlias]
+        val impsR = convertImports(allImports)
+        val aliasesR = convertTypeAliases(definedTypeAliases)
         val program = newProgram(pkgR, impsR, aliasesR, emptyExprs, section)
         embedLua("__chicc_printProfile(__ts, packageName)")
         return newCompilationResult(resultMessages, program)
@@ -645,8 +676,8 @@ pub fn compile(source: string, ns: any): CompilationResult {
     if msgCountAfterTyping > 0 {
         val section = luaExpr("parsedProgram.section") as Section | unit
         val pkgT = newPackage(moduleName, packageName)
-        val impsT = luaExpr("__chicc_convertImports(allImports)") as array[Import]
-        val aliasesT = luaExpr("__chicc_convertTypeAliases(definedTypeAliases)") as array[TypeAlias]
+        val impsT = convertImports(allImports)
+        val aliasesT = convertTypeAliases(definedTypeAliases)
         val program = newProgram(pkgT, impsT, aliasesT, expressions as array[Expr], section)
         embedLua("__chicc_printProfile(__ts, packageName)")
         return newCompilationResult(resultMessages, program)
@@ -663,8 +694,8 @@ pub fn compile(source: string, ns: any): CompilationResult {
     // PHASE 8: BUILD AND RETURN RESULT
     val section = luaExpr("parsedProgram.section") as Section | unit
     val pkgF = newPackage(moduleName, packageName)
-    val impsF = luaExpr("__chicc_convertImports(allImports)") as array[Import]
-    val aliasesF = luaExpr("__chicc_convertTypeAliases(definedTypeAliases)") as array[TypeAlias]
+    val impsF = convertImports(allImports)
+    val aliasesF = convertTypeAliases(definedTypeAliases)
     val program = newProgram(pkgF, impsF, aliasesF, expressions as array[Expr], section)
     embedLua("__chicc_printProfile(__ts, packageName)")
     newCompilationResult(resultMessages, program)
