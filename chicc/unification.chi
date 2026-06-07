@@ -2,7 +2,6 @@
 package chicc/unification
 import std/lang { luaExpr, embedLua }
 import chicc/types { Type, TypeId, RecordField, tAny, tUnit, functionType, recordType, sumCreate, arrayType, recursiveType, polyType, typeIdEquals }
-import std/lang.array { size, push, insertAt }
 import chicc/messages { Message, typeMismatch, notAFunction, functionArityError, infiniteType }
 import chicc/source { Section, toCodePoint }
 
@@ -286,7 +285,9 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
         } else if expected.tag == "primitive" && actual.tag == "primitive" {
             val expIds = expected.ids
             val actIds = actual.ids
-            if idsIntersect(expIds, actIds) == false {
+            // `any` on either side is the top type and intersects everything.
+            val eitherAny = luaExpr("(expected.ids and expected.ids[1] and expected.ids[1].name == 'any') or (actual.ids and actual.ids[1] and actual.ids[1].name == 'any')") as bool
+            if eitherAny == false && idsIntersect(expIds, actIds) == false {
                 val cp = sectionToCodePoint(section)
                 throwMessage(typeMismatch(typeDescr(expected), typeDescr(actual), cp))
             }
@@ -316,6 +317,12 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             // No queue rebuild needed — next iteration resolves via union-find
         } else if luaExpr("actual.tag == 'primitive' and actual.ids and #actual.ids > 0 and actual.ids[1].name == 'any'") as bool {
             // skip - actual is 'any' type (allows passing any-typed values to concrete params)
+        } else if luaExpr("actual.tag == 'primitive' and actual.ids and #actual.ids > 0 and actual.ids[1].name == 'unit'") as bool && luaExpr("expected.tag == 'record' or expected.tag == 'recursive' or expected.tag == 'sum'") as bool {
+            // skip - unit (the absence of a value) inhabits reference types,
+            // matching the JVM bootstrap's nullable semantics (e.g. passing
+            // unit where a record/data param is expected, or `record != unit`).
+        } else if luaExpr("expected.tag == 'primitive' and expected.ids and #expected.ids > 0 and expected.ids[1].name == 'unit'") as bool && luaExpr("actual.tag == 'record' or actual.tag == 'recursive' or actual.tag == 'sum'") as bool {
+            // skip - reference type compared/assigned against unit (nullable)
         } else if expected.tag == "fn" && actual.tag == "fn" {
             val expTypes = expected.types
             val actTypes = actual.types

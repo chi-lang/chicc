@@ -8,7 +8,7 @@ import chicc/source { Section }
 import chicc/ast { Expr, Import, TypeAlias, Program, newPackage, newProgram }
 import chicc/messages { invalidModuleName, invalidPackageName, cannotAccessInternalName, unrecognizedName }
 import chicc/symbols { newCompileTables, ctDefineTypeAlias }
-import chicc/checks { checkNames, visibilityCheck, fnCallCheck, immutabilityCheck, returnTypeCheck }
+import chicc/checks { checkNames, importConflictCheck, visibilityCheck, fnCallCheck, immutabilityCheck, returnTypeCheck }
 import chicc/inference_context { icInit, icDefineLocalSymbol }
 import chicc/emitter { emitProgram }
 
@@ -493,6 +493,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
 
     // PHASE 4: CHECK NAMES (on parse AST)
     val parseCode = luaExpr("parsedProgram.code") as any
+    importConflictCheck(sourceImports, resultMessages)
     checkNames(parseCode, tables, resultMessages)
 
     embedLua("if __prof then __ts[4] = os.clock() end")

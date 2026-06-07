@@ -11,6 +11,14 @@ fn freshState(): EmitterState {
     newState(prog)
 }
 
+// emitExpr is a shared `pub var` of chicc/emitter — the same global the compiler
+// itself dispatches through. Under compileModules the test runs in the same process
+// as the compiler, and this package is compiled early (it only depends on emitter,
+// ast, types, util), so the remaining chicc packages are compiled AFTER this code
+// runs. We therefore save the real dispatcher and restore it before summary(), or
+// the stub below would poison the compilation of every later package.
+val originalEmitExpr: (EmitterState, Expr) -> string = emitExpr
+
 // Wire emitExpr to dispatch based on kind
 emitExpr = { st, expr ->
     val kind = luaExpr("expr.kind") as string
@@ -189,5 +197,9 @@ test("emitNameDeclaration - fn inside function does NOT use shortcut") {
     assertEqual(result, "inner")
     assertEqual(st.sb.toString(), "local function tmp0() return (5) end;local inner=tmp0;")
 }
+
+// Restore the real dispatcher so packages compiled after this one (under
+// compileModules) use the compiler's emitExpr, not the test stub.
+emitExpr = originalEmitExpr
 
 summary()

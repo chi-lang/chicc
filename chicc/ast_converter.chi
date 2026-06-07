@@ -4,7 +4,7 @@ import chicc/source { Section }
 import chicc/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType }
 import chicc/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, packageTarget, setExprType, atomExpr, interpolatedStringExpr, createRecordExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, assignmentExpr, nameDeclarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam }
 import chicc/parse_ast { ParseAst }
-import chicc/symbols { FnSymbolTable, Symbol, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newSymbol, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, CompileTables, TypeTable, resolveType }
+import chicc/symbols { FnSymbolTable, Symbol, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newSymbol, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, lookupLoadedPublicSymbol, CompileTables, TypeTable, resolveType }
 
 // --- State (module-level mutable variables) ---
 
@@ -52,7 +52,15 @@ pub fn getSymbol(name: string, tables: any): any {
         val symName = luaExpr("ctSym.name") as string
         return packageTarget(symMod, symPkg, symName)
     }
-    // Fallback: return local target (symbol not found)
+    // Fallback: search all loaded packages for a public symbol (JVM-style
+    // import-free resolution of public declarations).
+    val loadedSym: any = lookupLoadedPublicSymbol(name)
+    if loadedSym != unit {
+        val loadedMod = luaExpr("loadedSym.moduleName") as string
+        val loadedPkg = luaExpr("loadedSym.packageName") as string
+        return packageTarget(loadedMod, loadedPkg, name)
+    }
+    // Not found: return local target
     localTarget(name)
 }
 

@@ -157,7 +157,7 @@ pub fn newCompileTables(pkg: any, ns: any, imports: any): CompileTables {
     val importedSymbols = luaExpr("{}") as any
 
     // Process imports
-    val importCount = luaExpr("#imports") as int
+    val importCount = luaExpr("imports and #imports or 0") as int
     var i = 1
     while i <= importCount {
         val imp = luaExpr("imports[i]") as any
@@ -243,6 +243,29 @@ pub fn ctGetAliasedPackage(ct: CompileTables, name: string): any {
     val pat = ct.packageAliasTable
     val result: any = luaExpr("pat[name]")
     result
+}
+
+// Fallback symbol resolution: search every loaded package for a public
+// symbol with the given name. Mirrors the JVM bootstrap behaviour where a
+// public declaration is reachable without an explicit import. Returns a
+// record { moduleName, packageName, name } or unit when not found.
+//
+// `pairs(package.loaded)` has no defined order, so when several loaded
+// packages export a public symbol with the same name we must break the tie
+// deterministically — otherwise resolution (and the self-hosted fixed point)
+// would depend on hash iteration order. We pick the lexicographically smallest
+// `module/package` qualifier, the same convention used by the UFCS resolver
+// (`pickDeterministicUfcs` in typer.chi).
+pub fn lookupLoadedPublicSymbol(name: string): any {
+    luaExpr("(function() local bestQ = nil; for qualifier, loaded in pairs(package.loaded) do if type(qualifier) == 'string' and type(loaded) == 'table' and loaded._package then local props = loaded._package[name]; if type(props) == 'table' and props.public == true then if bestQ == nil or qualifier < bestQ then bestQ = qualifier end end end end; if bestQ == nil then return nil end; local slashPos = bestQ:find('/'); if not slashPos then return nil end; return { moduleName = bestQ:sub(1, slashPos - 1), packageName = bestQ:sub(slashPos + 1), name = name } end)()")
+}
+
+// Every loaded package exporting a public symbol with the given name, as a
+// sorted array of `module/package` qualifiers. Used to detect ambiguity:
+// when this returns more than one entry, an import-free reference cannot be
+// resolved unambiguously and should be reported rather than silently picked.
+pub fn lookupLoadedPublicSymbolQualifiers(name: string): array[string] {
+    luaExpr("(function() local hits = {}; for qualifier, loaded in pairs(package.loaded) do if type(qualifier) == 'string' and type(loaded) == 'table' and loaded._package then local props = loaded._package[name]; if type(props) == 'table' and props.public == true then hits[#hits+1] = qualifier end end end; table.sort(hits); return hits end)()") as array[string]
 }
 
 pub fn ctDefineTypeAlias(ct: CompileTables, alias: any): unit {
@@ -375,6 +398,10 @@ pub fn resolveType(typeTable: TypeTable, typeSchemeVars: array[string], ref: any
 }
 
 pub fn resolveTypeAndWrapRecursive(typeTable: TypeTable, typeSchemeVars: array[string], ref: any, typeId: any, level: int): any {
+    // Simple case: no type id to wrap against — just resolve the type directly.
+    if typeId == unit {
+        return resolveType(typeTable, typeSchemeVars, ref, level)
+    }
     // Create a self-referencing type variable for this type name
     val qualifiedName = luaExpr("typeId.moduleName .. '::' .. typeId.packageName .. '::' .. typeId.name") as string
     val selfRefVar = variableType(qualifiedName, 0 - 1)

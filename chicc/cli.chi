@@ -4,7 +4,6 @@
 // stdlib loading, and dispatching to compile or run modes.
 package chicc/cli
 import std/lang { luaExpr, embedLua }
-import std/lang.string { len, byteSub }
 import std/os { getEnv }
 import std/io.file { readString, writeString }
 import chicc/compiler { newLuaCompilationEnv, newReplCompilationEnv, compileToLua, compileReplLine, formatMessage }

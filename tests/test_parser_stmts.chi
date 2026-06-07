@@ -296,16 +296,18 @@ test("parse var without type") {
 // parseBlock tests
 // ==============================
 
-test("parse empty block") {
-    // { }
+test("parse empty braces as empty record") {
+    // { } in expression position is an empty record (matches the JVM compiler:
+    // `block` is not an expression-position alternative there, so `{}` parses as
+    // ParseCreateRecord). Empty blocks only arise in body positions (fn/if/...).
     val tokens = [
         tk(TK_LBRACE, "{"), tk(TK_RBRACE, "}"),
         eof()
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.tag, "ParseBlock")
-    assertEqual(result.body.size(), 0)
+    assertEqual(result.tag, "ParseCreateRecord")
+    assertEqual(result.recordFields.size(), 0)
 }
 
 test("parse block with single expr") {
@@ -478,8 +480,8 @@ test("parse block with newlines before content") {
     assertEqual(result.body.size(), 1)
 }
 
-test("parse block with leading newlines is empty") {
-    // { \n }
+test("parse braces with only newlines as empty record") {
+    // { \n } — newlines are skipped, so this is still empty braces => empty record.
     val tokens = [
         tk(TK_LBRACE, "{"), tk(TK_NEWLINE, "\n"),
         tk(TK_RBRACE, "}"),
@@ -487,8 +489,8 @@ test("parse block with leading newlines is empty") {
     ]
     val p = newParser(tokens, "")
     val result = parseExpression(p)
-    assertEqual(result.tag, "ParseBlock")
-    assertEqual(result.body.size(), 0)
+    assertEqual(result.tag, "ParseCreateRecord")
+    assertEqual(result.recordFields.size(), 0)
 }
 
 summary()

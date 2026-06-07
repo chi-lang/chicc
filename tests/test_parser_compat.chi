@@ -15,7 +15,11 @@ fn parseGoldenFile(path: string): any {
 // Helper: attempt to parse and return whether it succeeded
 // Returns { ok: bool, result: any, error: string }
 fn tryParseGolden(path: string): { ok: bool, result: any, errMsg: string } {
-    embedLua("local source = readString(path)")
+    // The golden corpus lives at the meta-repo root, not under chicc/. Resolve the
+    // path relative to cwd first, then fall back to ../ so the test works whether it
+    // is run from chicc/ or from the meta-repo root — without a cross-repo symlink.
+    embedLua("local rp = path; local tf = io.open(rp, 'r'); if tf then tf:close() else rp = '../' .. path end")
+    embedLua("local source = readString(rp)")
     embedLua("local ok2, tokens = pcall(tokenize, source)")
     embedLua("if not ok2 then __chi_parse_ok = false; __chi_parse_err = tostring(tokens); __chi_parse_result = nil; return end")
     embedLua("local p = newParser(tokens, source)")
