@@ -208,7 +208,7 @@ pub fn typerGetUf(): any {
 }
 
 // --- Forward declaration for typeTerm (needed before typeTerms references it) ---
-pub var typeTerm: (any, int, any) -> any = { term: any, level: int, constraints: any -> unit }
+pub var typeTerm: (any, int, any) -> Type = { term: any, level: int, constraints: any -> tUnit }
 
 // --- Main API ---
 
@@ -225,7 +225,7 @@ pub fn typeTerms(terms: any, constraints: any, level: int): array[any] {
     results
 }
 
-fn typeTermImpl(term: any, level: int, constraints: any): any {
+fn typeTermImpl(term: any, level: int, constraints: any): Type {
     val kind = luaExpr("term.kind") as string
 
     val result: any = if kind == "atom" {
