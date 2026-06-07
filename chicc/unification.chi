@@ -2,6 +2,7 @@
 package chicc/unification
 import std/lang { luaExpr, embedLua }
 import chicc/types { Type, TypeId, RecordField, tAny, tUnit, functionType, recordType, sumCreate, arrayType, recursiveType, polyType, typeIdEquals }
+import std/lang.map { emptyMap, remove }
 import chicc/messages { Message, typeMismatch, notAFunction, functionArityError, infiniteType }
 import chicc/source { Section, toCodePoint }
 
@@ -88,7 +89,7 @@ fn throwMessage(msg: Message) {
 
 // Create a new union-find structure (a Lua table keyed by "name:level")
 pub fn ufNew(): any {
-    luaExpr("{}") as any
+    emptyMap[string, any]()
 }
 
 // Variable key for union-find lookup
@@ -101,13 +102,13 @@ fn varKey(v: Type): string {
 // Bind a variable to a type in the union-find
 pub fn ufBind(uf: any, variable: Type, t: Type) {
     val key = varKey(variable)
-    embedLua("uf[key] = t")
+    uf.put(key, t)
 }
 
 // Find the representative type for a variable, following chains with path compression
 pub fn ufFind(uf: any, variable: Type): Type {
     val key = varKey(variable)
-    val bound: any = luaExpr("uf[key]")
+    val bound: any = uf.get(key)
     if bound == unit {
         return variable
     }
@@ -122,7 +123,7 @@ pub fn ufFind(uf: any, variable: Type): Type {
             // Path compression
             val rootIsNotBound = luaExpr("root ~= boundType") as bool
             if rootIsNotBound {
-                embedLua("uf[key] = root")
+                uf.put(key, root)
             }
             result = root
         }
@@ -145,9 +146,9 @@ pub fn ufResolve(uf: any, t: Type): Type {
         } else {
             // Temporarily unbind variable to prevent infinite recursion on recursive types
             val key = varKey(t)
-            embedLua("uf[key] = nil")
+            uf.remove(key)
             result = ufResolve(uf, found)
-            embedLua("uf[key] = found")
+            uf.put(key, found)
         }
     } else if tag == "primitive" {
         result = t
@@ -224,7 +225,7 @@ pub fn ufResolve(uf: any, t: Type): Type {
 pub fn ufAllBindings(uf: any): array[any] {
     val result: array[any] = luaExpr("{}")
     // Iterate over all keys in the uf table
-    embedLua("for key, typ in pairs(uf) do local name, level = key:match('(.+):(%d+)'); if name then level = tonumber(level); local v = {tag='var', ids={}, types={}, typeParams={}, defaults=0, fields={}, lhs=nil, rhs=nil, elementType=nil, name=name, level=level, variable=nil, innerType=nil, body=nil}; table.insert(result, {variable=v, replacement=__P_.ufResolve(uf, typ)}) end end")
+    embedLua("for key, typ in pairs(uf.map) do local name, level = key:match('(.+):(%d+)'); if name then level = tonumber(level); local v = {tag='var', ids={}, types={}, typeParams={}, defaults=0, fields={}, lhs=nil, rhs=nil, elementType=nil, name=name, level=level, variable=nil, innerType=nil, body=nil}; table.insert(result, {variable=v, replacement=__P_.ufResolve(uf, typ)}) end end")
     result
 }
 
