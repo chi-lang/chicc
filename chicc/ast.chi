@@ -1,5 +1,5 @@
 package chicc/ast
-import std/lang { luaExpr, embedLua }
+import std/lang { luaExpr }
 import chicc/source { Section }
 import chicc/types { Type, TypeId }
 
@@ -126,133 +126,133 @@ fn emptyExpr(kind: string, section: Section | unit): Expr {
 
 pub fn atomExpr(value: string, typ: Type | unit, section: Section | unit): Expr {
     val e = emptyExpr("atom", section)
-    embedLua("e.atomValue = value")
-    embedLua("e.exprType = typ")
+    e.atomValue = value
+    e.exprType = typ
     e
 }
 
 pub fn interpolatedStringExpr(parts: array[Expr], section: Section | unit): Expr {
     val e = emptyExpr("interpolated_string", section)
-    embedLua("e.parts = parts")
+    e.parts = parts
     e
 }
 
 pub fn createRecordExpr(fields: array[ExprField], section: Section | unit): Expr {
     val e = emptyExpr("create_record", section)
-    embedLua("e.recordFields = fields")
+    e.recordFields = fields
     e
 }
 
 pub fn createArrayExpr(values: array[Expr], section: Section | unit): Expr {
     val e = emptyExpr("create_array", section)
-    embedLua("e.arrayValues = values")
+    e.arrayValues = values
     e
 }
 
 pub fn variableAccessExpr(tgt: Target, section: Section | unit): Expr {
     val e = emptyExpr("variable_access", section)
-    embedLua("e.target = tgt")
+    e.target = tgt
     e
 }
 
 pub fn fieldAccessExpr(recv: Expr, name: string, memberSec: Section | unit, section: Section | unit): Expr {
     val e = emptyExpr("field_access", section)
-    embedLua("e.receiver = recv")
-    embedLua("e.fieldName = name")
-    embedLua("e.memberSection = memberSec")
+    e.receiver = recv
+    e.fieldName = name
+    e.memberSection = memberSec
     e
 }
 
 pub fn fieldAssignmentExpr(recv: Expr, name: string, val_: Expr, section: Section | unit): Expr {
     val e = emptyExpr("field_assignment", section)
-    embedLua("e.receiver = recv")
-    embedLua("e.fieldName = name")
-    embedLua("e.value = val_")
+    e.receiver = recv
+    e.fieldName = name
+    e.value = val_
     e
 }
 
 pub fn assignmentExpr(tgt: Target, val_: Expr, section: Section | unit): Expr {
     val e = emptyExpr("assignment", section)
-    embedLua("e.target = tgt")
-    embedLua("e.value = val_")
+    e.target = tgt
+    e.value = val_
     e
 }
 
 pub fn nameDeclarationExpr(isPub: bool, name: string, isMut: bool, expType: Type | unit, val_: Expr, section: Section | unit): Expr {
     val e = emptyExpr("name_declaration", section)
-    embedLua("e.isPublic = isPub")
-    embedLua("e.declName = name")
-    embedLua("e.isMutable = isMut")
-    embedLua("e.expectedType = expType")
-    embedLua("e.value = val_")
+    e.isPublic = isPub
+    e.declName = name
+    e.isMutable = isMut
+    e.expectedType = expType
+    e.value = val_
     e
 }
 
 pub fn fnExpr(params: array[FnParam], defaults: any, fnBody: Expr, section: Section | unit): Expr {
     val e = emptyExpr("fn", section)
-    embedLua("e.parameters = params")
-    embedLua("e.defaultValues = defaults")
-    embedLua("e.body = fnBody")
+    e.parameters = params
+    e.defaultValues = defaults
+    e.body = fnBody
     e
 }
 
 pub fn blockExpr(bodyExprs: array[Expr], section: Section | unit): Expr {
     val e = emptyExpr("block", section)
-    embedLua("e.blockBody = bodyExprs")
+    e.blockBody = bodyExprs
     e
 }
 
 pub fn fnCallExpr(func: Expr, params: array[Expr], section: Section | unit): Expr {
     val e = emptyExpr("fn_call", section)
-    embedLua("e.callee = func")
-    embedLua("e.callParams = params")
+    e.callee = func
+    e.callParams = params
     e
 }
 
 pub fn ifElseExpr(cond: Expr, thenB: Expr, elseB: Expr | unit, section: Section | unit): Expr {
     val e = emptyExpr("if_else", section)
-    embedLua("e.condition = cond")
-    embedLua("e.thenBranch = thenB")
-    embedLua("e.elseBranch = elseB")
+    e.condition = cond
+    e.thenBranch = thenB
+    e.elseBranch = elseB
     e
 }
 
 pub fn infixOpExpr(operator: string, l: Expr, r: Expr, section: Section | unit): Expr {
     val e = emptyExpr("infix_op", section)
-    embedLua("e.op = operator")
-    embedLua("e.left = l")
-    embedLua("e.right = r")
+    e.op = operator
+    e.left = l
+    e.right = r
     e
 }
 
 pub fn prefixOpExpr(operator: string, expr: Expr, section: Section | unit): Expr {
     val e = emptyExpr("prefix_op", section)
-    embedLua("e.op = operator")
-    embedLua("e.prefixExpr = expr")
+    e.op = operator
+    e.prefixExpr = expr
     e
 }
 
 pub fn castExpr_(expr: Expr, tgt: Type, section: Section | unit): Expr {
     val e = emptyExpr("cast", section)
-    embedLua("e.castExpr = expr")
-    embedLua("e.targetType = tgt")
+    e.castExpr = expr
+    e.targetType = tgt
     e
 }
 
 pub fn whileLoopExpr(cond: Expr, loopBody: Expr, section: Section | unit): Expr {
     val e = emptyExpr("while_loop", section)
-    embedLua("e.loopCondition = cond")
-    embedLua("e.loopBody = loopBody")
+    e.loopCondition = cond
+    e.loopBody = loopBody
     e
 }
 
 pub fn forLoopExpr(vars: array[string], iter: Expr, state: Expr | unit, init: Expr | unit, forBody: Expr, section: Section | unit): Expr {
     val e = emptyExpr("for_loop", section)
-    embedLua("e.forVars = vars")
-    embedLua("e.iterable = iter")
-    embedLua("e.forState = state")
-    embedLua("e.forInit = init")
-    embedLua("e.forBody = forBody")
+    e.forVars = vars
+    e.iterable = iter
+    e.forState = state
+    e.forInit = init
+    e.forBody = forBody
     e
 }
 
@@ -266,45 +266,45 @@ pub fn continueExpr(section: Section | unit): Expr {
 
 pub fn indexOpExpr(variable: Expr, idx: Expr, section: Section | unit): Expr {
     val e = emptyExpr("index_op", section)
-    embedLua("e.indexVariable = variable")
-    embedLua("e.indexExpr = idx")
+    e.indexVariable = variable
+    e.indexExpr = idx
     e
 }
 
 pub fn indexedAssignmentExpr(variable: Expr, idx: Expr, val_: Expr, section: Section | unit): Expr {
     val e = emptyExpr("indexed_assignment", section)
-    embedLua("e.indexVariable = variable")
-    embedLua("e.indexExpr = idx")
-    embedLua("e.indexValue = val_")
+    e.indexVariable = variable
+    e.indexExpr = idx
+    e.indexValue = val_
     e
 }
 
 pub fn isExpr(expr: Expr, checked: Type, section: Section | unit): Expr {
     val e = emptyExpr("is", section)
-    embedLua("e.castExpr = expr")
-    embedLua("e.checkedType = checked")
+    e.castExpr = expr
+    e.checkedType = checked
     e
 }
 
 pub fn effectDefinitionExpr(mod: string, pkg: string, name: string, params: array[FnParam], section: Section | unit): Expr {
     val e = emptyExpr("effect_definition", section)
-    embedLua("e.effectModuleName = mod")
-    embedLua("e.effectPackageName = pkg")
-    embedLua("e.effectName = name")
-    embedLua("e.effectParams = params")
+    e.effectModuleName = mod
+    e.effectPackageName = pkg
+    e.effectName = name
+    e.effectParams = params
     e
 }
 
 pub fn handleExpr(hBody: Expr, cases: array[HandleCase], section: Section | unit): Expr {
     val e = emptyExpr("handle", section)
-    embedLua("e.handleBody = hBody")
-    embedLua("e.handleCases = cases")
+    e.handleBody = hBody
+    e.handleCases = cases
     e
 }
 
 pub fn returnExpr(val_: Expr, section: Section | unit): Expr {
     val e = emptyExpr("return", section)
-    embedLua("e.returnValue = val_")
+    e.returnValue = val_
     e
 }
 

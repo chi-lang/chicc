@@ -358,7 +358,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
                      val newCallee = variableAccessExpr(packageTarget(curMod, curPkg, dtName), memberSec)
                      val calleeType = luaExpr("dotOp.exprType") as Type | unit
                      newCallee.setExprType(calleeType)
-                     embedLua("term.callee = newCallee")
+                     term.callee = newCallee
                  } else if dtTag == "package_fn" {
                      // package_fn: prepend receiver, look up via ns, fill defaults
                      val dotOp_receiver = luaExpr("dotOp.receiver") as any
@@ -373,7 +373,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
                     val newCallee = variableAccessExpr(tgt, memberSec)
                     val calleeType = luaExpr("dotOp.exprType") as Type | unit
                     newCallee.setExprType(calleeType)
-                    embedLua("term.callee = newCallee")
+                    term.callee = newCallee
                 }
             }
         }

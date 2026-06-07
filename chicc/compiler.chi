@@ -101,13 +101,13 @@ fn markUsedWalkImpl(expr: any) {
     if kind == "name_declaration" {
         val value = luaExpr("expr.value") as any
         if value != unit {
-            embedLua("value.used = true")
+            value.used = true
             markUsedWalk(value)
         }
     } else if kind == "assignment" {
         val value = luaExpr("expr.value") as any
         if value != unit {
-            embedLua("value.used = true")
+            value.used = true
             markUsedWalk(value)
         }
     } else if kind == "block" {
@@ -117,7 +117,7 @@ fn markUsedWalkImpl(expr: any) {
             val used = luaExpr("expr.used == true") as bool
             val lastExpr = luaExpr("body[#body]") as any
             if used {
-                embedLua("lastExpr.used = true")
+                lastExpr.used = true
             }
             var bi = 1
             while bi <= bodyCount {
@@ -129,7 +129,7 @@ fn markUsedWalkImpl(expr: any) {
     } else if kind == "fn_call" {
         val callee = luaExpr("expr.callee") as any
         if callee != unit {
-            embedLua("callee.used = true")
+            callee.used = true
             markUsedWalk(callee)
         }
         val params = luaExpr("expr.callParams") as any
@@ -137,7 +137,7 @@ fn markUsedWalkImpl(expr: any) {
         var pi = 1
         while pi <= paramCount {
             val p = luaExpr("params[pi]") as any
-            embedLua("p.used = true")
+            p.used = true
             markUsedWalk(p)
             pi = pi + 1
         }
@@ -145,50 +145,50 @@ fn markUsedWalkImpl(expr: any) {
         val used = luaExpr("expr.used == true") as bool
         val cond = luaExpr("expr.condition") as any
         if cond != unit {
-            embedLua("cond.used = true")
+            cond.used = true
             markUsedWalk(cond)
         }
         val thenB = luaExpr("expr.thenBranch") as any
         if thenB != unit {
-            if used { embedLua("thenB.used = true") }
+            if used { thenB.used = true }
             markUsedWalk(thenB)
         }
         val elseB = luaExpr("expr.elseBranch") as any
         if elseB != unit {
-            if used { embedLua("elseB.used = true") }
+            if used { elseB.used = true }
             markUsedWalk(elseB)
         }
     } else if kind == "infix_op" {
         val used = luaExpr("expr.used == true") as bool
         val left = luaExpr("expr.left") as any
         if left != unit {
-            if used { embedLua("left.used = true") }
+            if used { left.used = true }
             markUsedWalk(left)
         }
         val right = luaExpr("expr.right") as any
         if right != unit {
-            if used { embedLua("right.used = true") }
+            if used { right.used = true }
             markUsedWalk(right)
         }
     } else if kind == "prefix_op" {
         val used = luaExpr("expr.used == true") as bool
         val inner = luaExpr("expr.prefixExpr") as any
         if inner != unit {
-            if used { embedLua("inner.used = true") }
+            if used { inner.used = true }
             markUsedWalk(inner)
         }
     } else if kind == "cast" {
         val used = luaExpr("expr.used == true") as bool
         val inner = luaExpr("expr.castExpr") as any
         if inner != unit {
-            if used { embedLua("inner.used = true") }
+            if used { inner.used = true }
             markUsedWalk(inner)
         }
     } else if kind == "is" {
         val used = luaExpr("expr.used == true") as bool
         val inner = luaExpr("expr.castExpr") as any
         if inner != unit {
-            if used { embedLua("inner.used = true") }
+            if used { inner.used = true }
             markUsedWalk(inner)
         }
     } else if kind == "create_record" {
@@ -200,7 +200,7 @@ fn markUsedWalkImpl(expr: any) {
             val f = luaExpr("fields[fi]") as any
             val fVal = luaExpr("f.value") as any
             if fVal != unit {
-                if used { embedLua("fVal.used = true") }
+                if used { fVal.used = true }
                 markUsedWalk(fVal)
             }
             fi = fi + 1
@@ -212,42 +212,42 @@ fn markUsedWalkImpl(expr: any) {
         var vi = 1
         while vi <= valCount {
             val v = luaExpr("values[vi]") as any
-            if used { embedLua("v.used = true") }
+            if used { v.used = true }
             markUsedWalk(v)
             vi = vi + 1
         }
     } else if kind == "index_op" {
         val indexVar = luaExpr("expr.indexVariable") as any
         if indexVar != unit {
-            embedLua("indexVar.used = true")
+            indexVar.used = true
             markUsedWalk(indexVar)
         }
         val indexExpr = luaExpr("expr.indexExpr") as any
         if indexExpr != unit {
-            embedLua("indexExpr.used = true")
+            indexExpr.used = true
             markUsedWalk(indexExpr)
         }
     } else if kind == "indexed_assignment" {
         val indexVar = luaExpr("expr.indexVariable") as any
         if indexVar != unit {
-            embedLua("indexVar.used = true")
+            indexVar.used = true
             markUsedWalk(indexVar)
         }
         val indexExpr = luaExpr("expr.indexExpr") as any
         if indexExpr != unit {
-            embedLua("indexExpr.used = true")
+            indexExpr.used = true
             markUsedWalk(indexExpr)
         }
         val indexVal = luaExpr("expr.indexValue") as any
         if indexVal != unit {
-            embedLua("indexVal.used = true")
+            indexVal.used = true
             markUsedWalk(indexVal)
         }
     } else if kind == "handle" {
         val used = luaExpr("expr.used == true") as bool
         val body = luaExpr("expr.handleBody") as any
         if body != unit {
-            if used { embedLua("body.used = true") }
+            if used { body.used = true }
             markUsedWalk(body)
         }
         val cases = luaExpr("expr.handleCases") as any
@@ -264,13 +264,13 @@ fn markUsedWalkImpl(expr: any) {
     } else if kind == "return" {
         val retVal = luaExpr("expr.returnValue") as any
         if retVal != unit {
-            embedLua("retVal.used = true")
+            retVal.used = true
             markUsedWalk(retVal)
         }
     } else if kind == "for_loop" {
         val iter = luaExpr("expr.iterable") as any
         if iter != unit {
-            embedLua("iter.used = true")
+            iter.used = true
             markUsedWalk(iter)
         }
         val forBody = luaExpr("expr.forBody") as any
@@ -280,7 +280,7 @@ fn markUsedWalkImpl(expr: any) {
     } else if kind == "while_loop" {
         val cond = luaExpr("expr.loopCondition") as any
         if cond != unit {
-            embedLua("cond.used = true")
+            cond.used = true
             markUsedWalk(cond)
         }
         val loopBody = luaExpr("expr.loopBody") as any
@@ -295,18 +295,18 @@ fn markUsedWalkImpl(expr: any) {
     } else if kind == "field_assignment" {
         val recv = luaExpr("expr.receiver") as any
         if recv != unit {
-            embedLua("recv.used = true")
+            recv.used = true
             markUsedWalk(recv)
         }
         val value = luaExpr("expr.value") as any
         if value != unit {
-            embedLua("value.used = true")
+            value.used = true
             markUsedWalk(value)
         }
     } else if kind == "field_access" {
         val recv = luaExpr("expr.receiver") as any
         if recv != unit {
-            embedLua("recv.used = true")
+            recv.used = true
             markUsedWalk(recv)
         }
     } else if kind == "interpolated_string" {
@@ -316,7 +316,7 @@ fn markUsedWalkImpl(expr: any) {
         var pi = 1
         while pi <= partCount {
             val p = luaExpr("parts[pi]") as any
-            if used { embedLua("p.used = true") }
+            if used { p.used = true }
             markUsedWalk(p)
             pi = pi + 1
         }
@@ -333,7 +333,7 @@ pub fn replaceTypes(expr: any, solutions: any) {
     val exprType = luaExpr("expr.exprType") as any
     if exprType != unit {
         val replaced = luaExpr("require('chicc/types').mapType(exprType, solutions)") as any
-        embedLua("expr.exprType = replaced")
+        expr.exprType = replaced
     }
     val children = luaExpr("require('chicc/ast').exprChildren(expr)") as any
     val childCount = luaExpr("#children") as int

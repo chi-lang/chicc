@@ -1,5 +1,4 @@
 package chicc/parse_ast
-import std/lang { luaExpr, embedLua }
 import chicc/source { Section }
 
 // -- TypeRef: tagged record for type references --
@@ -27,43 +26,43 @@ fn emptyTypeRef(tag: string, sec: Section | unit): TypeRef {
 
 pub fn typeParameterRef(refName: string, sec: Section | unit): TypeRef {
     val tr = emptyTypeRef("TypeParameterRef", sec)
-    embedLua("tr.name = refName")
+    tr.name = refName
     tr
 }
 
 pub fn typeNameRef(modName: string, pkgName: string, typeName: string, sec: Section | unit): TypeRef {
     val tr = emptyTypeRef("TypeNameRef", sec)
-    embedLua("tr.moduleName = modName")
-    embedLua("tr.packageName = pkgName")
-    embedLua("tr.name = typeName")
+    tr.moduleName = modName
+    tr.packageName = pkgName
+    tr.name = typeName
     tr
 }
 
 pub fn functionTypeRef(typeParams: array[any], argTypeRefs: array[any], retType: any, sec: Section | unit): TypeRef {
     val tr = emptyTypeRef("FunctionTypeRef", sec)
-    embedLua("tr.typeParameters = typeParams")
-    embedLua("tr.argumentTypeRefs = argTypeRefs")
-    embedLua("tr.returnType = retType")
+    tr.typeParameters = typeParams
+    tr.argumentTypeRefs = argTypeRefs
+    tr.returnType = retType
     tr
 }
 
 pub fn recordTypeRef(flds: array[any], sec: Section | unit): TypeRef {
     val tr = emptyTypeRef("RecordTypeRef", sec)
-    embedLua("tr.fields = flds")
+    tr.fields = flds
     tr
 }
 
 pub fn sumTypeRef(left: any, right: any, sec: Section | unit): TypeRef {
     val tr = emptyTypeRef("SumTypeRef", sec)
-    embedLua("tr.lhs = left")
-    embedLua("tr.rhs = right")
+    tr.lhs = left
+    tr.rhs = right
     tr
 }
 
 pub fn typeConstructorRef(base: any, typeParams: array[any], sec: Section | unit): TypeRef {
     val tr = emptyTypeRef("TypeConstructorRef", sec)
-    embedLua("tr.baseType = base")
-    embedLua("tr.typeParameters = typeParams")
+    tr.baseType = base
+    tr.typeParameters = typeParams
     tr
 }
 
@@ -262,158 +261,158 @@ pub fn parseUnitValue(sec: Section | unit): ParseAst {
 
 pub fn parseLongValue(v: int, sec: Section | unit): ParseAst {
     val p = emptyParseAst("LongValue", sec)
-    embedLua("p.longValue = v")
+    p.longValue = v
     p
 }
 
 pub fn parseFloatValue(v: float, sec: Section | unit): ParseAst {
     val p = emptyParseAst("FloatValue", sec)
-    embedLua("p.floatValue = v")
+    p.floatValue = v
     p
 }
 
 pub fn parseBoolValue(v: bool, sec: Section | unit): ParseAst {
     val p = emptyParseAst("BoolValue", sec)
-    embedLua("p.boolValue = v")
+    p.boolValue = v
     p
 }
 
 pub fn parseStringValue(v: string, sec: Section | unit): ParseAst {
     val p = emptyParseAst("StringValue", sec)
-    embedLua("p.stringValue = v")
+    p.stringValue = v
     p
 }
 
 pub fn parseStringText(v: string, sec: Section | unit): ParseAst {
     val p = emptyParseAst("StringText", sec)
-    embedLua("p.stringValue = v")
+    p.stringValue = v
     p
 }
 
 pub fn parseInterpolation(expr: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseInterpolation", sec)
-    embedLua("p.interpValue = expr")
+    p.interpValue = expr
     p
 }
 
 pub fn parseInterpolatedString(strParts: array[any], sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseInterpolatedString", sec)
-    embedLua("p.parts = strParts")
+    p.parts = strParts
     p
 }
 
 pub fn parseLambda(args: array[any], lambdaBody: array[any], sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseLambda", sec)
-    embedLua("p.formalArguments = args")
-    embedLua("p.body = lambdaBody")
+    p.formalArguments = args
+    p.body = lambdaBody
     p
 }
 
 pub fn parseFuncWithName(isPub: bool, fnName: string, typeParams: array[any], args: array[any], retTypeRef: any, fnBody: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseFuncWithName", sec)
-    embedLua("p.isPublic = isPub")
-    embedLua("p.name = fnName")
-    embedLua("p.typeParameters = typeParams")
-    embedLua("p.formalArguments = args")
-    embedLua("p.returnTypeRef = retTypeRef")
-    embedLua("p.funcBody = fnBody")
+    p.isPublic = isPub
+    p.name = fnName
+    p.typeParameters = typeParams
+    p.formalArguments = args
+    p.returnTypeRef = retTypeRef
+    p.funcBody = fnBody
     p
 }
 
 pub fn parseFnCall(fn_: any, concreteTypes: array[any], callArgs: array[any], sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseFnCall", sec)
-    embedLua("p.callee = fn_")
-    embedLua("p.concreteTypeParams = concreteTypes")
-    embedLua("p.arguments = callArgs")
+    p.callee = fn_
+    p.concreteTypeParams = concreteTypes
+    p.arguments = callArgs
     p
 }
 
 pub fn parseVariableRead(varName: string, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseVariableRead", sec)
-    embedLua("p.variableName = varName")
+    p.variableName = varName
     p
 }
 
 pub fn parseAssignment(varName: string, val_: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseAssignment", sec)
-    embedLua("p.variableName = varName")
-    embedLua("p.value = val_")
+    p.variableName = varName
+    p.value = val_
     p
 }
 
 pub fn parseIndexOperator(var_: any, idx: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseIndexOperator", sec)
-    embedLua("p.variable = var_")
-    embedLua("p.indexExpr = idx")
+    p.variable = var_
+    p.indexExpr = idx
     p
 }
 
 pub fn parseIndexedAssignment(var_: any, idx: any, idxVal: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseIndexedAssignment", sec)
-    embedLua("p.variable = var_")
-    embedLua("p.indexExpr = idx")
-    embedLua("p.indexValue = idxVal")
+    p.variable = var_
+    p.indexExpr = idx
+    p.indexValue = idxVal
     p
 }
 
 pub fn parseNameDeclaration(isPub: bool, symName: string, isMut: bool, tRef: any, val_: any, symSec: Section | unit, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseNameDeclaration", sec)
-    embedLua("p.isPublic = isPub")
-    embedLua("p.symbolName = symName")
-    embedLua("p.isMutable = isMut")
-    embedLua("p.typeRef = tRef")
-    embedLua("p.value = val_")
-    embedLua("p.symbolSection = symSec")
+    p.isPublic = isPub
+    p.symbolName = symName
+    p.isMutable = isMut
+    p.typeRef = tRef
+    p.value = val_
+    p.symbolSection = symSec
     p
 }
 
 pub fn parseBlock(blockBody: array[any], sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseBlock", sec)
-    embedLua("p.body = blockBody")
+    p.body = blockBody
     p
 }
 
 pub fn parseGroup(val_: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseGroup", sec)
-    embedLua("p.value = val_")
+    p.value = val_
     p
 }
 
 pub fn parseIfElse(cond: any, thenB: any, elseB: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseIfElse", sec)
-    embedLua("p.condition = cond")
-    embedLua("p.thenBody = thenB")
-    embedLua("p.elseBody = elseB")
+    p.condition = cond
+    p.thenBody = thenB
+    p.elseBody = elseB
     p
 }
 
 pub fn parseWhile(cond: any, wBody: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseWhile", sec)
-    embedLua("p.condition = cond")
-    embedLua("p.loopBody = wBody")
+    p.condition = cond
+    p.loopBody = wBody
     p
 }
 
 pub fn parseFor(vars: array[string], iter: any, state: any, init: any, fBody: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseFor", sec)
-    embedLua("p.forVars = vars")
-    embedLua("p.iterable = iter")
-    embedLua("p.forState = state")
-    embedLua("p.forInit = init")
-    embedLua("p.forBody = fBody")
+    p.forVars = vars
+    p.iterable = iter
+    p.forState = state
+    p.forInit = init
+    p.forBody = fBody
     p
 }
 
 pub fn parseWhen(cases: array[any], elsC: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseWhen", sec)
-    embedLua("p.whenCases = cases")
-    embedLua("p.elseCase = elsC")
+    p.whenCases = cases
+    p.elseCase = elsC
     p
 }
 
 pub fn parseReturn(retVal: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseReturn", sec)
-    embedLua("p.returnValue = retVal")
+    p.returnValue = retVal
     p
 }
 
@@ -427,72 +426,72 @@ pub fn parseContinue(sec: Section | unit): ParseAst {
 
 pub fn parseNot(expr: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseNot", sec)
-    embedLua("p.value = expr")
+    p.value = expr
     p
 }
 
 pub fn parseBinaryOp(operator: string, l: any, r: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseBinaryOp", sec)
-    embedLua("p.op = operator")
-    embedLua("p.left = l")
-    embedLua("p.right = r")
+    p.op = operator
+    p.left = l
+    p.right = r
     p
 }
 
 pub fn parseCast(expr: any, tRef: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseCast", sec)
-    embedLua("p.value = expr")
-    embedLua("p.typeRef = tRef")
+    p.value = expr
+    p.typeRef = tRef
     p
 }
 
 pub fn parseIs(expr: any, tRef: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseIs", sec)
-    embedLua("p.value = expr")
-    embedLua("p.typeRef = tRef")
+    p.value = expr
+    p.typeRef = tRef
     p
 }
 
 pub fn parseFieldAccess(recvName: string, memName: string, recv: any, memSec: Section | unit, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseFieldAccess", sec)
-    embedLua("p.receiverName = recvName")
-    embedLua("p.memberName = memName")
-    embedLua("p.receiver = recv")
-    embedLua("p.memberSection = memSec")
+    p.receiverName = recvName
+    p.memberName = memName
+    p.receiver = recv
+    p.memberSection = memSec
     p
 }
 
 pub fn parseFieldAssignment(recvName: string, memName: string, recv: any, val_: any, memSec: Section | unit, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseFieldAssignment", sec)
-    embedLua("p.receiverName = recvName")
-    embedLua("p.memberName = memName")
-    embedLua("p.receiver = recv")
-    embedLua("p.value = val_")
-    embedLua("p.memberSection = memSec")
+    p.receiverName = recvName
+    p.memberName = memName
+    p.receiver = recv
+    p.value = val_
+    p.memberSection = memSec
     p
 }
 
 pub fn parseEffectDefinition(isPub: bool, effName: string, typeParams: array[any], args: array[any], retTypeRef: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseEffectDefinition", sec)
-    embedLua("p.isPublic = isPub")
-    embedLua("p.name = effName")
-    embedLua("p.typeParameters = typeParams")
-    embedLua("p.formalArguments = args")
-    embedLua("p.returnTypeRef = retTypeRef")
+    p.isPublic = isPub
+    p.name = effName
+    p.typeParameters = typeParams
+    p.formalArguments = args
+    p.returnTypeRef = retTypeRef
     p
 }
 
 pub fn parseHandle(hBody: any, cases: array[any], sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseHandle", sec)
-    embedLua("p.handleBody = hBody")
-    embedLua("p.effectCases = cases")
+    p.handleBody = hBody
+    p.effectCases = cases
     p
 }
 
 pub fn parseWeave(val_: any, template: any, sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseWeave", sec)
-    embedLua("p.value = val_")
-    embedLua("p.opTemplate = template")
+    p.value = val_
+    p.opTemplate = template
     p
 }
 
@@ -502,13 +501,13 @@ pub fn parseWeavePlaceholder(sec: Section | unit): ParseAst {
 
 pub fn parseCreateArray(values: array[any], sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseCreateArray", sec)
-    embedLua("p.arrayValues = values")
+    p.arrayValues = values
     p
 }
 
 pub fn parseCreateRecord(fields: array[any], sec: Section | unit): ParseAst {
     val p = emptyParseAst("ParseCreateRecord", sec)
-    embedLua("p.recordFields = fields")
+    p.recordFields = fields
     p
 }
 

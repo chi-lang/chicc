@@ -352,7 +352,7 @@ fn decodeTableImpl(tbl: any): Type {
         val hasIds = luaExpr("tbl.ids ~= nil and #tbl.ids > 0") as bool
         if hasIds {
             val decodedIds = decodeLuaTypeIds(tbl, "ids")
-            embedLua("result.ids = decodedIds")
+            result.ids = decodedIds
             result
         } else {
             result
