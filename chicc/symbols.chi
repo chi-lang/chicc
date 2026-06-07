@@ -153,8 +153,8 @@ type CompileTables = {
 pub fn newCompileTables(pkg: any, ns: any, imports: any): CompileTables {
     val localST = newSymbolTable()
     val localTT = newTypeTable(unit)
-    val packageAliasTable = luaExpr("{}") as any
-    val importedSymbols = luaExpr("{}") as any
+    val packageAliasTable = emptyMap[string, any]()
+    val importedSymbols = emptyMap[string, any]()
 
     // Process imports
     val importCount = luaExpr("imports and #imports or 0") as int
@@ -166,7 +166,7 @@ pub fn newCompileTables(pkg: any, ns: any, imports: any): CompileTables {
         val pkgAlias = luaExpr("imp.packageAlias") as any
 
         if pkgAlias != unit && luaExpr("pkgAlias ~= ''") as bool {
-            embedLua("packageAliasTable[pkgAlias] = { moduleName = impModuleName, packageName = impPackageName }")
+            packageAliasTable.put(pkgAlias, { moduleName: impModuleName, packageName: impPackageName })
         }
 
         val entries = luaExpr("imp.entries") as any
@@ -181,7 +181,7 @@ pub fn newCompileTables(pkg: any, ns: any, imports: any): CompileTables {
             } else {
                 entryName
             }
-            embedLua("importedSymbols[importedName] = { moduleName = impModuleName, packageName = impPackageName, originalName = entryName }")
+            importedSymbols.put(importedName, { moduleName: impModuleName, packageName: impPackageName, originalName: entryName })
             // Also register imported type aliases in the local type table
             val typeAlias = luaExpr("ns and ns.getTypeAlias and ns.getTypeAlias(impModuleName, impPackageName, entryName) or nil") as any
             if typeAlias != unit {
@@ -210,7 +210,7 @@ pub fn ctGetLocalSymbol(ct: CompileTables, name: string): Symbol | unit {
     } else {
         // 2. Check imported symbols
         val importedSymbols = ct.importedSymbols
-        val imported = luaExpr("importedSymbols[name]") as any
+        val imported = importedSymbols.get(name)
         if imported != unit {
             val impMod = luaExpr("imported.moduleName") as string
             val impPkg = luaExpr("imported.packageName") as string
@@ -241,7 +241,7 @@ pub fn ctRemoveSymbol(ct: CompileTables, name: string): unit {
 
 pub fn ctGetAliasedPackage(ct: CompileTables, name: string): any {
     val pat = ct.packageAliasTable
-    val result: any = luaExpr("pat[name]")
+    val result: any = pat.get(name)
     result
 }
 
