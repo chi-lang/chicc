@@ -5,7 +5,7 @@
 package chicc/cli
 import std/lang { luaExpr, embedLua }
 import std/os { getEnv }
-import std/io.file { readString, writeString }
+import std/io.file { readString, writeString, open }
 import chicc/compiler { newLuaCompilationEnv, newReplCompilationEnv, compileToLua, compileReplLine, formatMessage }
 
 // ============================================================================
@@ -21,7 +21,7 @@ pub fn loadStdlib(): bool {
         return false
     }
     val libPath = "${chiHome}/lib/std.chim"
-    val exists = luaExpr("io.open(libPath, 'r') ~= nil") as bool
+    val exists = open(libPath, "r") != unit
     if exists {
         val errCode: any = luaExpr("chi_load_module(libPath)")
         if errCode != unit {

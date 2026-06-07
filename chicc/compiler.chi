@@ -45,19 +45,62 @@ pub fn newLuaCompilationEnv(): any {
 // Lua helper: merge two import arrays
 // ============================================================================
 
-embedLua("__chicc_mergeImports = function(a, b) local result = {}; for _, imp in ipairs(a) do result[#result+1] = imp end; for _, imp in ipairs(b) do result[#result+1] = imp end; return result end")
+fn mergeImports(a: any, b: any): array[any] {
+    val result: array[any] = []
+    val an = luaExpr("#a") as int
+    var i = 1
+    while i <= an {
+        result.push(luaExpr("a[i]") as any)
+        i = i + 1
+    }
+    val bn = luaExpr("#b") as int
+    i = 1
+    while i <= bn {
+        result.push(luaExpr("b[i]") as any)
+        i = i + 1
+    }
+    result
+}
 
 // ============================================================================
 // Lua helper: build type scheme var name array from type parameters
 // ============================================================================
 
-embedLua("__chicc_typeParamNames = function(params) local vars = {}; for _, tp in ipairs(params) do vars[#vars+1] = tp.name end; return vars end")
+fn typeParamNames(params: any): array[string] {
+    val result: array[string] = []
+    val n = luaExpr("#params") as int
+    var i = 1
+    while i <= n {
+        result.push(luaExpr("params[i].name") as string)
+        i = i + 1
+    }
+    result
+}
 
 // ============================================================================
 // Lua helper: split expressions into functions vs code
 // ============================================================================
 
-embedLua("__chicc_splitExprs = function(expressions) local functions = {}; local code = {}; for _, expr in ipairs(expressions) do if (expr.kind == 'name_declaration' and expr.value and expr.value.kind == 'fn' and expr.expectedType ~= nil) or expr.kind == 'effect_definition' then functions[#functions+1] = expr else code[#code+1] = expr end end; return { functions = functions, code = code } end")
+fn splitExprs(expressions: any): { functions: array[any], code: array[any] } {
+    val functions: array[any] = []
+    val code: array[any] = []
+    val n = luaExpr("#expressions") as int
+    var i = 1
+    while i <= n {
+        val expr = luaExpr("expressions[i]") as any
+        val kind = luaExpr("expr.kind") as string
+        val isFn = if kind == "name_declaration" {
+            luaExpr("expr.value ~= nil and expr.value.kind == 'fn' and expr.expectedType ~= nil") as bool
+        } else { false }
+        if isFn || kind == "effect_definition" {
+            functions.push(expr)
+        } else {
+            code.push(expr)
+        }
+        i = i + 1
+    }
+    { functions: functions, code: code }
+}
 
 // ============================================================================
 // Lua helper: convert raw imports to typed Import records
@@ -463,7 +506,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
 
     // PHASE 3: BUILD COMPILE TABLES
     val preludeImports = luaExpr("ns ~= nil and ns.getPreludeImports and ns.getPreludeImports() or {}") as any
-    val allImports = luaExpr("__chicc_mergeImports(preludeImports, sourceImports)") as any
+    val allImports = mergeImports(preludeImports, sourceImports)
     val tables = newCompileTables(pkg, ns, allImports)
 
     // Resolve type aliases from source
@@ -476,7 +519,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
         val aliasName = luaExpr("aliasDef.name") as string
         val aliasTypeRef = luaExpr("aliasDef.typeRef") as any
         val aliasTypeParams = luaExpr("aliasDef.typeParameters") as any
-        val typeSchemeVars = luaExpr("__chicc_typeParamNames(aliasTypeParams)") as any
+        val typeSchemeVars = typeParamNames(aliasTypeParams)
         val typeId = luaExpr("{ moduleName = moduleName, packageName = packageName, name = aliasName }") as any
         val resolved = luaExpr("require('chicc/symbols').resolveTypeAndWrapRecursive(tables.localTypeTable, typeSchemeVars, aliasTypeRef, typeId, 1)") as any
         // Ensure the resolved type carries its own typeId in ids (needed for typeref encoding)
@@ -533,9 +576,9 @@ pub fn compile(source: string, ns: any): CompilationResult {
     embedLua("if __prof then __ts[6] = os.clock() end")
 
     // PHASE 6: TYPE INFERENCE (Hindley-Milner)
-    val groups = luaExpr("__chicc_splitExprs(expressions)") as any
-    val functions = luaExpr("groups.functions") as any
-    val code = luaExpr("groups.code") as any
+    val groups = splitExprs(expressions)
+    val functions = groups.functions
+    val code = groups.code
 
     // Initialize inference context
     icInit(pkg, ns, tables)
