@@ -381,7 +381,7 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             val actElem = luaExpr("actual.elementType") as Type
             val newHistory = copyHistoryWith(history, constraint)
             val nc = newConstraint(expElem, actElem, section, newHistory)
-            embedLua("table.insert(queue, pos, nc)")
+            queue.insertAt(pos, nc)
         } else if expected.tag == "sum" {
             // Try unifying with rhs first, fall back to lhs
             val expRhs = luaExpr("expected.rhs") as Type

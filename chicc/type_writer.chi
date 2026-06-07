@@ -284,7 +284,7 @@ fn decodeLuaTypeList(tbl: any): array[Type] {
     while i <= count {
         val sub = luaExpr("tbl.types[i]") as any
         val decoded = decodeTable(sub)
-        embedLua("table.insert(result, decoded)")
+        result.push(decoded)
         i = i + 1
     }
     luaExpr("result") as array[Type]
@@ -299,7 +299,7 @@ fn decodeLuaFields(tbl: any): array[RecordField] {
         val fieldTypeTbl = luaExpr("tbl.fields[i][2]") as any
         val ft = decodeTable(fieldTypeTbl)
         val rf = { name: fieldName, fieldType: ft }
-        embedLua("table.insert(result, rf)")
+        result.push(rf)
         i = i + 1
     }
     luaExpr("result") as array[RecordField]

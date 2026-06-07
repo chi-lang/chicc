@@ -389,7 +389,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
     var mi = 1
     while mi <= parseMsgCount {
         val msg = luaExpr("parseMessages[mi]") as any
-        embedLua("table.insert(resultMessages, msg)")
+        resultMessages.push(msg)
         mi = mi + 1
     }
 
@@ -409,12 +409,12 @@ pub fn compile(source: string, ns: any): CompilationResult {
     val emptyModName = luaExpr("moduleName == ''") as bool
     if emptyModName {
         val msg = invalidModuleName(moduleName, { line: 1, column: 0 })
-        embedLua("table.insert(resultMessages, msg)")
+        resultMessages.push(msg)
     }
     val emptyPkgName = luaExpr("packageName == ''") as bool
     if emptyPkgName {
         val msg = invalidPackageName(packageName, { line: 1, column: 0 })
-        embedLua("table.insert(resultMessages, msg)")
+        resultMessages.push(msg)
     }
 
     // Validate imported names exist and are public
@@ -443,7 +443,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
                         luaExpr("{ line = line, column = col }") as any
                     } else { unit }
                     val msg = cannotAccessInternalName(entryName, cp as {line: int, column: int} | unit)
-                    embedLua("table.insert(resultMessages, msg)")
+                    resultMessages.push(msg)
                 }
             } else if sym == unit && typeAlias == unit {
                 val cp = if entrySec != unit {
@@ -452,7 +452,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
                     luaExpr("{ line = line, column = col }") as any
                 } else { unit }
                 val msg = unrecognizedName(entryName, cp as {line: int, column: int} | unit)
-                embedLua("table.insert(resultMessages, msg)")
+                resultMessages.push(msg)
             }
             ei = ei + 1
         }
@@ -484,7 +484,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
         // For records/sums, prepend so ids[1] is the alias typeId
         embedLua("local rt = resolved; if rt.tag == 'recursive' then rt = rt.innerType end; if rt.ids then if rt.tag == 'primitive' then table.insert(rt.ids, typeId) else table.insert(rt.ids, 1, typeId) end end")
         val typeAlias = luaExpr("{ typeId = typeId, aliasType = resolved }") as any
-        embedLua("table.insert(definedTypeAliases, typeAlias)")
+        (definedTypeAliases as array[any]).push(typeAlias)
         ctDefineTypeAlias(tables, typeAlias)
         ai = ai + 1
     }
@@ -518,9 +518,9 @@ pub fn compile(source: string, ns: any): CompilationResult {
     } else {
         val isMsg = luaExpr("type(__chicc_conv_result) == 'table' and __chicc_conv_result.code ~= nil") as bool
         if isMsg {
-            embedLua("table.insert(resultMessages, __chicc_conv_result)")
+            resultMessages.push(luaExpr("__chicc_conv_result") as any)
         } else {
-            embedLua("table.insert(resultMessages, { code = 'ERROR', text = tostring(__chicc_conv_result), codePoint = nil })")
+            resultMessages.push(luaExpr("{ code = 'ERROR', text = tostring(__chicc_conv_result), codePoint = nil }") as any)
         }
         luaExpr("{}") as any
     }
@@ -572,9 +572,9 @@ pub fn compile(source: string, ns: any): CompilationResult {
         embedLua("require('chicc/typer').typerSetUf(nil)")
         val isTcMsg = luaExpr("type(__chicc_tc_err) == 'table' and __chicc_tc_err.code ~= nil") as bool
         if isTcMsg {
-            embedLua("table.insert(resultMessages, __chicc_tc_err)")
+            resultMessages.push(luaExpr("__chicc_tc_err") as any)
         } else {
-            embedLua("table.insert(resultMessages, { code = 'ERROR', text = tostring(__chicc_tc_err), codePoint = nil })")
+            resultMessages.push(luaExpr("{ code = 'ERROR', text = tostring(__chicc_tc_err), codePoint = nil }") as any)
         }
     }
 
@@ -588,9 +588,9 @@ pub fn compile(source: string, ns: any): CompilationResult {
             embedLua("require('chicc/typer').typerSetUf(nil)")
             val isFnMsg = luaExpr("type(__chicc_fn_err) == 'table' and __chicc_fn_err.code ~= nil") as bool
             if isFnMsg {
-                embedLua("table.insert(resultMessages, __chicc_fn_err)")
+                resultMessages.push(luaExpr("__chicc_fn_err") as any)
             } else {
-                embedLua("table.insert(resultMessages, { code = 'ERROR', text = tostring(__chicc_fn_err), codePoint = nil })")
+                resultMessages.push(luaExpr("{ code = 'ERROR', text = tostring(__chicc_fn_err), codePoint = nil }") as any)
             }
         }
         fi = fi + 1

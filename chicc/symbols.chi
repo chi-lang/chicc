@@ -341,7 +341,7 @@ pub fn resolveType(typeTable: TypeTable, typeSchemeVars: array[string], ref: any
                     val actualRef: any = luaExpr("typeParams[pi]")
                     val actualType = resolveType(typeTable, typeSchemeVars, actualRef, level)
                     val varType = variableType(paramName, 1)
-                    embedLua("table.insert(replacements, { variable = varType, replacement = actualType })")
+                    (replacements as array[any]).push({ variable: varType, replacement: actualType })
                     pi = pi + 1
                 }
                 if paramCount > 0 {
