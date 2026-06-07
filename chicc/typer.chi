@@ -154,6 +154,17 @@ fn addConstraint(constraints: any, expected: any, actual: any, section: any) {
     (constraints as array[any]).push(c)
 }
 
+// --- Helper: clear a constraints list IN PLACE (preserves aliasing; the same
+// list is threaded by reference through recursive typeTerm, so it must be
+// mutated, not rebound to a fresh array) ---
+
+fn clearConstraints(constraints: any) {
+    val c = constraints as array[any]
+    while c.size() > 0 {
+        c.removeLast()
+    }
+}
+
 // --- Helpers: check for numeric primitive types ---
 
 fn isIntType(t: any): bool {
@@ -401,7 +412,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         val receiverType = typeTerm(receiver, level, constraints)
         val finalReceiverType: any = if typerUf != unit {
             unifyWithUf(constraints as array[any], typerUf)
-            embedLua("for i = 1, #constraints do constraints[i] = nil end")
+            clearConstraints(constraints)
             ufResolve(typerUf, receiverType as Type)
         } else {
             val solutions = unify(constraints as array[any])
@@ -544,7 +555,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         addConstraint(constraints, expectedType, valueType, valueSection)
         val mappedType: any = if typerUf != unit {
             unifyWithUf(constraints as array[any], typerUf)
-            embedLua("for i = 1, #constraints do constraints[i] = nil end")
+            clearConstraints(constraints)
             ufResolve(typerUf, expectedType as Type)
         } else {
             val solution = unify(constraints as array[any])
@@ -621,7 +632,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         }
         val finalIterableType: any = if typerUf != unit {
             unifyWithUf(constraints as array[any], typerUf)
-            embedLua("for i = 1, #constraints do constraints[i] = nil end")
+            clearConstraints(constraints)
             ufResolve(typerUf, iterableType as Type)
         } else {
             val solution = unify(constraints as array[any])
@@ -859,7 +870,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
             // Resolve type variables first (operands may be unresolved fn call results)
             val resolvedLhs: any = if typerUf != unit {
                 unifyWithUf(constraints as array[any], typerUf)
-                embedLua("for i = 1, #constraints do constraints[i] = nil end")
+                clearConstraints(constraints)
                 ufResolve(typerUf, lhsType as Type)
             } else { lhsType }
             val resolvedRhs: any = if typerUf != unit {
