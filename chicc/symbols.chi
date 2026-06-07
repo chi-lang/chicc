@@ -1,6 +1,6 @@
 package chicc/symbols
 import std/lang { luaExpr, embedLua }
-import std/lang.map { emptyMap }
+import std/lang.map { emptyMap, remove }
 import chicc/types { Type, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType }
 import chicc/parse_ast { TypeRef }
 
@@ -39,28 +39,28 @@ pub fn newSymbolTable(): SymbolTable {
 pub fn stAdd(st: SymbolTable, sym: Symbol): unit {
     val symbols = st.symbols
     val name = sym.name
-    embedLua("symbols[name] = sym")
+    symbols.put(name, sym)
 }
 
 pub fn stAddAlias(st: SymbolTable, alias: string, sym: Symbol): unit {
     val symbols = st.symbols
-    embedLua("symbols[alias] = sym")
+    symbols.put(alias, sym)
 }
 
 pub fn stGet(st: SymbolTable, name: string): Symbol | unit {
     val symbols = st.symbols
-    val result: Symbol | unit = luaExpr("symbols[name]")
+    val result: Symbol | unit = symbols.get(name)
     result
 }
 
 pub fn stRemove(st: SymbolTable, name: string): unit {
     val symbols = st.symbols
-    embedLua("symbols[name] = nil")
+    symbols.remove(name)
 }
 
 pub fn stHas(st: SymbolTable, name: string): bool {
     val symbols = st.symbols
-    val exists: bool = luaExpr("symbols[name] ~= nil")
+    val exists: bool = symbols.has(name)
     exists
 }
 
@@ -76,7 +76,7 @@ pub fn newFnSymbolTable(parent: any): FnSymbolTable {
 pub fn fstAddLocal(fst: FnSymbolTable, name: string, symType: any, isMut: bool): unit {
     val locals = fst.locals
     val sym = newFnSymbol(name, symType, isMut)
-    embedLua("locals[name] = sym")
+    locals.put(name, sym)
 }
 
 pub fn fstAddArgument(fst: FnSymbolTable, name: string, symType: any): unit {
@@ -85,7 +85,7 @@ pub fn fstAddArgument(fst: FnSymbolTable, name: string, symType: any): unit {
 
 pub fn fstGet(fst: FnSymbolTable, name: string): FnSymbol | unit {
     val locals = fst.locals
-    val found = luaExpr("locals[name]") as FnSymbol | unit
+    val found: FnSymbol | unit = locals.get(name)
     if found != unit {
         found
     } else {
@@ -100,7 +100,7 @@ pub fn fstGet(fst: FnSymbolTable, name: string): FnSymbol | unit {
 
 pub fn fstRemove(fst: FnSymbolTable, name: string): unit {
     val locals = fst.locals
-    embedLua("locals[name] = nil")
+    locals.remove(name)
 }
 
 // --- TypeTable: type alias storage ---
@@ -115,17 +115,17 @@ pub fn newTypeTable(parentPkg: any): TypeTable {
 pub fn ttAdd(tt: TypeTable, alias: any): unit {
     val aliases = tt.aliases
     val name: string = luaExpr("alias.typeId.name")
-    embedLua("aliases[name] = alias")
+    aliases.put(name, alias)
 }
 
 pub fn ttAddByName(tt: TypeTable, name: string, alias: any): unit {
     val aliases = tt.aliases
-    embedLua("aliases[name] = alias")
+    aliases.put(name, alias)
 }
 
 pub fn ttGet(tt: TypeTable, name: string): any {
     val aliases = tt.aliases
-    val found: any = luaExpr("aliases[name]")
+    val found: any = aliases.get(name)
     if found != unit {
         found
     } else {
@@ -409,7 +409,7 @@ pub fn resolveTypeAndWrapRecursive(typeTable: TypeTable, typeSchemeVars: array[s
     // Temporarily register self-ref in type table so self-references resolve
     val tempAlias = luaExpr("{ typeId = typeId, aliasType = selfRefVar }") as any
     val aliasName = luaExpr("typeId.name") as string
-    embedLua("typeTable.aliases[aliasName] = tempAlias")
+    typeTable.aliases.put(aliasName, tempAlias)
 
     // Resolve the type (self-references will find selfRefVar)
     val resolved = resolveType(typeTable, typeSchemeVars, ref, level)
@@ -424,7 +424,7 @@ pub fn resolveTypeAndWrapRecursive(typeTable: TypeTable, typeSchemeVars: array[s
 
     // Register final resolved alias
     val finalAlias = luaExpr("{ typeId = typeId, aliasType = finalType }") as any
-    embedLua("typeTable.aliases[aliasName] = finalAlias")
+    typeTable.aliases.put(aliasName, finalAlias)
 
     finalType
 }

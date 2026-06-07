@@ -961,7 +961,8 @@ pub fn convertProgram(parseProg: any, pkg: any, tables: any): array[Expr] {
         val tt = getTypeTable(tables)
         // Skip re-resolution if alias already exists in type table
         // (compiler.chi already resolved with resolveTypeAndWrapRecursive which handles recursive types)
-        val existing: any = luaExpr("tt.aliases[aliasName]")
+        val aliasesMap: any = luaExpr("tt.aliases")
+        val existing: any = aliasesMap.get(aliasName)
         if existing == unit {
             val resolved = resolveType(tt, tpNames, aliasTypeRef, currentTypeLevel)
             val modName = luaExpr("pkg.moduleName") as string
@@ -969,7 +970,7 @@ pub fn convertProgram(parseProg: any, pkg: any, tables: any): array[Expr] {
 
             // Create and register the alias
             val typeAlias = luaExpr("{ typeId = { moduleName = modName, packageName = pkgName, name = aliasName }, aliasType = resolved }") as any
-            embedLua("tables.localTypeTable.aliases[aliasName] = typeAlias")
+            aliasesMap.put(aliasName, typeAlias)
         }
 
         i = i + 1
