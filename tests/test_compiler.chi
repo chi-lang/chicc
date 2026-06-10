@@ -316,6 +316,29 @@ test("compileToLua: importing the method disambiguates an any receiver") {
     assertTrue(luaCode != unit)
 }
 
+// Default parameter values, end to end: the defaults map is produced by
+// ast_converter and consumed by both the emitter (nil-guard emission) and
+// the typer (default-vs-param type constraint). Pins the pipeline across
+// the defaultValues representation migration (issue #13).
+test("compileToLua: default param value emits a nil guard") {
+    val src = "fn add(a: int, b: int = 10): int { a + b }\nval r = add(1)"
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val msgCount: int = luaExpr("#result.messages")
+    assertEqual(msgCount, 0)
+    val codeStr: string = luaExpr("result.luaCode") as string
+    val hasGuard: bool = luaExpr("string.find(codeStr, 'if b == nil then', 1, true) ~= nil")
+    assertTrue(hasGuard)
+}
+
+test("compileToLua: default value of wrong type is a type error") {
+    val src = "fn f(x: int = \"oops\"): int { x }"
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val msgCount: int = luaExpr("#result.messages")
+    assertEqual(msgCount, 1)
+    val code = luaExpr("result.messages[1].code") as string
+    assertEqual(code, "TYPE_MISMATCH")
+}
+
 // =====================================================================
 // formatMessage tests
 // =====================================================================
