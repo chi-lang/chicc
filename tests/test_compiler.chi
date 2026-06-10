@@ -291,6 +291,31 @@ test("compileToLua: error produces nil luaCode") {
     assertTrue(msgCount > 0)
 }
 
+// UFCS method on an `any` receiver whose name is exported by several
+// loaded packages — `size` lives in array, map and set (regression for
+// issue #11 / commit ca49d6e). Needs a real compilation env: with
+// ns = unit the loaded-package lookup is skipped and the ambiguity
+// can't be detected.
+test("compileToLua: ambiguous UFCS method on any receiver is reported") {
+    val src = "import std/lang.map { emptyMap }\nval m: any = emptyMap[string, int]()\nval s = m.size()"
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val luaCode: any = luaExpr("result.luaCode")
+    assertTrue(luaCode == unit)
+    val msgCount: int = luaExpr("#result.messages")
+    assertEqual(msgCount, 1)
+    val code = luaExpr("result.messages[1].code") as string
+    assertEqual(code, "AMBIGUOUS_METHOD")
+}
+
+test("compileToLua: importing the method disambiguates an any receiver") {
+    val src = "import std/lang.map { emptyMap, size }\nval m: any = emptyMap[string, int]()\nval s = m.size()"
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val msgCount: int = luaExpr("#result.messages")
+    assertEqual(msgCount, 0)
+    val luaCode: any = luaExpr("result.luaCode")
+    assertTrue(luaCode != unit)
+}
+
 // =====================================================================
 // formatMessage tests
 // =====================================================================
