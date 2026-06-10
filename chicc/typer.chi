@@ -305,10 +305,10 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
                 } else {
                     icFreshVariable(level)
                 }
-                // Handle default values
-                val defaultValues = luaExpr("term.defaultValues") as any
+                // Handle default values (std/lang.map keyed by param name)
+                val defaultValues: any = term.defaultValues
                 if defaultValues != unit {
-                    val defaultVal = luaExpr("defaultValues[pName]") as any
+                    val defaultVal: any = defaultValues.get(pName)
                     if defaultVal != unit {
                         val dvType = typeTerm(defaultVal, level, constraints)
                         val dvSection = luaExpr("defaultVal.section") as any

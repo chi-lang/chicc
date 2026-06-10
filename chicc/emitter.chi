@@ -195,7 +195,22 @@ pub fn emitFn(st: EmitterState, expr: Expr, name: string, isTopLevel: bool): str
     val prevFunctionDepth = st.functionDepth
     st.inFunction = true
     st.functionDepth = prevFunctionDepth + 1
-    embedLua("if expr.defaultValues and type(expr.defaultValues) == 'table' then for dname, dval in pairs(expr.defaultValues) do local sname = __P_.luaName(dname) __P_.emit(st, 'if ' .. sname .. ' == nil then ') local dResult = __P_.emitExpr(st, dval) __P_.emit(st, sname .. '=' .. dResult .. ';end;') end end")
+    // Emit `if <param> == nil then <param> = <default> end` guards for
+    // default parameter values (a std/lang.map keyed by param name).
+    val defaultValues: any = expr.defaultValues
+    if defaultValues != unit {
+        val dnames: array[string] = defaultValues.keys()
+        val dnameCount = dnames.size()
+        var di = 1
+        while di <= dnameCount {
+            val dname = dnames[di]
+            val sname = luaName(dname)
+            emit(st, "if $sname == nil then ")
+            val dResult = emitExpr(st, defaultValues.get(dname) as Expr)
+            emit(st, "$sname=$dResult;end;")
+            di = di + 1
+        }
+    }
     val fnBody = expr.body as Expr
     val bodyResult = emitExpr(st, fnBody)
     val fnBodyBlock = fnBody.blockBody

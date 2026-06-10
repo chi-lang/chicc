@@ -1,5 +1,6 @@
 package chicc/ast_converter
 import std/lang { luaExpr, embedLua }
+import std/lang.map { emptyMap }
 import chicc/source { Section }
 import chicc/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType }
 import chicc/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, packageTarget, setExprType, atomExpr, interpolatedStringExpr, createRecordExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, assignmentExpr, nameDeclarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam }
@@ -348,7 +349,8 @@ fn convertLambdaImpl(node: any, pkg: any, tables: any): Expr {
     currentFnSymbolTable = fst
 
     var params: array[any] = []
-    var defaultArgs = luaExpr("{}") as any
+    val defaultArgs = emptyMap[string, any]()
+    var defaultArgCount = 0
     var fnTypes: array[any] = []
     var i = 1
     val argCount = args.size()
@@ -367,7 +369,8 @@ fn convertLambdaImpl(node: any, pkg: any, tables: any): Expr {
 
         if argDefValue != unit {
             val defExpr: any = convert(argDefValue, pkg, tables)
-            embedLua("defaultArgs[argName] = defExpr")
+            defaultArgs.put(argName, defExpr)
+            defaultArgCount = defaultArgCount + 1
         }
 
         fstAddArgument(fst, argName, argType)
@@ -402,11 +405,10 @@ fn convertLambdaImpl(node: any, pkg: any, tables: any): Expr {
 
     val body = blockExpr(bodyExprs as array[Expr], sec as Section | unit)
 
-    // Check if there are default args
-    val defaultCount = luaExpr("(function() local c=0; for _ in pairs(defaultArgs) do c=c+1 end; return c end)()") as int
-    val funcType = functionType(fnTypes as array[Type], [] as array[string], defaultCount)
+    val funcType = functionType(fnTypes as array[Type], [] as array[string], defaultArgCount)
 
-    val result: any = fnExpr(params as array[FnParam], defaultArgs, body as Expr, sec as Section | unit)
+    val defaults: any = if defaultArgCount > 0 { defaultArgs } else { unit }
+    val result: any = fnExpr(params as array[FnParam], defaults, body as Expr, sec as Section | unit)
     setExprType(result as Expr, funcType as Type | unit)
     result
 }
@@ -491,7 +493,7 @@ fn convertFuncWithNameImpl(node: any, pkg: any, tables: any): Expr {
 
     // Add arguments to the fn symbol table and build params
     var params: array[any] = []
-    var defaultArgs = luaExpr("{}") as any
+    val defaultArgs = emptyMap[string, any]()
     i = 1
     while i <= argCount {
         val arg = args[i]
@@ -507,7 +509,7 @@ fn convertFuncWithNameImpl(node: any, pkg: any, tables: any): Expr {
 
         if argDefValue != unit {
             val defExpr: any = convert(argDefValue, pkg, tables)
-            embedLua("defaultArgs[argName] = defExpr")
+            defaultArgs.put(argName, defExpr)
         }
 
         fstAddArgument(fst, argName, argType)
@@ -537,7 +539,7 @@ fn convertFuncWithNameImpl(node: any, pkg: any, tables: any): Expr {
                     val lambdaType = functionType([lambdaRetVar] as array[Type], [] as array[string], 0)
                     val lambdaParams: array[FnParam] = []
                     val lambdaSec = luaExpr("lastExpr.section") as any
-                    val lambdaFn: any = fnExpr(lambdaParams, luaExpr("{}"), lastExpr as Expr, lambdaSec as Section | unit)
+                    val lambdaFn: any = fnExpr(lambdaParams, unit, lastExpr as Expr, lambdaSec as Section | unit)
                     setExprType(lambdaFn as Expr, lambdaType as Type | unit)
                     embedLua("body.blockBody[bodyCount] = lambdaFn")
                 }
@@ -551,7 +553,8 @@ fn convertFuncWithNameImpl(node: any, pkg: any, tables: any): Expr {
     currentTypeSchemeVars = prevTypeSchemeVars
     typeSchemeLevel = prevTypeSchemeLevel
 
-    val fnBody = fnExpr(params as array[FnParam], defaultArgs, body as Expr, sec as Section | unit)
+    val defaults: any = if defaultArgCount > 0 { defaultArgs } else { unit }
+    val fnBody = fnExpr(params as array[FnParam], defaults, body as Expr, sec as Section | unit)
 
     nameDeclarationExpr(isPub, fnName, false, funcType as Type | unit, fnBody as Expr, sec as Section | unit)
 }
@@ -626,9 +629,8 @@ fn convertFnCallImpl(node: any, pkg: any, tables: any): Expr {
         val argKind = luaExpr("arg.kind") as string
         if argKind == "block" {
             val emptyParams: array[FnParam] = []
-            val emptyDefaults: any = luaExpr("{}") as any
             val blockSec: any = luaExpr("arg.section") as any
-            val wrappedFn = fnExpr(emptyParams, emptyDefaults, arg as Expr, blockSec as Section | unit)
+            val wrappedFn = fnExpr(emptyParams, unit, arg as Expr, blockSec as Section | unit)
             embedLua("convertedArgs[wi] = wrappedFn")
         }
         wi = wi + 1
@@ -642,9 +644,8 @@ fn convertFnCallImpl(node: any, pkg: any, tables: any): Expr {
             val calleeKind = luaExpr("callee.kind") as string
             if calleeKind == "block" {
                 val emptyParams: array[FnParam] = []
-                val emptyDefaults: any = luaExpr("{}") as any
                 val calleeSec: any = luaExpr("callee.section") as any
-                wrappedCallee = fnExpr(emptyParams, emptyDefaults, callee as Expr, calleeSec as Section | unit)
+                wrappedCallee = fnExpr(emptyParams, unit, callee as Expr, calleeSec as Section | unit)
             }
         }
     }

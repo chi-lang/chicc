@@ -63,6 +63,8 @@ type Expr = {
     isMutable: bool,
     expectedType: Type | unit,
     parameters: array[FnParam],
+    // std/lang.map (param name -> default Expr), or unit when the fn has
+    // no defaults; typed `any` because the stdlib Map type is package-private
     defaultValues: any,
     body: Expr | unit,
     callee: Expr | unit,
