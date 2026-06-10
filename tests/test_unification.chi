@@ -364,8 +364,8 @@ test("unify: empty constraints returns empty solutions") {
 test("unify: unit where a record is expected is a type error") {
     val rec = recordType([], [{ name: "x", fieldType: tInt }], [])
     val c = newConstraint(rec, tUnit, testSection, [])
-    val constraints: array[any] = luaExpr("{}")
-    embedLua("table.insert(constraints, c)")
+    val constraints: array[any] = []
+    constraints.push(c)
     embedLua("local ok, err = pcall(unify, constraints)")
     assertFalse(luaExpr("ok") as bool)
     assertEqual(luaExpr("err.code") as string, "TYPE_MISMATCH")
@@ -374,8 +374,8 @@ test("unify: unit where a record is expected is a type error") {
 test("unify: a record where unit is expected is a type error") {
     val rec = recordType([], [{ name: "x", fieldType: tInt }], [])
     val c = newConstraint(tUnit, rec, testSection, [])
-    val constraints: array[any] = luaExpr("{}")
-    embedLua("table.insert(constraints, c)")
+    val constraints: array[any] = []
+    constraints.push(c)
     embedLua("local ok, err = pcall(unify, constraints)")
     assertFalse(luaExpr("ok") as bool)
     assertEqual(luaExpr("err.code") as string, "TYPE_MISMATCH")
@@ -384,8 +384,8 @@ test("unify: a record where unit is expected is a type error") {
 test("unify: unit where a sum without a unit variant is expected is a type error") {
     val sumT = sumType([], tInt, tString, [])
     val c = newConstraint(sumT, tUnit, testSection, [])
-    val constraints: array[any] = luaExpr("{}")
-    embedLua("table.insert(constraints, c)")
+    val constraints: array[any] = []
+    constraints.push(c)
     embedLua("local ok, err = pcall(unify, constraints)")
     assertFalse(luaExpr("ok") as bool)
     assertEqual(luaExpr("err.code") as string, "TYPE_MISMATCH")
@@ -398,8 +398,8 @@ test("unify: unit where a recursive record is expected is a type error") {
     val inner = recordType([], [{ name: "next", fieldType: v }], [])
     val recT = recursiveType(v, inner)
     val c = newConstraint(recT, tUnit, testSection, [])
-    val constraints: array[any] = luaExpr("{}")
-    embedLua("table.insert(constraints, c)")
+    val constraints: array[any] = []
+    constraints.push(c)
     embedLua("local ok, err = pcall(unify, constraints)")
     assertFalse(luaExpr("ok") as bool)
     assertEqual(luaExpr("err.code") as string, "TYPE_MISMATCH")
@@ -408,20 +408,20 @@ test("unify: unit where a recursive record is expected is a type error") {
 test("unify: unit unifies with a sum that has a unit variant") {
     val sumT = sumType([], tInt, tUnit, [])
     val c = newConstraint(sumT, tUnit, testSection, [])
-    val constraints: array[any] = luaExpr("{}")
-    embedLua("table.insert(constraints, c)")
+    val constraints: array[any] = []
+    constraints.push(c)
     // Resolves through normal sum branching — no error.
     val solutions = unify(constraints)
-    assertEqual(luaExpr("#solutions") as int, 0)
+    assertEqual(solutions.size(), 0)
 }
 
 test("unify: actual any intersects a concrete primitive (no mismatch)") {
     // any is the top type; expected=int, actual=any must not error.
     val c = newConstraint(tInt, tAny, testSection, [])
-    val constraints: array[any] = luaExpr("{}")
-    embedLua("table.insert(constraints, c)")
+    val constraints: array[any] = []
+    constraints.push(c)
     val solutions = unify(constraints)
-    assertEqual(luaExpr("#solutions") as int, 0)
+    assertEqual(solutions.size(), 0)
 }
 
 summary()
