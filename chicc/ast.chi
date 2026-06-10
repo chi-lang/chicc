@@ -337,7 +337,6 @@ pub fn exprDeclName(e: Expr): string { e.declName }
 pub fn exprIsMutable(e: Expr): bool { e.isMutable }
 pub fn exprExpectedType(e: Expr): Type | unit { e.expectedType }
 pub fn exprParameters(e: Expr): array[FnParam] { e.parameters }
-pub fn exprDefaultValues(e: Expr): any { e.defaultValues }
 pub fn exprBody(e: Expr): Expr | unit { e.body }
 pub fn exprFunction(e: Expr): Expr | unit { e.callee }
 pub fn exprCallParams(e: Expr): array[Expr] { e.callParams }
