@@ -393,6 +393,25 @@ test("compileToLua: unrecognized character fails the compilation") {
     assertEqual(luaExpr("result.messages[1].codePoint.line") as int, 1)
 }
 
+test("compileToLua: characters illegal as tokens are fine inside strings and comments") {
+    // False-positive guard: `;` is not a Chi token but is legal text in
+    // string literals and comments — must compile cleanly.
+    val src = "val s = \"a; b ;; c\"\n// comment; with ;; semicolons\nval t = 1 /* block ; */ + 1"
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    assertEqual(luaExpr("#result.messages") as int, 0)
+    assertTrue(luaExpr("result.luaCode") as any != unit)
+}
+
+test("compileToLua: several unrecognized characters are all reported with positions") {
+    val src = "val a = 1;\nval b = 2;"
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    assertTrue(luaExpr("result.luaCode") as any == unit)
+    val msgs: array[any] = luaExpr("result.messages")
+    assertTrue(msgs.size() >= 2)
+    assertEqual(luaExpr("result.messages[1].codePoint.line") as int, 1)
+    assertEqual(luaExpr("result.messages[2].codePoint.line") as int, 2)
+}
+
 // =====================================================================
 // formatMessage tests
 // =====================================================================
