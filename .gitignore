@@ -9,8 +9,8 @@ chicc_gen1.lua
 compile.lua
 
 # Generated scripts
-run_chicc.sh
 test_golden.sh
 
 # Claude stuff
 .claude/worktrees
+.claude/skills
