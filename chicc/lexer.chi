@@ -135,6 +135,8 @@ pub fn skipLineComment(lex: Lexer) {
 // Skip a block comment (after detecting '/*').
 // Consumes all characters until '*/' or EOF. Tracks line/col properly.
 pub fn skipBlockComment(lex: Lexer) {
+    val startLine = lex.line
+    val startCol = lex.col
     // Consume '/' and '*'
     lexAdvance(lex)
     lexAdvance(lex)
@@ -148,6 +150,9 @@ pub fn skipBlockComment(lex: Lexer) {
         }
         lexAdvance(lex)
     }
+    // EOF inside the comment — report at the opening position
+    val sec = newSection(startLine, startCol, startLine, startCol)
+    lex.errors.push(syntaxError("unterminated block comment", toCodePoint(sec)))
 }
 
 // Skip whitespace (spaces and tabs) and comments (// and /* */).
@@ -395,7 +400,7 @@ pub fn readOperatorOrDelimiter(lex: Lexer) {
 }
 
 // --- Helper: convert escape character code to the actual character string ---
-fn escapeChar(ch: int): string {
+fn escapeChar(ch: int): string | unit {
     if ch == 110 { // 'n'
         "\n"
     } else if ch == 114 { // 'r'
@@ -411,15 +416,14 @@ fn escapeChar(ch: int): string {
     } else if ch == 36 { // dollar sign
         "$"
     } else {
-        // Unknown escape - return the backslash + char as-is
-        val c: string = fromCharCode(ch)
-        val result: string = "\\" + c
-        result
+        // Unknown escape
+        unit
     }
 }
 
 // --- Helper: read an escape sequence after consuming the backslash ---
-// Returns the string representation of the escaped character
+// Returns the string representation of the escaped character. An unknown
+// escape records a syntax error in lex.errors and yields the literal text.
 fn readEscape(lex: Lexer): string {
     // Current char is the one after '\'
     val ch = lexPeek(lex)
@@ -427,8 +431,19 @@ fn readEscape(lex: Lexer): string {
         // Backslash at end of string - just return backslash
         return "\\"
     }
+    val escLine = lex.line
+    val escCol = lex.col - 1 // position of the backslash
     lexAdvance(lex) // consume the escape character
-    escapeChar(ch)
+    val escaped = escapeChar(ch)
+    if escaped != unit {
+        escaped as string
+    } else {
+        // Unknown escape — report it, keep the literal text as recovery
+        val c: string = fromCharCode(ch)
+        val sec = newSection(escLine, escCol, escLine, escCol)
+        lex.errors.push(syntaxError("unknown escape sequence '\\$c'", toCodePoint(sec)))
+        "\\" + c
+    }
 }
 
 // --- Helper: scan ahead to check if string body contains unescaped '$' ---
@@ -505,9 +520,13 @@ pub fn lexReadString(lex: Lexer) {
                 lexAdvance(lex)
             }
         }
-        // Consume closing '"' (if present)
+        // Consume closing '"'
         if lexPeek(lex) == 34 {
             lexAdvance(lex)
+        } else {
+            // EOF without a closing quote — report at the opening position
+            val openSec = newSection(startLine, startCol, startLine, startCol)
+            lex.errors.push(syntaxError("unterminated string", toCodePoint(openSec)))
         }
         val text = sb.toString()
         val section = newSection(startLine, startCol, lex.line, lex.col - 1)
@@ -581,6 +600,10 @@ pub fn lexReadString(lex: Lexer) {
         val closeCol = lex.col
         if lexPeek(lex) == 34 {
             lexAdvance(lex)
+        } else {
+            // EOF without a closing quote — report at the opening position
+            val openErrSec = newSection(startLine, startCol, startLine, startCol)
+            lex.errors.push(syntaxError("unterminated string", toCodePoint(openErrSec)))
         }
         val closeSec = newSection(closeLine, closeCol, closeLine, closeCol)
         lex.tokens.push(newToken(TK_INTERP_END, "\"", closeSec))
