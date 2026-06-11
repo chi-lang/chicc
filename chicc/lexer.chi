@@ -1,7 +1,8 @@
 // chicc/chicc/lexer.chi
 package chicc/lexer
 import chicc/token { Token, newToken, lookupKeyword, TK_INT, TK_FLOAT, TK_STRING, TK_INTERP_START, TK_INTERP_TEXT, TK_INTERP_EXPR_START, TK_INTERP_EXPR_END, TK_INTERP_END, TK_ID, TK_PLUS, TK_MINUS, TK_STAR, TK_SLASH, TK_PERCENT, TK_EQ, TK_EQEQ, TK_NEQ, TK_LT, TK_LTEQ, TK_GT, TK_GTEQ, TK_NOT, TK_AND, TK_OR, TK_AMP, TK_PIPE, TK_LSHIFT, TK_RSHIFT, TK_ARROW, TK_WEAVE, TK_UNDERSCORE, TK_DOT, TK_COMMA, TK_COLON, TK_PLUSEQ, TK_MINUSEQ, TK_STAREQ, TK_SLASHEQ, TK_LPAREN, TK_RPAREN, TK_LBRACE, TK_RBRACE, TK_LBRACKET, TK_RBRACKET, TK_NEWLINE, TK_EOF }
-import chicc/source { newSection }
+import chicc/source { newSection, toCodePoint }
+import chicc/messages { Message, syntaxError }
 import chicc/util { newStringBuilder, append, toString }
 import std/lang.string { fromCharCode }
 
@@ -11,12 +12,16 @@ type Lexer = {
     line: int,
     col: int,
     length: int,
-    tokens: array[Token]
+    tokens: array[Token],
+    // Errors collected during lexing (Message records). The lexer
+    // recovers and keeps going; the compiler drains these into its
+    // result messages, so a lexing error fails the compilation (#21).
+    errors: array[Message]
 }
 
 pub fn newLexer(source: string): Lexer {
     val len: int = source.byteLen()
-    { source: source, pos: 1, line: 1, col: 1, length: len, tokens: [] }
+    { source: source, pos: 1, line: 1, col: 1, length: len, tokens: [], errors: [] }
 }
 
 // Peek at current character (returns byte value, 0 for EOF)
@@ -382,8 +387,9 @@ pub fn readOperatorOrDelimiter(lex: Lexer) {
         val sec = newSection(startLine, startCol, startLine, startCol)
         lex.tokens.push(newToken(TK_NEWLINE, "\n", sec))
     } else {
-        // Unrecognized character - skip it
-        println("Warning: unrecognized character at line $startLine col $startCol")
+        // Unrecognized character - record the error and skip it
+        val sec = newSection(startLine, startCol, startLine, startCol)
+        lex.errors.push(syntaxError("unrecognized character", toCodePoint(sec)))
         lexAdvance(lex)
     }
 }
@@ -631,9 +637,10 @@ pub fn readToken(lex: Lexer) {
     }
 }
 
-// --- Main tokenize entry point ---
-// Tokenizes the entire source string and returns an array of tokens.
-pub fn tokenize(source: string): array[Token] {
+// --- Main tokenize entry points ---
+// Tokenizes the entire source and returns the full lexer state —
+// callers that care about recovered errors (compiler) read .errors.
+pub fn tokenizeLexer(source: string): Lexer {
     val lex = newLexer(source)
     while true {
         skipWhitespaceAndComments(lex)
@@ -641,10 +648,15 @@ pub fn tokenize(source: string): array[Token] {
             // EOF reached
             val eofSection = newSection(lex.line, lex.col, lex.line, lex.col)
             lex.tokens.push(newToken(TK_EOF, "", eofSection))
-            return lex.tokens
+            return lex
         }
         readToken(lex)
     }
     // Unreachable, but satisfies type checker
-    lex.tokens
+    lex
+}
+
+// Tokenizes the entire source string and returns an array of tokens.
+pub fn tokenize(source: string): array[Token] {
+    tokenizeLexer(source).tokens
 }
