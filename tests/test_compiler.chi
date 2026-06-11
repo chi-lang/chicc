@@ -380,6 +380,19 @@ test("compileToLua: recovered errors survive a later unrecoverable error") {
     assertEqual(line1, 1)
 }
 
+// Lexer-recovered errors must fail the compilation too (issue #21):
+// an unrecognized character used to be a stdout warning and was
+// silently dropped from the token stream.
+test("compileToLua: unrecognized character fails the compilation") {
+    val src = "val x = 1;\nval y = 2"
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    assertTrue(luaExpr("result.luaCode") as any == unit)
+    val msgCount: int = luaExpr("#result.messages")
+    assertTrue(msgCount > 0)
+    assertEqual(luaExpr("result.messages[1].code") as string, "SYNTAX_ERROR")
+    assertEqual(luaExpr("result.messages[1].codePoint.line") as int, 1)
+}
+
 // =====================================================================
 // formatMessage tests
 // =====================================================================
