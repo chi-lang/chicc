@@ -174,13 +174,20 @@ static int load_compiler(lua_State *L) {
         return -1;
     }
 
-    /* Set chi_compile for eval()/compileLua() in Chi programs */
+    /* Set chi_compile for eval()/compileLua() in Chi programs.
+     * Returns luaCode on success, nil + formatted messages on failure. */
     if (luaL_dostring(L,
             "chi_compile = function(source)\n"
             "  local ns = newLuaCompilationEnv()\n"
             "  local result = compileToLua(source, ns)\n"
             "  if result and result.luaCode then return result.luaCode end\n"
-            "  return nil\n"
+            "  local fmt = package.loaded['chicc/compiler'].formatMessage\n"
+            "  local parts = {}\n"
+            "  for i, m in ipairs(result and result.messages or {}) do\n"
+            "    parts[i] = fmt(m)\n"
+            "  end\n"
+            "  if #parts == 0 then return nil, 'unknown compilation error' end\n"
+            "  return nil, table.concat(parts, '; ')\n"
             "end\n") != 0) {
         fprintf(stderr, "Fatal: setting chi_compile: %s\n",
                 lua_tostring(L, -1));

@@ -199,9 +199,11 @@ package.loaded['std/lang'] = {
     println = chi_println,
     compileLua = function(chi_code) return chi_compile(chi_code) end,
     eval = function(chi_code)
-        code = chi_compile(chi_code)
-        local f = load(code)
-        return f()
+        local code, err = chi_compile(chi_code)
+        if not code then
+            error("eval: compilation failed: " .. (err or "unknown compilation error"), 2)
+        end
+        return load(code)()
     end,
     reload = chi_reload_module,
     loadModule = chi_load_module

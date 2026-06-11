@@ -31,11 +31,17 @@ arg = saved_arg
 local _CLI = package.loaded['chicc/cli']
 local _COMPILER = package.loaded['chicc/compiler']
 
+-- chi_compile(source) -> luaCode on success, nil + formatted messages on failure
 chi_compile = function(source)
   local ns = _COMPILER.newLuaCompilationEnv()
   local result = _COMPILER.compileToLua(source, ns)
   if result and result.luaCode then return result.luaCode end
-  return nil
+  local parts = {}
+  for i, m in ipairs(result and result.messages or {}) do
+    parts[i] = _COMPILER.formatMessage(m)
+  end
+  if #parts == 0 then return nil, "unknown compilation error" end
+  return nil, table.concat(parts, "; ")
 end
 
 local args = {}
