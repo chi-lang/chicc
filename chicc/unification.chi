@@ -18,6 +18,11 @@ pub fn newConstraint(expected: any, actual: any, section: any, history: array[an
     { expected: expected, actual: actual, section: section, history: history }
 }
 
+// A single variable binding produced by unification, as returned by
+// ufAllBindings and tryUnify: `variable` is the type variable,
+// `replacement` is the type it resolved to.
+type Binding = { variable: Type, replacement: Type }
+
 // Apply variable replacement to both expected and actual types in a constraint
 pub fn constraintWithReplacedVariable(c: Constraint, toReplace: Type, substitution: Type): Constraint {
     val exp = luaExpr("c.expected") as Type
@@ -254,6 +259,28 @@ fn copyHistoryWith(history: array[any], constraint: any): array[any] {
     }
     newHistory.push(constraint)
     newHistory
+}
+
+// Core constraint solver behind both facades. Mutates `uf`; stops at the
+// FIRST failing constraint and returns the same Message the throwing
+// facades raise (verbatim — code, text, codePoint). Returns unit on
+// SUCCESS — i.e. "no failure to report"; do not read unit as an error.
+// On failure, bindings made before the failing constraint remain in `uf`
+// (today's post-throw state, preserved deliberately — see
+// docs/excavation/tryunify/01-architecture.md, "State ownership").
+fn unifyCore(constraints: array[any], uf: any): Message | unit {
+    embedLua("error('stub: unifyCore')")
+    unit // unreachable
+}
+
+// Non-throwing trial unification: answers "do these constraints unify?"
+// as a value. Runs the core on a fresh union-find: success returns the
+// bindings array (possibly empty — `[] != unit`), failure returns unit.
+// Never throws. A failed probe leaks no bindings — the fresh union-find
+// is simply discarded.
+pub fn tryUnify(constraints: array[any]): array[Binding] | unit {
+    embedLua("error('stub: tryUnify')")
+    unit // unreachable
 }
 
 // Unify constraints using a pre-existing union-find
