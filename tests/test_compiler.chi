@@ -339,6 +339,20 @@ test("compileToLua: default value of wrong type is a type error") {
     assertEqual(code, "TYPE_MISMATCH")
 }
 
+// Recovered parse errors must fail the compilation (issue #16): the
+// parser's error-recovery sites used to println and carry on, so a
+// program with an unparseable declaration compiled and ran.
+test("compileToLua: recovered parse error fails the compilation") {
+    val src = "type Opt2 = (int | unit) | unit\nval x = 1"
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val luaCode: any = luaExpr("result.luaCode")
+    assertTrue(luaCode == unit)
+    val msgCount: int = luaExpr("#result.messages")
+    assertTrue(msgCount > 0)
+    val code = luaExpr("result.messages[1].code") as string
+    assertEqual(code, "SYNTAX_ERROR")
+}
+
 // =====================================================================
 // formatMessage tests
 // =====================================================================
