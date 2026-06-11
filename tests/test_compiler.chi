@@ -412,6 +412,34 @@ test("compileToLua: several unrecognized characters are all reported with positi
     assertEqual(luaExpr("result.messages[2].codePoint.line") as int, 2)
 }
 
+// Silent lexer acceptances (follow-up to #21): unterminated strings
+// and block comments, and unknown escape sequences, must fail the
+// compilation with a positioned error instead of being absorbed.
+test("compileToLua: unterminated string fails at its opening position") {
+    val src = "val a = 1\nval s = \"never closed"
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    assertTrue(luaExpr("result.luaCode") as any == unit)
+    assertEqual(luaExpr("result.messages[1].code") as string, "SYNTAX_ERROR")
+    assertEqual(luaExpr("result.messages[1].codePoint.line") as int, 2)
+}
+
+test("compileToLua: unterminated block comment fails at its opening position") {
+    val src = "val x = 1\n/* swallows the rest\nprintln(x)"
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    assertTrue(luaExpr("result.luaCode") as any == unit)
+    assertEqual(luaExpr("result.messages[1].code") as string, "SYNTAX_ERROR")
+    assertEqual(luaExpr("result.messages[1].codePoint.line") as int, 2)
+}
+
+test("compileToLua: unknown escape sequence is an error, known ones are fine") {
+    val bad: any = compileToLua("val s = \"oops: \\q\"", newLuaCompilationEnv())
+    assertTrue(luaExpr("bad.luaCode") as any == unit)
+    assertEqual(luaExpr("bad.messages[1].code") as string, "SYNTAX_ERROR")
+    val good: any = compileToLua("val s = \"ok: \\n \\t \\\\ \\$ \\\" end\"", newLuaCompilationEnv())
+    assertEqual(luaExpr("#good.messages") as int, 0)
+    assertTrue(luaExpr("good.luaCode") as any != unit)
+}
+
 // =====================================================================
 // formatMessage tests
 // =====================================================================
