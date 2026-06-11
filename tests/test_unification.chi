@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, intTypeId, stringTypeId, boolTypeId, floatTypeId, unitTypeId }
-import chicc/unification { Constraint, newConstraint, constraintWithReplacedVariable, unify }
+import chicc/unification { Constraint, Binding, newConstraint, constraintWithReplacedVariable, unify, tryUnify }
 import chicc/source { newSection, Section }
 import std/lang { luaExpr, embedLua }
 
@@ -422,6 +422,138 @@ test("unify: actual any intersects a concrete primitive (no mismatch)") {
     constraints.push(c)
     val solutions = unify(constraints)
     assertEqual(solutions.size(), 0)
+}
+
+// --- tryUnify (issue #12): non-throwing trial unification ---
+// Contract under test (docs/excavation/tryunify/): tryUnify answers
+// "do these constraints unify?" as a value — success returns the
+// bindings array (possibly empty; `[] != unit`), failure returns unit.
+// Every failure arm of the unifier is pinned through BOTH facades:
+// thrown with the right code via `unify`, `unit` via `tryUnify`
+// (Phase 3 resolutions F2/F3/F6 — the type system cannot catch a
+// polarity inversion or a dropped failure; only these tests can).
+
+// Missing throwing-facade arm: the existing infinite-type test puts the
+// variable on the EXPECTED side; this pins the actual-side occurs check.
+test("unify: infinite type with variable on actual side throws error") {
+    val v = variableType("T", 0)
+    val fnType = functionType([v, tInt], [], 0)
+    val c = newConstraint(fnType, v, testSection, [])
+    val constraints: array[any] = []
+    constraints.push(c)
+    embedLua("local ok, err = pcall(unify, constraints)")
+    assertFalse(luaExpr("ok") as bool)
+    assertEqual(luaExpr("err.code") as string, "INFINITE_TYPE")
+}
+
+test("tryUnify: mismatched primitives returns unit") {
+    val r = tryUnify([newConstraint(tInt, tString, testSection, [])])
+    assertTrue(r == unit)
+}
+
+test("tryUnify: record missing field returns unit") {
+    val expected = recordType([], [{ name: "x", fieldType: tInt }, { name: "y", fieldType: tString }], [])
+    val actual = recordType([], [{ name: "x", fieldType: tInt }], [])
+    val r = tryUnify([newConstraint(expected, actual, testSection, [])])
+    assertTrue(r == unit)
+}
+
+test("tryUnify: infinite type with variable on expected side returns unit") {
+    val v = variableType("T", 0)
+    val fnType = functionType([v, tInt], [], 0)
+    val r = tryUnify([newConstraint(v, fnType, testSection, [])])
+    assertTrue(r == unit)
+}
+
+test("tryUnify: infinite type with variable on actual side returns unit") {
+    val v = variableType("T", 0)
+    val fnType = functionType([v, tInt], [], 0)
+    val r = tryUnify([newConstraint(fnType, v, testSection, [])])
+    assertTrue(r == unit)
+}
+
+test("tryUnify: function arity mismatch returns unit") {
+    val expected = functionType([tInt, tString], [], 0)
+    val actual = functionType([tInt, tString, tBool], [], 0)
+    val r = tryUnify([newConstraint(expected, actual, testSection, [])])
+    assertTrue(r == unit)
+}
+
+test("tryUnify: non-function actual against function expected returns unit") {
+    val expected = functionType([tInt, tString], [], 0)
+    val r = tryUnify([newConstraint(expected, tInt, testSection, [])])
+    assertTrue(r == unit)
+}
+
+test("tryUnify: mismatched tags (record vs array) returns unit") {
+    val rec = recordType([], [{ name: "x", fieldType: tInt }], [])
+    val arr = arrayType(tInt, [])
+    val r = tryUnify([newConstraint(rec, arr, testSection, [])])
+    assertTrue(r == unit)
+}
+
+// Polarity pinning (F2): success must be distinguishable from failure
+// even when there is nothing to bind — an empty array, never unit.
+test("tryUnify: success with zero bindings returns empty array, not unit") {
+    val r = tryUnify([newConstraint(tInt, tInt, testSection, [])])
+    assertTrue(r != unit)
+    val bindings = r as array[Binding]
+    assertEqual(bindings.size(), 0)
+}
+
+test("tryUnify: empty constraints succeed with an empty bindings array") {
+    val constraints: array[any] = []
+    val r = tryUnify(constraints)
+    assertTrue(r != unit)
+    val bindings = r as array[Binding]
+    assertEqual(bindings.size(), 0)
+}
+
+// Also pins the consumption idiom (F6/d): the FIRST comparison of
+// tryUnify's DECLARED sum return type (array[Binding] | unit) against
+// unit in the tree — native `!= unit` branch, then the trusting cast.
+test("tryUnify: success with one binding returns variable and replacement") {
+    val v = variableType("T", 0)
+    val r = tryUnify([newConstraint(v, tInt, testSection, [])])
+    assertTrue(r != unit)
+    if r != unit {
+        val bindings = r as array[Binding]
+        assertEqual(bindings.size(), 1)
+        assertTrue(bindings[1].variable.typeEquals(v))
+        assertTrue(bindings[1].replacement.typeEquals(tInt))
+    }
+}
+
+// Sum fallback with an OBSERVABLE binding (F6 vacuous-success killer):
+// sum(T | string) vs int — rhs (string) is probed first and fails, the
+// lhs fallback must actually run and bind T=int. A polarity-inverted
+// probe would report rhs as vacuously successful, never queue the
+// fallback, and produce zero bindings — caught here, through both
+// facades. (The no-binding fallback case is already pinned by
+// "unify: sum type falls back to lhs".)
+test("unify: sum fallback binds a variable through lhs after rhs probe fails") {
+    val v = variableType("T", 0)
+    val sumT = sumType([], v, tString, [])
+    val c = newConstraint(sumT, tInt, testSection, [])
+    val constraints: array[any] = []
+    constraints.push(c)
+    val solutions = unify(constraints)
+    assertEqual(solutions.size(), 1)
+    assertTrue(solutions[1].variable.typeEquals(v))
+    assertTrue(solutions[1].replacement.typeEquals(tInt))
+}
+
+test("tryUnify: sum fallback succeeds and returns the lhs binding") {
+    val v = variableType("T", 0)
+    val sumT = sumType([], v, tString, [])
+    val r = tryUnify([newConstraint(sumT, tInt, testSection, [])])
+    assertTrue(r != unit)
+    if r != unit {
+        val bindings = r as array[Binding]
+        assertEqual(bindings.size(), 1)
+        assertTrue(bindings[1].variable.typeEquals(v))
+        assertTrue(bindings[1].replacement.typeEquals(tInt))
+    }
 }
 
 summary()
