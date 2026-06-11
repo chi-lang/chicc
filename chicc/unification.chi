@@ -271,24 +271,6 @@ fn copyHistoryWith(history: array[any], constraint: any): array[any] {
 // (today's post-throw state, preserved deliberately — see
 // docs/excavation/tryunify/01-architecture.md, "State ownership").
 fn unifyCore(constraints: array[any], uf: any): Message | unit {
-    embedLua("error('stub: unifyCore')")
-    unit // unreachable
-}
-
-// Non-throwing trial unification: answers "do these constraints unify?"
-// as a value. Runs the core on a fresh union-find: success returns the
-// bindings array (possibly empty — `[] != unit`), failure returns unit.
-// Never throws FOR UNIFICATION FAILURES; a genuine Lua error (i.e. a
-// compiler bug) propagates deliberately instead of degrading to "does
-// not unify" — see docs/excavation/tryunify/00-decisions.md, decision 4.
-// A failed probe leaks no bindings — the fresh union-find is discarded.
-pub fn tryUnify(constraints: array[any]): array[Binding] | unit {
-    embedLua("error('stub: tryUnify')")
-    unit // unreachable
-}
-
-// Unify constraints using a pre-existing union-find
-pub fn unifyWithUf(constraints: array[any], uf: any) {
     val queue: array[any] = []
     val initialCount = constraints.size()
     var i = 1
@@ -321,7 +303,7 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             val eitherAny = luaExpr("(expected.ids and expected.ids[1] and expected.ids[1].name == 'any') or (actual.ids and actual.ids[1] and actual.ids[1].name == 'any')") as bool
             if eitherAny == false && idsIntersect(expIds, actIds) == false {
                 val cp = sectionToCodePoint(section)
-                throwMessage(typeMismatch(typeDescr(expected), typeDescr(actual), cp))
+                return typeMismatch(typeDescr(expected), typeDescr(actual), cp)
             }
         } else if expected.tag == "recursive" {
             val unfolded = expected.unfoldRecursive()
@@ -336,14 +318,14 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
         } else if expected.tag == "var" {
             if expected.occursInExcludingSumBranches(actual) {
                 val cp = sectionToCodePoint(section)
-                throwMessage(infiniteType(expected.name, typeDescr(actual), cp))
+                return infiniteType(expected.name, typeDescr(actual), cp)
             }
             ufBind(uf, expected, actual)
             // No queue rebuild needed — next iteration resolves via union-find
         } else if actual.tag == "var" {
             if actual.occursInExcludingSumBranches(expected) {
                 val cp = sectionToCodePoint(section)
-                throwMessage(infiniteType(actual.name, typeDescr(expected), cp))
+                return infiniteType(actual.name, typeDescr(expected), cp)
             }
             ufBind(uf, actual, expected)
             // No queue rebuild needed — next iteration resolves via union-find
@@ -356,7 +338,7 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             val actLen = actTypes.size()
             if expLen != actLen {
                 val cp = sectionToCodePoint(section)
-                throwMessage(functionArityError(expLen - 1, actLen - 1, cp))
+                return functionArityError(expLen - 1, actLen - 1, cp)
             }
             val lastIndex = expLen
             var fi = 1
@@ -395,7 +377,7 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
                 }
                 if found == false {
                     val cp = sectionToCodePoint(section)
-                    throwMessage(typeMismatch("record with field '$expFieldName'", "record without field '$expFieldName'", cp))
+                    return typeMismatch("record with field '$expFieldName'", "record without field '$expFieldName'", cp)
                 }
                 val newHistory = copyHistoryWith(history, constraint)
                 val nc = newConstraint(expFieldType, actFieldType, section, newHistory)
@@ -409,7 +391,9 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             val nc = newConstraint(expElem, actElem, section, newHistory)
             queue.insertAt(pos, nc)
         } else if expected.tag == "sum" {
-            // Try unifying with rhs first, fall back to lhs
+            // Try unifying with rhs first, fall back to lhs. The probe is a
+            // self-recursive call on a FRESH union-find: a failed probe leaks
+            // nothing; a successful one has its bindings merged below.
             val expRhs = luaExpr("expected.rhs") as Type
             val expLhs = luaExpr("expected.lhs") as Type
             val newHistory = copyHistoryWith(history, constraint)
@@ -417,19 +401,15 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             val rhsConstraints: array[any] = []
             rhsConstraints.push(rhsConstraint)
 
-            // Use pcall to try rhs first
-            embedLua("local __pcall_ok, __pcall_result = pcall(__P_.unify, rhsConstraints)")
-            val pcallOk = luaExpr("__pcall_ok") as bool
-            if pcallOk {
-                // Merge partial solutions into our union-find
-                val partialSolutions: array[any] = luaExpr("__pcall_result")
-                val psLen = partialSolutions.size()
+            val probeUf = ufNew()
+            val probeFailure = unifyCore(rhsConstraints, probeUf)
+            if probeFailure == unit {
+                // Merge the probe's solutions into our union-find
+                val bindings = ufAllBindings(probeUf)
+                val bLen = bindings.size()
                 var si = 1
-                while si <= psLen {
-                    val psEntry = partialSolutions[si]
-                    val psVar = luaExpr("psEntry.variable") as Type
-                    val psRepl = luaExpr("psEntry.replacement") as Type
-                    ufBind(uf, psVar, psRepl)
+                while si <= bLen {
+                    ufBind(uf, bindings[si].variable, bindings[si].replacement)
                     si = si + 1
                 }
             } else {
@@ -447,18 +427,15 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             val lhsConstraints: array[any] = []
             lhsConstraints.push(lhsConstraint)
 
-            embedLua("local __pcall_ok, __pcall_result = pcall(__P_.unify, lhsConstraints)")
-            val pcallOk = luaExpr("__pcall_ok") as bool
-            if pcallOk {
-                // Merge partial solutions into our union-find
-                val partialSolutions: array[any] = luaExpr("__pcall_result")
-                val psLen = partialSolutions.size()
+            val probeUf = ufNew()
+            val probeFailure = unifyCore(lhsConstraints, probeUf)
+            if probeFailure == unit {
+                // Merge the probe's solutions into our union-find
+                val bindings = ufAllBindings(probeUf)
+                val bLen = bindings.size()
                 var si = 1
-                while si <= psLen {
-                    val psEntry = partialSolutions[si]
-                    val psVar = luaExpr("psEntry.variable") as Type
-                    val psRepl = luaExpr("psEntry.replacement") as Type
-                    ufBind(uf, psVar, psRepl)
+                while si <= bLen {
+                    ufBind(uf, bindings[si].variable, bindings[si].replacement)
                     si = si + 1
                 }
             } else {
@@ -468,11 +445,41 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
             }
         } else if expected.tag == "fn" && actual.tag != "fn" {
             val cp = sectionToCodePoint(section)
-            throwMessage(notAFunction(cp))
+            return notAFunction(cp)
         } else {
             val cp = sectionToCodePoint(section)
-            throwMessage(typeMismatch(typeDescr(expected), typeDescr(actual), cp))
+            return typeMismatch(typeDescr(expected), typeDescr(actual), cp)
         }
+    }
+    // The whole queue drained without a failure: success.
+    unit
+}
+
+// Non-throwing trial unification: answers "do these constraints unify?"
+// as a value. Runs the core on a fresh union-find: success returns the
+// bindings array (possibly empty — `[] != unit`), failure returns unit.
+// Never throws FOR UNIFICATION FAILURES; a genuine Lua error (i.e. a
+// compiler bug) propagates deliberately instead of degrading to "does
+// not unify" — see docs/excavation/tryunify/00-decisions.md, decision 4.
+// A failed probe leaks no bindings — the fresh union-find is discarded.
+pub fn tryUnify(constraints: array[any]): array[Binding] | unit {
+    val uf = ufNew()
+    val failure = unifyCore(constraints, uf)
+    // unit from the core means SUCCESS — return the bindings then.
+    if failure == unit {
+        ufAllBindings(uf)
+    } else {
+        unit
+    }
+}
+
+// Unify constraints using a pre-existing union-find. Throwing facade:
+// runs the core and raises the returned Message verbatim, preserving the
+// legacy contract (compiler.chi pcall harnesses, tests asserting err.code).
+pub fn unifyWithUf(constraints: array[any], uf: any) {
+    val failure = unifyCore(constraints, uf)
+    if failure != unit {
+        throwMessage(failure as Message)
     }
 }
 

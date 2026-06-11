@@ -2,7 +2,7 @@
 package chicc/checks
 import std/lang { luaExpr, embedLua }
 import chicc/types { Type, tUnit, typeEquals, sumListTypes }
-import chicc/unification { newConstraint }
+import chicc/unification { newConstraint, tryUnify }
 import chicc/messages { unrecognizedName, ambiguousName, cannotAccessInternalName, notAFunction, cannotChangeImmutableVariable, typeMismatch, genericError }
 import chicc/ast { exprChildren }
 
@@ -616,11 +616,8 @@ fn rtWalkExprImpl(expr: any, messages: any) {
             }
             if typeEquals(actualType as Type, expRet as Type) == false && sumMatch == false {
                 // Try unification to see if types are compatible
-                val constraint = newConstraint(expRet, actualType, luaExpr("expr.section") as any, luaExpr("{}") as array[any])
-                val testConstraints = luaExpr("{}") as any
-                (testConstraints as array[any]).push(constraint)
-                embedLua("local __rt_ok = pcall(require('chicc/unification').unify, testConstraints)")
-                val unifyOk = luaExpr("__rt_ok") as bool
+                val constraint = newConstraint(expRet, actualType, luaExpr("expr.section") as any, [])
+                val unifyOk = tryUnify([constraint]) != unit
                 if unifyOk == false {
                     val expTag = luaExpr("expRet.tag") as string
                     val actTag = luaExpr("actualType.tag") as string

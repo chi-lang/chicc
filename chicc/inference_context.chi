@@ -4,6 +4,7 @@ import std/lang { luaExpr, embedLua }
 import std/lang.map { emptyMap, forEach }
 import chicc/types { Type, TypeId, variableType }
 import chicc/ast { DotTarget }
+import chicc/unification { tryUnify, newConstraint }
 
 // --- Module-level state ---
 
@@ -194,9 +195,7 @@ pub fn icTrialUnify(typeScheme: any, receiverType: any): bool {
         return false
     }
     val firstParam = types[1]
-    embedLua("local _unif = require('chicc/unification'); local __trial_ok = pcall(function() _unif.unify({_unif.newConstraint(firstParam, receiverType, nil, {})}) end)")
-    val trialOk = luaExpr("__trial_ok") as bool
-    trialOk
+    tryUnify([newConstraint(firstParam, receiverType, unit, [])]) != unit
 }
 
 // List local scope functions matching a UFCS call
