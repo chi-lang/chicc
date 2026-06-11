@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/util { newStringBuilder, StringBuilder, toString }
-import chicc/ast { Program, Package, newPackage, newProgram, newTypeAlias, atomExpr, blockExpr, nameDeclarationExpr, variableAccessExpr, localTarget, packageTarget, infixOpExpr, returnExpr, effectDefinitionExpr, newFnParam }
+import chicc/ast { Program, Package, newPackage, newProgram, newTypeAlias, atomExpr, blockExpr, nameDeclarationExpr, variableAccessExpr, localTarget, packageTarget, infixOpExpr, returnExpr, effectDefinitionExpr, newFnParam, fnExpr, fnCallExpr }
 import chicc/types { tInt, tFloat, tBool, tString, tUnit, newTypeId, primitiveType }
 import chicc/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitProgram }
 import std/lang { luaExpr, embedLua }
@@ -316,6 +316,38 @@ test("emitProgram - non-final top-level statements are scoped in do-end") {
     assertTrue(luaExpr("__ep9_hasDo") as bool)
     embedLua("__ep9_hasA = string.find(output, '__P_.a=(1)', 1, true) ~= nil")
     assertTrue(luaExpr("__ep9_hasA") as bool)
+}
+
+test("emitProgram - val = luaExpr(...) stays unwrapped") {
+    // A name_declaration whose RHS calls luaExpr/embedLua may introduce a
+    // persistent chunk-local; wrapping it in `do ... end` would scope that
+    // local away from later statements. Such declarations must stay unwrapped.
+    val pkg = newPackage("mymod", "mypkg")
+    val callee = variableAccessExpr(packageTarget("std", "lang", "luaExpr"), unit)
+    val call = fnCallExpr(callee, [atomExpr("1", tString, unit)], unit)
+    val decl = nameDeclarationExpr(false, "x", false, unit, call, unit)
+    embedLua("decl.exprType = {tag='primitive', ids={{moduleName='std',packageName='lang.int',name='int'}}}")
+    val final = atomExpr("2", tInt, unit)
+    val prog = newProgram(pkg, [], [], [decl, final], unit)
+    val output = emitProgram(prog, true)
+    assertFalse(output.contains("do "))
+}
+
+test("emitProgram - fn declaration with luaExpr in its body is still wrapped") {
+    // luaExpr/embedLua inside a fn body emits into the function, where locals
+    // are function-scoped — wrapping the declaration stays safe. This keeps
+    // the 200-locals fix effective for the many fns that use raw Lua.
+    val pkg = newPackage("mymod", "mypkg")
+    val callee = variableAccessExpr(packageTarget("std", "lang", "luaExpr"), unit)
+    val call = fnCallExpr(callee, [atomExpr("1", tString, unit)], unit)
+    val body = blockExpr([call], unit)
+    val fnE = fnExpr([], unit, body, unit)
+    val decl = nameDeclarationExpr(false, "f", false, unit, fnE, unit)
+    embedLua("decl.exprType = {tag='primitive', ids={{moduleName='std',packageName='lang.int',name='int'}}}")
+    val final = atomExpr("2", tInt, unit)
+    val prog = newProgram(pkg, [], [], [decl, final], unit)
+    val output = emitProgram(prog, true)
+    assertTrue(output.contains("do "))
 }
 
 summary()
