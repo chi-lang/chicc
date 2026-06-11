@@ -353,6 +353,33 @@ test("compileToLua: recovered parse error fails the compilation") {
     assertEqual(code, "SYNTAX_ERROR")
 }
 
+test("compileToLua: recovery collects errors from several declarations") {
+    // Two independently unparseable aliases — both must be reported,
+    // each with its own source position.
+    val src = "type A = (int | unit) | unit\ntype B = ((int) -> int) | unit\nval x = 1"
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    assertTrue(luaExpr("result.luaCode") as any == unit)
+    val msgs: array[any] = luaExpr("result.messages")
+    assertTrue(msgs.size() >= 2)
+    val line1 = luaExpr("result.messages[1].codePoint.line") as int
+    val lineLast = luaExpr("result.messages[#result.messages].codePoint.line") as int
+    assertEqual(line1, 1)
+    assertEqual(lineLast, 2)
+}
+
+test("compileToLua: recovered errors survive a later unrecoverable error") {
+    // Line 1 recovers; the dangling `fn broken(` makes the parser throw.
+    // Both must be present (the parser is hoisted out of the pcall).
+    val src = "type A = (int | unit) | unit\nfn broken("
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    assertTrue(luaExpr("result.luaCode") as any == unit)
+    val msgs: array[any] = luaExpr("result.messages")
+    assertTrue(msgs.size() >= 2)
+    // First message is the line-1 recovered error, not the thrown one.
+    val line1 = luaExpr("result.messages[1].codePoint.line") as int
+    assertEqual(line1, 1)
+}
+
 // =====================================================================
 // formatMessage tests
 // =====================================================================
