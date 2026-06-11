@@ -1,0 +1,22 @@
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import std/lang { eval, luaExpr, embedLua }
+
+// ===== eval() contract tests (#19) =====
+
+test("eval of valid source evaluates without error") {
+    // eval currently returns the evaluated module's package table; pinning
+    // only "does not raise" here — the return contract is not part of #19.
+    val r = eval("1 + 1")
+    assertTrue(r != unit)
+}
+
+test("eval of invalid source raises a clear compilation error") {
+    // Chi has no try/catch — pcall is the legitimate FFI escape hatch here.
+    embedLua("__ev_ok, __ev_err = pcall(function() return package.loaded['std/lang'].eval('val x =') end)")
+    assertFalse(luaExpr("__ev_ok") as bool)
+    val msg = luaExpr("tostring(__ev_err)") as string
+    assertTrue(msg.contains("eval: compilation failed"))
+    assertTrue(msg.contains("SYNTAX_ERROR"))
+}
+
+summary()
