@@ -19,8 +19,10 @@ pub fn newConstraint(expected: any, actual: any, section: any, history: array[an
 }
 
 // A single variable binding produced by unification, as returned by
-// ufAllBindings and tryUnify: `variable` is the type variable,
-// `replacement` is the type it resolved to.
+// ufAllBindings, unify and tryUnify: `variable` is the type variable,
+// `replacement` is the type it resolved to. Resolution is relative to
+// the union-find the binding came from — a probe result may still
+// contain variables that are bound in an outer (session) union-find.
 type Binding = { variable: Type, replacement: Type }
 
 // Apply variable replacement to both expected and actual types in a constraint
@@ -227,7 +229,7 @@ pub fn ufResolve(uf: any, t: Type): Type {
 }
 
 // Return all bindings from the union-find as solution entries {variable, replacement}
-pub fn ufAllBindings(uf: any): array[any] {
+pub fn ufAllBindings(uf: any): array[Binding] {
     val result: array[any] = luaExpr("{}")
     // Iterate over all keys in the uf table
     embedLua("for key, typ in pairs(uf.map) do local name, level = key:match('(.+):(%d+)'); if name then level = tonumber(level); local v = {tag='var', ids={}, types={}, typeParams={}, defaults=0, fields={}, lhs=nil, rhs=nil, elementType=nil, name=name, level=level, variable=nil, innerType=nil, body=nil}; table.insert(result, {variable=v, replacement=__P_.ufResolve(uf, typ)}) end end")
@@ -276,8 +278,10 @@ fn unifyCore(constraints: array[any], uf: any): Message | unit {
 // Non-throwing trial unification: answers "do these constraints unify?"
 // as a value. Runs the core on a fresh union-find: success returns the
 // bindings array (possibly empty — `[] != unit`), failure returns unit.
-// Never throws. A failed probe leaks no bindings — the fresh union-find
-// is simply discarded.
+// Never throws FOR UNIFICATION FAILURES; a genuine Lua error (i.e. a
+// compiler bug) propagates deliberately instead of degrading to "does
+// not unify" — see docs/excavation/tryunify/00-decisions.md, decision 4.
+// A failed probe leaks no bindings — the fresh union-find is discarded.
 pub fn tryUnify(constraints: array[any]): array[Binding] | unit {
     embedLua("error('stub: tryUnify')")
     unit // unreachable
@@ -473,7 +477,7 @@ pub fn unifyWithUf(constraints: array[any], uf: any) {
 }
 
 // Main unification function — uses union-find for O(N·α(N)) instead of O(N²)
-pub fn unify(constraints: array[any]): array[any] {
+pub fn unify(constraints: array[any]): array[Binding] {
     val uf = ufNew()
     unifyWithUf(constraints, uf)
     ufAllBindings(uf)

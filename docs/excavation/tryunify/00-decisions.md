@@ -33,8 +33,10 @@ The four sites:
    failure returns `unit`. Bool-only sites test `!= unit`; sum-branch
    sites merge the returned bindings.
 
-   `Binding` is a new public alias for what `ufAllBindings` already
-   produces: `type Binding = { variable: Type, replacement: Type }`.
+   `Binding` is a new alias for what `ufAllBindings` already produces:
+   `type Binding = { variable: Type, replacement: Type }`. (Plain
+   `type`, not `pub type` — the grammar has no `pub type`, and plain
+   aliases are importable cross-package anyway; see Phase 3, F5.)
    (Review feedback: the element type need not be `any` — agreed;
    naming the record also lets `unify`/`ufAllBindings` declare it,
    shrinking gratuitous `any` per the f96b134 direction.)
@@ -89,3 +91,21 @@ The four sites:
   non-idiomatic, two fields where the sum type says it in one);
   making `unifyWithUf` itself value-returning publicly (rejected:
   breaks 4+ existing callers for no gain).
+
+## Decision 4 (user-confirmed, Phase 3 / F7): no error backstop
+
+The old `pcall`s incidentally caught **genuine Lua errors** (compiler
+bugs: stack overflow on pathological recursive sums, nil-index on
+malformed types) and degraded them to "probe failed". This masking is
+NOT preserved: `tryUnify` returns `unit` only for unification failures
+the core detects; any other error propagates. Consequences, accepted:
+
+- typer-side sites (sum branches, UFCS probes) — an internal error now
+  aborts the type-check group via compiler.chi's harness with an ERROR
+  message instead of silently rejecting a candidate/branch;
+- `checks.chi` (Phase 7) has no handler above it — an internal error
+  there crashes the compiler with a raw traceback. Visible-bug-over-
+  masked-bug is the point (same philosophy as #7).
+
+This is the single deliberate behaviour change in this excavation;
+everything else is preserved 1:1.

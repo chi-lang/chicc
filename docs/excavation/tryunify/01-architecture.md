@@ -23,9 +23,13 @@ code differs, the difference is named explicitly.
 | **Probing Facade** | New contract (`tryUnify`): run the core on a fresh UF; failure ⇒ `unit`, success ⇒ the bindings array. |
 
 The sum-branch probing inside the core is a **code path of the core**,
-not a module (an earlier draft wrongly listed it as one). The three
-trial-site consumers (UFCS resolver, return checker) stay where they are;
-they only switch which facade they call.
+not a module (an earlier draft wrongly listed it as one). It probes by
+**self-recursion**: fresh UF, `unifyCore` on the branch constraint,
+merge `ufAllBindings` on success — NOT by calling `tryUnify`. (Phase 3,
+finding F1: `unifyCore ↔ tryUnify` would be mutual recursion, which Chi
+plain `fn`s cannot express; self-recursion is legal. An earlier draft
+had the core call the Probing Facade — the language vetoed it.) The two
+external trial sites (UFCS resolver, return checker) switch to `tryUnify`.
 
 ## Diagram (target)
 
@@ -39,14 +43,15 @@ flowchart TD
     TCH -.->|"pcall harness around whole type-check, unchanged"| TF
     TF --> CORE["Unifier Core"]
     PF["Probing Facade: tryUnify"] --> CORE
-    CORE -->|"sum-branch probe"| PF
+    CORE -->|"sum-branch probe: fresh UF, self-recursion"| CORE
     UR["UFCS resolver icTrialUnify"] --> PF
     RC["return-type checker"] --> PF
 ```
 
 Today UR, RC and the core's sum branches reach trial behaviour via
-`pcall(unify, …)`; the change reroutes those three call sites to the
-Probing Facade and deletes the `pcall`s.
+`pcall(unify, …)`. The change reroutes UR and RC to the Probing Facade,
+turns the sum branches into direct self-recursive probes, and deletes
+all four `pcall`s.
 
 ## Edge annotations
 
@@ -54,8 +59,8 @@ Probing Facade and deletes the `pcall`s.
 |------|----|----------------|------------|---------------|--------------|
 | Throwing Facade | Core | `(constraints: array[Constraint], uf)` → `Message \| unit` (`unit` = success) | sync | Facade: `Message` ⇒ `error(msg)`, verbatim | none |
 | Probing Facade | Core | `(constraints, fresh uf)` → `Message \| unit` | sync | Facade: `Message` ⇒ `unit`; success ⇒ `ufAllBindings(fresh uf): array[Binding]` (`Binding = { variable: Type, replacement: Type }`, per 00-decisions) | none |
-| Core, expected-sum branch | Probing Facade | `[Constraint(expected.rhs, actual)]` — **rhs first** | sync | Core: `unit` ⇒ queue `Constraint(expected.lhs, actual)` into the **session** queue/UF; bindings ⇒ `ufBind` each into session UF | fallback branch is re-queued, so a nested sum re-probes recursively |
-| Core, actual-sum branch | Probing Facade | `[Constraint(expected, actual.lhs)]` — **lhs first** (mirror asymmetry, preserved) | sync | as above with `actual.rhs` | as above |
+| Core, expected-sum branch | Core (self-recursive, fresh UF) | `unifyCore([Constraint(expected.rhs, actual)], ufNew())` — **rhs first** → `Message \| unit` | sync | Sum branch: `Message` ⇒ queue `Constraint(expected.lhs, actual)` into the **session** queue/UF; `unit` ⇒ `ufBind` each of `ufAllBindings(probeUf)` into session UF | fallback branch is re-queued, so a nested sum re-probes recursively |
+| Core, actual-sum branch | Core (self-recursive, fresh UF) | `unifyCore([Constraint(expected, actual.lhs)], ufNew())` — **lhs first** (mirror asymmetry, preserved) | sync | as above with `actual.rhs` | as above |
 | UFCS resolver | Probing Facade | `[Constraint(firstParam, receiver)]` | sync | resolver: `unit` ⇒ candidate rejected silently | none |
 | return-type checker | Probing Facade | `[Constraint(expectedReturn, actualReturn)]` | sync | checker: `unit` ⇒ pushes its own diagnostic | none |
 
@@ -116,6 +121,11 @@ impossible to misread — Phase 2 signature comment requirement.
   contract section — preservation is part of the spec, not an accident.
   Considered and rejected again: fixing the warts in this change
   (scope creep on the hottest path; each is a separate issue candidate).
+  *(Phase 3 amendment: Round 2 originally rejected "sum branches call
+  the Core directly with a fresh UF" in favour of routing through the
+  Probing Facade. Finding F1 reversed this — Core ↔ tryUnify is mutual
+  recursion, inexpressible with plain Chi `fn`s, while self-recursion
+  is fine. The aesthetic preference lost to the language.)*
 - *Round 3 (simplify):* dropped the duplicate "unchanged callers" edge
   row (the diagram subgraph carries it); Sync/Async column noted as
   carrying no information here. No module forwards-only; the cycle is
