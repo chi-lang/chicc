@@ -427,7 +427,12 @@ fn parseSource(source: string): any {
     // Returns { parsedProgram, messages }
     // Use pcall to catch parse errors
     embedLua("__chicc_parse_msgs = {}")
-    embedLua("__chicc_parse_ok, __chicc_parse_prog = pcall(function() local _lex = require('chicc/lexer'); local _par = require('chicc/parser'); local tokens = _lex.tokenize(source); local p = _par.newParser(tokens, source); return _par.parseProgram(p) end)")
+    embedLua("local __p; __chicc_parse_ok, __chicc_parse_prog = pcall(function() local _lex = require('chicc/lexer'); local _par = require('chicc/parser'); local tokens = _lex.tokenize(source); __p = _par.newParser(tokens, source); return _par.parseProgram(__p) end)")
+    // Drain errors the parser recovered from — they must fail the
+    // compilation like any other message (issue #16). The parser is
+    // hoisted out of the pcall closure so recovered errors survive
+    // even when a later, unrecoverable error is thrown.
+    embedLua("if __p then for _, e in ipairs(__p.errors) do table.insert(__chicc_parse_msgs, e) end end")
     val ok = luaExpr("__chicc_parse_ok") as bool
     if ok {
         val prog = luaExpr("__chicc_parse_prog") as any

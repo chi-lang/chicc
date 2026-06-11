@@ -1,17 +1,38 @@
 package chicc/parser
 import chicc/token { Token, TK_EOF, TK_NEWLINE, TK_PACKAGE, TK_IMPORT, TK_TYPE, TK_DATA, TK_ID, TK_SLASH, TK_DOT, TK_AS, TK_LBRACE, TK_RBRACE, TK_COMMA, newToken, TK_INT, TK_FLOAT, TK_STRING, TK_TRUE, TK_FALSE, TK_UNIT, TK_PLUS, TK_MINUS, TK_STAR, TK_PERCENT, TK_EQEQ, TK_NEQ, TK_LT, TK_LTEQ, TK_GT, TK_GTEQ, TK_NOT, TK_AND, TK_OR, TK_AMP, TK_PIPE, TK_LSHIFT, TK_RSHIFT, TK_WEAVE, TK_UNDERSCORE, TK_LPAREN, TK_RPAREN, TK_LBRACKET, TK_RBRACKET, TK_COLON, TK_EQ, TK_PLUSEQ, TK_MINUSEQ, TK_STAREQ, TK_SLASHEQ, TK_IS, TK_ARROW, TK_FN, TK_VAL, TK_VAR, TK_PUB, TK_IF, TK_ELSE, TK_WHILE, TK_FOR, TK_IN, TK_WHEN, TK_WITH, TK_HANDLE, TK_EFFECT, TK_RETURN, TK_BREAK, TK_CONTINUE, TK_INTERP_START, TK_INTERP_TEXT, TK_INTERP_EXPR_START, TK_INTERP_EXPR_END, TK_INTERP_END }
-import chicc/source { Section, newSection }
+import chicc/source { Section, newSection, toCodePoint }
+import chicc/messages { Message, syntaxError }
 import chicc/parse_ast { PackageDefinition, ParseImportEntry, ParseImport, ParseProgram, ParseAst, newPackageDefinition, newParseImportEntry, newParseImport, newParseProgram, parseLongValue, parseFloatValue, parseBoolValue, parseStringValue, parseUnitValue, parseVariableRead, parseNot, parseBinaryOp, parseCast, parseIs, parseFieldAccess, parseFieldAssignment, parseAssignment, parseIndexOperator, parseIndexedAssignment, parseFnCall, parseWeave, parseWeavePlaceholder, parseCreateArray, parseCreateRecord, parseGroup, parseReturn, parseBreak, parseContinue, parseBlock, parseLambda, parseFuncWithName, parseNameDeclaration, newFormalArgument, typeParameterRef, newParseRecordField, parseIfElse, parseWhile, parseFor, parseWhen, newParseWhenCase, newParseElseCase, typeNameRef, functionTypeRef, recordTypeRef, sumTypeRef, typeConstructorRef, newTypeRefField, newParseTypeAlias, newParseVariantTypeDefinition, newVariantConstructor, newFormalField, parseEffectDefinition, parseHandle, newParseHandleCase, parseStringText, parseInterpolation, parseInterpolatedString }
 
 type Parser = {
     tokens: array[Token],
     pos: int,
     source: string,
-    noTrailingLambda: bool
+    noTrailingLambda: bool,
+    // Syntax errors collected during recovery (Message records). The
+    // parser recovers and keeps going so several errors surface at
+    // once; the compiler drains these into its result messages, so a
+    // recovered error still fails the compilation (issue #16).
+    errors: array[Message]
 }
 
 pub fn newParser(tokens: array[Token], source: string): Parser {
-    { tokens: tokens, pos: 1, source: source, noTrailingLambda: false }
+    { tokens: tokens, pos: 1, source: source, noTrailingLambda: false, errors: [] }
+}
+
+// -- Helper: get section from a token --
+fn tokenSection(tok: Token): Section {
+    val sec = tok.section
+    if sec is Section {
+        sec as Section
+    } else {
+        newSection(0, 0, 0, 0)
+    }
+}
+
+// Record a recovered syntax error at the given token's position.
+fn recordParseError(p: Parser, text: string, tok: Token) {
+    p.errors.push(syntaxError(text, toCodePoint(tokenSection(tok))))
 }
 
 pub fn current(p: Parser): Token {
@@ -33,7 +54,7 @@ pub fn expect(p: Parser, kind: int): Token {
         advance(p)
     } else {
         val tok = current(p)
-        println("Parse error: expected token kind $kind but got ${tok.value}")
+        recordParseError(p, "expected token kind $kind but got ${tok.value}", tok)
         tok
     }
 }
@@ -75,16 +96,6 @@ pub var parseInterpStringFwd: (Parser) -> any = { p -> advance(p) }
 var parseExprFwd: (Parser, int) -> any = { p, minPrec -> advance(p) }
 var parseBraceRecordFwd: (Parser) -> any = { p -> advance(p) }
 var parseTypeRefImplFwd: (Parser) -> any = { p -> advance(p) }
-
-// -- Helper: get section from a token --
-fn tokenSection(tok: Token): Section {
-    val sec = tok.section
-    if sec is Section {
-        sec as Section
-    } else {
-        newSection(0, 0, 0, 0)
-    }
-}
 
 // -- Helper: peek at token kind at offset from current position --
 pub fn peekAhead(p: Parser, offset: int): int {
@@ -482,7 +493,7 @@ fn parsePrefixExpr(p: Parser): any {
     // Fallback: consume token and return a unit value
     val tok = advance(p)
     val sec = tokenSection(tok)
-    println("Parse error: unexpected token ${tok.value} (kind $kind)")
+    recordParseError(p, "unexpected token ${tok.value} (kind $kind)", tok)
     parseUnitValue(sec)
 }
 
@@ -1237,7 +1248,7 @@ fn parseBaseTypeRef(p: Parser): any {
     // Fallback
     val tok = advance(p)
     val sec = tokenSection(tok)
-    println("Parse error: unexpected token in type ref: ${tok.value}")
+    recordParseError(p, "unexpected token in type ref: ${tok.value}", tok)
     typeNameRef("", "", "any", sec)
 }
 
