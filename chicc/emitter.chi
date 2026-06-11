@@ -964,21 +964,71 @@ emitExpr = { st: EmitterState, expr: Expr ->
 
 // --- Top-level program emitter ---
 
+// True iff this fn_call expression calls raw embedLua/luaExpr — mirrors the
+// std/lang special-case in emitFnCall, which is what emits the raw Lua code.
+fn isRawLuaCall(e: Expr): bool {
+    val callee = e.callee
+    if callee == unit { return false }
+    val tgt = (callee as Expr).target
+    if tgt == unit { return false }
+    val t = tgt as any
+    val tgtMod = t.moduleName as string
+    val tgtPkg = t.packageName as string
+    val name = t.name as string
+    tgtMod == "std" && tgtPkg == "lang" && (name == "embedLua" || name == "luaExpr")
+}
+
+// True iff emitting `e` at chunk level may reach a raw embedLua/luaExpr call,
+// which can declare a persistent chunk-local (e.g. `local __defining_type_id`
+// in type_writer). Fn bodies are not descended into: everything inside them
+// emits function-scoped, so it cannot leak a chunk-local. That early return
+// also covers defaultValues, which only exists on "fn" exprs. The child list
+// below must stay in sync with the Expr fields in ast.chi.
+fn containsRawLuaCall(e: Expr): bool {
+    val kind = e.kind
+    if kind == "fn" { return false }
+    if kind == "fn_call" && isRawLuaCall(e) { return true }
+    val child = { c: any -> if c != unit { containsRawLuaCall(c as Expr) } else { false } }
+    val each = { items: array[any] -> items.any { it -> containsRawLuaCall(it as Expr) } }
+    if child(e.receiver) { return true }
+    if child(e.value) { return true }
+    if child(e.callee) { return true }
+    if child(e.condition) { return true }
+    if child(e.thenBranch) { return true }
+    if child(e.elseBranch) { return true }
+    if child(e.left) { return true }
+    if child(e.right) { return true }
+    if child(e.prefixExpr) { return true }
+    if child(e.castExpr) { return true }
+    if child(e.loopCondition) { return true }
+    if child(e.loopBody) { return true }
+    if child(e.iterable) { return true }
+    if child(e.forState) { return true }
+    if child(e.forInit) { return true }
+    if child(e.forBody) { return true }
+    if child(e.indexVariable) { return true }
+    if child(e.indexExpr) { return true }
+    if child(e.indexValue) { return true }
+    if child(e.handleBody) { return true }
+    if child(e.returnValue) { return true }
+    if each(e.parts) { return true }
+    if each(e.arrayValues) { return true }
+    if each(e.callParams) { return true }
+    if each(e.blockBody) { return true }
+    if e.recordFields.any { f -> containsRawLuaCall(f.value as Expr) } { return true }
+    if e.handleCases.any { c -> containsRawLuaCall(c.body as Expr) } { return true }
+    false
+}
+
 // A top-level statement is safe to wrap in a `do ... end` scope iff it does not
 // introduce a chunk-local that later statements rely on. Value/function
 // declarations and ordinary calls bind onto __P_ (or use transient temps), so
-// they are safe. Raw embedLua/luaExpr may declare persistent chunk locals (e.g.
-// `local __defining_type_id` in type_writer), so they must stay unwrapped.
+// they are safe — unless emitting them reaches a raw embedLua/luaExpr call
+// (anywhere outside a fn body), which must stay unwrapped.
 fn topLevelWrappable(expr: Expr): bool {
-    val kind = luaExpr("expr.kind") as string
-    if kind == "name_declaration" || kind == "assignment" {
-        true
-    } else if kind == "fn_call" {
-        val cname = luaExpr("(function() local c = expr.callee; if c and c.target and c.target.name then return c.target.name end; return '' end)()") as string
-        cname != "embedLua" && cname != "luaExpr"
-    } else {
-        false
-    }
+    val kind = expr.kind
+    val wrappableKind = kind == "name_declaration" || kind == "assignment" || kind == "fn_call"
+    wrappableKind && containsRawLuaCall(expr) == false
 }
 
 pub fn emitProgram(prog: Program, emitModule: bool): string {
