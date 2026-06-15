@@ -570,6 +570,25 @@ pub fn compile(source: string, ns: any): CompilationResult {
         ai = ai + 1
     }
 
+    // Materialise variant (`data`) constructors: register their types + the
+    // data sum + a constructor function symbol per variant into `tables`, and
+    // capture the constructor declarations. MUST run before checkNames so that
+    // constructor calls in user code resolve. Wrapped in pcall to surface the
+    // generic-variant rejection (and any other lowering error) as a message.
+    embedLua("__chicc_var_ok, __chicc_var_result = pcall(function() local _ac = require('chicc/ast_converter'); return _ac.lowerVariantTypes(parsedProgram, pkg, tables) end)")
+    var variantCtorDecls: any = luaExpr("{}")
+    val varOk = luaExpr("__chicc_var_ok") as bool
+    if varOk {
+        variantCtorDecls = luaExpr("__chicc_var_result") as any
+    } else {
+        val isVarMsg = luaExpr("type(__chicc_var_result) == 'table' and __chicc_var_result.code ~= nil") as bool
+        if isVarMsg {
+            resultMessages.push(luaExpr("__chicc_var_result") as any)
+        } else {
+            resultMessages.push(luaExpr("{ code = 'ERROR', text = tostring(__chicc_var_result), codePoint = nil }") as any)
+        }
+    }
+
     embedLua("if __prof then __ts[3] = os.clock() end")
 
     // PHASE 4: CHECK NAMES (on parse AST)
@@ -605,6 +624,10 @@ pub fn compile(source: string, ns: any): CompilationResult {
         }
         luaExpr("{}") as any
     }
+
+    // Prepend the variant constructor declarations (built before checkNames)
+    // so they are typed and emitted ahead of the code that uses them.
+    embedLua("if variantCtorDecls and #variantCtorDecls > 0 then for i = #variantCtorDecls, 1, -1 do table.insert(expressions, 1, variantCtorDecls[i]) end end")
 
     embedLua("if __prof then __ts[5] = os.clock() end")
 

@@ -131,6 +131,32 @@ record_meta_table = {
     end
 }
 
+-- Per-variant metatables for `data` constructors, memoised by variant name.
+-- Each clones the record metatable behavior (isRecord = true so a variant
+-- value is still a valid record for field access / chi_is_record, plus the
+-- record __tostring) and adds the nominal variant tag that `is`/`as` check.
+local __chi_variant_metas = {}
+function chi_variant_meta(name)
+    local m = __chi_variant_metas[name]
+    if m == nil then
+        m = {
+            isRecord = true,
+            variantName = name,
+            __tostring = record_meta_table.__tostring
+        }
+        __chi_variant_metas[name] = m
+    end
+    return m
+end
+
+function chi_is_variant(value, name)
+    local meta = getmetatable(value)
+    if meta then
+        return meta.variantName == name
+    end
+    return false
+end
+
 -- Global chi namespace (used by define)
 chi = {}
 

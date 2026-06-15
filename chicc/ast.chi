@@ -96,7 +96,10 @@ type Expr = {
     handleBody: Expr | unit,
     handleCases: array[any],
     returnValue: Expr | unit,
-    blockBody: array[any]
+    blockBody: array[any],
+    // Non-empty on a "create_record" produced by a variant constructor: the
+    // variant name (e.g. "Circle"). Drives the per-variant metatable at codegen.
+    variantName: string
 }
 
 type HandleCase = {
@@ -123,7 +126,8 @@ fn emptyExpr(kind: string, section: Section | unit): Expr {
       forState: unit, forInit: unit, forBody: unit, indexVariable: unit,
       indexExpr: unit, indexValue: unit, effectModuleName: "",
       effectPackageName: "", effectName: "", effectParams: [],
-      handleBody: unit, handleCases: [], returnValue: unit, blockBody: [] }
+      handleBody: unit, handleCases: [], returnValue: unit, blockBody: [],
+      variantName: "" }
 }
 
 pub fn atomExpr(value: string, typ: Type | unit, section: Section | unit): Expr {
@@ -142,6 +146,17 @@ pub fn interpolatedStringExpr(parts: array[Expr], section: Section | unit): Expr
 pub fn createRecordExpr(fields: array[ExprField], section: Section | unit): Expr {
     val e = emptyExpr("create_record", section)
     e.recordFields = fields
+    e
+}
+
+// A variant constructor's body: a record literal tagged with the variant name.
+// Same shape as createRecordExpr; the variantName drives the per-variant
+// metatable in emitCreateRecord. Discrimination (is/as) is keyed on the
+// resolved variant type, not on this field.
+pub fn createVariantExpr(fields: array[ExprField], variantName: string, section: Section | unit): Expr {
+    val e = emptyExpr("create_record", section)
+    e.recordFields = fields
+    e.variantName = variantName
     e
 }
 
@@ -325,6 +340,7 @@ pub fn exprSection(e: Expr): Section | unit { e.section }
 pub fn exprAtomValue(e: Expr): string { e.atomValue }
 pub fn exprParts(e: Expr): array[Expr] { e.parts }
 pub fn exprRecordFields(e: Expr): array[ExprField] { e.recordFields }
+pub fn exprVariantName(e: Expr): string { e.variantName }
 pub fn exprArrayValues(e: Expr): array[Expr] { e.arrayValues }
 pub fn exprTarget(e: Expr): Target | unit { e.target }
 pub fn exprReceiver(e: Expr): Expr | unit { e.receiver }

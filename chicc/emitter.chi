@@ -651,7 +651,17 @@ pub fn emitCreateRecord(st: EmitterState, expr: Expr): string {
     }
     val name = nextTmpName(st)
     emit(st, "local $name={$contents};")
-    emit(st, "setmetatable($name, record_meta_table);")
+    // A variant constructor's body carries the variant name; it gets the
+    // per-variant metatable (which still reports isRecord) so `is`/`as` can
+    // discriminate it nominally. Plain records get the shared record metatable.
+    // Read via luaExpr with a default so Exprs built without the field (nil)
+    // are treated as plain records, not a variant named "unit".
+    val variantName = luaExpr("expr.variantName or ''") as string
+    if variantName == "" {
+        emit(st, "setmetatable($name, record_meta_table);")
+    } else {
+        emit(st, "setmetatable($name, chi_variant_meta(\"$variantName\"));")
+    }
     name
 }
 
@@ -734,6 +744,17 @@ pub fn emitIs(st: EmitterState, expr: Expr): string {
     val checkedTag = if checkedT != unit { luaExpr("checkedT.tag") as string } else { "unknown" }
     val valueTypeName = if castET != unit { luaExpr("castET.ids and castET.ids[1] and castET.ids[1].name or 'unknown'") as string } else { "unknown" }
     val checkedTypeName = if checkedT != unit { luaExpr("checkedT.ids and checkedT.ids[1] and checkedT.ids[1].name or 'unknown'") as string } else { "unknown" }
+
+    // Variant discrimination is nominal: a checked type that is a record with a
+    // non-empty `name` (set only by variant lowering — type aliases keep name
+    // "") compares the runtime metatable tag rather than falling through to
+    // chi_is_record (true for every record). MUST precede the same-tag
+    // short-circuit below, or `someVariant is OtherVariant` would emit "true".
+    val checkedVariantName = if checkedT != unit { luaExpr("(checkedT.tag == 'record' and checkedT.name) or ''") as string } else { "" }
+    if checkedVariantName != "" {
+        val variantValue = emitExpr(st, castVal)
+        return "chi_is_variant($variantValue, \"$checkedVariantName\")"
+    }
 
     // If both are primitives with the same name, statically true
     if valueTag == checkedTag {

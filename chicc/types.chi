@@ -125,6 +125,19 @@ pub fn isArray(t: Type): bool { t.tag == "array" }
 pub fn isVariable(t: Type): bool { t.tag == "var" }
 pub fn isRecursive(t: Type): bool { t.tag == "recursive" }
 
+// A variant constructor's type is a `record` whose `name` holds the variant
+// name (e.g. "Circle"), set by variant lowering. Plain records and type
+// aliases leave `name` == "" (note: type aliases DO get non-empty `ids` via
+// the alias post-processing in compiler.chi, so `ids` cannot distinguish a
+// variant from an alias — `name` can). Returns the variant name, or unit.
+pub fn variantNameOf(t: Type): string | unit {
+    if t.tag == "record" {
+        if t.name != "" { t.name } else { unit }
+    } else {
+        unit
+    }
+}
+
 // Field accessors
 pub fn typeIds(t: Type): array[TypeId] { t.ids }
 pub fn typeTypes(t: Type): array[Type] { t.types }
