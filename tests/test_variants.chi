@@ -1,0 +1,185 @@
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/compiler { compile, compileToLua, hasErrors, newLuaCompilationEnv }
+import std/lang { luaExpr, embedLua }
+
+// =====================================================================
+// Contract tests for variant (`data`) type constructors — issue #14.
+//
+// Tests-before-bodies: the implementation is stubbed, so every test here
+// is expected to FAIL right now. Each must fail because the FEATURE is
+// missing (UNRECOGNIZED_NAME at eval, hasErrors == true on a valid
+// variant program, missing chi_is_variant in emitted Lua), NOT because of
+// a test-syntax error.
+//
+// Mechanisms (all exercise the chicc-under-test via the bootstrap bundle):
+//   (1) eval(src) wrapped in pcall — end-to-end compile+run; assert
+//       raise / no-raise and inspect the error text.
+//   (2) compile(src, env) + hasErrors(...) — compile-level accept/reject.
+//   (3) compileToLua(src, env).luaCode — codegen-shape (white-box) check.
+//   (4) io.write capture around eval — robust runtime-value channel.
+//       (chi_println cannot be overridden: emitted code holds its own
+//       reference; io.write is the shared layer below it.)
+//
+// NOTE on source-string representation:
+//   - eval/io.write tests put the program in a LUA-side string literal
+//     (embedLua "__src = '...\\n...'") so newlines survive into Lua.
+//   - compile/compileToLua tests pass a CHI string (with `\n`) directly to
+//     the Chi-level compiler functions.
+// =====================================================================
+
+// ---------------------------------------------------------------------
+// Construction + run: the issue repro must eval without raising.
+// RED now: eval raises UNRECOGNIZED_NAME for 'Circle' / 'Rect'.
+// ---------------------------------------------------------------------
+test("repro: data + construction + is/as evals without raising") {
+    embedLua("__src1 = 'data Shape = Circle(r: int) | Rect(w: int, h: int)\\nfn area(s: Shape): int {\\n  if s is Circle { val c = s as Circle\\n c.r * c.r * 3 } else { val r = s as Rect\\n r.w * r.h } }\\nprintln(area(Circle(2)))\\nprintln(area(Rect(3, 4)))'")
+    embedLua("__rok, __rerr = pcall(function() return package.loaded['std/lang'].eval(__src1) end)")
+    val ok = luaExpr("__rok") as bool
+    if ok == false {
+        embedLua("error('repro eval raised: ' .. tostring(__rerr))")
+    }
+    assertTrue(ok)
+}
+
+// ---------------------------------------------------------------------
+// Construction value correctness (mechanism 4 — io.write capture).
+// area(Circle(2)) = 2*2*3 = 12 ; area(Rect(3,4)) = 3*4 = 12.
+// The repro prints both on their own lines, so captured stdout must be
+// exactly "12\n12\n".
+// ---------------------------------------------------------------------
+test("repro: area(Circle(2))==12 and area(Rect(3,4))==12 via stdout") {
+    embedLua("__src2 = 'data Shape = Circle(r: int) | Rect(w: int, h: int)\\nfn area(s: Shape): int {\\n  if s is Circle { val c = s as Circle\\n c.r * c.r * 3 } else { val r = s as Rect\\n r.w * r.h } }\\nprintln(area(Circle(2)))\\nprintln(area(Rect(3, 4)))'")
+    embedLua("__buf2 = {}")
+    embedLua("__owrite2 = io.write")
+    embedLua("io.write = function(...) for _,a in ipairs({...}) do __buf2[#__buf2+1] = tostring(a) end end")
+    embedLua("pcall(function() return package.loaded['std/lang'].eval(__src2) end)")
+    embedLua("io.write = __owrite2")
+    embedLua("__out2 = table.concat(__buf2)")
+    val out = luaExpr("__out2") as string
+    assertEqual(out, "12\n12\n")
+}
+
+// ---------------------------------------------------------------------
+// `is` discrimination: Circle is Circle -> true branch, Rect is Circle ->
+// false branch, observable in output. Correct prints "yes\nno\n"; the
+// chi_is_record-everywhere bug would print "yes\nyes\n".
+// ---------------------------------------------------------------------
+test("is: Circle matches Circle, Rect does not (observable branch)") {
+    embedLua("__src3 = 'data Shape = Circle(r: int) | Rect(w: int, h: int)\\nfn label(s: Shape): string { if s is Circle { \"yes\" } else { \"no\" } }\\nprintln(label(Circle(1)))\\nprintln(label(Rect(1, 1)))'")
+    embedLua("__buf3 = {}")
+    embedLua("__owrite3 = io.write")
+    embedLua("io.write = function(...) for _,a in ipairs({...}) do __buf3[#__buf3+1] = tostring(a) end end")
+    embedLua("pcall(function() return package.loaded['std/lang'].eval(__src3) end)")
+    embedLua("io.write = __owrite3")
+    embedLua("__out3 = table.concat(__buf3)")
+    val out = luaExpr("__out3") as string
+    assertEqual(out, "yes\nno\n")
+}
+
+// ---------------------------------------------------------------------
+// `is` hazard B2 — same-tag short-circuit. A value already typed as a
+// variant record (via `as`) checked against a DIFFERENT variant must be
+// false. emitIs returns literal "true" for record-vs-record before any
+// variant logic; the variant branch must be hoisted above it, otherwise
+// `(Circle as record) is Rect` mis-emits true.
+// Correct prints "no\n"; the B2 bug prints "yes\n".
+// ---------------------------------------------------------------------
+test("is hazard B2: a Circle value is NOT a Rect") {
+    embedLua("__src4 = 'data Shape = Circle(r: int) | Rect(w: int, h: int)\\nval s: Shape = Circle(2)\\nval c = s as Circle\\nprintln(if c is Rect { \"yes\" } else { \"no\" })'")
+    embedLua("__buf4 = {}")
+    embedLua("__owrite4 = io.write")
+    embedLua("io.write = function(...) for _,a in ipairs({...}) do __buf4[#__buf4+1] = tostring(a) end end")
+    embedLua("pcall(function() return package.loaded['std/lang'].eval(__src4) end)")
+    embedLua("io.write = __owrite4")
+    embedLua("__out4 = table.concat(__buf4)")
+    val out = luaExpr("__out4") as string
+    assertEqual(out, "no\n")
+}
+
+// ---------------------------------------------------------------------
+// `as` + field access: `s as Circle` type-checks and `.r` yields the
+// field value (here 7).
+// ---------------------------------------------------------------------
+test("as + field access: (s as Circle).r yields the field value") {
+    embedLua("__src5 = 'data Shape = Circle(r: int) | Rect(w: int, h: int)\\nval s: Shape = Circle(7)\\nval c = s as Circle\\nprintln(c.r)'")
+    embedLua("__buf5 = {}")
+    embedLua("__owrite5 = io.write")
+    embedLua("io.write = function(...) for _,a in ipairs({...}) do __buf5[#__buf5+1] = tostring(a) end end")
+    embedLua("pcall(function() return package.loaded['std/lang'].eval(__src5) end)")
+    embedLua("io.write = __owrite5")
+    embedLua("__out5 = table.concat(__buf5)")
+    val out = luaExpr("__out5") as string
+    assertEqual(out, "7\n")
+}
+
+// ---------------------------------------------------------------------
+// Overlapping shapes E1 — sumCreate-dedup hazard. Celsius and Fahrenheit
+// are structurally identical; typeEquals ignores `ids`, so sumCreate would
+// collapse them into one branch and drop one. Lower must use raw sumType.
+// At runtime a Celsius value must be `is Celsius` (true) and NOT
+// `is Fahrenheit` (false). Correct output: "yes\nno\n".
+// ---------------------------------------------------------------------
+test("overlapping E1: Celsius is Celsius true, is Fahrenheit false") {
+    embedLua("__src6 = 'data Temp = Celsius(degrees: int) | Fahrenheit(degrees: int)\\nval t: Temp = Celsius(20)\\nprintln(if t is Celsius { \"yes\" } else { \"no\" })\\nprintln(if t is Fahrenheit { \"yes\" } else { \"no\" })'")
+    embedLua("__buf6 = {}")
+    embedLua("__owrite6 = io.write")
+    embedLua("io.write = function(...) for _,a in ipairs({...}) do __buf6[#__buf6+1] = tostring(a) end end")
+    embedLua("pcall(function() return package.loaded['std/lang'].eval(__src6) end)")
+    embedLua("io.write = __owrite6")
+    embedLua("__out6 = table.concat(__buf6)")
+    val out = luaExpr("__out6") as string
+    assertEqual(out, "yes\nno\n")
+}
+
+// ---------------------------------------------------------------------
+// Contract (no run) — a valid variant program must COMPILE clean.
+// RED now: hasErrors == true (Circle/Rect unrecognized).
+// ---------------------------------------------------------------------
+test("compile: a valid variant program has no errors") {
+    val src = "data Shape = Circle(r: int) | Rect(w: int, h: int)\n" +
+        "fn area(s: Shape): int {\n" +
+        "  if s is Circle { val c = s as Circle\n c.r * c.r * 3 } else { val r = s as Rect\n r.w * r.h } }\n" +
+        "println(area(Circle(2)))"
+    val r = compile(src, newLuaCompilationEnv())
+    assertFalse(hasErrors(r))
+}
+
+// ---------------------------------------------------------------------
+// Codegen shape (white-box, kept minimal) — the emitted Lua for a program
+// using `is` on a variant must route through chi_is_variant, not
+// chi_is_record. RED now: luaCode is nil (compilation fails).
+// ---------------------------------------------------------------------
+test("codegen: emitted Lua uses chi_is_variant for variant `is`") {
+    val src = "data Shape = Circle(r: int) | Rect(w: int, h: int)\n" +
+        "fn label(s: Shape): string { if s is Circle { \"c\" } else { \"r\" } }\n" +
+        "println(label(Circle(1)))"
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val notNil = luaExpr("result.luaCode ~= nil") as bool
+    assertTrue(notNil)
+    val code: string = luaExpr("result.luaCode") as string
+    assertTrue(code.contains("chi_is_variant"))
+}
+
+test("codegen: variant construction sets a per-variant metatable") {
+    val src = "data Shape = Circle(r: int) | Rect(w: int, h: int)\n" +
+        "val s: Shape = Circle(1)"
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val notNil = luaExpr("result.luaCode ~= nil") as bool
+    assertTrue(notNil)
+    val code: string = luaExpr("result.luaCode") as string
+    assertTrue(code.contains("chi_variant_meta"))
+}
+
+// ---------------------------------------------------------------------
+// ERROR case — generic variants are out of scope and must be REJECTED
+// with a clear compilation error, not silently miscompiled. RED now: the
+// stub lets `data Box[T] = Wrap(value: T)` through (hasErrors == false),
+// miscompiling Wrap(value: any). Contract: rejected.
+// ---------------------------------------------------------------------
+test("error: generic variant data Box[T] is rejected") {
+    val src = "data Box[T] = Wrap(value: T)\nval x = 1"
+    val r = compile(src, newLuaCompilationEnv())
+    assertTrue(hasErrors(r))
+}
+
+summary()
