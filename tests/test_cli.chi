@@ -1,5 +1,5 @@
 import std/lang { embedLua, luaExpr }
-import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/cli { cliMain }
 
 // Test cli.chi functions
@@ -132,6 +132,48 @@ test("runFile returns 1 for invalid source") {
     assertEqual(result, 1)
 
     embedLua("os.remove('/tmp/test_chicc_runbad.chi')")
+}
+
+// ============================================================================
+// Unreadable inputs, unwritable outputs, extra inputs
+// ============================================================================
+
+test("cliMain run with missing file returns 1") {
+    embedLua("os.remove('/tmp/test_chicc_missing.chi')")
+    val args: any = luaExpr("{'/tmp/test_chicc_missing.chi'}")
+    assertEqual(cliMain(args), 1)
+}
+
+test("cliMain compile with missing file returns 1") {
+    embedLua("os.remove('/tmp/test_chicc_missing.chi')")
+    val args: any = luaExpr("{'compile', '/tmp/test_chicc_missing.chi'}")
+    assertEqual(cliMain(args), 1)
+}
+
+test("cliMain run with a directory as input returns 1") {
+    embedLua("os.execute('mkdir -p /tmp/test_chicc_dir.chi')")
+    val args: any = luaExpr("{'/tmp/test_chicc_dir.chi'}")
+    assertEqual(cliMain(args), 1)
+    embedLua("os.remove('/tmp/test_chicc_dir.chi')")
+}
+
+test("cliMain compile with unwritable output returns 1") {
+    embedLua("local f = io.open('/tmp/test_chicc_ok.chi', 'w'); f:write('val x = 42\\n'); f:close()")
+    val args: any = luaExpr("{'compile', '-o', '/nonexistent/dir/x.lua', '/tmp/test_chicc_ok.chi'}")
+    assertEqual(cliMain(args), 1)
+    embedLua("os.remove('/tmp/test_chicc_ok.chi')")
+}
+
+test("cliMain compile with two inputs returns 1 and writes nothing") {
+    embedLua("local f = io.open('/tmp/test_chicc_a.chi', 'w'); f:write('val a = 1\\n'); f:close()")
+    embedLua("local f = io.open('/tmp/test_chicc_b.chi', 'w'); f:write('val b = 2\\n'); f:close()")
+    embedLua("os.remove('/tmp/test_chicc_a.lua'); os.remove('/tmp/test_chicc_b.lua')")
+    val args: any = luaExpr("{'compile', '/tmp/test_chicc_a.chi', '/tmp/test_chicc_b.chi'}")
+    assertEqual(cliMain(args), 1)
+    val written: bool = luaExpr("io.open('/tmp/test_chicc_a.lua', 'r') ~= nil or io.open('/tmp/test_chicc_b.lua', 'r') ~= nil")
+    assertFalse(written)
+    embedLua("os.remove('/tmp/test_chicc_a.chi'); os.remove('/tmp/test_chicc_b.chi')")
+    embedLua("os.remove('/tmp/test_chicc_a.lua'); os.remove('/tmp/test_chicc_b.lua')")
 }
 
 // ============================================================================
