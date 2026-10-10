@@ -39,6 +39,12 @@ pub fn syntaxError(msg: string, cp: { line: int, column: int } | unit): Message 
     newMessage("SYNTAX_ERROR", "Syntax error: $msg", cp)
 }
 
+// A raw Lua error thrown inside the compiler: a compiler bug, not a mistake
+// in the source.
+pub fn internalError(msg: string): Message {
+    newMessage("INTERNAL_ERROR", "Internal compiler error: $msg", unit)
+}
+
 pub fn typeMismatch(expected: string, actual: string, cp: { line: int, column: int } | unit): Message {
     newMessage("TYPE_MISMATCH", "Expected type is '$expected' but got '$actual'", cp)
 }

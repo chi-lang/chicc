@@ -13,11 +13,14 @@ type Parser = {
     // parser recovers and keeps going so several errors surface at
     // once; the compiler drains these into its result messages, so a
     // recovered error still fails the compilation (issue #16).
-    errors: array[Message]
+    errors: array[Message],
+    // Every construct left open at EOF fails there; only the first of
+    // those errors is reported.
+    eofReported: bool
 }
 
 pub fn newParser(tokens: array[Token], source: string): Parser {
-    { tokens: tokens, pos: 1, source: source, noTrailingLambda: false, errors: [] }
+    { tokens: tokens, pos: 1, source: source, noTrailingLambda: false, errors: [], eofReported: false }
 }
 
 // -- Helper: get section from a token --
@@ -32,7 +35,13 @@ fn tokenSection(tok: Token): Section {
 
 // Record a recovered syntax error at the given token's position.
 fn recordParseError(p: Parser, text: string, tok: Token) {
-    p.errors.push(syntaxError(text, toCodePoint(tokenSection(tok))))
+    if tok.kind == TK_EOF {
+        if p.eofReported { return unit }
+        p.eofReported = true
+        p.errors.push(syntaxError("unexpected end of file", toCodePoint(tokenSection(tok))))
+    } else {
+        p.errors.push(syntaxError(text, toCodePoint(tokenSection(tok))))
+    }
 }
 
 pub fn current(p: Parser): Token {
@@ -43,9 +52,10 @@ pub fn peek(p: Parser): int {
     current(p).kind
 }
 
+// Stays on TK_EOF: there is no token after it to read.
 pub fn advance(p: Parser): Token {
     val tok = current(p)
-    p.pos = p.pos + 1
+    if tok.kind != TK_EOF { p.pos = p.pos + 1 }
     tok
 }
 

@@ -7,7 +7,7 @@ import std/lang { luaExpr, embedLua }
 import chicc/source { Section }
 import chicc/ast { Expr, Import, ImportEntry, TypeAlias, Program, newPackage, newProgram, newImport, newImportEntry, newTypeAlias }
 import chicc/types { Type, TypeId }
-import chicc/messages { invalidModuleName, invalidPackageName, cannotAccessInternalName, unrecognizedName }
+import chicc/messages { invalidModuleName, invalidPackageName, cannotAccessInternalName, unrecognizedName, internalError }
 import chicc/symbols { newCompileTables, ctDefineTypeAlias }
 import chicc/checks { checkNames, importConflictCheck, visibilityCheck, fnCallCheck, immutabilityCheck, returnTypeCheck }
 import chicc/inference_context { icInit, icDefineLocalSymbol }
@@ -420,6 +420,17 @@ pub fn replaceTypes(expr: any, solutions: any) {
 }
 
 // ============================================================================
+// thrownMessage — the message for an error thrown by a compiler phase
+// ============================================================================
+
+// Phases throw a Message for a mistake in the source; any other thrown value
+// is a compiler bug.
+fn thrownMessage(err: any): any {
+    val isMsg = luaExpr("type(err) == 'table' and err.code ~= nil") as bool
+    if isMsg { err } else { internalError(luaExpr("tostring(err)") as string) }
+}
+
+// ============================================================================
 // parseSource — tokenize + parse with error handling
 // ============================================================================
 
@@ -441,13 +452,8 @@ fn parseSource(source: string): any {
         val msgs = luaExpr("__chicc_parse_msgs") as any
         luaExpr("{ parsedProgram = prog, messages = msgs }") as any
     } else {
-        val errVal = luaExpr("__chicc_parse_prog") as any
-        val isMsg = luaExpr("type(__chicc_parse_prog) == 'table' and __chicc_parse_prog.code ~= nil") as bool
-        if isMsg {
-            embedLua("table.insert(__chicc_parse_msgs, __chicc_parse_prog)")
-        } else {
-            embedLua("table.insert(__chicc_parse_msgs, { code = 'SYNTAX_ERROR', text = tostring(__chicc_parse_prog), codePoint = nil })")
-        }
+        val parseMsgs = luaExpr("__chicc_parse_msgs") as array[any]
+        parseMsgs.push(thrownMessage(luaExpr("__chicc_parse_prog") as any))
         val emptyProg = luaExpr("{ packageDefinition = nil, imports = {}, typeAliases = {}, variantTypes = {}, code = {}, section = nil }") as any
         luaExpr("{ parsedProgram = emptyProg, messages = __chicc_parse_msgs }") as any
     }
@@ -581,12 +587,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
     if varOk {
         variantCtorDecls = luaExpr("__chicc_var_result") as any
     } else {
-        val isVarMsg = luaExpr("type(__chicc_var_result) == 'table' and __chicc_var_result.code ~= nil") as bool
-        if isVarMsg {
-            resultMessages.push(luaExpr("__chicc_var_result") as any)
-        } else {
-            resultMessages.push(luaExpr("{ code = 'ERROR', text = tostring(__chicc_var_result), codePoint = nil }") as any)
-        }
+        resultMessages.push(thrownMessage(luaExpr("__chicc_var_result") as any))
     }
 
     embedLua("if __prof then __ts[3] = os.clock() end")
@@ -616,12 +617,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
     val expressions: any = if convOk {
         luaExpr("__chicc_conv_result") as any
     } else {
-        val isMsg = luaExpr("type(__chicc_conv_result) == 'table' and __chicc_conv_result.code ~= nil") as bool
-        if isMsg {
-            resultMessages.push(luaExpr("__chicc_conv_result") as any)
-        } else {
-            resultMessages.push(luaExpr("{ code = 'ERROR', text = tostring(__chicc_conv_result), codePoint = nil }") as any)
-        }
+        resultMessages.push(thrownMessage(luaExpr("__chicc_conv_result") as any))
         luaExpr("{}") as any
     }
 
@@ -674,12 +670,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
     val tcOk = luaExpr("__chicc_tc_ok") as bool
     if tcOk == false {
         embedLua("require('chicc/typer').typerSetUf(nil)")
-        val isTcMsg = luaExpr("type(__chicc_tc_err) == 'table' and __chicc_tc_err.code ~= nil") as bool
-        if isTcMsg {
-            resultMessages.push(luaExpr("__chicc_tc_err") as any)
-        } else {
-            resultMessages.push(luaExpr("{ code = 'ERROR', text = tostring(__chicc_tc_err), codePoint = nil }") as any)
-        }
+        resultMessages.push(thrownMessage(luaExpr("__chicc_tc_err") as any))
     }
 
     // Type-check each function independently (with shared union-find for incremental solving)
@@ -690,12 +681,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
         val fnOk = luaExpr("__chicc_fn_ok") as bool
         if fnOk == false {
             embedLua("require('chicc/typer').typerSetUf(nil)")
-            val isFnMsg = luaExpr("type(__chicc_fn_err) == 'table' and __chicc_fn_err.code ~= nil") as bool
-            if isFnMsg {
-                resultMessages.push(luaExpr("__chicc_fn_err") as any)
-            } else {
-                resultMessages.push(luaExpr("{ code = 'ERROR', text = tostring(__chicc_fn_err), codePoint = nil }") as any)
-            }
+            resultMessages.push(thrownMessage(luaExpr("__chicc_fn_err") as any))
         }
         fi = fi + 1
     }

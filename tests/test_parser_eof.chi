@@ -1,0 +1,64 @@
+import chicc/test_util { test, assertEqual, summary }
+import chicc/compiler { compileToLua, compileReplLine, newLuaCompilationEnv, newReplCompilationEnv, formatMessage }
+
+// A program cut off at end of file fails with one syntax error at the EOF
+// position (#31). The parser used to read past TK_EOF and crash with a Lua
+// error, and every construct left open at EOF added its own error (#20).
+//
+// Programs are compiled by the chicc modules under test, not eval(): eval()
+// compiles with the prebuilt chicc.lua, which would pass even if the sources
+// regressed.
+
+fn joinMessages(messages: array[any]): string {
+    var out = ""
+    for m in messages {
+        out = if out == "" { formatMessage(m) } else { "$out | ${formatMessage(m)}" }
+    }
+    out
+}
+
+// All compilation messages, formatted and joined; "compiled" if it compiled.
+fn compileErrors(src: string): string {
+    val result = compileToLua(src, newLuaCompilationEnv())
+    if result.luaCode != unit { return "compiled" }
+    joinMessages(result.messages as array[any])
+}
+
+// The REPL prints every message of a failed line, so the messages are what
+// the user sees.
+fn replErrors(src: string): string {
+    val result = compileReplLine(src, newReplCompilationEnv())
+    if result.luaCode != unit { return "compiled" }
+    joinMessages(result.messages as array[any])
+}
+
+val eof = "[SYNTAX_ERROR] Syntax error: unexpected end of file"
+
+test("binary operator at EOF") {
+    assertEqual(compileErrors("val x = 1 +\n"), "$eof (line 2, col 1)")
+}
+
+test("unclosed group at EOF") {
+    assertEqual(compileErrors("val x = (1 +"), "$eof (line 1, col 13)")
+}
+
+test("missing type at EOF") {
+    assertEqual(compileErrors("val x: "), "$eof (line 1, col 8)")
+}
+
+test("nested unclosed groups at EOF report one error") {
+    assertEqual(compileErrors("val x = ((1"), "$eof (line 1, col 12)")
+    assertEqual(compileErrors("val x = (((1"), "$eof (line 1, col 13)")
+}
+
+test("nested unclosed groups at EOF report one error in the REPL") {
+    assertEqual(replErrors("val x = ((1"), "$eof (line 1, col 12)")
+    assertEqual(replErrors("val x = (((1"), "$eof (line 1, col 13)")
+}
+
+test("an error before EOF is reported next to the EOF error") {
+    val notAssignable = "[SYNTAX_ERROR] Syntax error: left side of assignment is not assignable (expected a variable, field or index)"
+    assertEqual(compileErrors("var x = 1\nx + 1 = 5\nval y = (1"), "$notAssignable (line 2, col 3) | $eof (line 3, col 11)")
+}
+
+summary()
