@@ -263,6 +263,20 @@ fn copyHistoryWith(history: array[any], constraint: any): array[any] {
     newHistory
 }
 
+// Whether `history` holds a constraint between these same two types
+fn historyContains(history: array[any], expected: Type, actual: Type): bool {
+    val hLen = history.size()
+    var hi = 1
+    while hi <= hLen {
+        val h = history[hi] as Constraint
+        val hExpected = h.expected as Type
+        val hActual = h.actual as Type
+        if hExpected.typeEquals(expected) && hActual.typeEquals(actual) { return true }
+        hi = hi + 1
+    }
+    false
+}
+
 // Core constraint solver behind both facades. Mutates `uf`; stops at the
 // FIRST failing constraint and returns the same Message the throwing
 // facades raise (verbatim — code, text, codePoint). Returns unit on
@@ -305,16 +319,17 @@ fn unifyCore(constraints: array[any], uf: any): Message | unit {
                 val cp = sectionToCodePoint(section)
                 return typeMismatch(typeDescr(expected), typeDescr(actual), cp)
             }
-        } else if expected.tag == "recursive" {
-            val unfolded = expected.unfoldRecursive()
-            val newHistory = copyHistoryWith(history, constraint)
-            val nc = newConstraint(unfolded, actual, section, newHistory)
-            queue.insertAt(pos, nc)
-        } else if actual.tag == "recursive" {
-            val unfolded = actual.unfoldRecursive()
-            val newHistory = copyHistoryWith(history, constraint)
-            val nc = newConstraint(expected, unfolded, section, newHistory)
-            queue.insertAt(pos, nc)
+        } else if expected.tag == "recursive" || actual.tag == "recursive" {
+            // A pair already being unified higher up this constraint's
+            // derivation holds coinductively; unfolding it again would
+            // loop forever on two distinct recursive types.
+            if historyContains(history, expected, actual) == false {
+                val newExpected = if expected.tag == "recursive" { expected.unfoldRecursive() } else { expected }
+                val newActual = if actual.tag == "recursive" { actual.unfoldRecursive() } else { actual }
+                val newHistory = copyHistoryWith(history, constraint)
+                val nc = newConstraint(newExpected, newActual, section, newHistory)
+                queue.insertAt(pos, nc)
+            }
         } else if expected.tag == "var" {
             if expected.occursInExcludingSumBranches(actual) {
                 val cp = sectionToCodePoint(section)

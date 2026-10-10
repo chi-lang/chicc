@@ -121,6 +121,30 @@ test("typeEquals: same recursive types") {
     assertTrue(r1.typeEquals(r2))
 }
 
+test("typeEquals: recursive types with equal bodies built separately") {
+    val v = variableType("X", 0)
+    val r1 = recursiveType(v, recordType([], [{ name: "a", fieldType: tInt }, { name: "next", fieldType: v }], []))
+    val r2 = recursiveType(v, recordType([], [{ name: "a", fieldType: tInt }, { name: "next", fieldType: v }], []))
+    assertTrue(r1.typeEquals(r2))
+}
+
+test("typeEquals: recursive types sharing the self-reference but differing in body") {
+    // Box[int] vs Box[string]: all instances of a generic recursive alias
+    // share the self-reference variable.
+    val v = variableType("X", 0)
+    val boxInt = recursiveType(v, recordType([], [{ name: "a", fieldType: tInt }, { name: "next", fieldType: v }], []))
+    val boxString = recursiveType(v, recordType([], [{ name: "a", fieldType: tString }, { name: "next", fieldType: v }], []))
+    assertFalse(boxInt.typeEquals(boxString))
+}
+
+test("typeEquals: recursive types with different self-references") {
+    val x = variableType("X", 0)
+    val y = variableType("Y", 0)
+    val rx = recursiveType(x, recordType([], [{ name: "next", fieldType: x }], []))
+    val ry = recursiveType(y, recordType([], [{ name: "next", fieldType: y }], []))
+    assertFalse(rx.typeEquals(ry))
+}
+
 test("typeEquals: same poly types") {
     val v = variableType("T", 0)
     val body = functionType([v, v], [], 0)

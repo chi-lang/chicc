@@ -197,4 +197,21 @@ test("resolveTypeAndWrapRecursive - simple case delegates to resolveType") {
     assertTrue((result as Type).tag == "primitive")
 }
 
+test("resolveType - recursive alias substitutes its type arguments") {
+    // type Box[T] = { v: T, next: Box[T] | unit }, registered the way the
+    // compiler registers source aliases (level 1)
+    val tt = newTypeTable(unit)
+    val tRef = typeNameRef("", "", "T", unit)
+    val boxOfT = typeConstructorRef(typeNameRef("", "", "Box", unit), [tRef], unit)
+    val body = recordTypeRef([newTypeRefField("v", tRef), newTypeRefField("next", sumTypeRef(boxOfT, typeNameRef("", "", "unit", unit), unit))], unit)
+    val typeId: any = { moduleName: "m", packageName: "p", name: "Box" }
+    resolveTypeAndWrapRecursive(tt, ["T"], body, typeId, 1)
+
+    val boxOfInt = typeConstructorRef(typeNameRef("", "", "Box", unit), [typeNameRef("", "", "int", unit)], unit)
+    val result = resolveType(tt, [], boxOfInt, 0)
+    assertEqual(result.tag, "recursive")
+    val inner = result.innerType as Type
+    assertTrue(inner.fields[1].fieldType.typeEquals(tInt))
+}
+
 summary()

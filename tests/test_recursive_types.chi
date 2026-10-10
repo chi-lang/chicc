@@ -1,0 +1,71 @@
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary, withinLimits }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { luaExpr, embedLua }
+
+// Recursive type aliases end to end (issue #48): instances of a generic
+// recursive alias differ by their type arguments, and unifying two
+// different recursive aliases terminates.
+
+// Compiles `src`; returns the codes of the reported messages, comma-separated.
+fn messageCodes(src: string): string {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    messages.map { m -> m.code as string }.joinToStringWithSeparator(",")
+}
+
+val boxDecl = "type Box[T] = { v: T, next: Box[T] | unit }\n"
+
+test("Box[string] is rejected where Box[int] is expected") {
+    withinLimits(30) {
+        val src = "${boxDecl}fn take(n: Box[int]): int { n.v + 1 }\nval s: Box[string] = { v: \"abc\", next: unit }\nprintln(take(s))"
+        assertEqual(messageCodes(src), "TYPE_MISMATCH")
+    }
+}
+
+test("a record literal is checked against Box's type argument") {
+    withinLimits(30) {
+        val src = "${boxDecl}val x: Box[int] = { v: \"abc\", next: unit }"
+        assertEqual(messageCodes(src), "TYPE_MISMATCH")
+    }
+}
+
+test("a generic function does not turn Box[string] into int") {
+    withinLimits(30) {
+        val src = "${boxDecl}fn first[T](b: Box[T]): T { b.v }\nval s: Box[string] = { v: \"abc\", next: unit }\nval i: int = first(s)\nprintln(i + 1)"
+        assertEqual(messageCodes(src), "TYPE_MISMATCH")
+    }
+}
+
+test("structurally equal recursive aliases unify") {
+    withinLimits(30) {
+        val src = "type S1 = { v: int, next: () -> S1 }\ntype S2 = { v: int, next: () -> S2 }\nfn take(n: S2): int { n.v }\nfn pass(n: S1): int { take(n) }"
+        assertEqual(messageCodes(src), "")
+    }
+}
+
+test("structurally different recursive aliases mismatch") {
+    withinLimits(30) {
+        val src = "type S1 = { v: int, next: () -> S1 }\ntype S3 = { v: string, next: () -> S3 }\nfn take(n: S3): string { n.v }\nfn pass(n: S1): string { take(n) }"
+        assertEqual(messageCodes(src), "TYPE_MISMATCH")
+    }
+}
+
+test("recursive aliases unify when the recursive sum branch comes first") {
+    withinLimits(30) {
+        val src = "type L1 = { v: int, next: unit | L1 }\ntype L2 = { v: int, next: unit | L2 }\nfn take(n: L2): int { n.v }\nfn pass(n: L1): int { take(n) }"
+        assertEqual(messageCodes(src), "")
+    }
+}
+
+test("a generic recursive alias compiles and runs") {
+    withinLimits(30) {
+        val src = "type Tree[T] = { v: T, kids: array[Tree[T]] }\nfn sum(t: Tree[int]): int { t.v }\nval t: Tree[int] = { v: 1, kids: [] }\nprintln(sum(t))"
+        val result: any = compileToLua(src, newLuaCompilationEnv())
+        assertEqual((result.messages as array[any]).size(), 0)
+        val luaCode = result.luaCode as string
+        embedLua("local buf = {}; local write = io.write; io.write = function(...) for _, a in ipairs({...}) do buf[#buf + 1] = tostring(a) end end; local ok, err = pcall(function() return assert(load(luaCode))() end); io.write = write; __treeOut = ok and table.concat(buf) or ('error: ' .. tostring(err))")
+        assertEqual(luaExpr("__treeOut") as string, "1\n")
+    }
+}
+
+summary()

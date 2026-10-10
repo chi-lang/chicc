@@ -177,6 +177,12 @@ fn typeIdListsIntersect(a: array[TypeId], b: array[TypeId]): bool {
     false
 }
 
+// Recursive types already found equal, as weak sets keyed by the types:
+// equal recursive types often sit in separate tables (each instantiation
+// builds its own), and typeEquals meets the same pair again and again.
+// Types are not changed once built, so a remembered answer stays right.
+embedLua("local __equal_recursive = setmetatable({}, { __mode = 'k' })")
+
 // 1. Deep structural equality for types
 pub fn typeEquals(a: Type, b: Type): bool {
     // Reference equality shortcircuit
@@ -231,11 +237,20 @@ pub fn typeEquals(a: Type, b: Type): bool {
     } else if tagA == "var" {
         a.name == b.name && a.level == b.level
     } else if tagA == "recursive" {
-        // Only compare self-ref variables — the variable name (qualified type alias name)
-        // uniquely identifies the recursive type. Comparing inner types would infinite-loop.
+        // Instances of one generic alias share the self-reference variable
+        // (Box[int] vs Box[string]), so the bodies decide. Comparing them
+        // terminates: inside innerType the self-reference is that variable.
         val aVar = a.variable as Type
         val bVar = b.variable as Type
-        aVar.typeEquals(bVar)
+        if aVar.typeEquals(bVar) == false { return false }
+        if luaExpr("__equal_recursive[a] ~= nil and __equal_recursive[a][b] == true") as bool { return true }
+        val aInner = a.innerType as Type
+        val bInner = b.innerType as Type
+        val equal = aInner.typeEquals(bInner)
+        if equal {
+            embedLua("local seen = __equal_recursive[a]; if seen == nil then seen = setmetatable({}, { __mode = 'k' }); __equal_recursive[a] = seen end; seen[b] = true")
+        }
+        equal
     } else if tagA == "poly" {
         val aBody = a.body as Type
         val bBody = b.body as Type

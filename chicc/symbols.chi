@@ -332,12 +332,14 @@ pub fn resolveType(typeTable: TypeTable, typeSchemeVars: array[string], ref: any
             val alias: any = if baseName != "" { ttGet(typeTable, baseName) } else { unit }
             if alias != unit {
                 val aliasType: any = luaExpr("alias.aliasType")
-                val paramCount = luaExpr("alias.aliasType and alias.aliasType.typeParams and #alias.aliasType.typeParams or 0") as int
+                // A recursive alias carries its type parameters on its body
+                val paramsHolder: any = if aliasType != unit && aliasType.tag == "recursive" { aliasType.innerType } else { aliasType }
+                val paramCount = luaExpr("paramsHolder and paramsHolder.typeParams and #paramsHolder.typeParams or 0") as int
                 val actualCount = luaExpr("#typeParams") as int
                 val replacements: any = luaExpr("{}")
                 var pi = 1
                 while pi <= paramCount && pi <= actualCount {
-                    val paramName = luaExpr("alias.aliasType.typeParams[pi]") as string
+                    val paramName = luaExpr("paramsHolder.typeParams[pi]") as string
                     val actualRef: any = luaExpr("typeParams[pi]")
                     val actualType = resolveType(typeTable, typeSchemeVars, actualRef, level)
                     val varType = variableType(paramName, 1)

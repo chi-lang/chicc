@@ -36,6 +36,16 @@ pub fn assertFalse(value: bool) {
     assertEqual(value, false)
 }
 
+// Runs `body`, raising once it has run for `seconds` of wall-clock time or
+// grown the Lua heap by 1 GB, so a test of something that may loop forever
+// fails fast instead of stalling the suite until run_tests.sh's per-file
+// timeout. The heap cap matters: a runaway loop that allocates drives the
+// machine into swap, where CPU time (and so a CPU-time deadline) stalls.
+pub fn withinLimits(seconds: int, body: () -> unit) {
+    embedLua("local deadline = os.time() + seconds; local heapCapKb = collectgarbage('count') + 1024 * 1024; debug.sethook(function() if os.time() > deadline then debug.sethook(); error('did not terminate within ' .. seconds .. ' s', 0) end; if collectgarbage('count') > heapCapKb then debug.sethook(); error('heap grew by more than 1 GB', 0) end end, '', 100000)")
+    embedLua("local ok, err = pcall(body); debug.sethook(); if not ok then error(err, 0) end")
+}
+
 pub fn summary() {
     val total = passed + failed
     println("Tests: $total total, $passed passed, $failed failed")

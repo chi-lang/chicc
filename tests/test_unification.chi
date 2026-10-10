@@ -1,4 +1,4 @@
-import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary, withinLimits }
 import chicc/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, intTypeId, stringTypeId, boolTypeId, floatTypeId, unitTypeId }
 import chicc/unification { Constraint, Binding, newConstraint, constraintWithReplacedVariable, unify, tryUnify }
 import chicc/source { newSection, Section }
@@ -270,6 +270,73 @@ test("unify: recursive type gets unfolded") {
     // Then v2 should be assigned to the unfolded type
     val count: int = luaExpr("#solutions")
     assertTrue(count >= 1)
+}
+
+// --- unify: two recursive types (issue #48) ---
+
+// A recursive alias the way resolveTypeAndWrapRecursive builds it: the body
+// refers back to the alias through the self-reference variable.
+fn recursiveAlias(name: string, body: (Type) -> Type): Type {
+    val self = variableType(name, 0 - 1)
+    recursiveType(self, body(self))
+}
+
+// type Box[T] = { v: T, next: Box[T] | unit }, instantiated with `elem`
+fn box(elem: Type): Type {
+    recursiveAlias("t::u::Box") { self -> recordType([], [{ name: "v", fieldType: elem }, { name: "next", fieldType: sumType([], self, tUnit, []) }], []) }
+}
+
+// type <name> = { v: <elem>, next: () -> <name> }
+fn thunkList(name: string, elem: Type): Type {
+    recursiveAlias(name) { self -> recordType([], [{ name: "v", fieldType: elem }, { name: "next", fieldType: functionType([self], [], 0) }], []) }
+}
+
+// Unifies a single constraint; returns the failure code, or "" on success.
+fn unifyCode(expected: Type, actual: Type): string {
+    val constraints: array[any] = []
+    constraints.push(newConstraint(expected, actual, testSection, []))
+    embedLua("local ok, err = pcall(unify, constraints); __unifyCode = ok and '' or (type(err) == 'table' and err.code or tostring(err))")
+    luaExpr("__unifyCode") as string
+}
+
+test("unify: instances of a recursive alias with different arguments mismatch") {
+    withinLimits(10) {
+        assertEqual(unifyCode(box(tInt), box(tString)), "TYPE_MISMATCH")
+    }
+}
+
+test("unify: a recursive alias instance binds its type argument") {
+    withinLimits(10) {
+        val t = variableType("T", 1)
+        val constraints: array[any] = []
+        constraints.push(newConstraint(box(tInt), box(t), testSection, []))
+        val bindings = unify(constraints)
+        assertEqual(bindings.size(), 1)
+        assertEqual(bindings[1].variable.name, "T")
+        assertTrue(bindings[1].replacement.typeEquals(tInt))
+    }
+}
+
+test("unify: structurally equal recursive aliases unify") {
+    withinLimits(10) {
+        assertEqual(unifyCode(thunkList("t::u::S2", tInt), thunkList("t::u::S1", tInt)), "")
+    }
+}
+
+test("unify: structurally different recursive aliases mismatch") {
+    withinLimits(10) {
+        assertEqual(unifyCode(thunkList("t::u::S3", tString), thunkList("t::u::S1", tInt)), "TYPE_MISMATCH")
+    }
+}
+
+test("unify: recursive aliases terminate when no sum branch cuts the recursion short") {
+    // `next: unit | L`: the expected-side sum probe tries the recursive
+    // branch before unit, so termination cannot come from unit matching.
+    withinLimits(10) {
+        val l1 = recursiveAlias("t::u::L1") { self -> recordType([], [{ name: "v", fieldType: tInt }, { name: "next", fieldType: sumType([], tUnit, self, []) }], []) }
+        val l2 = recursiveAlias("t::u::L2") { self -> recordType([], [{ name: "v", fieldType: tInt }, { name: "next", fieldType: sumType([], tUnit, self, []) }], []) }
+        assertEqual(unifyCode(l2, l1), "")
+    }
 }
 
 // --- unify: not a function ---
