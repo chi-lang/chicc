@@ -157,9 +157,9 @@ pub fn runFile(inputPath: string): int {
 
 // Helper to resolve output path from input path (replace .chi with .lua)
 fn defaultOutputPath(inputPath: string): string {
-    val suffix = inputPath.byteSub(inputPath.len() - 3, inputPath.len())
+    val suffix = inputPath.byteSub(inputPath.byteLen() - 3, inputPath.byteLen())
     if suffix == ".chi" {
-        val base = inputPath.byteSub(1, inputPath.len() - 4)
+        val base = inputPath.byteSub(1, inputPath.byteLen() - 4)
         "$base.lua"
     } else {
         "$inputPath.lua"
@@ -168,9 +168,9 @@ fn defaultOutputPath(inputPath: string): string {
 
 // Helper to check file extension
 fn hasExtension(path: string, ext: string): bool {
-    val extLen = ext.len()
+    val extLen = ext.byteLen()
     val neg: int = 0 - extLen
-    val suffix = path.byteSub(neg, path.len())
+    val suffix = path.byteSub(neg, path.byteLen())
     suffix == ext
 }
 
@@ -200,7 +200,8 @@ type FileArgs = { input: string, output: string }
 
 // Parses `[-o OUTPUT] FILE` after the command word. Prints the error and
 // returns unit on bad arguments; output is "" when not given.
-fn parseFileArgs(command: string, args: any, argc: int): FileArgs | unit {
+fn parseFileArgs(command: string, args: array[string]): FileArgs | unit {
+    val argc = args.size()
     if argc < 2 {
         eprintln("Error: $command requires a file argument")
         printUsage(eprintln)
@@ -210,14 +211,14 @@ fn parseFileArgs(command: string, args: any, argc: int): FileArgs | unit {
     var inputPath: string = ""
     var i = 2
     while i <= argc {
-        val a = luaExpr("args[i]") as string
+        val a = args[i]
         if a == "-o" || a == "--output" {
             i = i + 1
             if i > argc {
                 eprintln("Error: $a requires an argument")
                 return unit
             }
-            outputPath = luaExpr("args[i]") as string
+            outputPath = args[i]
         } else {
             if inputPath != "" {
                 eprintln("Error: $command takes a single input file, got '$inputPath' and '$a'")
@@ -345,7 +346,7 @@ pub fn cliMain(args: any): int {
     }
 
     if firstArg == "compile" {
-        val parsed = parseFileArgs("compile", args, argc)
+        val parsed = parseFileArgs("compile", args as array[string])
         if parsed == unit {
             return 1
         }
@@ -364,7 +365,7 @@ pub fn cliMain(args: any): int {
             eprintln("Error: 'build' command requires native chi binary")
             return 1
         }
-        val parsed = parseFileArgs("build", args, argc)
+        val parsed = parseFileArgs("build", args as array[string])
         if parsed == unit {
             return 1
         }
@@ -372,7 +373,7 @@ pub fn cliMain(args: any): int {
         val inputPath = fileArgs.input
         var outputPath = fileArgs.output
         if outputPath == "" {
-            outputPath = inputPath.byteSub(1, inputPath.len() - 4)
+            outputPath = inputPath.byteSub(1, inputPath.byteLen() - 4)
         }
         val luaCode = compileSource(inputPath)
         if luaCode == unit {

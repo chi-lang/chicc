@@ -175,35 +175,38 @@ test("cliMain compile with two inputs returns 1 and writes nothing") {
 // build argument handling
 // ============================================================================
 
+type BuildCall = { input: string, luaCode: string, output: string }
+
 // Stands in for the native launcher: marks the process as native and replaces
 // chi_build with a stub recording each call.
-fn stubNativeBuild() {
-    embedLua("_CHI_NATIVE = true; __build_calls = {}; chi_build = function(input, luaCode, output) table.insert(__build_calls, { input = input, luaCode = luaCode, output = output }); return 0 end")
+fn stubNativeBuild(): array[BuildCall] {
+    val calls: array[BuildCall] = []
+    val stub = { input: string, luaCode: string, output: string ->
+        calls.push({ input: input, luaCode: luaCode, output: output })
+        0
+    }
+    embedLua("_CHI_NATIVE = true; chi_build = stub")
+    calls
 }
 
 fn unstubNativeBuild() {
-    embedLua("_CHI_NATIVE = nil; chi_build = nil; __build_calls = nil")
-}
-
-fn buildCalls(): array[{ input: string, luaCode: string, output: string }] {
-    luaExpr("__build_calls")
+    embedLua("_CHI_NATIVE = nil; chi_build = nil")
 }
 
 test("cliMain build outside the native binary returns 1 without building") {
-    stubNativeBuild()
+    val calls = stubNativeBuild()
     embedLua("_CHI_NATIVE = nil")
     writeString("/tmp/test_chicc_build.chi", "val x = 42\n")
     assertEqual(cliMain(["build", "/tmp/test_chicc_build.chi"]), 1)
-    assertEqual(buildCalls().size(), 0)
+    assertEqual(calls.size(), 0)
     unstubNativeBuild()
     embedLua("os.remove('/tmp/test_chicc_build.chi')")
 }
 
 test("cliMain build passes --output before the input to chi_build") {
-    stubNativeBuild()
+    val calls = stubNativeBuild()
     writeString("/tmp/test_chicc_build.chi", "val x = 42\n")
     assertEqual(cliMain(["build", "--output", "/tmp/x", "/tmp/test_chicc_build.chi"]), 0)
-    val calls = buildCalls()
     assertEqual(calls.size(), 1)
     assertEqual(calls[1].input, "/tmp/test_chicc_build.chi")
     assertEqual(calls[1].output, "/tmp/x")
@@ -213,10 +216,9 @@ test("cliMain build passes --output before the input to chi_build") {
 }
 
 test("cliMain build passes --output after the input to chi_build") {
-    stubNativeBuild()
+    val calls = stubNativeBuild()
     writeString("/tmp/test_chicc_build.chi", "val x = 42\n")
     assertEqual(cliMain(["build", "/tmp/test_chicc_build.chi", "--output", "x"]), 0)
-    val calls = buildCalls()
     assertEqual(calls.size(), 1)
     assertEqual(calls[1].input, "/tmp/test_chicc_build.chi")
     assertEqual(calls[1].output, "x")
@@ -225,10 +227,9 @@ test("cliMain build passes --output after the input to chi_build") {
 }
 
 test("cliMain build passes -o to chi_build") {
-    stubNativeBuild()
+    val calls = stubNativeBuild()
     writeString("/tmp/test_chicc_build.chi", "val x = 42\n")
     assertEqual(cliMain(["build", "-o", "y", "/tmp/test_chicc_build.chi"]), 0)
-    val calls = buildCalls()
     assertEqual(calls.size(), 1)
     assertEqual(calls[1].output, "y")
     unstubNativeBuild()
@@ -236,18 +237,27 @@ test("cliMain build passes -o to chi_build") {
 }
 
 test("cliMain build defaults the output to the input without .chi") {
-    stubNativeBuild()
+    val calls = stubNativeBuild()
     writeString("/tmp/test_chicc_build.chi", "val x = 42\n")
     assertEqual(cliMain(["build", "/tmp/test_chicc_build.chi"]), 0)
-    val calls = buildCalls()
     assertEqual(calls.size(), 1)
     assertEqual(calls[1].output, "/tmp/test_chicc_build")
     unstubNativeBuild()
     embedLua("os.remove('/tmp/test_chicc_build.chi')")
 }
 
+test("cliMain build accepts a non-ASCII input path") {
+    val calls = stubNativeBuild()
+    writeString("/tmp/test_chicc_żółw.chi", "val x = 42\n")
+    assertEqual(cliMain(["build", "/tmp/test_chicc_żółw.chi"]), 0)
+    assertEqual(calls.size(), 1)
+    assertEqual(calls[1].output, "/tmp/test_chicc_żółw")
+    unstubNativeBuild()
+    embedLua("os.remove('/tmp/test_chicc_żółw.chi')")
+}
+
 test("cliMain build rejects bad arguments without building") {
-    stubNativeBuild()
+    val calls = stubNativeBuild()
     writeString("/tmp/test_chicc_build.chi", "val x = 42\n")
     writeString("/tmp/test_chicc_build.txt", "val x = 42\n")
     embedLua("os.remove('/tmp/test_chicc_missing.chi')")
@@ -259,16 +269,16 @@ test("cliMain build rejects bad arguments without building") {
     assertEqual(cliMain(["build", "-o", "y"]), 1)
     assertEqual(cliMain(["build", "/tmp/test_chicc_build.chi", "/tmp/test_chicc_build.chi"]), 1)
     assertEqual(cliMain(["build", "/tmp/test_chicc_missing.chi"]), 1)
-    assertEqual(buildCalls().size(), 0)
+    assertEqual(calls.size(), 0)
     unstubNativeBuild()
     embedLua("os.remove('/tmp/test_chicc_build.chi'); os.remove('/tmp/test_chicc_build.txt')")
 }
 
 test("cliMain build does not build source that fails to compile") {
-    stubNativeBuild()
+    val calls = stubNativeBuild()
     writeString("/tmp/test_chicc_build_bad.chi", "fn {")
     assertEqual(cliMain(["build", "/tmp/test_chicc_build_bad.chi"]), 1)
-    assertEqual(buildCalls().size(), 0)
+    assertEqual(calls.size(), 0)
     unstubNativeBuild()
     embedLua("os.remove('/tmp/test_chicc_build_bad.chi')")
 }
