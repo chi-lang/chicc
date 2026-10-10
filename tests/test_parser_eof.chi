@@ -2,8 +2,7 @@ import chicc/test_util { test, assertEqual, summary }
 import chicc/compiler { compileToLua, compileReplLine, newLuaCompilationEnv, newReplCompilationEnv, formatMessage }
 
 // A program cut off at end of file fails with one syntax error at the EOF
-// position (#31). The parser used to read past TK_EOF and crash with a Lua
-// error, and every construct left open at EOF added its own error (#20).
+// position, however many constructs are left open there (#31, #20).
 //
 // Programs are compiled by the chicc modules under test, not eval(): eval()
 // compiles with the prebuilt chicc.lua, which would pass even if the sources

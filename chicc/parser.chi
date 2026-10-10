@@ -35,13 +35,13 @@ fn tokenSection(tok: Token): Section {
 
 // Record a recovered syntax error at the given token's position.
 fn recordParseError(p: Parser, text: string, tok: Token) {
+    var msg = text
     if tok.kind == TK_EOF {
         if p.eofReported { return unit }
         p.eofReported = true
-        p.errors.push(syntaxError("unexpected end of file", toCodePoint(tokenSection(tok))))
-    } else {
-        p.errors.push(syntaxError(text, toCodePoint(tokenSection(tok))))
+        msg = "unexpected end of file"
     }
+    p.errors.push(syntaxError(msg, toCodePoint(tokenSection(tok))))
 }
 
 pub fn current(p: Parser): Token {
@@ -52,7 +52,7 @@ pub fn peek(p: Parser): int {
     current(p).kind
 }
 
-// Stays on TK_EOF: there is no token after it to read.
+// There is no token after TK_EOF to move to.
 pub fn advance(p: Parser): Token {
     val tok = current(p)
     if tok.kind != TK_EOF { p.pos = p.pos + 1 }

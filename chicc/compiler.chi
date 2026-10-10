@@ -7,7 +7,7 @@ import std/lang { luaExpr, embedLua }
 import chicc/source { Section }
 import chicc/ast { Expr, Import, ImportEntry, TypeAlias, Program, newPackage, newProgram, newImport, newImportEntry, newTypeAlias }
 import chicc/types { Type, TypeId }
-import chicc/messages { invalidModuleName, invalidPackageName, cannotAccessInternalName, unrecognizedName, internalError }
+import chicc/messages { Message, invalidModuleName, invalidPackageName, cannotAccessInternalName, unrecognizedName, internalError }
 import chicc/symbols { newCompileTables, ctDefineTypeAlias }
 import chicc/checks { checkNames, importConflictCheck, visibilityCheck, fnCallCheck, immutabilityCheck, returnTypeCheck }
 import chicc/inference_context { icInit, icDefineLocalSymbol }
@@ -419,15 +419,10 @@ pub fn replaceTypes(expr: any, solutions: any) {
     }
 }
 
-// ============================================================================
-// thrownMessage — the message for an error thrown by a compiler phase
-// ============================================================================
-
-// Phases throw a Message for a mistake in the source; any other thrown value
-// is a compiler bug.
-fn thrownMessage(err: any): any {
+// A phase throws a Message for a mistake in the source.
+fn thrownMessage(err: any): Message {
     val isMsg = luaExpr("type(err) == 'table' and err.code ~= nil") as bool
-    if isMsg { err } else { internalError(luaExpr("tostring(err)") as string) }
+    if isMsg { err as Message } else { internalError("$err") }
 }
 
 // ============================================================================

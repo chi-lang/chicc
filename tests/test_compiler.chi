@@ -367,32 +367,31 @@ test("compileToLua: recovery collects errors from several declarations") {
     assertEqual(lineLast, 2)
 }
 
-// A raw Lua error thrown by a phase is a compiler bug, not a mistake in the
-// source (#31): it gets its own code. The crashes are injected by wrapping
-// the phase entry points, since the compiler has no known crash to rely on.
+// Raw Lua errors thrown by a phase get the INTERNAL_ERROR code (#31). The
+// crashes are injected by wrapping the phase entry points, since the
+// compiler has no known crash to rely on.
 test("compileToLua: recovered errors survive a parser crash reported as internal error") {
     embedLua("local par = require('chicc/parser'); __crash_orig = par.parseProgram; par.parseProgram = function(p) __crash_orig(p); error('injected crash') end")
-    val src = "type A = (int | unit) | unit\nval x = 1"
-    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val result = compileToLua("var x = 1\nx + 1 = 5", newLuaCompilationEnv())
     embedLua("require('chicc/parser').parseProgram = __crash_orig")
-    assertTrue(luaExpr("result.luaCode") as any == unit)
-    val msgs: array[any] = luaExpr("result.messages")
-    assertTrue(msgs.size() >= 2)
-    // The line-1 error recovered before the crash, then the crash itself.
-    assertEqual(luaExpr("result.messages[1].code") as string, "SYNTAX_ERROR")
-    assertEqual(luaExpr("result.messages[1].codePoint.line") as int, 1)
-    assertEqual(luaExpr("result.messages[#result.messages].code") as string, "INTERNAL_ERROR")
-    assertTrue(luaExpr("result.messages[#result.messages].text:find('injected crash', 1, true) ~= nil") as bool)
+    assertTrue(result.luaCode == unit)
+    val msgs = result.messages as array[any]
+    assertEqual(msgs.size(), 2)
+    assertEqual(msgs[1].code as string, "SYNTAX_ERROR")
+    assertEqual(msgs[1].codePoint.line as int, 2)
+    assertEqual(msgs[2].code as string, "INTERNAL_ERROR")
+    assertTrue((msgs[2].text as string).contains("injected crash"))
 }
 
 test("compileToLua: crash in a later phase is reported as internal error") {
     embedLua("local ac = require('chicc/ast_converter'); __crash_orig = ac.convertProgram; ac.convertProgram = function() error('injected crash') end")
-    val result: any = compileToLua("val x = 1", newLuaCompilationEnv())
+    val result = compileToLua("val x = 1", newLuaCompilationEnv())
     embedLua("require('chicc/ast_converter').convertProgram = __crash_orig")
-    assertTrue(luaExpr("result.luaCode") as any == unit)
-    assertEqual(luaExpr("#result.messages") as int, 1)
-    assertEqual(luaExpr("result.messages[1].code") as string, "INTERNAL_ERROR")
-    assertTrue(luaExpr("result.messages[1].text:find('injected crash', 1, true) ~= nil") as bool)
+    assertTrue(result.luaCode == unit)
+    val msgs = result.messages as array[any]
+    assertEqual(msgs.size(), 1)
+    assertEqual(msgs[1].code as string, "INTERNAL_ERROR")
+    assertTrue((msgs[1].text as string).contains("injected crash"))
 }
 
 // Lexer-recovered errors must fail the compilation too (issue #21):
