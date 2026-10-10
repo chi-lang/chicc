@@ -406,7 +406,8 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         callParamTypes.push(fnCallResult as Type)
         val callType = functionType(callParamTypes as array[Type], [] as array[string], 0)
         val termSection = luaExpr("term.section") as any
-        addConstraint(constraints, definedFunctionType, callType, termSection)
+        // The callee is called with callType's arguments, so it is the actual side.
+        addConstraint(constraints, callType, definedFunctionType, termSection)
         fnCallResult
     } else if kind == "field_access" {
         // 8. field_access: type receiver, solve constraints, check field or UFCS

@@ -1,0 +1,103 @@
+import chicc/test_util { test, assertEqual, summary, withinLimits }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { loadLuaCode }
+
+// Function types end to end (issue #47): a function value passed where a
+// function type is expected has its parameters checked contravariantly and
+// its return covariantly; plain calls still check each argument against the
+// declared parameter.
+
+// Compiles `src`; returns the codes of the reported messages, comma-separated.
+fn messageCodes(src: string): string {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    messages.map { m -> m.code as string }.joinToStringWithSeparator(",")
+}
+
+// Compiles and runs `src`; returns its top-level `r`.
+fn runR(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    assertEqual(messageCodes(src), "")
+    val run = loadLuaCode(result.luaCode as string) as () -> any
+    val pkg: any = run()
+    pkg.r
+}
+
+val applyNarrow = "fn apply(f: ({ a: int }) -> int): int { f({ a: 1 }) }\n"
+val gWide = "fn g(r: { a: int, b: int }): int { r.a + r.b }\n"
+
+test("a callback needing a wider record than supplied is rejected") {
+    withinLimits(30) {
+        assertEqual(messageCodes("${applyNarrow}${gWide}val r = apply(g)"), "TYPE_MISMATCH")
+    }
+}
+
+test("a lambda needing a wider record than supplied is rejected") {
+    withinLimits(30) {
+        assertEqual(messageCodes("${applyNarrow}val r = apply({ r: { a: int, b: int } -> r.a + r.b })"), "TYPE_MISMATCH")
+    }
+}
+
+test("a callback accepting a narrower record is accepted") {
+    withinLimits(30) {
+        val src = "fn apply(f: ({ a: int, b: int }) -> int): int { f({ a: 1, b: 2 }) }\nfn g(r: { a: int }): int { r.a }\nval r = apply(g)"
+        assertEqual(runR(src) as int, 1)
+    }
+}
+
+test("a plain call still checks the argument against the declared parameter") {
+    withinLimits(30) {
+        val src = "${gWide}val r = g({ a: 1 })"
+        val result: any = compileToLua(src, newLuaCompilationEnv())
+        val messages = result.messages as array[any]
+        assertEqual(messages.size(), 1)
+        assertEqual(messages[1].code as string, "TYPE_MISMATCH")
+        assertEqual(messages[1].text as string, "Expected type is 'record with field 'b'' but got 'record without field 'b''")
+    }
+}
+
+test("a plain call with too few arguments reports the declared arity first") {
+    withinLimits(30) {
+        // Nested, so the call is not padded with unit arguments (#39).
+        val src = "fn outer(): int {\n    fn inner(a: int, b: int): int { a + b }\n    inner(1)\n}"
+        val result: any = compileToLua(src, newLuaCompilationEnv())
+        val messages = result.messages as array[any]
+        assertEqual(messages.size(), 1)
+        assertEqual(messages[1].code as string, "FUNCTION_ARITY_ERROR")
+        assertEqual(messages[1].text as string, "Function requires 2 parameters, but was called with 1")
+    }
+}
+
+test("a callback with too many parameters reports its own arity first") {
+    withinLimits(30) {
+        val src = "fn apply(f: (int) -> int): int { f(1) }\nfn g(x: int, y: int): int { x + y }\nval r = apply(g)"
+        val result: any = compileToLua(src, newLuaCompilationEnv())
+        val messages = result.messages as array[any]
+        assertEqual(messages.size(), 1)
+        assertEqual(messages[1].code as string, "FUNCTION_ARITY_ERROR")
+        assertEqual(messages[1].text as string, "Function requires 2 parameters, but was called with 1")
+    }
+}
+
+test("a callback returning a wider record is accepted") {
+    withinLimits(30) {
+        val src = "fn apply(f: (int) -> { a: int }): int { f(1).a }\nfn g(x: int): { a: int, b: int } { { a: x, b: 2 } }\nval r = apply(g)"
+        assertEqual(runR(src) as int, 1)
+    }
+}
+
+test("a callback is accepted where the expected parameter is any") {
+    withinLimits(30) {
+        val src = "fn apply(f: (any) -> int): int { f(1) }\nfn g(x: int): int { x + 1 }\nval r = apply(g)"
+        assertEqual(runR(src) as int, 2)
+    }
+}
+
+test("a callback taking any is accepted") {
+    withinLimits(30) {
+        val src = "fn apply(f: (int) -> int): int { f(1) }\nfn g(x: any): int { 7 }\nval r = apply(g)"
+        assertEqual(runR(src) as int, 7)
+    }
+}
+
+summary()

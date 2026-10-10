@@ -351,13 +351,15 @@ fn unifyCore(constraints: array[any], uf: any, outerAssumed: Assumed | unit): Me
         } else if luaExpr("actual.tag == 'primitive' and actual.ids and #actual.ids > 0 and actual.ids[1].name == 'any'") as bool {
             // skip - actual is 'any' type (allows passing any-typed values to concrete params)
         } else if expected.tag == "fn" && actual.tag == "fn" {
+            // The actual function gets called with the expected function's
+            // arguments: parameters are contravariant, the return covariant.
             val expTypes = expected.types
             val actTypes = actual.types
             val expLen = expTypes.size()
             val actLen = actTypes.size()
             if expLen != actLen {
                 val cp = sectionToCodePoint(section)
-                return functionArityError(expLen - 1, actLen - 1, cp)
+                return functionArityError(actLen - 1, expLen - 1, cp)
             }
             val lastIndex = expLen
             var fi = 1
@@ -368,7 +370,11 @@ fn unifyCore(constraints: array[any], uf: any, outerAssumed: Assumed | unit): Me
                     // void return accepts anything - skip
                 } else {
                     val newHistory = copyHistoryWith(history, constraint)
-                    val nc = newConstraint(expParam, actParam, section, newHistory)
+                    val nc = if fi == lastIndex {
+                        newConstraint(expParam, actParam, section, newHistory)
+                    } else {
+                        newConstraint(actParam, expParam, section, newHistory)
+                    }
                     queue.insertAt(pos, nc)
                 }
                 fi = fi + 1
