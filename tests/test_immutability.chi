@@ -1,0 +1,72 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { loadLuaCode }
+
+// An assignment to a local name is checked against the mutability of the
+// local binding the name resolves to at that point (issue #37).
+
+// Returns the module's package table, or unit when compilation or Lua
+// loading fails. Each source declares its own package so that members left
+// by one test are not seen by the next.
+fn runModule(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val code = result.luaCode
+    if code == unit { return unit }
+    val loader: any = loadLuaCode(code as string)
+    if loader == unit { return unit }
+    val run = loader as () -> any
+    run()
+}
+
+// Asserts that compiling `src` fails and that the first message is a
+// CANNOT_CHANGE_IMMUTABLE on `line`.
+fn assertImmutableAt(src: string, line: int) {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    assertTrue(result.luaCode == unit)
+    val msgs: array[any] = result.messages
+    assertTrue(msgs.size() > 0)
+    if msgs.size() > 0 {
+        val msg = msgs[1]
+        assertEqual(msg.code, "CANNOT_CHANGE_IMMUTABLE")
+        assertTrue(msg.codePoint != unit)
+        if msg.codePoint != unit {
+            assertEqual(msg.codePoint.line, line)
+        }
+    }
+}
+
+test("a function-local val cannot be reassigned") {
+    assertImmutableAt("package t/s37a\nfn f(): int {\n    val a = 1\n    a = 2\n    a\n}\nprintln(f())\n", 4)
+}
+
+test("a parameter cannot be reassigned") {
+    assertImmutableAt("package t/s37b\nfn f(x: int): int {\n    x = 5\n    x\n}\nprintln(f(1))\n", 3)
+}
+
+test("an enclosing function's val cannot be reassigned from a lambda") {
+    assertImmutableAt("package t/s37c\nfn f(): int {\n    val a = 1\n    val g = { -> a = 2 }\n    g()\n    a\n}\nprintln(f())\n", 4)
+}
+
+test("a local var that shares a name with a top-level val can be reassigned") {
+    val pkg = runModule("package t/s37d\nval a = 10\nfn g(): int {\n    var a = 1\n    a = 2\n    a\n}\nval r = g()\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, 2)
+}
+
+test("a block-local val does not make the outer var immutable after the block") {
+    val pkg = runModule("package t/s37e\nfn f(): int {\n    var a = 1\n    if true {\n        val a = 5\n    }\n    a = 2\n    a\n}\nval r = f()\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, 2)
+}
+
+test("a top-level val cannot be reassigned") {
+    assertImmutableAt("package t/s37f\nval t = 1\nt = 2\n", 3)
+}
+
+test("a function-local var can be reassigned") {
+    val pkg = runModule("package t/s37g\nfn f(): int {\n    var a = 1\n    a = 2\n    a\n}\nval r = f()\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, 2)
+}
+
+summary()

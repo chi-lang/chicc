@@ -472,11 +472,7 @@ pub fn immutabilityCheck(exprs: any, currentModule: string, currentPackage: stri
                 val tTag = luaExpr("target.tag") as string
                 var isMutable: any = unit
                 if tTag == "local" {
-                    val tName = luaExpr("target.name") as string
-                    val sym = luaExpr("ct ~= nil and require('chicc/symbols').ctGetLocalSymbol(ct, tName) or nil") as any
-                    if sym != unit {
-                         isMutable = luaExpr("sym.isMutable") as any
-                    }
+                    isMutable = expr.isMutable
                 } else if tTag == "package" {
                     val tMod = luaExpr("target.moduleName") as string
                     val tPkg = luaExpr("target.packageName") as string

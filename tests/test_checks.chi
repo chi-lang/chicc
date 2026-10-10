@@ -329,11 +329,9 @@ test("fnCallCheck: nested fn_call checks callee types") {
 // immutabilityCheck tests
 // =========================================================================
 
-test("immutabilityCheck: assignment to mutable is fine") {
+test("immutabilityCheck: assignment to a mutable local is fine") {
     val pkg: any = { moduleName: "test", packageName: "pkg" }
     val ct = newCompileTables(pkg, unit, [])
-    val sym = newSymbol("test", "pkg", "x", tInt, true, true)
-    ctDefineSymbol(ct, sym)
     val messages: any = luaExpr("{}")
 
     val value = atomExpr("42", tInt, testSection)
@@ -346,11 +344,9 @@ test("immutabilityCheck: assignment to mutable is fine") {
     assertEqual(msgCount, 0)
 }
 
-test("immutabilityCheck: assignment to immutable produces error") {
+test("immutabilityCheck: assignment to an immutable local produces error") {
     val pkg: any = { moduleName: "test", packageName: "pkg" }
     val ct = newCompileTables(pkg, unit, [])
-    val sym = newSymbol("test", "pkg", "y", tInt, true, false)
-    ctDefineSymbol(ct, sym)
     val messages: any = luaExpr("{}")
 
     val value = atomExpr("42", tInt, testSection)
@@ -364,6 +360,23 @@ test("immutabilityCheck: assignment to immutable produces error") {
     val msg: any = luaExpr("messages[1]")
     val code: string = luaExpr("msg.code")
     assertEqual(code, "CANNOT_CHANGE_IMMUTABLE")
+}
+
+test("immutabilityCheck: an immutable package symbol does not affect a mutable local of the same name") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    val ct = newCompileTables(pkg, unit, [])
+    val sym = newSymbol("test", "pkg", "y", tInt, true, false)
+    ctDefineSymbol(ct, sym)
+    val messages: any = luaExpr("{}")
+
+    val value = atomExpr("42", tInt, testSection)
+    val expr = variableAssignmentExpr(localTarget("y"), true, value, testSection)
+    expr.setExprType(tInt)
+    val exprs: any = luaExpr("{}")
+    embedLua("table.insert(exprs, expr)")
+    immutabilityCheck(exprs, "test", "pkg", ct, unit, messages)
+    val msgCount: int = luaExpr("#messages")
+    assertEqual(msgCount, 0)
 }
 
 test("immutabilityCheck: package target same module") {
