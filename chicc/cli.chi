@@ -62,8 +62,7 @@ fn printMessages(messages: any, msgCount: int) {
     }
 }
 
-// Contents of the file, or unit when it cannot be read. readString itself
-// crashes on a missing file and returns nil for a directory.
+// readString crashes on a missing file and returns nil for a directory.
 fn readSource(path: string): string | unit {
     val f = open(path, "r")
     if f == unit {
