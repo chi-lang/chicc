@@ -188,9 +188,12 @@ pub fn fieldAssignmentExpr(recv: Expr, name: string, val_: Expr, section: Sectio
     e
 }
 
-pub fn assignmentExpr(tgt: Target, val_: Expr, section: Section | unit): Expr {
+// `isMut` is the mutability of the local binding `tgt` resolves to. It is
+// ignored for a package target, whose mutability is in the symbol tables.
+pub fn variableAssignmentExpr(tgt: Target, isMut: bool, val_: Expr, section: Section | unit): Expr {
     val e = emptyExpr("assignment", section)
     e.target = tgt
+    e.isMutable = isMut
     e.value = val_
     e
 }

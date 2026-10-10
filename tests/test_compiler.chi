@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/compiler { compile, compileToLua, hasErrors, markUsed, replaceTypes, newLuaCompilationEnv, formatMessage, newCompilationResult }
-import chicc/ast { newPackage, newProgram, atomExpr, blockExpr, declarationExpr, fnExpr, assignmentExpr, variableAccessExpr, localTarget, fnCallExpr, newFnParam, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, createRecordExpr, createArrayExpr, indexOpExpr, fieldAccessExpr, fieldAssignmentExpr, handleExpr, returnExpr, newExprField, newImport, newImportEntry, newTypeAlias }
+import chicc/ast { newPackage, newProgram, atomExpr, blockExpr, declarationExpr, fnExpr, variableAssignmentExpr, variableAccessExpr, localTarget, fnCallExpr, newFnParam, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, createRecordExpr, createArrayExpr, indexOpExpr, fieldAccessExpr, fieldAssignmentExpr, handleExpr, returnExpr, newExprField, newImport, newImportEntry, newTypeAlias }
 import chicc/types { tInt, tFloat, tBool, tString, tUnit, tAny, functionType, variableType, mapType, newTypeId, primitiveType }
 import chicc/messages { newMessage, genericError, unrecognizedName }
 import std/lang { luaExpr, embedLua }
@@ -28,7 +28,7 @@ test("markUsed: name_declaration marks value as used") {
 
 test("markUsed: assignment marks value as used") {
     val valExpr = atomExpr("5", tInt, unit)
-    val assign = assignmentExpr(localTarget("x"), valExpr, unit)
+    val assign = variableAssignmentExpr(localTarget("x"), true, valExpr, unit)
     val exprs: any = luaExpr("{assign}")
     markUsed(exprs)
     val valueUsed: bool = luaExpr("valExpr.used == true")

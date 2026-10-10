@@ -4,7 +4,7 @@ import std/lang.map { emptyMap }
 import std/math { finf }
 import chicc/source { Section }
 import chicc/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, newTypeId, variantNameOf, sumListTypes }
-import chicc/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, packageTarget, setExprType, atomExpr, interpolatedStringExpr, createRecordExpr, createVariantExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, assignmentExpr, declarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam }
+import chicc/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, packageTarget, setExprType, atomExpr, interpolatedStringExpr, createRecordExpr, createVariantExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, variableAssignmentExpr, declarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam }
 import chicc/parse_ast { ParseAst }
 import chicc/symbols { FnSymbolTable, Symbol, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newSymbol, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, lookupLoadedPublicSymbol, CompileTables, TypeTable, resolveType }
 
@@ -81,6 +81,15 @@ pub fn getSymbol(name: string, tables: any): Target {
     }
     // Not found: return local target
     localTarget(name)
+}
+
+// Whether the local binding getSymbol resolves `name` to here is mutable;
+// false when `name` resolves to no local.
+fn isMutableLocal(name: string): bool {
+    val fst: any = currentFnSymbolTable
+    if fst == unit { return false }
+    val sym: any = fstGet(fst as FnSymbolTable, name)
+    sym != unit && (sym.isMutable as bool)
 }
 
 // Returns the target that getSymbol resolves the name to from here on.
@@ -247,8 +256,9 @@ pub fn convert(node: any, pkg: any, tables: any): Expr {
     } else if tag == "ParseAssignment" {
         val varName = node.paVariableName()
         val tgt = getSymbol(varName, tables)
+        val isMut = isMutableLocal(varName)
         val val_ = convert(node.paValue(), pkg, tables)
-        assignmentExpr(tgt, val_, sec)
+        variableAssignmentExpr(tgt, isMut, val_, sec)
     } else if tag == "ParseIndexOperator" {
         val var_ = convert(node.paVariable(), pkg, tables)
         val idx = convert(node.paIndexExpr(), pkg, tables)

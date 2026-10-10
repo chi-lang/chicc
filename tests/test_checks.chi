@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, functionType }
-import chicc/ast { localTarget, packageTarget, atomExpr, variableAccessExpr, fnCallExpr, declarationExpr, assignmentExpr, fnExpr, blockExpr, returnExpr, newFnParam, newImport, newImportEntry }
+import chicc/ast { localTarget, packageTarget, atomExpr, variableAccessExpr, fnCallExpr, declarationExpr, variableAssignmentExpr, fnExpr, blockExpr, returnExpr, newFnParam, newImport, newImportEntry }
 import chicc/checks { importConflictCheck }
 import chicc/parse_ast { parseVariableRead, parseNameDeclaration, parseLambda, parseFor, parseFuncWithName, parseEffectDefinition, parseHandle, parseFnCall, parseBlock, parseBinaryOp, parseIfElse, newFormalArgument, newParseHandleCase }
 import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol }
@@ -337,7 +337,7 @@ test("immutabilityCheck: assignment to mutable is fine") {
     val messages: any = luaExpr("{}")
 
     val value = atomExpr("42", tInt, testSection)
-    val expr = assignmentExpr(localTarget("x"), value, testSection)
+    val expr = variableAssignmentExpr(localTarget("x"), true, value, testSection)
     expr.setExprType(tInt)
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, expr)")
@@ -354,7 +354,7 @@ test("immutabilityCheck: assignment to immutable produces error") {
     val messages: any = luaExpr("{}")
 
     val value = atomExpr("42", tInt, testSection)
-    val expr = assignmentExpr(localTarget("y"), value, testSection)
+    val expr = variableAssignmentExpr(localTarget("y"), false, value, testSection)
     expr.setExprType(tInt)
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, expr)")
@@ -374,7 +374,7 @@ test("immutabilityCheck: package target same module") {
     val messages: any = luaExpr("{}")
 
     val value = atomExpr("42", tInt, testSection)
-    val expr = assignmentExpr(packageTarget("test", "pkg", "z"), value, testSection)
+    val expr = variableAssignmentExpr(packageTarget("test", "pkg", "z"), false, value, testSection)
     expr.setExprType(tInt)
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, expr)")
@@ -389,7 +389,7 @@ test("immutabilityCheck: cross-module package target") {
     val messages: any = luaExpr("{}")
 
     val value = atomExpr("42", tInt, testSection)
-    val expr = assignmentExpr(packageTarget("other", "otherpkg", "w"), value, testSection)
+    val expr = variableAssignmentExpr(packageTarget("other", "otherpkg", "w"), false, value, testSection)
     expr.setExprType(tInt)
     val exprs: any = luaExpr("{}")
     embedLua("table.insert(exprs, expr)")

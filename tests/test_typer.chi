@@ -1,7 +1,7 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/types { Type, TypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, polyType, intTypeId, stringTypeId, boolTypeId, optionTypeId, sumCreate, mapType }
 import chicc/unification { Constraint, newConstraint, unify, ufNew, ufAllBindings, ufResolve, unifyWithUf }
-import chicc/ast { Target, DotTarget, localTarget, packageTarget, fieldDotTarget, localFnDotTarget, packageFnDotTarget, atomExpr, variableAccessExpr, fieldAccessExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, declarationExpr, assignmentExpr, blockExpr, fnExpr, createRecordExpr, createArrayExpr, interpolatedStringExpr, castExpr_, whileLoopExpr, breakExpr, continueExpr, isExpr, returnExpr, indexOpExpr, indexedAssignmentExpr, fieldAssignmentExpr, newFnParam, newExprField }
+import chicc/ast { Target, DotTarget, localTarget, packageTarget, fieldDotTarget, localFnDotTarget, packageFnDotTarget, atomExpr, variableAccessExpr, fieldAccessExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, declarationExpr, variableAssignmentExpr, blockExpr, fnExpr, createRecordExpr, createArrayExpr, interpolatedStringExpr, castExpr_, whileLoopExpr, breakExpr, continueExpr, isExpr, returnExpr, indexOpExpr, indexedAssignmentExpr, fieldAssignmentExpr, newFnParam, newExprField }
 import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol }
 import chicc/source { newSection }
 import std/lang { luaExpr, embedLua }
@@ -387,7 +387,7 @@ test("typeTerm: assignment returns variable type") {
     icDefineLocalSymbol("x", tInt)
     val constraints = newConstraints()
     val value = atomExpr("42", tInt, testSection)
-    val expr = assignmentExpr(localTarget("x"), value, testSection)
+    val expr = variableAssignmentExpr(localTarget("x"), true, value, testSection)
     val result = typeTerm(expr, 0, constraints)
     assertTrue(result.typeEquals(tInt))
 }

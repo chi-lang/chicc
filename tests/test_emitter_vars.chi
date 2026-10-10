@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/util { newStringBuilder, StringBuilder, toString }
-import chicc/ast { Program, Package, newPackage, newProgram, variableAccessExpr, declarationExpr, assignmentExpr, atomExpr, localTarget, packageTarget }
+import chicc/ast { Program, Package, newPackage, newProgram, variableAccessExpr, declarationExpr, variableAssignmentExpr, atomExpr, localTarget, packageTarget }
 import chicc/types { tInt, tString }
 import chicc/emitter { EmitterState, newState, emit, nextTmpName, topLevelName, localQualifiedName, emitVariableAccess, emitNameDeclaration, emitAssignment, emitExpr, emitAtom }
 
@@ -62,7 +62,7 @@ test("emitNameDeclaration - package symbol") {
 test("emitAssignment - local symbol") {
     val st = freshState()
     val valExpr = atomExpr("10", tInt, unit)
-    val expr = assignmentExpr(localTarget("y"), valExpr, unit)
+    val expr = variableAssignmentExpr(localTarget("y"), true, valExpr, unit)
     val result = emitAssignment(st, expr)
     assertEqual(result, "y")
     assertEqual(st.sb.toString(), "y=(10);")
@@ -71,7 +71,7 @@ test("emitAssignment - local symbol") {
 test("emitAssignment - package symbol same module/package") {
     val st = freshState()
     val valExpr = atomExpr("10", tInt, unit)
-    val expr = assignmentExpr(packageTarget("mymod", "mypkg", "y"), valExpr, unit)
+    val expr = variableAssignmentExpr(packageTarget("mymod", "mypkg", "y"), false, valExpr, unit)
     val result = emitAssignment(st, expr)
     assertEqual(result, "__P_.y")
     assertEqual(st.sb.toString(), "__P_.y=(10);")
@@ -80,7 +80,7 @@ test("emitAssignment - package symbol same module/package") {
 test("emitAssignment - package symbol different module") {
     val st = freshState()
     val valExpr = atomExpr("99", tInt, unit)
-    val expr = assignmentExpr(packageTarget("other", "otherpkg", "z"), valExpr, unit)
+    val expr = variableAssignmentExpr(packageTarget("other", "otherpkg", "z"), false, valExpr, unit)
     val result = emitAssignment(st, expr)
     assertEqual(result, "__other__otherpkg.z")
     assertEqual(st.sb.toString(), "__other__otherpkg.z=(99);")
