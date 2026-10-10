@@ -1,0 +1,71 @@
+import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv, formatMessage }
+import std/lang { luaExpr, embedLua }
+
+// An `if` without `else` ends at the line break after its then-block (#29):
+// a next line starting with `-`, `(`, `[` or `{` is a new statement, not an
+// operator, call, index or trailing lambda applied to the `if`. `else` and
+// `else if` on the line after `}` still bind to the `if`.
+//
+// Each program is compiled by the chicc modules under test and run with
+// io.write captured, so a parse failure surfaces as the compilation error
+// and a misparse as wrong output. eval() is not used: it compiles with the
+// prebuilt chicc.lua, which would pass even if the sources regressed.
+
+fn runCaptured(src: string): string {
+    val result = compileToLua(src, newLuaCompilationEnv())
+    if result.luaCode == unit {
+        val messages = result.messages as array[any]
+        var msg = "compilation failed:"
+        for m in messages { msg = "$msg ${formatMessage(m)}" }
+        embedLua("error(msg)")
+    }
+    val code = result.luaCode as string
+    embedLua("__in_buf = {}")
+    embedLua("__in_write = io.write")
+    embedLua("io.write = function(...) for _,a in ipairs({...}) do __in_buf[#__in_buf+1] = tostring(a) end end")
+    embedLua("__in_ok, __in_err = pcall(assert(load(code)))")
+    embedLua("io.write = __in_write")
+    if !(luaExpr("__in_ok") as bool) {
+        embedLua("error('run raised: ' .. tostring(__in_err))")
+    }
+    luaExpr("table.concat(__in_buf)") as string
+}
+
+// ---- Next line after an else-less if is a new statement ----
+
+test("next line starting with - is not a subtraction") {
+    assertEqual(runCaptured("fn f(): int {\n    if true { 10 }\n    -1\n}\nprintln(f())"), "-1\n")
+}
+
+test("next line starting with ( is not a call") {
+    assertEqual(runCaptured("fn g(): int {\n    if false { println(\"x\") }\n    (5)\n}\nprintln(g())"), "5\n")
+}
+
+test("next line starting with [ is not an index") {
+    assertEqual(runCaptured("fn h(): array[int] {\n    if false { println(\"x\") }\n    [1, 2]\n}\nprintln(h())"), "[1, 2]\n")
+}
+
+test("next line starting with { is not a trailing lambda") {
+    assertEqual(runCaptured("fn k(): int {\n    if false { println(\"x\") }\n    { 7 }\n}\nprintln(k())"), "7\n")
+}
+
+test("top-level else-less if followed by a parenthesized line") {
+    assertEqual(runCaptured("if false { println(\"x\") }\n(5)\nprintln(\"ok\")"), "ok\n")
+}
+
+// ---- else on the next line still binds ----
+
+test("else on the line after the then-block") {
+    assertEqual(runCaptured("fn m(): int {\n    if false { 1 }\n    else { 2 }\n}\nprintln(m())"), "2\n")
+}
+
+test("else if and else on the lines after the then-block") {
+    assertEqual(runCaptured("fn m(): int {\n    if false { 1 }\n    else if true { 3 }\n    else { 4 }\n}\nprintln(m())"), "3\n")
+}
+
+test("else after blank lines following the then-block") {
+    assertEqual(runCaptured("fn m(): int {\n    if false { 1 }\n\n    else { 2 }\n}\nprintln(m())"), "2\n")
+}
+
+summary()

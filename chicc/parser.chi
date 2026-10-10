@@ -1035,7 +1035,9 @@ fn parseIfElseExpr(p: Parser): any {
     // Parse then block
     skipNewlines(p)
     val thenBody = parseBlockFwd(p)
-    // Check for else
+    // `else` may follow on a later line; without it the newline must stay
+    // so the next line is a new statement, not an operand of this `if`
+    val afterThen = p.pos
     skipNewlines(p)
     var elseBody: any = unit
     if peek(p) == TK_ELSE {
@@ -1048,6 +1050,8 @@ fn parseIfElseExpr(p: Parser): any {
             // else block
             elseBody = parseBlockFwd(p)
         }
+    } else {
+        p.pos = afterThen
     }
     parseIfElse(cond, thenBody, elseBody, startSec)
 }
