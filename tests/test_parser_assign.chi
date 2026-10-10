@@ -1,0 +1,77 @@
+import chicc/test_util { test, assertEqual, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv, formatMessage }
+import std/lang { luaExpr, embedLua }
+
+// Assignment binds with the lowest precedence and accepts only a variable,
+// field access or index on its left side (#30). `=` and compound operators
+// with any other left side fail the compilation instead of dropping the
+// right-hand side or degrading to a plain binary operation.
+//
+// Programs are compiled by the chicc modules under test, not eval(): eval()
+// compiles with the prebuilt chicc.lua, which would pass even if the sources
+// regressed.
+
+// All compilation messages, formatted and joined; "compiled" if none.
+fn compileErrors(src: string): string {
+    val result = compileToLua(src, newLuaCompilationEnv())
+    if result.luaCode != unit { return "compiled" }
+    val messages = result.messages as array[any]
+    var out = ""
+    for m in messages {
+        out = if out == "" { formatMessage(m) } else { "$out | ${formatMessage(m)}" }
+    }
+    out
+}
+
+fn runCaptured(src: string): string {
+    val result = compileToLua(src, newLuaCompilationEnv())
+    if result.luaCode == unit {
+        val messages = result.messages as array[any]
+        var msg = "compilation failed:"
+        for m in messages { msg = "$msg ${formatMessage(m)}" }
+        embedLua("error(msg)")
+    }
+    val code = result.luaCode as string
+    embedLua("__asg_buf = {}")
+    embedLua("__asg_write = io.write")
+    embedLua("io.write = function(...) for _,a in ipairs({...}) do __asg_buf[#__asg_buf+1] = tostring(a) end end")
+    embedLua("__asg_ok, __asg_err = pcall(assert(load(code)))")
+    embedLua("io.write = __asg_write")
+    if !(luaExpr("__asg_ok") as bool) {
+        embedLua("error('run raised: ' .. tostring(__asg_err))")
+    }
+    luaExpr("table.concat(__asg_buf)") as string
+}
+
+val notAssignable = "[SYNTAX_ERROR] Syntax error: left side of assignment is not assignable (expected a variable, field or index)"
+
+// ---- Rejected left sides ----
+
+test("= with a binary operation on the left is rejected") {
+    assertEqual(compileErrors("var x = 1\nx + 1 = 5\nprintln(x)"), "$notAssignable (line 2, col 3)")
+}
+
+test("compound assignment to a call is rejected") {
+    assertEqual(compileErrors("fn f(): int { 1 }\nf() += 5\nprintln(\"ok\")"), "$notAssignable (line 2, col 2)")
+}
+
+test("field assignment inside a binary operand is rejected") {
+    assertEqual(compileErrors("val r = { a: 1 }\nval y = 2 * r.a = 5\nprintln(r.a)"), "$notAssignable (line 2, col 11)")
+}
+
+test("variable assignment inside a binary operand is rejected") {
+    assertEqual(compileErrors("var x = 1\nval y = 2 * x = 5\nprintln(x)"), "$notAssignable (line 2, col 11)")
+}
+
+test("index assignment inside a binary operand is rejected") {
+    assertEqual(compileErrors("val xs = [1, 2]\nval y = 2 * xs[1] = 5\nprintln(xs[1])"), "$notAssignable (line 2, col 11)")
+}
+
+// ---- Valid targets ----
+
+test("variable, field and index accept = and compound assignment") {
+    val src = "var x = 1\nx = 5\nx += 1\nval r = { a: 1 }\nr.a = 5\nr.a += 2\nval xs = [1, 2]\nxs[1] = 9\nxs[1] += 1\nprintln(x)\nprintln(r.a)\nprintln(xs[1])"
+    assertEqual(runCaptured(src), "6\n7\n10\n")
+}
+
+summary()

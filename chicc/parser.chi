@@ -518,6 +518,25 @@ fn parsePrefixExpr(p: Parser): any {
 
 // -- Pratt Parser: Infix Expressions --
 
+// The only place assignment nodes are built: `.f` and `[i]` are parsed as
+// plain access and become targets here, at assignment precedence, so
+// `2 * r.a = 5` is rejected like `2 * x = 5`. Field and index assignments
+// keep the section of the access they replace.
+fn parseAssignTo(p: Parser, target: any, value: any, sec: Section): any {
+    val tag = target.paTag()
+    if tag == "ParseVariableRead" {
+        return parseAssignment(target.paVariableName(), value, sec)
+    }
+    if tag == "ParseFieldAccess" {
+        return parseFieldAssignment(target.paReceiverName(), target.paMemberName(), target.paReceiver(), value, target.paMemberSection(), target.paSection())
+    }
+    if tag == "ParseIndexOperator" {
+        return parseIndexedAssignment(target.paVariable(), target.paIndexExpr(), value, target.paSection())
+    }
+    p.errors.push(syntaxError("left side of assignment is not assignable (expected a variable, field or index)", toCodePoint(target.paSection() as Section)))
+    target
+}
+
 fn parseInfixExpr(p: Parser, left: any, prec: int): any {
     val kind = peek(p)
     val tok = current(p)
@@ -529,15 +548,7 @@ fn parseInfixExpr(p: Parser, left: any, prec: int): any {
         val memTok = expect(p, TK_ID)
         val memSec = tokenSection(memTok)
         val recvName = if left.paTag() == "ParseVariableRead" { left.paVariableName() } else { "" }
-        val access = parseFieldAccess(recvName, memTok.value, left, memSec, sec)
-        // Check for field assignment: .field = value
-        if peek(p) == TK_EQ {
-            advance(p)
-            skipNewlines(p)
-            val rhs = parseExprFwd(p, 0)
-            return parseFieldAssignment(recvName, memTok.value, left, rhs, memSec, sec)
-        }
-        return access
+        return parseFieldAccess(recvName, memTok.value, left, memSec, sec)
     }
 
     // Index access: expr[index]  OR  Generic call: expr[T, U](args)
@@ -590,15 +601,7 @@ fn parseInfixExpr(p: Parser, left: any, prec: int): any {
             skipNewlines(p)
             p.noTrailingLambda = saved
             expect(p, TK_RBRACKET)
-            val idxOp = parseIndexOperator(left, idxExpr, sec)
-            // Check for indexed assignment: expr[idx] = value
-            if peek(p) == TK_EQ {
-                advance(p)
-                skipNewlines(p)
-                val rhs = parseExprFwd(p, 0)
-                return parseIndexedAssignment(left, idxExpr, rhs, sec)
-            }
-            return idxOp
+            return parseIndexOperator(left, idxExpr, sec)
         }
     }
 
@@ -628,31 +631,12 @@ fn parseInfixExpr(p: Parser, left: any, prec: int): any {
         return parseFnCall(left, [], args, sec)
     }
 
-    // Assignment: name = value
+    // Assignment: target = value
     if kind == TK_EQ {
-        if left.paTag() == "ParseVariableRead" {
-            advance(p)
-            skipNewlines(p)
-            val rhs = parseExprFwd(p, 0)
-            return parseAssignment(left.paVariableName(), rhs, sec)
-        }
-        // If left is a field access, convert to field assignment
-        if left.paTag() == "ParseFieldAccess" {
-            advance(p)
-            skipNewlines(p)
-            val rhs = parseExprFwd(p, 0)
-            return parseFieldAssignment(left.paReceiverName(), left.paMemberName(), left.paReceiver(), rhs, left.paMemberSection(), sec)
-        }
-        // If left is index operator, convert to indexed assignment
-        if left.paTag() == "ParseIndexOperator" {
-            advance(p)
-            skipNewlines(p)
-            val rhs = parseExprFwd(p, 0)
-            return parseIndexedAssignment(left.paVariable(), left.paIndexExpr(), rhs, sec)
-        }
-        // Fallback: consume and return left
         advance(p)
-        return left as ParseAst
+        skipNewlines(p)
+        val rhs = parseExprFwd(p, 0)
+        return parseAssignTo(p, left, rhs, sec)
     }
 
     // Op-assignment: +=, -=, *=, /=
@@ -661,17 +645,7 @@ fn parseInfixExpr(p: Parser, left: any, prec: int): any {
         val opStr = if kind == TK_PLUSEQ { "+" } else if kind == TK_MINUSEQ { "-" } else if kind == TK_STAREQ { "*" } else { "/" }
         skipNewlines(p)
         val rhs = parseExprFwd(p, 0)
-        val binOp = parseBinaryOp(opStr, left, rhs, sec)
-        if left.paTag() == "ParseVariableRead" {
-            return parseAssignment(left.paVariableName(), binOp, sec)
-        }
-        if left.paTag() == "ParseFieldAccess" {
-            return parseFieldAssignment(left.paReceiverName(), left.paMemberName(), left.paReceiver(), binOp, left.paMemberSection(), sec)
-        }
-        if left.paTag() == "ParseIndexOperator" {
-            return parseIndexedAssignment(left.paVariable(), left.paIndexExpr(), binOp, sec)
-        }
-        return binOp
+        return parseAssignTo(p, left, parseBinaryOp(opStr, left, rhs, sec), sec)
     }
 
     // Cast: expr as TypeRef
