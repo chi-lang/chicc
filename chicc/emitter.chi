@@ -270,12 +270,7 @@ pub fn emitFn(st: EmitterState, expr: Expr, name: string, isTopLevel: bool): str
     }
     val fnBody = expr.body as Expr
     val bodyResult = emitExpr(st, fnBody)
-    val fnBodyBlock = fnBody.blockBody
-    val bodyCount = luaExpr("#fnBodyBlock") as int
-    val lastKind = if bodyCount > 0 {
-        (fnBodyBlock[bodyCount] as Expr).kind
-    } else { "" }
-    if lastKind != "return" {
+    if !isBlockTerminator(fnBody) {
         emit(st, "return $bodyResult")
     }
     emit(st, " end;")
@@ -630,9 +625,18 @@ fn extractConditionThunks(st: EmitterState, expr: Expr): string {
     }
 }
 
-// A loop body gets its own `do ... end`: `goto __continue_N` must not jump
-// into the scope of a body local, and Lua allows no statement after a
-// trailing `break` or `return`, so the label cannot share the body's block.
+// The body gets its own `do ... end`: `goto __continue_N` must not jump into
+// the scope of a body local, and Lua allows no statement after a trailing
+// `break` or `return`, so the label cannot share the body's block.
+fn emitLoop(st: EmitterState, header: string, body: Expr, loopId: int) {
+    emit(st, "$header do do ")
+    val prevInFunction = st.inFunction
+    st.inFunction = true
+    emitExpr(st, body)
+    emit(st, " end ::__continue_$loopId:: end;")
+    st.inFunction = prevInFunction
+}
+
 pub fn emitWhile(st: EmitterState, expr: Expr): string {
     val prevLoopId = st.currentLoopId
     val loopId = st.nextLoopId
@@ -642,13 +646,7 @@ pub fn emitWhile(st: EmitterState, expr: Expr): string {
     val condition = expr.loopCondition as Expr
     val condResult = extractConditionThunks(st, condition)
 
-    emit(st, "while $condResult do do ")
-    val prevInFunction = st.inFunction
-    st.inFunction = true
-    val loopBody = expr.loopBody as Expr
-    emitExpr(st, loopBody)
-    emit(st, " end ::__continue_$loopId:: end;")
-    st.inFunction = prevInFunction
+    emitLoop(st, "while $condResult", expr.loopBody as Expr, loopId)
 
     st.currentLoopId = prevLoopId
     "nil"
@@ -699,13 +697,7 @@ pub fn emitForLoop(st: EmitterState, expr: Expr): string {
         elements = iterResult
     }
 
-    emit(st, "for $vars in $elements do do ")
-    val prevInFunction = st.inFunction
-    st.inFunction = true
-    val forBody = expr.forBody as Expr
-    emitExpr(st, forBody)
-    emit(st, " end ::__continue_$loopId:: end;")
-    st.inFunction = prevInFunction
+    emitLoop(st, "for $vars in $elements", expr.forBody as Expr, loopId)
 
     st.currentLoopId = prevLoopId
     "nil"

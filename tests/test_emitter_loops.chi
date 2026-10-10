@@ -27,22 +27,22 @@ fn runModule(src: string): any {
 // `note(x)` is a call, so each use allocates a temporary local.
 // Counters are not named `i`: chi_record_pairs reads a global `i`, which
 // resolves to a package var `i` left by an earlier test.
-val noteFn = "var trace = \"\"\nfn note(x: any) {\n    trace = \"\$trace\$x,\"\n}\n"
+val note = "var trace = \"\"\nfn note(x: any) {\n    trace = \"\$trace\$x,\"\n}\n"
 
 test("while: continue followed by a statement with a temporary") {
-    val pkg = runModule(noteFn + "var n = 0\nwhile n < 10 {\n    n += 1\n    if n == 5 { continue }\n    note(n)\n}\n")
+    val pkg = runModule(note + "var n = 0\nwhile n < 10 {\n    n += 1\n    if n == 5 { continue }\n    note(n)\n}\n")
     assertTrue(pkg != unit)
     assertEqual(pkg.trace, "1,2,3,4,6,7,8,9,10,")
 }
 
 test("for array: continue followed by a statement with a temporary") {
-    val pkg = runModule(noteFn + "for x in [1, 2, 3] {\n    if x == 2 { continue }\n    note(x)\n}\n")
+    val pkg = runModule(note + "for x in [1, 2, 3] {\n    if x == 2 { continue }\n    note(x)\n}\n")
     assertTrue(pkg != unit)
     assertEqual(pkg.trace, "1,3,")
 }
 
 test("for record: continue followed by a statement with a temporary") {
-    val pkg = runModule(noteFn + "for k, v in { a: 1, b: 2 } {\n    if v == 1 { continue }\n    note(k)\n}\n")
+    val pkg = runModule(note + "for k, v in { a: 1, b: 2 } {\n    if v == 1 { continue }\n    note(k)\n}\n")
     assertTrue(pkg != unit)
     assertEqual(pkg.trace, "b,")
 }
@@ -72,42 +72,49 @@ test("while: body ends with return") {
 }
 
 test("while: dead code after break never runs") {
-    val pkg = runModule(noteFn + "var n = 0\nwhile n < 3 {\n    n += 1\n    break\n    note(\"dead\")\n}\n")
+    val pkg = runModule(note + "var n = 0\nwhile n < 3 {\n    n += 1\n    break\n    note(\"dead\")\n}\n")
     assertTrue(pkg != unit)
     assertEqual(pkg.n, 1)
     assertEqual(pkg.trace, "")
 }
 
 test("while: dead code after continue never runs") {
-    val pkg = runModule(noteFn + "var n = 0\nwhile n < 3 {\n    n += 1\n    continue\n    note(\"dead\")\n}\n")
+    val pkg = runModule(note + "var n = 0\nwhile n < 3 {\n    n += 1\n    continue\n    note(\"dead\")\n}\n")
     assertTrue(pkg != unit)
     assertEqual(pkg.n, 3)
     assertEqual(pkg.trace, "")
 }
 
 test("for: dead code after break never runs") {
-    val pkg = runModule(noteFn + "var n = 0\nfor x in [1, 2, 3] {\n    n += 1\n    break\n    note(\"dead\")\n}\n")
+    val pkg = runModule(note + "var n = 0\nfor x in [1, 2, 3] {\n    n += 1\n    break\n    note(\"dead\")\n}\n")
     assertTrue(pkg != unit)
     assertEqual(pkg.n, 1)
     assertEqual(pkg.trace, "")
 }
 
 test("for: dead code after continue never runs") {
-    val pkg = runModule(noteFn + "var n = 0\nfor x in [1, 2, 3] {\n    n += 1\n    continue\n    note(\"dead\")\n}\n")
+    val pkg = runModule(note + "var n = 0\nfor x in [1, 2, 3] {\n    n += 1\n    continue\n    note(\"dead\")\n}\n")
     assertTrue(pkg != unit)
     assertEqual(pkg.n, 3)
     assertEqual(pkg.trace, "")
 }
 
 test("dead code after break inside an if branch never runs") {
-    val pkg = runModule(noteFn + "var n = 0\nwhile n < 3 {\n    n += 1\n    if n == 2 {\n        break\n        note(\"dead\")\n    }\n}\n")
+    val pkg = runModule(note + "var n = 0\nwhile n < 3 {\n    n += 1\n    if n == 2 {\n        break\n        note(\"dead\")\n    }\n}\n")
     assertTrue(pkg != unit)
     assertEqual(pkg.n, 2)
     assertEqual(pkg.trace, "")
 }
 
+test("dead code after return in a function and a lambda never runs") {
+    val pkg = runModule("fn f(): int {\n    return 1\n    2\n}\nval g = { ->\n    return 3\n    4\n}\nval a = f()\nval b = g()\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.a, 1)
+    assertEqual(pkg.b, 3)
+}
+
 test("nested loops: continue in the outer, break in the inner") {
-    val pkg = runModule(noteFn + "var n = 0\nwhile n < 3 {\n    n += 1\n    if n == 2 { continue }\n    while true { break }\n    note(n)\n}\n")
+    val pkg = runModule(note + "var n = 0\nwhile n < 3 {\n    n += 1\n    if n == 2 { continue }\n    while true { break }\n    note(n)\n}\n")
     assertTrue(pkg != unit)
     assertEqual(pkg.trace, "1,3,")
 }
