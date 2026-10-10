@@ -84,8 +84,7 @@ test("emitCreateRecord - multiple fields") {
 
 test("emitCreateRecord - keyword field uses bracket key, builtin field stays plain") {
     val st = freshState()
-    embedLua("test_rec3 = {kind='create_record', recordFields={{name='end', value={kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}, {name='pairs', value={kind='atom', atomValue='2', exprType={tag='primitive',ids={{name='int'}}}}}}}")
-    val e: any = luaExpr("test_rec3")
+    val e: any = { kind: "create_record", recordFields: [{ name: "end", value: { kind: "atom", atomValue: "1", exprType: { tag: "primitive", ids: [{ name: "int" }] } } }, { name: "pairs", value: { kind: "atom", atomValue: "2", exprType: { tag: "primitive", ids: [{ name: "int" }] } } }] }
     emitCreateRecord(st, e)
     assertEqual(st.sb.toString(), "local _chi_tmp0={[\"end\"]=(1),pairs=(2)};setmetatable(_chi_tmp0, record_meta_table);")
 }
@@ -133,15 +132,13 @@ test("emitFieldAccess - nil dotTarget defaults to field") {
 
 test("emitFieldAccess - keyword field uses bracket key") {
     val st = freshState()
-    embedLua("test_fa3 = {kind='field_access', receiver={kind='atom', atomValue='obj', exprType={tag='primitive',ids={{name='int'}}}}, fieldName='end', dotTarget={tag='field'}}")
-    val e: any = luaExpr("test_fa3")
+    val e: any = { kind: "field_access", receiver: { kind: "atom", atomValue: "obj", exprType: { tag: "primitive", ids: [{ name: "int" }] } }, fieldName: "end", dotTarget: { tag: "field" } }
     assertEqual(emitFieldAccess(st, e), "(obj)[\"end\"]")
 }
 
 test("emitFieldAccess - builtin-named field is not mangled") {
     val st = freshState()
-    embedLua("test_fa4 = {kind='field_access', receiver={kind='atom', atomValue='obj', exprType={tag='primitive',ids={{name='int'}}}}, fieldName='next', dotTarget={tag='field'}}")
-    val e: any = luaExpr("test_fa4")
+    val e: any = { kind: "field_access", receiver: { kind: "atom", atomValue: "obj", exprType: { tag: "primitive", ids: [{ name: "int" }] } }, fieldName: "next", dotTarget: { tag: "field" } }
     assertEqual(emitFieldAccess(st, e), "(obj).next")
 }
 
@@ -167,8 +164,7 @@ test("emitFieldAssignment - string value") {
 
 test("emitFieldAssignment - keyword field uses bracket key") {
     val st = freshState()
-    embedLua("test_faa3 = {kind='field_assignment', receiver={kind='atom', atomValue='obj', exprType={tag='primitive',ids={{name='int'}}}}, fieldName='repeat', value={kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='int'}}}}}")
-    val e: any = luaExpr("test_faa3")
+    val e: any = { kind: "field_assignment", receiver: { kind: "atom", atomValue: "obj", exprType: { tag: "primitive", ids: [{ name: "int" }] } }, fieldName: "repeat", value: { kind: "atom", atomValue: "42", exprType: { tag: "primitive", ids: [{ name: "int" }] } } }
     emitFieldAssignment(st, e)
     assertEqual(st.sb.toString(), "(obj)[\"repeat\"]=(42);")
 }
