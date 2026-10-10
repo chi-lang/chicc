@@ -1,0 +1,85 @@
+import std/lang { embedLua, luaExpr }
+import std/io.file { writeString, readString }
+import chicc/test_util { test, assertEqual, summary }
+import chicc/cli { cliMain }
+
+// REPL sessions driven through cliMain with stdin, stdout and stderr
+// redirected to temp files.
+
+// Output lines of the session, prompts stripped and empty lines dropped.
+fn sessionLines(output: string): string {
+    val lines: array[string] = []
+    for line in output.split("\n") {
+        var l = line
+        while l.startsWith("> ") {
+            l = l.substring(3, l.len())
+        }
+        if l != "" {
+            lines.push(l)
+        }
+    }
+    lines.joinToStringWithSeparator("\n")
+}
+
+// Feeds `input` to a fresh REPL session and returns what it printed, stdout
+// and stderr interleaved.
+fn repl(input: string): string {
+    val inPath = luaExpr("os.tmpname()") as string
+    val outPath = luaExpr("os.tmpname()") as string
+    writeString(inPath, input)
+    // A session starts with an empty user/default package.
+    embedLua("package.loaded['user/default'] = nil")
+    // The REPL prints values with Lua's print and errors on io.stderr.
+    embedLua("io.input(inPath); io.output(outPath); __repl_test_saved = { print = _G.print, stderr = io.stderr }; io.stderr = io.output(); _G.print = function(...) io.write(table.concat({...}, '\\t'), '\\n') end")
+    val code = cliMain(["repl"])
+    embedLua("io.output():close(); io.output(io.stdout); io.input(io.stdin); _G.print = __repl_test_saved.print; io.stderr = __repl_test_saved.stderr")
+    val output = readString(outPath)
+    embedLua("os.remove(inPath); os.remove(outPath)")
+    assertEqual(code, 0)
+    sessionLines(output)
+}
+
+test("a later val rebinds a name taken by an earlier import") {
+    assertEqual(repl("import std/math { abs }\nval abs = 5\nabs\n"), "5")
+}
+
+test("a later fn rebinds a name taken by an earlier import") {
+    assertEqual(repl("import std/lang.array { map }\nfn map(x: int): int { x + 100 }\nmap(1)\n"), "101")
+}
+
+test("a later import rebinds a name defined earlier") {
+    assertEqual(repl("val abs = 5\nimport std/math { abs }\nabs(-3)\n"), "3")
+}
+
+test("a failed line keeps the earlier binding") {
+    val out = repl("import std/math { abs }\nval abs: string = 5\nabs(-3)\n")
+    val lines = out.split("\n")
+    assertEqual(lines.size(), 2)
+    assertEqual(lines[1].startsWith("Error: "), true)
+    assertEqual(lines[2], "3")
+}
+
+test("error positions refer to the typed line") {
+    val err = "Error: [UNRECOGNIZED_NAME] Name 'foo' was not recognized (line 1, col 1)"
+    assertEqual(repl("foo\nimport std/math { abs }\nfoo\n"), "$err\n$err")
+}
+
+test("data constructors and type are available on later lines") {
+    val out = repl("data Shape = Circle(radius: float) | Square(side: float)\nCircle(3.14)\nval s: Shape = Square(1.0)\ns is Square\ns is Circle\n")
+    val lines = out.split("\n")
+    assertEqual(lines.size(), 3)
+    // How a variant value prints is not settled here, only that it does.
+    assertEqual(lines[1].startsWith("Error") || lines[1].startsWith("ERROR"), false)
+    assertEqual(lines[2], "true")
+    assertEqual(lines[3], "false")
+}
+
+test("a type alias is available on later lines") {
+    assertEqual(repl("type P = { x: int }\nval p: P = { x: 1 }\np.x\n"), "1")
+}
+
+test("the Option type is auto-imported") {
+    assertEqual(repl("val o: Option[int] = 5\no\n"), "5")
+}
+
+summary()
