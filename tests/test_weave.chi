@@ -1,0 +1,65 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv, formatMessage }
+import std/lang { loadLuaCode }
+
+// A standalone `_` is the weave placeholder, not an identifier (#24).
+
+// Returns the module's package table, or unit when compilation or Lua
+// loading fails. Each source declares its own package so that members left
+// by one test are not seen by the next.
+fn runModule(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val code = result.luaCode
+    if code == unit { return unit }
+    val loader: any = loadLuaCode(code as string)
+    if loader == unit { return unit }
+    val run = loader as () -> any
+    run()
+}
+
+// All compilation messages, formatted and joined; "compiled" if it compiled.
+fn compileErrors(src: string): string {
+    val result = compileToLua(src, newLuaCompilationEnv())
+    if result.luaCode != unit { return "compiled" }
+    var out = ""
+    for m in result.messages as array[any] {
+        out = if out == "" { formatMessage(m) } else { "$out | ${formatMessage(m)}" }
+    }
+    out
+}
+
+val upper = "import std/lang.string { toUpper }\n"
+
+// The top-level weave temp is a package member, read through the target it
+// was declared with.
+test("top-level weave fills the placeholder") {
+    val pkg = runModule("package t/w24a\n" + upper + "val r = \"hello\" ~> toUpper(_) ~> \"\${_}!\"\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, "HELLO!")
+}
+
+test("weave in a function body fills the placeholder") {
+    val pkg = runModule("package t/w24b\n" + upper + "fn f(): string {\n    \"hello\" ~> toUpper(_) ~> \"\${_}!\"\n}\nval r = f()\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, "HELLO!")
+}
+
+test("dollar before underscore in a string is literal text") {
+    val pkg = runModule("package t/w24c\nval x = 5\nval s = \"\$_x\"\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.s, "\$_x")
+}
+
+test("snake_case identifiers read and interpolate") {
+    val pkg = runModule("package t/w24d\nval my_var = 7\nval a = my_var\nval s = \"\$my_var\"\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.a, 7)
+    assertEqual(pkg.s, "7")
+}
+
+test("placeholder outside a weave is a compile error at the placeholder") {
+    assertEqual(compileErrors("package t/w24e\nprintln(_)\n"),
+        "[ERROR] Placeholder '_' used outside of a weave template. (line 2, col 9)")
+}
+
+summary()

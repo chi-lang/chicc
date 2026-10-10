@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, summary }
 import chicc/lexer { tokenize }
-import chicc/token { TK_INT, TK_FLOAT, TK_STRING, TK_ID, TK_EOF, TK_NEWLINE, TK_VAL, TK_VAR, TK_FN, TK_IF, TK_ELSE, TK_PUB, TK_PLUS, TK_MINUS, TK_STAR, TK_EQ, TK_EQEQ, TK_LPAREN, TK_RPAREN, TK_LBRACE, TK_RBRACE, TK_LBRACKET, TK_RBRACKET, TK_COLON, TK_COMMA, TK_INTERP_START, TK_INTERP_TEXT, TK_INTERP_EXPR_START, TK_INTERP_EXPR_END, TK_INTERP_END }
+import chicc/token { TK_INT, TK_FLOAT, TK_STRING, TK_ID, TK_EOF, TK_NEWLINE, TK_VAL, TK_VAR, TK_FN, TK_IF, TK_ELSE, TK_PUB, TK_PLUS, TK_MINUS, TK_STAR, TK_EQ, TK_EQEQ, TK_LPAREN, TK_RPAREN, TK_LBRACE, TK_RBRACE, TK_LBRACKET, TK_RBRACKET, TK_COLON, TK_COMMA, TK_INTERP_START, TK_INTERP_TEXT, TK_INTERP_EXPR_START, TK_INTERP_EXPR_END, TK_INTERP_END, TK_UNDERSCORE }
 import std/lang { luaExpr }
 
 // --- 1. Empty source ---
@@ -287,6 +287,17 @@ test("tokenize: multiplication a * b") {
     assertEqual(tokens[2].kind, TK_STAR)
     assertEqual(tokens[3].kind, TK_ID)
     assertEqual(tokens[4].kind, TK_EOF)
+}
+
+test("tokenize: standalone underscore is the placeholder, inner underscore is part of an identifier") {
+    val tokens = tokenize("_ a_b _x")
+    assertEqual(tokens[1].kind, TK_UNDERSCORE)
+    assertEqual(tokens[2].kind, TK_ID)
+    assertEqual(tokens[2].value, "a_b")
+    assertEqual(tokens[3].kind, TK_UNDERSCORE)
+    assertEqual(tokens[4].kind, TK_ID)
+    assertEqual(tokens[4].value, "x")
+    assertEqual(tokens[5].kind, TK_EOF)
 }
 
 summary()

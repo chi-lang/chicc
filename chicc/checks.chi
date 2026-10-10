@@ -11,11 +11,14 @@ import chicc/ast { exprChildren }
 var cnDefinedNames: any = unit
 var cnMessages: any = unit
 var cnCtRef: any = unit
+// Number of weave templates enclosing the node being walked
+var cnWeaveDepth: int = 0
 
 fn cnInit(ct: any, messages: any) {
     cnDefinedNames = luaExpr("{}")
     cnMessages = messages
     cnCtRef = ct
+    cnWeaveDepth = 0
 }
 
 fn cnHasName(name: string): bool {
@@ -277,7 +280,15 @@ fn cnWalkParseAst(node: any) {
         val val_ = luaExpr("node.value") as any
         if val_ != unit { cnWalkParseAst(val_) }
         val tmpl = luaExpr("node.opTemplate") as any
-        if tmpl != unit { cnWalkParseAst(tmpl) }
+        if tmpl != unit {
+            cnWeaveDepth = cnWeaveDepth + 1
+            cnWalkParseAst(tmpl)
+            cnWeaveDepth = cnWeaveDepth - 1
+        }
+    } else if tag == "ParseWeavePlaceholder" {
+        if cnWeaveDepth == 0 {
+            cnAddMessage(genericError("Placeholder '_' used outside of a weave template.", cnSectionToCp(node.section)))
+        }
     } else if tag == "ParseInterpolatedString" {
         val parts = luaExpr("node.parts") as any
         val partCount = luaExpr("#parts") as int
@@ -311,7 +322,7 @@ fn cnWalkParseAst(node: any) {
         }
     } else {
         // Leaf nodes (UnitValue, LongValue, FloatValue, BoolValue, StringValue,
-        // StringText, ParseBreak, ParseContinue, ParseWeavePlaceholder) — no children
+        // StringText, ParseBreak, ParseContinue) — no children
     }
 }
 

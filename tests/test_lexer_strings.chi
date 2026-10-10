@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, summary }
 import chicc/lexer { newLexer, lexReadString }
-import chicc/token { TK_STRING, TK_INTERP_START, TK_INTERP_TEXT, TK_INTERP_EXPR_START, TK_INTERP_EXPR_END, TK_INTERP_END, TK_ID, TK_INT, TK_PLUS, TK_DOT, TK_LBRACE, TK_RBRACE, TK_COLON, TK_COMMA }
+import chicc/token { TK_STRING, TK_INTERP_START, TK_INTERP_TEXT, TK_INTERP_EXPR_START, TK_INTERP_EXPR_END, TK_INTERP_END, TK_ID, TK_INT, TK_PLUS, TK_DOT, TK_LBRACE, TK_RBRACE, TK_COLON, TK_COMMA, TK_UNDERSCORE }
 import std/lang { luaExpr, embedLua }
 
 // Helper: build a string containing dollar sign via Lua
@@ -368,6 +368,29 @@ test("interp: escape in text segment") {
     assertEqual(lex.tokens[4].value, "name")
     assertEqual(lex.tokens[5].kind, TK_INTERP_EXPR_END)
     assertEqual(lex.tokens[6].kind, TK_INTERP_END)
+}
+
+// === Underscore after a dollar ===
+
+test("interp: dollar before underscore is literal text") {
+    val src = mkInterpSrc("", "_x", "")
+    val lex = newLexer(src)
+    lexReadString(lex)
+    // INTERP_START, TEXT(dollar), TEXT("_x"), INTERP_END
+    assertEqual(lex.tokens.size(), 4)
+    assertEqual(lex.tokens[2].kind, TK_INTERP_TEXT)
+    assertEqual(lex.tokens[2].value, dollar())
+    assertEqual(lex.tokens[3].kind, TK_INTERP_TEXT)
+    assertEqual(lex.tokens[3].value, "_x")
+}
+
+test("interp: underscore in expr is the placeholder") {
+    val src = mkExprSrc("", "_", "")
+    val lex = newLexer(src)
+    lexReadString(lex)
+    // INTERP_START, EXPR_START, UNDERSCORE, EXPR_END, INTERP_END
+    assertEqual(lex.tokens.size(), 5)
+    assertEqual(lex.tokens[3].kind, TK_UNDERSCORE)
 }
 
 summary()

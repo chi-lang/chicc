@@ -29,8 +29,8 @@ test("isLetter: A-Z") {
     assertTrue(isLetter(90))   // 'Z'
 }
 
-test("isLetter: underscore") {
-    assertTrue(isLetter(95))  // '_'
+test("isLetter: underscore does not start an identifier") {
+    assertFalse(isLetter(95))  // '_'
 }
 
 test("isLetter: non-letters") {
@@ -126,13 +126,6 @@ test("readIdentOrKeyword: name with underscore") {
     readIdentOrKeyword(lex)
     assertEqual(lex.tokens[1].kind, TK_ID)
     assertEqual(lex.tokens[1].value, "my_var")
-}
-
-test("readIdentOrKeyword: name starting with underscore") {
-    val lex = newLexer("_private")
-    readIdentOrKeyword(lex)
-    assertEqual(lex.tokens[1].kind, TK_ID)
-    assertEqual(lex.tokens[1].value, "_private")
 }
 
 test("readIdentOrKeyword: name with digits") {

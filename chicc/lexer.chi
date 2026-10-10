@@ -76,12 +76,14 @@ pub fn isDigit(ch: int): bool {
     ch >= 48 && ch <= 57
 }
 
+// Identifier start. A leading `_` is the weave placeholder, not an identifier.
 pub fn isLetter(ch: int): bool {
-    (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || ch == 95
+    (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122)
 }
 
+// Identifier continuation.
 pub fn isAlphaNum(ch: int): bool {
-    isDigit(ch) || isLetter(ch)
+    isDigit(ch) || isLetter(ch) || ch == 95
 }
 
 // --- Number lexing ---
@@ -114,7 +116,7 @@ pub fn readNumber(lex: Lexer) {
 }
 
 // --- Identifier / keyword lexing ---
-// Reads an identifier or keyword. Expects current char to be a letter or underscore.
+// Reads an identifier or keyword. Expects current char to be a letter.
 pub fn readIdentOrKeyword(lex: Lexer) {
     val startLine = lex.line
     val startCol = lex.col
