@@ -1,4 +1,4 @@
-import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/test_util { test, assertEqual, summary }
 import chicc/compiler { compileToLua, newLuaCompilationEnv, formatMessage }
 import std/lang { luaExpr, embedLua }
 
@@ -21,15 +21,15 @@ fn runCaptured(src: string): string {
         embedLua("error(msg)")
     }
     val code = result.luaCode as string
-    embedLua("__in_buf = {}")
-    embedLua("__in_write = io.write")
-    embedLua("io.write = function(...) for _,a in ipairs({...}) do __in_buf[#__in_buf+1] = tostring(a) end end")
-    embedLua("__in_ok, __in_err = pcall(assert(load(code)))")
-    embedLua("io.write = __in_write")
-    if !(luaExpr("__in_ok") as bool) {
-        embedLua("error('run raised: ' .. tostring(__in_err))")
+    embedLua("__ifnl_buf = {}")
+    embedLua("__ifnl_write = io.write")
+    embedLua("io.write = function(...) for _,a in ipairs({...}) do __ifnl_buf[#__ifnl_buf+1] = tostring(a) end end")
+    embedLua("__ifnl_ok, __ifnl_err = pcall(assert(load(code)))")
+    embedLua("io.write = __ifnl_write")
+    if !(luaExpr("__ifnl_ok") as bool) {
+        embedLua("error('run raised: ' .. tostring(__ifnl_err))")
     }
-    luaExpr("table.concat(__in_buf)") as string
+    luaExpr("table.concat(__ifnl_buf)") as string
 }
 
 // ---- Next line after an else-less if is a new statement ----
