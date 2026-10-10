@@ -76,11 +76,12 @@ fn readSource(path: string): string | unit {
 // Compile mode: source -> Lua file
 // ============================================================================
 
-pub fn compileFile(inputPath: string, outputPath: string): int {
+// Prints the diagnostics and returns unit when inputPath cannot be read or compiled.
+fn compileSource(inputPath: string): string | unit {
     val source = readSource(inputPath)
     if source == unit {
         eprintln("Error: cannot read $inputPath")
-        return 1
+        return unit
     }
     val ns = newLuaCompilationEnv()
     val result = compileToLua(source as string, ns)
@@ -90,18 +91,25 @@ pub fn compileFile(inputPath: string, outputPath: string): int {
     if luaCode == unit {
         printMessages(messages, msgCount)
         eprintln("Compilation failed.")
-        1
-    } else {
-        val out = open(outputPath, "w")
-        if out == unit {
-            eprintln("Error: cannot write $outputPath")
-            return 1
-        }
-        write(out, luaCode as string)
-        close(out)
-        println("Compiled: $inputPath -> $outputPath")
-        0
+        return unit
     }
+    luaCode as string
+}
+
+pub fn compileFile(inputPath: string, outputPath: string): int {
+    val luaCode = compileSource(inputPath)
+    if luaCode == unit {
+        return 1
+    }
+    val out = open(outputPath, "w")
+    if out == unit {
+        eprintln("Error: cannot write $outputPath")
+        return 1
+    }
+    write(out, luaCode as string)
+    close(out)
+    println("Compiled: $inputPath -> $outputPath")
+    0
 }
 
 // ============================================================================
@@ -186,6 +194,51 @@ fn printUsage(out: (string) -> unit) {
     out("  -o, --output FILE           Output file path (compile and build)")
     out("  -h, --help                  Show this help")
     out("  --version                   Show version")
+}
+
+type FileArgs = { input: string, output: string }
+
+// Parses `[-o OUTPUT] FILE` after the command word. Prints the error and
+// returns unit on bad arguments; output is "" when not given.
+fn parseFileArgs(command: string, args: any, argc: int): FileArgs | unit {
+    if argc < 2 {
+        eprintln("Error: $command requires a file argument")
+        printUsage(eprintln)
+        return unit
+    }
+    var outputPath: string = ""
+    var inputPath: string = ""
+    var i = 2
+    while i <= argc {
+        val a = luaExpr("args[i]") as string
+        if a == "-o" || a == "--output" {
+            i = i + 1
+            if i > argc {
+                eprintln("Error: $a requires an argument")
+                return unit
+            }
+            outputPath = luaExpr("args[i]") as string
+        } else {
+            if inputPath != "" {
+                eprintln("Error: $command takes a single input file, got '$inputPath' and '$a'")
+                return unit
+            }
+            inputPath = a
+        }
+        i = i + 1
+    }
+
+    if inputPath == "" {
+        eprintln("Error: no input file specified")
+        return unit
+    }
+
+    if hasExtension(inputPath, ".chi") == false {
+        eprintln("Error: $inputPath is not a Chi source file (.chi)")
+        return unit
+    }
+
+    { input: inputPath, output: outputPath }
 }
 
 // ============================================================================
@@ -292,59 +345,17 @@ pub fn cliMain(args: any): int {
     }
 
     if firstArg == "compile" {
-        // compile mode: chicc compile [-o OUTPUT] FILE
-        if argc < 2 {
-            eprintln("Error: compile requires a file argument")
-            printUsage(eprintln)
+        val parsed = parseFileArgs("compile", args, argc)
+        if parsed == unit {
             return 1
         }
-        var outputPath: string = ""
-        var inputPath: string = ""
-        var i = 2
-        while i <= argc {
-            val a = luaExpr("args[i]") as string
-            if a == "-o" {
-                i = i + 1
-                if i > argc {
-                    eprintln("Error: -o requires an argument")
-                    return 1
-                }
-                outputPath = luaExpr("args[i]") as string
-            } else {
-                if a == "--output" {
-                    i = i + 1
-                    if i > argc {
-                        eprintln("Error: --output requires an argument")
-                        return 1
-                    }
-                    outputPath = luaExpr("args[i]") as string
-                } else {
-                    if inputPath != "" {
-                        eprintln("Error: compile takes a single input file, got '$inputPath' and '$a'")
-                        return 1
-                    }
-                    inputPath = a
-                }
-            }
-            i = i + 1
-        }
-
-        if inputPath == "" {
-            eprintln("Error: no input file specified")
-            return 1
-        }
-
-        if hasExtension(inputPath, ".chi") == false {
-            eprintln("Error: $inputPath is not a Chi source file (.chi)")
-            return 1
-        }
-
+        val fileArgs = parsed as FileArgs
+        var outputPath = fileArgs.output
         if outputPath == "" {
-            outputPath = defaultOutputPath(inputPath)
+            outputPath = defaultOutputPath(fileArgs.input)
         }
-
         loadStdlib()
-        return compileFile(inputPath, outputPath)
+        return compileFile(fileArgs.input, outputPath)
     }
 
     if firstArg == "build" {
@@ -353,8 +364,21 @@ pub fn cliMain(args: any): int {
             eprintln("Error: 'build' command requires native chi binary")
             return 1
         }
-        val buildResult = luaExpr("chi_build(args)") as int
-        return buildResult
+        val parsed = parseFileArgs("build", args, argc)
+        if parsed == unit {
+            return 1
+        }
+        val fileArgs = parsed as FileArgs
+        val inputPath = fileArgs.input
+        var outputPath = fileArgs.output
+        if outputPath == "" {
+            outputPath = inputPath.byteSub(1, inputPath.len() - 4)
+        }
+        val luaCode = compileSource(inputPath)
+        if luaCode == unit {
+            return 1
+        }
+        return luaExpr("chi_build(inputPath, luaCode, outputPath)") as int
     }
 
     // Default: treat first arg as a file to run
