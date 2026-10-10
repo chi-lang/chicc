@@ -357,7 +357,6 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
                 if dtTag == "field" {
                     // field: leave callee as-is
                 } else if dtTag == "local_binding" {
-                    // local_binding: prepend receiver, call the local itself.
                     // No default args: looked up by name they would be those of
                     // a same-named package function.
                     (term.callParams as array[any]).insertAt(1, dotOp.receiver)

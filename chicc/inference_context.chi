@@ -207,8 +207,7 @@ pub fn icListLocalFunctionsForType(name: string, receiverType: any): array[any] 
     var scope = icLocalSymbols
     var bound = false
     while scope != icPackageSymbols && !bound {
-        val symbols: any = luaExpr("scope.symbols")
-        val localSym: any = symbols.get(name)
+        val localSym: any = scope.symbols.get(name)
         if localSym != unit {
             bound = true
             if icTrialUnify(localSym, receiverType) {
@@ -216,7 +215,7 @@ pub fn icListLocalFunctionsForType(name: string, receiverType: any): array[any] 
                 results.push(localEntry)
             }
         }
-        scope = luaExpr("scope.parent")
+        scope = scope.parent
     }
     val sym = icLocalSymbolsGet(icPackageSymbols, name)
     if sym != unit {
