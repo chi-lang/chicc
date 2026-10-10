@@ -49,6 +49,16 @@ test("a name the stdlib and a compiler package both export resolves to the stdli
     assertEqual(pkg.n, 3)
 }
 
+// `_G` sits in package.loaded too; under a _G metatable `_G._package` is some
+// package's symbol table.
+test("a package.loaded entry that is not a module/package is not searched") {
+    embedLua("package.loaded['n2x'] = { _package = { len = { public = true } } }")
+    val pkg = runModule("package test/n2x\nval n = len(\"abc\")\n")
+    embedLua("package.loaded['n2x'] = nil")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.n, 3)
+}
+
 test("a compiler function is not a name without an import") {
     val msg = firstMessage("package test/n2c\nval st = newSymbolTable()\n")
     assertTrue(msg != unit)
