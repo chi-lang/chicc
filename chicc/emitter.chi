@@ -331,45 +331,14 @@ fn isRawLuaCall(e: Expr, withLuaExpr: bool): bool {
 
 // True iff emitting `e` may reach a raw call (see isRawLuaCall), which can
 // declare a local that later statements of the same scope rely on (e.g. the
-// chunk-local `local __defining_type_id` in type_writer). Fn bodies are not
-// descended into: everything inside them emits function-scoped, so it cannot
-// leak a local into the enclosing scope. That early return also covers
-// defaultValues, which only exists on "fn" exprs. The child list below must
-// stay in sync with the Expr fields in ast.chi.
+// chunk-local `local __defining_type_id` in type_writer). A fn's children are
+// not descended into: its body and default values emit function-scoped, so
+// they cannot leak a local into the enclosing scope.
 fn containsRawLuaCall(e: Expr, withLuaExpr: bool): bool {
     val kind = e.kind
     if kind == "fn" { return false }
     if kind == "fn_call" && isRawLuaCall(e, withLuaExpr) { return true }
-    val child = { c: any -> if c != unit { containsRawLuaCall(c as Expr, withLuaExpr) } else { false } }
-    val each = { items: array[any] -> items.any { it -> containsRawLuaCall(it as Expr, withLuaExpr) } }
-    if child(e.receiver) { return true }
-    if child(e.value) { return true }
-    if child(e.callee) { return true }
-    if child(e.condition) { return true }
-    if child(e.thenBranch) { return true }
-    if child(e.elseBranch) { return true }
-    if child(e.left) { return true }
-    if child(e.right) { return true }
-    if child(e.prefixExpr) { return true }
-    if child(e.castExpr) { return true }
-    if child(e.loopCondition) { return true }
-    if child(e.loopBody) { return true }
-    if child(e.iterable) { return true }
-    if child(e.forState) { return true }
-    if child(e.forInit) { return true }
-    if child(e.forBody) { return true }
-    if child(e.indexVariable) { return true }
-    if child(e.indexExpr) { return true }
-    if child(e.indexValue) { return true }
-    if child(e.handleBody) { return true }
-    if child(e.returnValue) { return true }
-    if each(e.parts) { return true }
-    if each(e.arrayValues) { return true }
-    if each(e.callParams) { return true }
-    if each(e.blockBody) { return true }
-    if e.recordFields.any { f -> containsRawLuaCall(f.value as Expr, withLuaExpr) } { return true }
-    if e.handleCases.any { c -> containsRawLuaCall(c.body as Expr, withLuaExpr) } { return true }
-    false
+    exprChildren(e).any { c -> containsRawLuaCall(c as Expr, withLuaExpr) }
 }
 
 // A statement can get its own `do ... end` scope unless it ends the block or

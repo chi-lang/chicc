@@ -1,7 +1,8 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/source { newSection }
 import chicc/types { tInt, tString }
-import chicc/ast { localTarget, packageTarget, atomExpr, blockExpr, fnCallExpr, variableAccessExpr, breakExpr, continueExpr, returnExpr, infixOpExpr, ifElseExpr }
+import chicc/ast { localTarget, packageTarget, atomExpr, blockExpr, fnCallExpr, variableAccessExpr, breakExpr, continueExpr, returnExpr, infixOpExpr, ifElseExpr, fnExpr, newFnParam, forLoopExpr }
+import std/lang.map { emptyMap }
 
 test("localTarget") {
     val t = localTarget("x")
@@ -61,6 +62,34 @@ test("exprChildren - fnCall") {
     val call = fnCallExpr(func, [arg1, arg2], unit)
     val children = call.exprChildren()
     assertEqual(children.size(), 3)
+}
+
+test("exprChildren - fn: default values in parameter order, then the body") {
+    val defA = atomExpr("1", tInt, unit)
+    val defC = atomExpr("3", tInt, unit)
+    val defaults = emptyMap[string, any]()
+    defaults.put("c", defC)
+    defaults.put("a", defA)
+    val params = [newFnParam("a", tInt, unit), newFnParam("b", tInt, unit), newFnParam("c", tInt, unit)]
+    val body = blockExpr([], unit)
+    val children = fnExpr(params, defaults, body, unit).exprChildren()
+    assertEqual(children.size(), 3)
+    assertTrue(children[1] == defA)
+    assertTrue(children[2] == defC)
+    assertTrue(children[3] == body)
+}
+
+test("exprChildren - for loop: iterable, state, init, then the body") {
+    val gen = variableAccessExpr(localTarget("gen"), unit)
+    val state = atomExpr("10", tInt, unit)
+    val init = atomExpr("0", tInt, unit)
+    val body = blockExpr([], unit)
+    val children = forLoopExpr(["v"], gen, state, init, body, unit).exprChildren()
+    assertEqual(children.size(), 4)
+    assertTrue(children[1] == gen)
+    assertTrue(children[2] == state)
+    assertTrue(children[3] == init)
+    assertTrue(children[4] == body)
 }
 
 test("isTerminator - break") {

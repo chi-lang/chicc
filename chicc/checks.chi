@@ -56,6 +56,35 @@ fn cnSectionToCp(sec: any): { line: int, column: int } | unit {
     }
 }
 
+// Reports `varName` at `sec` unless it is in scope or resolves to exactly one
+// symbol through the compile tables.
+fn cnCheckName(varName: string, sec: any) {
+    if cnHasName(varName) == false {
+        val ct = cnCtRef
+        val aliased = luaExpr("ct ~= nil and require('chicc/symbols').ctGetAliasedPackage(ct, varName) or nil") as any
+        if aliased == unit {
+            val localSym = luaExpr("ct ~= nil and require('chicc/symbols').ctGetLocalSymbol(ct, varName) or nil") as any
+            if localSym == unit {
+                // Fallback: a public symbol from any loaded package is
+                // reachable without an explicit import (JVM-style). When more
+                // than one loaded package exports the name we must not pick
+                // one silently — report the ambiguity so the user qualifies,
+                // aliases, or uses UFCS.
+                val quals = luaExpr("require('chicc/symbols').lookupLoadedPublicSymbolQualifiers(varName)") as array[string]
+                val qcount = luaExpr("#quals") as int
+                val cp = cnSectionToCp(sec)
+                if qcount == 0 {
+                    cnAddMessage(unrecognizedName(varName, cp))
+                } else if qcount > 1 {
+                    val joined = luaExpr("table.concat(quals, ', ')") as string
+                    cnAddMessage(ambiguousName(varName, joined, cp))
+                }
+                // qcount == 1: resolves unambiguously, no message
+            }
+        }
+    }
+}
+
 fn cnWalkParseAst(node: any) {
     val tag = luaExpr("node.tag") as string
 
@@ -68,32 +97,7 @@ fn cnWalkParseAst(node: any) {
         val symName = luaExpr("node.symbolName") as string
         cnAddName(symName)
     } else if tag == "ParseVariableRead" {
-        val varName = luaExpr("node.variableName") as string
-        if cnHasName(varName) == false {
-            val ct = cnCtRef
-            val aliased = luaExpr("ct ~= nil and require('chicc/symbols').ctGetAliasedPackage(ct, varName) or nil") as any
-            if aliased == unit {
-                val localSym = luaExpr("ct ~= nil and require('chicc/symbols').ctGetLocalSymbol(ct, varName) or nil") as any
-                if localSym == unit {
-                    // Fallback: a public symbol from any loaded package is
-                    // reachable without an explicit import (JVM-style). When more
-                    // than one loaded package exports the name we must not pick
-                    // one silently — report the ambiguity so the user qualifies,
-                    // aliases, or uses UFCS.
-                    val quals = luaExpr("require('chicc/symbols').lookupLoadedPublicSymbolQualifiers(varName)") as array[string]
-                    val qcount = luaExpr("#quals") as int
-                    val sec = luaExpr("node.section") as any
-                    val cp = cnSectionToCp(sec)
-                    if qcount == 0 {
-                        cnAddMessage(unrecognizedName(varName, cp))
-                    } else if qcount > 1 {
-                        val joined = luaExpr("table.concat(quals, ', ')") as string
-                        cnAddMessage(ambiguousName(varName, joined, cp))
-                    }
-                    // qcount == 1: resolves unambiguously, no message
-                }
-            }
-        }
+        cnCheckName(node.variableName as string, node.section)
     } else if tag == "ParseLambda" {
         cnWithNewScope({
             val args = luaExpr("node.formalArguments") as any
@@ -115,6 +119,14 @@ fn cnWalkParseAst(node: any) {
             }
         })
     } else if tag == "ParseFor" {
+        // The iterable, state and init are evaluated before the loop
+        // variables exist
+        val iter = node.iterable
+        if iter != unit { cnWalkParseAst(iter) }
+        val state = node.forState
+        if state != unit { cnWalkParseAst(state) }
+        val init = node.forInit
+        if init != unit { cnWalkParseAst(init) }
         cnWithNewScope({
             val vars = luaExpr("node.forVars") as any
             val varCount = luaExpr("#vars") as int
@@ -123,10 +135,6 @@ fn cnWalkParseAst(node: any) {
                 val varName = luaExpr("vars[i]") as string
                 cnAddName(varName)
                 i = i + 1
-            }
-            val iter = luaExpr("node.iterable") as any
-            if iter != unit {
-                cnWalkParseAst(iter)
             }
             val forBody = luaExpr("node.forBody") as any
             if forBody != unit {
@@ -143,6 +151,9 @@ fn cnWalkParseAst(node: any) {
             var i = 1
             while i <= argCount {
                 val arg = luaExpr("args[i]") as any
+                // A default value sees only the parameters declared before it
+                val defaultValue = arg.defaultValue
+                if defaultValue != unit { cnWalkParseAst(defaultValue) }
                 val argName = luaExpr("arg.name") as string
                 cnAddName(argName)
                 i = i + 1
@@ -265,6 +276,7 @@ fn cnWalkParseAst(node: any) {
         val val_ = luaExpr("node.value") as any
         if val_ != unit { cnWalkParseAst(val_) }
     } else if tag == "ParseAssignment" {
+        cnCheckName(node.variableName as string, node.section)
         val val_ = luaExpr("node.value") as any
         if val_ != unit { cnWalkParseAst(val_) }
     } else if tag == "ParseIndexOperator" {

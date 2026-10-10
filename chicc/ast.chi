@@ -403,9 +403,77 @@ pub fn setExprUsed(e: Expr, u: bool) { e.used = u }
 pub fn setExprDotTarget(e: Expr, dt: DotTarget | unit) { e.dotTarget = dt }
 pub fn setExprTarget(e: Expr, tgt: Target | unit) { e.target = tgt }
 
+fn pushChild(children: array[any], child: Expr | unit) {
+    if child != unit { children.push(child) }
+}
+
+// The child expressions of `expr`, in evaluation order. A fn's default values
+// are its children (they are evaluated on entry, before the body), and so are
+// a generator for loop's state and init. Every Expr walker enumerates children
+// here, so a field added to Expr must be added here too.
 pub fn exprChildren(expr: any): array[any] {
-    val result: array[any] = luaExpr("(function() local r = {} local k = expr.kind; if k == 'atom' or k == 'variable_access' or k == 'break' or k == 'continue' or k == 'effect_definition' then return r end; if k == 'interpolated_string' then return expr.parts end; if k == 'create_record' then for _, f in ipairs(expr.recordFields) do r[#r+1] = f.value end; return r end; if k == 'create_array' then return expr.arrayValues end; if k == 'field_access' then if expr.receiver then r[#r+1] = expr.receiver end; return r end; if k == 'field_assignment' then if expr.receiver then r[#r+1] = expr.receiver end; if expr.value then r[#r+1] = expr.value end; return r end; if k == 'assignment' or k == 'name_declaration' then if expr.value then r[#r+1] = expr.value end; return r end; if k == 'fn' then if expr.body then r[#r+1] = expr.body end; return r end; if k == 'block' then return expr.blockBody end; if k == 'fn_call' then if expr.callee then r[#r+1] = expr.callee end; for _, p in ipairs(expr.callParams) do r[#r+1] = p end; return r end; if k == 'if_else' then if expr.condition then r[#r+1] = expr.condition end; if expr.thenBranch then r[#r+1] = expr.thenBranch end; if expr.elseBranch then r[#r+1] = expr.elseBranch end; return r end; if k == 'infix_op' then if expr.left then r[#r+1] = expr.left end; if expr.right then r[#r+1] = expr.right end; return r end; if k == 'prefix_op' then if expr.prefixExpr then r[#r+1] = expr.prefixExpr end; return r end; if k == 'cast' or k == 'is' then if expr.castExpr then r[#r+1] = expr.castExpr end; return r end; if k == 'while_loop' then if expr.loopCondition then r[#r+1] = expr.loopCondition end; if expr.loopBody then r[#r+1] = expr.loopBody end; return r end; if k == 'for_loop' then if expr.iterable then r[#r+1] = expr.iterable end; if expr.forBody then r[#r+1] = expr.forBody end; return r end; if k == 'index_op' then if expr.indexVariable then r[#r+1] = expr.indexVariable end; if expr.indexExpr then r[#r+1] = expr.indexExpr end; return r end; if k == 'indexed_assignment' then if expr.indexVariable then r[#r+1] = expr.indexVariable end; if expr.indexExpr then r[#r+1] = expr.indexExpr end; if expr.indexValue then r[#r+1] = expr.indexValue end; return r end; if k == 'handle' then if expr.handleBody then r[#r+1] = expr.handleBody end; for _, c in ipairs(expr.handleCases) do r[#r+1] = c.body end; return r end; if k == 'return' then if expr.returnValue then r[#r+1] = expr.returnValue end; return r end; return r end)()")
-    result
+    val e = expr as Expr
+    val k = e.kind
+    val r: array[any] = []
+    if k == "block" {
+        for c in e.blockBody { r.push(c) }
+    } else if k == "interpolated_string" {
+        for c in e.parts { r.push(c) }
+    } else if k == "create_array" {
+        for c in e.arrayValues { r.push(c) }
+    } else if k == "create_record" {
+        for f in e.recordFields { r.push(f.value) }
+    } else if k == "fn_call" {
+        pushChild(r, e.callee)
+        for c in e.callParams { r.push(c) }
+    } else if k == "fn" {
+        // defaultValues is keyed by name; walking the parameters keeps the
+        // order deterministic
+        val defaults: any = e.defaultValues
+        if defaults != unit {
+            for p in e.parameters { pushChild(r, defaults.get(p.name)) }
+        }
+        pushChild(r, e.body)
+    } else if k == "field_access" {
+        pushChild(r, e.receiver)
+    } else if k == "field_assignment" {
+        pushChild(r, e.receiver)
+        pushChild(r, e.value)
+    } else if k == "assignment" || k == "name_declaration" {
+        pushChild(r, e.value)
+    } else if k == "if_else" {
+        pushChild(r, e.condition)
+        pushChild(r, e.thenBranch)
+        pushChild(r, e.elseBranch)
+    } else if k == "infix_op" {
+        pushChild(r, e.left)
+        pushChild(r, e.right)
+    } else if k == "prefix_op" {
+        pushChild(r, e.prefixExpr)
+    } else if k == "cast" || k == "is" {
+        pushChild(r, e.castExpr)
+    } else if k == "while_loop" {
+        pushChild(r, e.loopCondition)
+        pushChild(r, e.loopBody)
+    } else if k == "for_loop" {
+        pushChild(r, e.iterable)
+        pushChild(r, e.forState)
+        pushChild(r, e.forInit)
+        pushChild(r, e.forBody)
+    } else if k == "index_op" {
+        pushChild(r, e.indexVariable)
+        pushChild(r, e.indexExpr)
+    } else if k == "indexed_assignment" {
+        pushChild(r, e.indexVariable)
+        pushChild(r, e.indexExpr)
+        pushChild(r, e.indexValue)
+    } else if k == "handle" {
+        pushChild(r, e.handleBody)
+        for c in e.handleCases { r.push(c.body) }
+    } else if k == "return" {
+        pushChild(r, e.returnValue)
+    }
+    r
 }
 
 pub fn isTerminator(expr: any): bool {

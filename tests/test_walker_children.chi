@@ -1,0 +1,98 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv, formatMessage }
+import std/lang { loadLuaCode }
+
+// Walkers see a fn's default values and a generator loop's state and init;
+// checkNames reports unknown names there, in loop iterables and in assignment
+// targets with a position (issue #36).
+//
+// Programs are compiled by the chicc modules under test, not eval(): eval()
+// compiles with the prebuilt chicc.lua.
+
+// Returns the module's package table, or unit when compilation or Lua
+// loading fails. Each source declares its own package so that members left
+// by one test are not seen by the next.
+fn runModule(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val code = result.luaCode
+    if code == unit { return unit }
+    val loader: any = loadLuaCode(code as string)
+    if loader == unit { return unit }
+    val run = loader as () -> any
+    run()
+}
+
+// All compilation messages, formatted and joined; "compiled" if it compiled.
+fn compileErrors(src: string): string {
+    val result = compileToLua(src, newLuaCompilationEnv())
+    if result.luaCode != unit { return "compiled" }
+    var out = ""
+    for m in result.messages as array[any] {
+        out = if out == "" { formatMessage(m) } else { "$out | ${formatMessage(m)}" }
+    }
+    out
+}
+
+fn unrecognized(name: string, line: int, col: int): string {
+    "[UNRECOGNIZED_NAME] Name '$name' was not recognized (line $line, col $col)"
+}
+
+fn repeatLine(line: string, n: int): string {
+    var out = ""
+    var i = 0
+    while i < n {
+        out = out + line
+        i = i + 1
+    }
+    out
+}
+
+test("a package used only in a default value is required") {
+    val pkg = runModule("package t/s36a\nimport std/math { abs }\nfn f(a: int = abs(0 - 3)): int { a }\nval r = f()\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, 3)
+}
+
+test("a default value reads an earlier parameter") {
+    val pkg = runModule("package t/s36b\nfn f(a: int, b: int = a + 1): int { a + b }\nval r = f(1)\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, 3)
+}
+
+test("undefined name in a default value is reported with its position") {
+    assertEqual(compileErrors("package t/s36c\nfn f(a: int = undefinedDefault): int { a }\nprintln(f())\n"),
+        unrecognized("undefinedDefault", 2, 15))
+}
+
+test("loop variable is not visible in its own iterable") {
+    assertEqual(compileErrors("package t/s36d\nfor x in x {\n}\n"), unrecognized("x", 2, 10))
+}
+
+test("loop variable shadows an outer name of the same name in the body only") {
+    val src = "package t/s36e\nvar trace = \"\"\nval x = [1, 2]\nfor x in x {\n    trace = \"\$trace\$x,\"\n}\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.trace, "1,2,")
+}
+
+// An assignment's position is that of its `=`
+test("assignment to an undefined name is reported with its position") {
+    assertEqual(compileErrors("package t/s36f\nundefinedVar = 5\n"), unrecognized("undefinedVar", 2, 14))
+}
+
+test("undefined name in a generator loop state is reported with its position") {
+    val src = "package t/s36g\nfn gen(s: int, c: int): int | unit { unit }\nfor v in gen, undefinedState {\n}\n"
+    assertEqual(compileErrors(src), unrecognized("undefinedState", 3, 15))
+}
+
+// A statement that reaches raw Lua is not given its own scope; one that only
+// holds a fn using raw Lua is, so its temporaries do not pile up toward Lua's
+// limit of 200 live locals per function.
+test("fn body with 250 calls of a lambda using embedLua loads and runs every call") {
+    val src = "package t/s36h\nimport std/lang { embedLua }\nvar calls = 0\nfn run(g: () -> unit) { g() }\nfn f() {\n" + repeatLine("    run({\n        embedLua(\"local q = 1\")\n        calls = calls + 1\n    })\n", 250) + "}\nf()\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.calls, 250)
+}
+
+summary()
