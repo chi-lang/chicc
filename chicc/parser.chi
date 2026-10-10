@@ -74,8 +74,9 @@ pub fn skipNewlines(p: Parser) {
     }
 }
 
-// noTrailingLambda makes `{` end the expression (it opens the body of an
-// if/while/for/when condition). It holds only at the condition's top level:
+// noTrailingLambda makes a `{` that does not look like a lambda end the
+// expression (it opens the body of an if/while/for/when condition). It holds
+// only at the condition's top level:
 // nested constructs and delimited subexpressions set their own value and
 // restore the returned previous one on exit.
 fn swapNoTrailingLambda(p: Parser, value: bool): bool {
