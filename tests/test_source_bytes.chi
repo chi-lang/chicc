@@ -1,0 +1,87 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv, formatMessage }
+import chicc/lexer { tokenizeLexer }
+import std/lang { loadLuaCode }
+
+// NUL bytes and non-ASCII text in source survive lexing and emission, and
+// lexer positions count characters, not bytes (#26).
+
+fn luaOf(src: string): string {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val code = result.luaCode
+    if code == unit { return "" }
+    code as string
+}
+
+// Returns the module's package table, or unit when compilation or Lua
+// loading fails.
+fn runModule(src: string): any {
+    val code = luaOf(src)
+    if code == "" { return unit }
+    val loader: any = loadLuaCode(code)
+    if loader == unit { return unit }
+    val run = loader as () -> any
+    run()
+}
+
+// All compilation messages, formatted and joined; "compiled" if it compiled.
+fn compileErrors(src: string): string {
+    val result = compileToLua(src, newLuaCompilationEnv())
+    if result.luaCode != unit { return "compiled" }
+    var out = ""
+    for m in result.messages as array[any] {
+        out = if out == "" { formatMessage(m) } else { "$out | ${formatMessage(m)}" }
+    }
+    out
+}
+
+val syntax = "[SYNTAX_ERROR] Syntax error:"
+
+test("NUL byte in code is a syntax error at its position") {
+    assertEqual(compileErrors("val a = 1\n\0\nval b = 2\n"),
+        "$syntax unrecognized character (line 2, col 1)")
+}
+
+test("NUL byte in a line comment does not end the source") {
+    val pkg = runModule("val a = 1 // c\0d\nval b = 2\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.b, 2)
+}
+
+test("non-ASCII string literal is emitted whole") {
+    val pkg = runModule("val s = \"ééé!\"\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.s, "ééé!")
+}
+
+test("non-ASCII interpolated string is emitted whole") {
+    val pkg = runModule("val x = 1\nval s = \"ééé \$x ééé!\"\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.s, "ééé 1 ééé!")
+}
+
+test("NUL escape followed by a digit keeps the digit") {
+    val pkg = runModule("val n = \"a\\01\".len()\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.n, 3)
+}
+
+test("unknown escape names the whole escaped character") {
+    assertEqual(compileErrors("val s = \"a\\é\"\n"),
+        "$syntax unknown escape sequence '\\é' (line 1, col 11)")
+}
+
+test("column after non-ASCII text counts characters") {
+    assertEqual(compileErrors("val s = \"é\\q\"\n"),
+        "$syntax unknown escape sequence '\\q' (line 1, col 11)")
+}
+
+test("non-ASCII character in code is one unrecognized character") {
+    val lex = tokenizeLexer("é a")
+    assertEqual(lex.errors.size(), 1)
+    assertEqual(lex.tokens[1].value, "a")
+    val sec: any = lex.tokens[1].section
+    assertEqual(sec.startCol, 3)
+}
+
+summary()

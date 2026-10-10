@@ -91,7 +91,7 @@ pub fn normaliseEffectName(name: string): string {
 pub var emitExpr: (EmitterState, Expr) -> string = { st, expr -> "" }
 
 pub fn escapeLuaString(value: string): string {
-    val sLen = value.len()
+    val sLen = value.byteLen()
     var result = ""
     var i = 1
     while i <= sLen {
@@ -109,7 +109,9 @@ pub fn escapeLuaString(value: string): string {
         } else {
             val isNull = value.charCodeAt(i) == 0
             if isNull {
-                result = "${result}\\0"
+                // Lua reads up to three decimal digits, so a shorter escape
+                // would absorb a digit that follows the NUL
+                result = "${result}\\000"
             } else {
                 result = "$result$ch"
             }

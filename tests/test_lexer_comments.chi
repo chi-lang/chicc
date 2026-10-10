@@ -23,7 +23,7 @@ test("skipLineComment preserves newline") {
 test("skipLineComment at EOF") {
     val lex = newLexer("// comment with no newline")
     skipLineComment(lex)
-    assertEqual(lexPeek(lex), 0) // EOF
+    assertEqual(lexPeek(lex), -1) // EOF
 }
 
 // --- skipBlockComment tests ---
@@ -44,7 +44,7 @@ test("skipBlockComment spanning multiple lines") {
 test("skipBlockComment with no closing - skips to EOF") {
     val lex = newLexer("/* unclosed comment")
     skipBlockComment(lex)
-    assertEqual(lexPeek(lex), 0) // EOF
+    assertEqual(lexPeek(lex), -1) // EOF
 }
 
 test("skipBlockComment empty block comment") {
@@ -98,7 +98,7 @@ test("skipWhitespaceAndComments mixed whitespace and comments") {
 test("skipWhitespaceAndComments at EOF") {
     val lex = newLexer("   ")
     skipWhitespaceAndComments(lex)
-    assertEqual(lexPeek(lex), 0) // EOF
+    assertEqual(lexPeek(lex), -1) // EOF
 }
 
 test("skipWhitespaceAndComments no whitespace") {

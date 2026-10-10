@@ -44,6 +44,14 @@ test("escapeLuaString - mixed special chars") {
     assertEqual(escapeLuaString("a\\b\nc"), "a\\\\b\\nc")
 }
 
+test("escapeLuaString - multibyte characters are kept whole") {
+    assertEqual(escapeLuaString("ééé!"), "ééé!")
+}
+
+test("escapeLuaString - NUL followed by a digit") {
+    assertEqual(escapeLuaString("a\0" + "1"), "a\\0001")
+}
+
 // --- emitAtom tests ---
 
 test("emitAtom - integer") {

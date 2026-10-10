@@ -24,31 +24,44 @@ pub fn newLexer(source: string): Lexer {
     { source: source, pos: 1, line: 1, col: 1, length: len, tokens: [], errors: [] }
 }
 
-// Peek at current character (returns byte value, 0 for EOF)
+// Peek at current character (returns byte value, -1 for EOF; a NUL byte is 0)
 pub fn lexPeek(lex: Lexer): int {
-    if lex.pos > lex.length { return 0 }
+    if lex.pos > lex.length { return -1 }
     lex.source.charCodeAt(lex.pos)
 }
 
 // Peek at character at offset from current position (0 is current)
 pub fn lexPeekAt(lex: Lexer, offset: int): int {
     val p = lex.pos + offset
-    if p > lex.length { return 0 }
-    if p < 1 { return 0 }
+    if p > lex.length { return -1 }
+    if p < 1 { return -1 }
     lex.source.charCodeAt(p)
 }
 
-// Advance by one byte, tracking line and column
+fn isUtf8Continuation(ch: int): bool {
+    ch >= 128 && ch < 192
+}
+
+// Advance by one byte, tracking line and column. Columns count characters,
+// so UTF-8 continuation bytes stay in the column of their lead byte.
 pub fn lexAdvance(lex: Lexer) {
     val ch = lexPeek(lex)
-    if ch != 0 {
+    if ch != -1 {
         lex.pos = lex.pos + 1
         if ch == 10 {
             lex.line = lex.line + 1
             lex.col = 1
-        } else {
+        } else if !isUtf8Continuation(ch) {
             lex.col = lex.col + 1
         }
+    }
+}
+
+// Advance past the whole UTF-8 character at the current position
+fn lexAdvanceChar(lex: Lexer) {
+    lexAdvance(lex)
+    while isUtf8Continuation(lexPeek(lex)) {
+        lexAdvance(lex)
     }
 }
 
@@ -127,7 +140,7 @@ pub fn skipLineComment(lex: Lexer) {
     lexAdvance(lex)
     lexAdvance(lex)
     // Skip until newline or EOF
-    while lexPeek(lex) != 0 && lexPeek(lex) != 10 {
+    while lexPeek(lex) != -1 && lexPeek(lex) != 10 {
         lexAdvance(lex)
     }
 }
@@ -141,7 +154,7 @@ pub fn skipBlockComment(lex: Lexer) {
     lexAdvance(lex)
     lexAdvance(lex)
     // Skip until '*/' or EOF
-    while lexPeek(lex) != 0 {
+    while lexPeek(lex) != -1 {
         if lexPeek(lex) == 42 && lexPeekAt(lex, 1) == 47 {
             // Found '*/'
             lexAdvance(lex) // consume '*'
@@ -158,7 +171,7 @@ pub fn skipBlockComment(lex: Lexer) {
 // Skip whitespace (spaces and tabs) and comments (// and /* */).
 // Does NOT skip newlines - they are significant tokens.
 pub fn skipWhitespaceAndComments(lex: Lexer) {
-    while lexPeek(lex) != 0 {
+    while lexPeek(lex) != -1 {
         val ch = lexPeek(lex)
         if ch == 32 || ch == 9 {
             // Space or tab
@@ -395,7 +408,7 @@ pub fn readOperatorOrDelimiter(lex: Lexer) {
         // Unrecognized character - record the error and skip it
         val sec = newSection(startLine, startCol, startLine, startCol)
         lex.errors.push(syntaxError("unrecognized character", toCodePoint(sec)))
-        lexAdvance(lex)
+        lexAdvanceChar(lex)
     }
 }
 
@@ -427,19 +440,20 @@ fn escapeChar(ch: int): string | unit {
 fn readEscape(lex: Lexer): string {
     // Current char is the one after '\'
     val ch = lexPeek(lex)
-    if ch == 0 {
+    if ch == -1 {
         // Backslash at end of string - just return backslash
         return "\\"
     }
     val escLine = lex.line
     val escCol = lex.col - 1 // position of the backslash
-    lexAdvance(lex) // consume the escape character
+    val charStart = lex.pos
+    lexAdvanceChar(lex) // consume the escape character
     val escaped = escapeChar(ch)
     if escaped != unit {
         escaped as string
     } else {
         // Unknown escape — report it, keep the literal text as recovery
-        val c: string = fromCharCode(ch)
+        val c = substringFrom(lex, charStart, lex.pos - 1)
         val sec = newSection(escLine, escCol, escLine, escCol)
         lex.errors.push(syntaxError("unknown escape sequence '\\$c'", toCodePoint(sec)))
         "\\" + c
@@ -468,7 +482,7 @@ fn stringHasDollar(lex: Lexer): bool {
 // --- Helper: read text segment into a StringBuilder until we hit $, ", or EOF ---
 // Returns the accumulated text. Does NOT consume the terminating $, ", or EOF.
 fn readTextSegment(lex: Lexer, sb: { parts: array[string], length: int }) {
-    while lexPeek(lex) != 0 {
+    while lexPeek(lex) != -1 {
         val ch = lexPeek(lex)
         if ch == 34 { // '"' - end of string
             return unit
@@ -508,7 +522,7 @@ pub fn lexReadString(lex: Lexer) {
     if !hasInterp {
         // Simple string - no interpolation
         val sb = newStringBuilder()
-        while lexPeek(lex) != 0 && lexPeek(lex) != 34 {
+        while lexPeek(lex) != -1 && lexPeek(lex) != 34 {
             val ch = lexPeek(lex)
             if ch == 92 { // '\'
                 lexAdvance(lex) // consume '\'
@@ -537,7 +551,7 @@ pub fn lexReadString(lex: Lexer) {
         val openSec = newSection(startLine, startCol, startLine, startCol)
         lex.tokens.push(newToken(TK_INTERP_START, "\"", openSec))
 
-        while lexPeek(lex) != 0 && lexPeek(lex) != 34 {
+        while lexPeek(lex) != -1 && lexPeek(lex) != 34 {
             val ch = lexPeek(lex)
             if ch == 36 { // '$' - interpolation
                 val dollarLine = lex.line
@@ -632,7 +646,7 @@ pub fn readToken(lex: Lexer) {
 readExpressionTokensImpl = { lex: Lexer ->
     var braceDepth = 1
     skipWhitespaceAndComments(lex)
-    while lexPeek(lex) != 0 && (lexPeek(lex) != 125 || braceDepth > 1) {
+    while lexPeek(lex) != -1 && (lexPeek(lex) != 125 || braceDepth > 1) {
         val ch = lexPeek(lex)
         if ch == 123 { // '{'
             braceDepth = braceDepth + 1
@@ -651,7 +665,7 @@ pub fn tokenizeLexer(source: string): Lexer {
     val lex = newLexer(source)
     while true {
         skipWhitespaceAndComments(lex)
-        if lexPeek(lex) == 0 {
+        if lexPeek(lex) == -1 {
             // EOF reached
             val eofSection = newSection(lex.line, lex.col, lex.line, lex.col)
             lex.tokens.push(newToken(TK_EOF, "", eofSection))

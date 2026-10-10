@@ -22,9 +22,9 @@ test("lexPeek returns first char code") {
     assertEqual(lexPeek(lex), 65)
 }
 
-test("lexPeek at EOF returns 0") {
+test("lexPeek at EOF returns -1") {
     val lex = newLexer("")
-    assertEqual(lexPeek(lex), 0)
+    assertEqual(lexPeek(lex), -1)
 }
 
 test("lexPeekAt with offset 0 same as lexPeek") {
@@ -39,9 +39,24 @@ test("lexPeekAt with positive offset") {
     assertEqual(lexPeekAt(lex, 2), 67)
 }
 
-test("lexPeekAt past end returns 0") {
+test("lexPeekAt past end returns -1") {
     val lex = newLexer("AB")
-    assertEqual(lexPeekAt(lex, 5), 0)
+    assertEqual(lexPeekAt(lex, 5), -1)
+}
+
+test("lexPeek reads a NUL byte as 0, not EOF") {
+    val lex = newLexer("\0a")
+    assertEqual(lexPeek(lex), 0)
+    lexAdvance(lex)
+    assertEqual(lexPeek(lex), 97)
+}
+
+test("lexAdvance counts a multibyte character as one column") {
+    val lex = newLexer("éa")
+    lexAdvance(lex)
+    lexAdvance(lex)
+    assertEqual(lexPeek(lex), 97)
+    assertEqual(lex.col, 2)
 }
 
 test("lexAdvance moves position and column") {
@@ -99,7 +114,7 @@ test("lexPeek after lexAdvance") {
     lexAdvance(lex)
     assertEqual(lexPeek(lex), 89)
     lexAdvance(lex)
-    assertEqual(lexPeek(lex), 0)
+    assertEqual(lexPeek(lex), -1)
 }
 
 test("multiple newlines") {
