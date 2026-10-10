@@ -1,31 +1,41 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv, formatMessage }
 import std/lang { luaExpr, embedLua }
 
 // Trailing lambdas vs. condition bodies (#27): `{` ends an if/while/for/when
 // condition only at the condition's top level. Nested constructs and
 // delimited subexpressions must not leak or inherit that restriction.
 //
-// Each program is compiled and run by eval (the chicc-under-test, see
-// test_variants.chi) with io.write captured, so a parse failure surfaces as
-// the eval error and a misparse as wrong output.
+// Each program is compiled by the chicc modules under test and run with
+// io.write captured, so a parse failure surfaces as the compilation error
+// and a misparse as wrong output. eval() is not used: it compiles with the
+// prebuilt chicc.lua, which would pass even if the sources regressed.
 
 fn runCaptured(src: string): string {
+    val result = compileToLua(src, newLuaCompilationEnv())
+    if result.luaCode == unit {
+        val messages = result.messages as array[any]
+        var msg = "compilation failed:"
+        for m in messages { msg = "$msg ${formatMessage(m)}" }
+        embedLua("error(msg)")
+    }
+    val code = result.luaCode as string
     embedLua("__tl_buf = {}")
     embedLua("__tl_write = io.write")
     embedLua("io.write = function(...) for _,a in ipairs({...}) do __tl_buf[#__tl_buf+1] = tostring(a) end end")
-    embedLua("__tl_ok, __tl_err = pcall(function() return package.loaded['std/lang'].eval(src) end)")
+    embedLua("__tl_ok, __tl_err = pcall(assert(load(code)))")
     embedLua("io.write = __tl_write")
     if !(luaExpr("__tl_ok") as bool) {
-        embedLua("error('eval raised: ' .. tostring(__tl_err))")
+        embedLua("error('run raised: ' .. tostring(__tl_err))")
     }
     luaExpr("table.concat(__tl_buf)") as string
 }
 
-val runInt = "fn run(f: () -> int): int { f() }\n"
-val runBool = "fn run(f: () -> bool): bool { f() }\n"
+val runIntSrc = "fn run(f: () -> int): int { f() }\n"
+val runBoolSrc = "fn run(f: () -> bool): bool { f() }\n"
 // A misparsed `tenfold { e }` degrades to `tenfold` followed by the block
 // `{ e }`, which still yields `e`; scaling the result tells the two apart.
-val tenfold = "fn tenfold(f: () -> int): int { f() * 10 }\n"
+val tenfoldSrc = "fn tenfold(f: () -> int): int { f() * 10 }\n"
 
 // ---- Nested constructs restore the outer condition's restriction ----
 
@@ -42,51 +52,51 @@ test("nested if in a for iterable keeps the loop body") {
 }
 
 test("nested when at the top level of an if condition") {
-    assertEqual(runCaptured(runBool + "if when { true -> run { true } else -> false } { println(\"yes\") }"), "yes\n")
+    assertEqual(runCaptured(runBoolSrc + "if when { true -> run { true } else -> false } { println(\"yes\") }"), "yes\n")
 }
 
 // ---- when else body parses like a regular case body ----
 
 test("trailing lambda in when else branch") {
-    assertEqual(runCaptured(runInt + "val x = when {\n    true -> 0\n    else -> run { 2 }\n}\nprintln(x)"), "0\n")
+    assertEqual(runCaptured(runIntSrc + "val x = when {\n    true -> 0\n    else -> run { 2 }\n}\nprintln(x)"), "0\n")
 }
 
 test("trailing lambda in a taken when else branch") {
-    assertEqual(runCaptured(runInt + "val x = when {\n    false -> 0\n    else -> run { 2 }\n}\nprintln(x)"), "2\n")
+    assertEqual(runCaptured(runIntSrc + "val x = when {\n    false -> 0\n    else -> run { 2 }\n}\nprintln(x)"), "2\n")
 }
 
 // ---- Delimited subexpressions allow trailing lambdas inside a condition ----
 
 test("trailing lambda inside parentheses in an if condition") {
-    assertEqual(runCaptured(runBool + "if (run { true }) { println(\"yes\") }"), "yes\n")
+    assertEqual(runCaptured(runBoolSrc + "if (run { true }) { println(\"yes\") }"), "yes\n")
 }
 
 test("trailing lambda inside a call argument list in an if condition") {
-    assertEqual(runCaptured("fn id(b: bool): bool { b }\n" + runBool + "if id(run { true }) { println(\"yes\") }"), "yes\n")
+    assertEqual(runCaptured("fn id(b: bool): bool { b }\n" + runBoolSrc + "if id(run { true }) { println(\"yes\") }"), "yes\n")
 }
 
 test("trailing lambda inside an array literal in an if condition") {
-    assertEqual(runCaptured(runInt + "if [run { 1 }].size() == 1 { println(\"yes\") }"), "yes\n")
+    assertEqual(runCaptured(runIntSrc + "if [run { 1 }].size() == 1 { println(\"yes\") }"), "yes\n")
 }
 
 test("trailing lambda inside an index in an if condition") {
-    assertEqual(runCaptured(runInt + "val xs = [5]\nif xs[run { 1 }] == 5 { println(\"yes\") }"), "yes\n")
+    assertEqual(runCaptured(runIntSrc + "val xs = [5]\nif xs[run { 1 }] == 5 { println(\"yes\") }"), "yes\n")
 }
 
 test("trailing lambda inside a lambda body in an if condition") {
-    assertEqual(runCaptured(tenfold + "if [1].all { x -> tenfold { x } == 10 } { println(\"yes\") }"), "yes\n")
+    assertEqual(runCaptured(tenfoldSrc + "if [1].all { x -> tenfold { x } == 10 } { println(\"yes\") }"), "yes\n")
 }
 
 test("trailing lambda inside a record literal in an if condition") {
-    assertEqual(runCaptured(runInt + "if { a: run { 1 } }.a == 1 { println(\"yes\") }"), "yes\n")
+    assertEqual(runCaptured(runIntSrc + "if { a: run { 1 } }.a == 1 { println(\"yes\") }"), "yes\n")
 }
 
 test("trailing lambda inside string interpolation in an if condition") {
-    assertEqual(runCaptured(runInt + "if \"\${run { 1 }}\" == \"1\" { println(\"yes\") }"), "yes\n")
+    assertEqual(runCaptured(runIntSrc + "if \"\${run { 1 }}\" == \"1\" { println(\"yes\") }"), "yes\n")
 }
 
 test("trailing lambda inside a handle body in an if condition") {
-    assertEqual(runCaptured(tenfold + "if handle { tenfold { 1 } } with { } == 10 { println(\"yes\") }"), "yes\n")
+    assertEqual(runCaptured(tenfoldSrc + "if handle { tenfold { 1 } } with { } == 10 { println(\"yes\") }"), "yes\n")
 }
 
 // ---- Plain conditions still stop at the body ----
