@@ -1,0 +1,44 @@
+import chicc/test_util { test, assertEqual, summary, withinLimits }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import chicc/types { typeToString }
+import chicc/type_writer { decodeType }
+import std/lang { loadLuaCode, luaExpr }
+
+// A generic function of the current package called via UFCS from another
+// generic function (issue #67): the callee's type parameters get fresh
+// variables, so they do not bind the caller's same-named parameters.
+
+// Compiles `src`, expecting no messages, and runs it, which registers the
+// package for later compilations. Returns the package.
+fn compileAndRun(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    assertEqual(messages.map { m -> m.code as string }.joinToStringWithSeparator(","), "")
+    val run = loadLuaCode(result.luaCode as string) as () -> any
+    run()
+}
+
+fn exportedType(pkg: any, name: string): string {
+    // `type` is a keyword in Chi, so the export entry is read from Lua.
+    typeToString(decodeType(luaExpr("pkg._package[name].type") as string))
+}
+
+test("a UFCS call to a generic function does not change the caller's exported type") {
+    withinLimits(30) {
+        val lib = "package t67/lib\nfn first[T](xs: array[T]): T { xs[1] }\npub fn wrap[T](x: T): T {\n    val n: int = [1, 2].first()\n    x\n}"
+        compileAndRun(lib)
+        val use = "package t67/use\nimport t67/lib { wrap }\npub val r: string = wrap(\"abc\")"
+        val pkg: any = compileAndRun(use)
+        assertEqual(pkg.r as string, "abc")
+    }
+}
+
+test("a UFCS callee's type parameter does not bind the caller's same-named one") {
+    withinLimits(30) {
+        val lib = "package t67/pick\nfn first[T](xs: array[T]): T { xs[1] }\npub fn pick[T, R](x: T, ys: array[R]): T {\n    val y: R = ys.first()\n    x\n}"
+        val pkg: any = compileAndRun(lib)
+        assertEqual(exportedType(pkg, "pick"), "(T, array[R]) -> T")
+    }
+}
+
+summary()

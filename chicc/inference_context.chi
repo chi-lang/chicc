@@ -2,7 +2,7 @@
 package chicc/inference_context
 import std/lang { luaExpr, embedLua }
 import std/lang.map { emptyMap, forEach }
-import chicc/types { Type, TypeId, variableType }
+import chicc/types { Type, TypeId, variableType, polyType }
 import chicc/ast { DotTarget }
 import chicc/unification { tryUnify, newConstraint }
 
@@ -243,8 +243,15 @@ pub fn icListCurrentPackageFunctionsForType(name: string, receiverType: any): ar
     val ct = icCompileTables
     val sym: any = luaExpr("require('chicc/symbols').ctGetLocalSymbol(ct, name)")
     if sym != unit {
-        val symType: any = luaExpr("sym.symbolType")
-        if symType != unit {
+        val declType: any = luaExpr("sym.symbolType")
+        if declType != unit {
+            // A declared generic type is not generalized yet; without the poly
+            // its type parameters stay shared with the caller's same-named ones.
+            val symType: any = if (declType as Type).typeParams.size() > 0 {
+                polyType(0, declType as Type)
+            } else {
+                declType
+            }
             if icTrialUnify(symType, receiverType) {
                 // Use the symbol's own module/package for the dot target
                 // (it may be imported from a different package)
