@@ -66,15 +66,13 @@ test("top-level handler case: var assigned in the case body") {
     assertEqual(pkg.r, "ab")
 }
 
-// Until block scopes (#34), a top-level while or if body declares on the
-// package, and reads in the body and its closures must see that member.
-test("top-level while and if: val in the body is read back in the body") {
+test("top-level while and if: val in the body is a local of the body") {
     val src = "package t/s35g\n" + note + "var n = 0\nwhile n < 2 {\n    val q = n * 10\n    val h = { -> q }\n    note(h())\n    n = n + 1\n}\nif n == 2 {\n    val z = 5\n    note(z)\n}\n"
     val pkg = runModule(src)
     assertTrue(pkg != unit)
     assertEqual(pkg.trace, "0,10,5,")
-    assertEqual(pkg.q, 10)
-    assertEqual(pkg.z, 5)
+    assertEqual(pkg.q, unit)
+    assertEqual(pkg.z, unit)
 }
 
 summary()

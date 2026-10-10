@@ -593,20 +593,7 @@ fn convertFnCallImpl(node: any, pkg: any, tables: any): Expr {
     var i = 1
     val argCount = argNodes.size()
     while i <= argCount {
-        val argNode = argNodes[i]
-        val argTag = argNode.paTag()
-        var ca: any = unit
-        if argTag == "ParseBlock" {
-            // Block arguments become zero-arg lambdas. Give them a temporary
-            // symbol table so locals defined inside resolve correctly.
-            val prevFst = currentFnSymbolTable
-            val tmpFst = newFnSymbolTable(prevFst)
-            currentFnSymbolTable = tmpFst
-            ca = convert(argNode, pkg, tables)
-            currentFnSymbolTable = prevFst
-        } else {
-            ca = convert(argNode, pkg, tables)
-        }
+        val ca: any = convert(argNodes[i], pkg, tables)
         convertedArgs.push(ca)
         i = i + 1
     }
@@ -676,10 +663,14 @@ convertFnCall = convertFnCallImpl
 
 // --- Block conversion ---
 
+// A block is a scope, also at top level: its names become locals that are
+// not visible after it.
 fn convertBlockImpl(node: any, pkg: any, tables: any): Expr {
     val sec = node.paSection()
     val bodyNodes = node.paBody()
 
+    val prevFst = currentFnSymbolTable
+    currentFnSymbolTable = newFnSymbolTable(prevFst)
     currentTypeLevel = currentTypeLevel + 1
     var bodyExprs: array[any] = []
     var i = 1
@@ -690,6 +681,7 @@ fn convertBlockImpl(node: any, pkg: any, tables: any): Expr {
         i = i + 1
     }
     currentTypeLevel = currentTypeLevel - 1
+    currentFnSymbolTable = prevFst
 
     blockExpr(bodyExprs as array[Expr], sec as Section | unit)
 }
@@ -733,6 +725,15 @@ convertNameDeclaration = convertNameDeclarationImpl
 
 // --- When conversion (fold into nested IfElse) ---
 
+// A when case body is a scope even when it is not a block.
+fn convertCaseBody(node: any, pkg: any, tables: any): Expr {
+    val prevFst = currentFnSymbolTable
+    currentFnSymbolTable = newFnSymbolTable(prevFst)
+    val body = convert(node, pkg, tables)
+    currentFnSymbolTable = prevFst
+    body
+}
+
 fn convertWhenImpl(node: any, pkg: any, tables: any): Expr {
     val sec = node.paSection()
     val cases = node.paWhenCases()
@@ -748,7 +749,7 @@ fn convertWhenImpl(node: any, pkg: any, tables: any): Expr {
     // Only else case
     if caseCount == 0 && elseCase != unit {
         val ecBody: any = luaExpr("elseCase.body")
-        return convert(ecBody, pkg, tables)
+        return convertCaseBody(ecBody, pkg, tables)
     }
 
     // Build from last case backward
@@ -759,12 +760,12 @@ fn convertWhenImpl(node: any, pkg: any, tables: any): Expr {
     val lastSec: any = luaExpr("lastCase.section")
 
     val lastCondExpr: any = convert(lastCond, pkg, tables)
-    val lastBodyExpr: any = convert(lastBody, pkg, tables)
+    val lastBodyExpr: any = convertCaseBody(lastBody, pkg, tables)
 
     var result: any = unit
     if elseCase != unit {
         val ecBody: any = luaExpr("elseCase.body")
-        val elseExpr: any = convert(ecBody, pkg, tables)
+        val elseExpr: any = convertCaseBody(ecBody, pkg, tables)
         result = ifElseExpr(lastCondExpr as Expr, lastBodyExpr as Expr, elseExpr as Expr | unit, lastSec as Section | unit) as any
     } else {
         result = ifElseExpr(lastCondExpr as Expr, lastBodyExpr as Expr, unit, lastSec as Section | unit) as any
@@ -779,7 +780,7 @@ fn convertWhenImpl(node: any, pkg: any, tables: any): Expr {
         val wcSec: any = luaExpr("wc.section")
 
         val condExpr: any = convert(wcCond, pkg, tables)
-        val bodyExpr: any = convert(wcBody, pkg, tables)
+        val bodyExpr: any = convertCaseBody(wcBody, pkg, tables)
         result = ifElseExpr(condExpr as Expr, bodyExpr as Expr, result as Expr | unit, wcSec as Section | unit) as any
         idx = idx - 1
     }

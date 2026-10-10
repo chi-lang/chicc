@@ -5,7 +5,7 @@ import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tFloat, tStr
 import chicc/source { Section, toCodePoint }
 import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget, atomExpr }
 import chicc/unification { unify, unifyWithUf, ufNew, ufResolve, ufAllBindings, newConstraint }
-import chicc/inference_context { icFreshVariable, icGetTargetType, icWithNewLocalScope, icDefineLocalSymbol, icListLocalFunctionsForType, icListCurrentPackageFunctionsForType, icListTypesPackageFunctionsForType, icListAllLoadedFunctionsForType }
+import chicc/inference_context { icFreshVariable, icGetTargetType, icWithNewLocalScope, icDefineLocalSymbol, icUpdateSymbolType, icListLocalFunctionsForType, icListCurrentPackageFunctionsForType, icListTypesPackageFunctionsForType, icListAllLoadedFunctionsForType }
 
 // --- Helper: throw a typer error ---
 
@@ -329,14 +329,16 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         })
         fnResult
     } else if kind == "block" {
-        // 6. block: type each body expr at level+1, return last type
+        // 6. block: a scope; type each body expr at level+1, return last type
         val bodyExprs = luaExpr("term.blockBody") as any
         val bodyCount = luaExpr("#bodyExprs") as int
         if bodyCount == 0 {
             tUnit
         } else {
-            val types = typeTerms(bodyExprs, constraints, level + 1)
-            val lastType = types[types.size()]
+            val lastType: any = icWithNewLocalScope({
+                val types = typeTerms(bodyExprs, constraints, level + 1)
+                types[types.size()]
+            })
             lastType
         }
     } else if kind == "fn_call" {
@@ -563,8 +565,9 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
             mapType(expectedType as Type, solution)
         }
         val polymorphicType = polyType(level, mappedType as Type)
-        val declName = luaExpr("term.declName") as string
-        icDefineLocalSymbol(declName, polymorphicType)
+        // By target: a package member declared inside a block scope (a
+        // top-level weave temp) must still land in the package symbols.
+        icUpdateSymbolType(luaExpr("term.target"), polymorphicType)
         expectedType
     } else if kind == "assignment" {
         // 10. assignment: get target type, type value, constrain
@@ -582,11 +585,13 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         val conditionType = typeTerm(condition, level, constraints)
         val condSection = luaExpr("condition.section") as any
         addConstraint(constraints, tBool, conditionType, condSection)
+        // Each branch is a scope even when it is not a block (a bare when
+        // case body)
         val thenBranch = luaExpr("term.thenBranch") as any
-        val thenBranchType = typeTerm(thenBranch, level, constraints)
+        val thenBranchType = icWithNewLocalScope({ typeTerm(thenBranch, level, constraints) }) as Type
         val elseBranch = luaExpr("term.elseBranch") as any
         if elseBranch != unit {
-            val elseBranchType = typeTerm(elseBranch, level, constraints)
+            val elseBranchType = icWithNewLocalScope({ typeTerm(elseBranch, level, constraints) }) as Type
             sumCreate(luaExpr("{}") as array[TypeId], thenBranchType, elseBranchType, luaExpr("{}") as array[string])
         } else {
             sumCreate(luaExpr("{}") as array[TypeId], thenBranchType, tUnit, luaExpr("{}") as array[string])

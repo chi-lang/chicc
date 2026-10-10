@@ -1,0 +1,123 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import chicc/ast { atomExpr, blockExpr, declarationExpr, variableAccessExpr, packageTarget }
+import chicc/types { tInt }
+import chicc/typer { typeTerm }
+import chicc/inference_context { icInit }
+import std/lang { loadLuaCode }
+
+// An if, else, while or when body is a scope: a name declared in it is
+// visible to the end of that body only, inside functions and at top level
+// (issue #34).
+
+// Returns the module's package table, or unit when compilation or Lua
+// loading fails. Each source declares its own package so that members left
+// by one test are not seen by the next.
+fn runModule(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val code = result.luaCode
+    if code == unit { return unit }
+    val loader: any = loadLuaCode(code as string)
+    if loader == unit { return unit }
+    val run = loader as () -> any
+    run()
+}
+
+// Asserts that compiling `src` fails and that the first message is an
+// UNRECOGNIZED_NAME at `line`:`column`.
+fn assertUnrecognizedAt(src: string, line: int, column: int) {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    assertTrue(result.luaCode == unit)
+    val msgs: array[any] = result.messages
+    assertTrue(msgs.size() > 0)
+    if msgs.size() > 0 {
+        val msg = msgs[1]
+        assertEqual(msg.code, "UNRECOGNIZED_NAME")
+        assertTrue(msg.codePoint != unit)
+        if msg.codePoint != unit {
+            assertEqual(msg.codePoint.line, line)
+            assertEqual(msg.codePoint.column, column)
+        }
+    }
+}
+
+val note = "var trace = \"\"\nfn note(x: any) {\n    trace = \"\$trace\$x,\"\n}\n"
+
+test("fn: a block local does not shadow the outer binding after the block") {
+    val src = "package t/s34a\nval outer34 = 10\nfn f(): int {\n    if true {\n        val outer34 = 2\n    }\n    outer34\n}\nval r = f()\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, 10)
+    // The test runtime resolves unknown Lua globals through package tables,
+    // so the value alone would not catch a read of the dead block local.
+    val code: any = compileToLua(src, newLuaCompilationEnv()).luaCode
+    assertTrue(code != unit && (code as string).contains("return __P_.outer34"))
+}
+
+test("fn: a block local of another type does not retype the outer local") {
+    val src = "package t/s34b\nfn f(c: bool): string {\n    val y = \"a\"\n    if c {\n        val y = 1\n    }\n    y\n}\nval r = f(true)\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, "a")
+}
+
+test("fn: a bare when case body does not retype the outer local") {
+    val src = "package t/s34c\nfn f(c: bool): string {\n    val y = \"a\"\n    when {\n        c -> val y = 1\n    }\n    y\n}\nval r = f(true)\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, "a")
+}
+
+test("fn: an if/else local read after the block is unrecognized") {
+    val src = "package t/s34d\nfn f(c: bool): int {\n    if c {\n        val y = 1\n    } else {\n        val z = 2\n    }\n    y\n}\n"
+    assertUnrecognizedAt(src, 8, 5)
+}
+
+test("fn: a while local read after the loop is unrecognized") {
+    val src = "package t/s34e\nfn f(c: bool): int {\n    while c {\n        val y = 1\n    }\n    y\n}\n"
+    assertUnrecognizedAt(src, 6, 5)
+}
+
+test("fn: a when local read after the when is unrecognized") {
+    val src = "package t/s34f\nfn f(c: bool): int {\n    when {\n        c -> { val y = 1 }\n        else -> { val y = 2 }\n    }\n    y\n}\n"
+    assertUnrecognizedAt(src, 7, 5)
+}
+
+test("fn: a local of a bare when case body read after the when is unrecognized") {
+    val src = "package t/s34g\nfn f(c: bool): int {\n    when {\n        c -> val y = 1\n        else -> val y = 2\n    }\n    y\n}\n"
+    assertUnrecognizedAt(src, 7, 5)
+}
+
+test("top level: an if local read after the block is unrecognized") {
+    val src = "package t/s34h\nif true {\n    val q = 5\n}\nprintln(q)\n"
+    assertUnrecognizedAt(src, 5, 9)
+}
+
+test("top level: while body locals are locals of the body, closures included") {
+    val src = "package t/s34i\n" + note + "val q = 1\nvar i = 0\nwhile i < 2 {\n    val q = i * 10\n    val h = { -> q }\n    note(h())\n    i = i + 1\n}\nnote(q)\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.trace, "0,10,1,")
+    assertEqual(pkg.h, unit)
+}
+
+test("top level: a fn declared in an if body is callable in the body only") {
+    val src = "package t/s34j\n" + note + "if true {\n    fn twice(x: int): int { x * 2 }\n    note(twice(4))\n}\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.trace, "8,")
+    assertEqual(pkg.twice, unit)
+}
+
+// A top-level weave declares its temp on the package inside the weave's block.
+test("typer: a package member declared inside a block is read through its target") {
+    icInit({ moduleName: "t", packageName: "s34k" }, unit, unit)
+    val tgt = packageTarget("t", "s34k", "tmp")
+    val decl = declarationExpr(false, tgt, false, unit, atomExpr("1", tInt, unit), unit)
+    val block = blockExpr([decl, variableAccessExpr(tgt, unit)], unit)
+    val constraints: array[any] = []
+    val t = typeTerm(block, 0, constraints)
+    assertTrue(t.typeEquals(tInt))
+}
+
+summary()
