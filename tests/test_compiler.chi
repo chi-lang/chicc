@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/compiler { compile, compileToLua, hasErrors, markUsed, replaceTypes, newLuaCompilationEnv, formatMessage, newCompilationResult }
-import chicc/ast { newPackage, newProgram, atomExpr, blockExpr, nameDeclarationExpr, fnExpr, assignmentExpr, variableAccessExpr, localTarget, fnCallExpr, newFnParam, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, createRecordExpr, createArrayExpr, indexOpExpr, fieldAccessExpr, fieldAssignmentExpr, handleExpr, returnExpr, newExprField, newImport, newImportEntry, newTypeAlias }
+import chicc/ast { newPackage, newProgram, atomExpr, blockExpr, declarationExpr, fnExpr, assignmentExpr, variableAccessExpr, localTarget, fnCallExpr, newFnParam, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, createRecordExpr, createArrayExpr, indexOpExpr, fieldAccessExpr, fieldAssignmentExpr, handleExpr, returnExpr, newExprField, newImport, newImportEntry, newTypeAlias }
 import chicc/types { tInt, tFloat, tBool, tString, tUnit, tAny, functionType, variableType, mapType, newTypeId, primitiveType }
 import chicc/messages { newMessage, genericError, unrecognizedName }
 import std/lang { luaExpr, embedLua }
@@ -19,7 +19,7 @@ test("markUsed: top-level atoms stay unused") {
 
 test("markUsed: name_declaration marks value as used") {
     val valExpr = atomExpr("42", tInt, unit)
-    val decl = nameDeclarationExpr(false, "x", false, unit, valExpr, unit)
+    val decl = declarationExpr(false, localTarget("x"), false, unit, valExpr, unit)
     val exprs: any = luaExpr("{decl}")
     markUsed(exprs)
     val valueUsed: bool = luaExpr("valExpr.used == true")
@@ -157,7 +157,7 @@ test("replaceTypes: recurses into children") {
     val v1 = variableType("a1", 0)
     val child = atomExpr("42", unit, unit)
     embedLua("child.exprType = v1")
-    val decl = nameDeclarationExpr(false, "x", false, unit, child, unit)
+    val decl = declarationExpr(false, localTarget("x"), false, unit, child, unit)
     val solutions: any = luaExpr("{{ variable = v1, replacement = tString }}")
     replaceTypes(decl, solutions)
     val childType: any = luaExpr("child.exprType")

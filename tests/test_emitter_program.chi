@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/util { newStringBuilder, StringBuilder, toString }
-import chicc/ast { Program, Package, newPackage, newProgram, newTypeAlias, atomExpr, blockExpr, nameDeclarationExpr, variableAccessExpr, localTarget, packageTarget, infixOpExpr, returnExpr, effectDefinitionExpr, newFnParam, fnExpr, fnCallExpr }
+import chicc/ast { Program, Package, newPackage, newProgram, newTypeAlias, atomExpr, blockExpr, declarationExpr, variableAccessExpr, localTarget, packageTarget, infixOpExpr, returnExpr, effectDefinitionExpr, newFnParam, fnExpr, fnCallExpr }
 import chicc/types { tInt, tFloat, tBool, tString, tUnit, newTypeId, primitiveType }
 import chicc/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitProgram }
 import std/lang { luaExpr, embedLua }
@@ -43,7 +43,7 @@ test("emitExpr dispatches name_declaration") {
     val prog = newProgram(pkg, [], [], [], unit)
     val st = newState(prog)
     val valExpr = atomExpr("42", tInt, unit)
-    val expr = nameDeclarationExpr(false, "x", false, unit, valExpr, unit)
+    val expr = declarationExpr(false, packageTarget("m", "p", "x"), false, unit, valExpr, unit)
     val result = emitExpr(st, expr)
     assertEqual(result, "__P_.x")
     assertEqual(st.sb.toString(), "__P_.x=(42);")
@@ -262,7 +262,7 @@ test("emitProgram - multiple expressions returns at end") {
 test("emitProgram - name declarations emit package info") {
     val pkg = newPackage("mymod", "mypkg")
     val valExpr = atomExpr("42", tInt, unit)
-    val decl = nameDeclarationExpr(true, "x", false, unit, valExpr, unit)
+    val decl = declarationExpr(true, packageTarget("mymod", "mypkg", "x"), false, unit, valExpr, unit)
     embedLua("decl.exprType = {tag='primitive', ids={{moduleName='std',packageName='lang.int',name='int'}}}")
     val prog = newProgram(pkg, [], [], [decl], unit)
     val output = emitProgram(prog, true)
@@ -305,9 +305,9 @@ test("emitProgram - non-final top-level statements are scoped in do-end") {
     // last stays unwrapped so the module return follows it. Vals bind onto __P_,
     // so the scoping is transparent.
     val pkg = newPackage("mymod", "mypkg")
-    val v1 = nameDeclarationExpr(false, "a", false, unit, atomExpr("1", tInt, unit), unit)
+    val v1 = declarationExpr(false, packageTarget("mymod", "mypkg", "a"), false, unit, atomExpr("1", tInt, unit), unit)
     embedLua("v1.exprType = {tag='primitive', ids={{moduleName='std',packageName='lang.int',name='int'}}}")
-    val v2 = nameDeclarationExpr(false, "b", false, unit, atomExpr("2", tInt, unit), unit)
+    val v2 = declarationExpr(false, packageTarget("mymod", "mypkg", "b"), false, unit, atomExpr("2", tInt, unit), unit)
     embedLua("v2.exprType = {tag='primitive', ids={{moduleName='std',packageName='lang.int',name='int'}}}")
     val prog = newProgram(pkg, [], [], [v1, v2], unit)
     val output = emitProgram(prog, true)
@@ -325,7 +325,7 @@ test("emitProgram - val = luaExpr(...) stays unwrapped") {
     val pkg = newPackage("mymod", "mypkg")
     val callee = variableAccessExpr(packageTarget("std", "lang", "luaExpr"), unit)
     val call = fnCallExpr(callee, [atomExpr("1", tString, unit)], unit)
-    val decl = nameDeclarationExpr(false, "x", false, unit, call, unit)
+    val decl = declarationExpr(false, packageTarget("mymod", "mypkg", "x"), false, unit, call, unit)
     embedLua("decl.exprType = {tag='primitive', ids={{moduleName='std',packageName='lang.int',name='int'}}}")
     val final = atomExpr("2", tInt, unit)
     val prog = newProgram(pkg, [], [], [decl, final], unit)
@@ -342,7 +342,7 @@ test("emitProgram - fn declaration with luaExpr in its body is still wrapped") {
     val call = fnCallExpr(callee, [atomExpr("1", tString, unit)], unit)
     val body = blockExpr([call], unit)
     val fnE = fnExpr([], unit, body, unit)
-    val decl = nameDeclarationExpr(false, "f", false, unit, fnE, unit)
+    val decl = declarationExpr(false, packageTarget("mymod", "mypkg", "f"), false, unit, fnE, unit)
     embedLua("decl.exprType = {tag='primitive', ids={{moduleName='std',packageName='lang.int',name='int'}}}")
     val final = atomExpr("2", tInt, unit)
     val prog = newProgram(pkg, [], [], [decl, final], unit)

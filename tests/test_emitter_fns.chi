@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/util { newStringBuilder, StringBuilder, toString }
-import chicc/ast { Program, Package, Expr, newPackage, newProgram, atomExpr, blockExpr, fnExpr, fnCallExpr, variableAccessExpr, nameDeclarationExpr, returnExpr, localTarget, packageTarget, newFnParam }
+import chicc/ast { Program, Package, Expr, newPackage, newProgram, atomExpr, blockExpr, fnExpr, fnCallExpr, variableAccessExpr, declarationExpr, returnExpr, localTarget, packageTarget, newFnParam }
 import chicc/types { tInt, tString, tUnit }
 import chicc/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitBlock, emitFn, emitFnCall, emitNameDeclaration, emitVariableAccess }
 import std/lang { luaExpr, embedLua }
@@ -177,7 +177,7 @@ test("emitNameDeclaration - top-level fn declaration uses emitFn") {
     val st = freshState()
     val body = blockExpr([atomExpr("10", tInt, unit)], unit)
     val fnE = fnExpr([], unit, body, unit)
-    val decl = nameDeclarationExpr(false, "myFn", false, unit, fnE, unit)
+    val decl = declarationExpr(false, packageTarget("mymod", "mypkg", "myFn"), false, unit, fnE, unit)
     val result = emitNameDeclaration(st, decl)
     assertEqual(result, "myFn")
     assertEqual(st.sb.toString(), "function __P_.myFn() return (10) end;")
@@ -189,7 +189,7 @@ test("emitNameDeclaration - fn inside function does NOT use shortcut") {
     st.functionDepth = 1
     val body = blockExpr([atomExpr("5", tInt, unit)], unit)
     val fnE = fnExpr([], unit, body, unit)
-    val decl = nameDeclarationExpr(false, "inner", false, unit, fnE, unit)
+    val decl = declarationExpr(false, localTarget("inner"), false, unit, fnE, unit)
     val result = emitNameDeclaration(st, decl)
     // Inside a function, it should NOT use the top-level shortcut
     // It should emitExpr on the fn (which calls emitFn with empty name, non-topLevel)

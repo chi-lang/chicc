@@ -195,10 +195,12 @@ pub fn assignmentExpr(tgt: Target, val_: Expr, section: Section | unit): Expr {
     e
 }
 
-pub fn nameDeclarationExpr(isPub: bool, name: string, isMut: bool, expType: Type | unit, val_: Expr, section: Section | unit): Expr {
+// `tgt` is the target that reads and assignments of the declared name resolve to.
+pub fn declarationExpr(isPub: bool, tgt: Target, isMut: bool, expType: Type | unit, val_: Expr, section: Section | unit): Expr {
     val e = emptyExpr("name_declaration", section)
     e.isPublic = isPub
-    e.declName = name
+    e.target = tgt
+    e.declName = tgt.name
     e.isMutable = isMut
     e.expectedType = expType
     e.value = val_

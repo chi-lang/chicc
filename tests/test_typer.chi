@@ -1,7 +1,7 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/types { Type, TypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, sumType, arrayType, variableType, polyType, intTypeId, stringTypeId, boolTypeId, optionTypeId, sumCreate, mapType }
 import chicc/unification { Constraint, newConstraint, unify, ufNew, ufAllBindings, ufResolve, unifyWithUf }
-import chicc/ast { Target, DotTarget, localTarget, packageTarget, fieldDotTarget, localFnDotTarget, packageFnDotTarget, atomExpr, variableAccessExpr, fieldAccessExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, nameDeclarationExpr, assignmentExpr, blockExpr, fnExpr, createRecordExpr, createArrayExpr, interpolatedStringExpr, castExpr_, whileLoopExpr, breakExpr, continueExpr, isExpr, returnExpr, indexOpExpr, indexedAssignmentExpr, fieldAssignmentExpr, newFnParam, newExprField }
+import chicc/ast { Target, DotTarget, localTarget, packageTarget, fieldDotTarget, localFnDotTarget, packageFnDotTarget, atomExpr, variableAccessExpr, fieldAccessExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, declarationExpr, assignmentExpr, blockExpr, fnExpr, createRecordExpr, createArrayExpr, interpolatedStringExpr, castExpr_, whileLoopExpr, breakExpr, continueExpr, isExpr, returnExpr, indexOpExpr, indexedAssignmentExpr, fieldAssignmentExpr, newFnParam, newExprField }
 import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol }
 import chicc/source { newSection }
 import std/lang { luaExpr, embedLua }
@@ -205,7 +205,7 @@ test("typeTerm: name_declaration defines symbol") {
     initTestCtx()
     val constraints = newConstraints()
     val value = atomExpr("42", tInt, testSection)
-    val expr = nameDeclarationExpr(false, "x", false, unit, value, testSection)
+    val expr = declarationExpr(false, localTarget("x"), false, unit, value, testSection)
     val result = typeTerm(expr, 0, constraints)
     // x should now be defined
     val sym = icGetLocalSymbol("x")
@@ -216,7 +216,7 @@ test("typeTerm: name_declaration with type annotation") {
     initTestCtx()
     val constraints = newConstraints()
     val value = atomExpr("42", tInt, testSection)
-    val expr = nameDeclarationExpr(false, "x", false, tInt, value, testSection)
+    val expr = declarationExpr(false, localTarget("x"), false, tInt, value, testSection)
     val result = typeTerm(expr, 0, constraints)
     assertTrue(result.typeEquals(tInt))
 }
@@ -471,7 +471,7 @@ test("incremental UF: name_declaration clears constraints and populates UF") {
     typerSetUf(uf)
     val constraints = newConstraints()
     val value = atomExpr("42", tInt, testSection)
-    val expr = nameDeclarationExpr(false, "x", false, unit, value, testSection)
+    val expr = declarationExpr(false, localTarget("x"), false, unit, value, testSection)
     typeTerm(expr, 0, constraints)
     // Constraints should have been cleared after mid-typing solve
     val cCount: int = luaExpr("#constraints")
@@ -489,7 +489,7 @@ test("incremental UF: name_declaration resolves type correctly") {
     typerSetUf(uf)
     val constraints = newConstraints()
     val value = atomExpr("42", tInt, testSection)
-    val expr = nameDeclarationExpr(false, "y", false, unit, value, testSection)
+    val expr = declarationExpr(false, localTarget("y"), false, unit, value, testSection)
     typeTerm(expr, 0, constraints)
     // The defined symbol should have a poly type wrapping int
     val sym: any = icGetLocalSymbol("y")
@@ -533,13 +533,13 @@ test("incremental UF: multiple declarations accumulate bindings in shared UF") {
     val constraints = newConstraints()
     // First declaration: val a = 42
     val val1 = atomExpr("42", tInt, testSection)
-    val expr1 = nameDeclarationExpr(false, "a", false, unit, val1, testSection)
+    val expr1 = declarationExpr(false, localTarget("a"), false, unit, val1, testSection)
     typeTerm(expr1, 0, constraints)
     val bindingsAfter1 = ufAllBindings(uf)
     val count1: int = luaExpr("#bindingsAfter1")
     // Second declaration: val b = "hello"
     val val2 = atomExpr("hello", tString, testSection)
-    val expr2 = nameDeclarationExpr(false, "b", false, unit, val2, testSection)
+    val expr2 = declarationExpr(false, localTarget("b"), false, unit, val2, testSection)
     typeTerm(expr2, 0, constraints)
     val bindingsAfter2 = ufAllBindings(uf)
     val count2: int = luaExpr("#bindingsAfter2")
@@ -564,7 +564,7 @@ test("incremental UF: final unifyWithUf resolves remaining constraints") {
     val constraints = newConstraints()
     // Create: val x = 42; then add an extra constraint that x's type = int
     val val1 = atomExpr("42", tInt, testSection)
-    val expr1 = nameDeclarationExpr(false, "x2", false, unit, val1, testSection)
+    val expr1 = declarationExpr(false, localTarget("x2"), false, unit, val1, testSection)
     val resultType = typeTerm(expr1, 0, constraints)
     // Now add a trailing constraint (simulating what compiler.chi does after all typeTerm calls)
     val extraVar = icFreshVariable(0)
@@ -583,7 +583,7 @@ test("incremental UF: fallback path works when UF is not set") {
     typerSetUf(unit)
     val constraints = newConstraints()
     val value = atomExpr("42", tInt, testSection)
-    val expr = nameDeclarationExpr(false, "z", false, unit, value, testSection)
+    val expr = declarationExpr(false, localTarget("z"), false, unit, value, testSection)
     typeTerm(expr, 0, constraints)
     // Without UF, constraints should NOT be cleared (old behavior)
     val cCount: int = luaExpr("#constraints")

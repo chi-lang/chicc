@@ -4,7 +4,7 @@ import std/lang.map { emptyMap }
 import std/math { finf }
 import chicc/source { Section }
 import chicc/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, newTypeId }
-import chicc/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, packageTarget, setExprType, atomExpr, interpolatedStringExpr, createRecordExpr, createVariantExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, assignmentExpr, nameDeclarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam }
+import chicc/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, packageTarget, setExprType, atomExpr, interpolatedStringExpr, createRecordExpr, createVariantExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, assignmentExpr, declarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam }
 import chicc/parse_ast { ParseAst }
 import chicc/symbols { FnSymbolTable, Symbol, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newSymbol, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, lookupLoadedPublicSymbol, CompileTables, TypeTable, resolveType }
 
@@ -83,15 +83,18 @@ pub fn getSymbol(name: string, tables: any): Target {
     localTarget(name)
 }
 
-pub fn addLocalSymbol(name: string, isMut: bool, isPub: bool, symType: any, pkg: any, tables: any) {
+// Returns the target that getSymbol resolves the name to from here on.
+pub fn addLocalSymbol(name: string, isMut: bool, isPub: bool, symType: any, pkg: any, tables: any): Target {
     val fst: any = currentFnSymbolTable
     if fst != unit {
         fstAddLocal(fst as FnSymbolTable, name, unit, isMut)
+        localTarget(name)
     } else {
         val mod: string = luaExpr("pkg.moduleName")
         val pkgName: string = luaExpr("pkg.packageName")
         val sym = newSymbol(mod, pkgName, name, symType, isPub, isMut)
         ctDefineSymbol(tables as CompileTables, sym)
+        packageTarget(mod, pkgName, name)
     }
 }
 
@@ -499,7 +502,7 @@ fn convertFuncWithNameImpl(node: any, pkg: any, tables: any): Expr {
     val funcType = functionType(fnTypeArr as array[Type], tpNames, defaultArgCount)
 
     // Register symbol BEFORE converting body (for self-recursion)
-    addLocalSymbol(fnName, false, isPub, funcType, pkg, tables)
+    val fnTarget = addLocalSymbol(fnName, false, isPub, funcType, pkg, tables)
 
     // Create FnSymbolTable for the function
     val parentFst = currentFnSymbolTable
@@ -572,7 +575,7 @@ fn convertFuncWithNameImpl(node: any, pkg: any, tables: any): Expr {
     val defaults: any = if defaultArgCount > 0 { defaultArgs } else { unit }
     val fnBody = fnExpr(params as array[FnParam], defaults, body as Expr, sec as Section | unit)
 
-    nameDeclarationExpr(isPub, fnName, false, funcType as Type | unit, fnBody as Expr, sec as Section | unit)
+    declarationExpr(isPub, fnTarget, false, funcType as Type | unit, fnBody as Expr, sec as Section | unit)
 }
 
 convertFuncWithName = convertFuncWithNameImpl
@@ -720,10 +723,10 @@ fn convertNameDeclarationImpl(node: any, pkg: any, tables: any): Expr {
     if valKind == "fn" {
         symType = luaExpr("val_.exprType") as any
     }
-    addLocalSymbol(symName, isMut, isPub, symType, pkg, tables)
+    val symTarget = addLocalSymbol(symName, isMut, isPub, symType, pkg, tables)
     currentTypeLevel = currentTypeLevel - 1
 
-    nameDeclarationExpr(isPub, symName, isMut, expType as Type | unit, val_ as Expr, sec as Section | unit)
+    declarationExpr(isPub, symTarget, isMut, expType as Type | unit, val_ as Expr, sec as Section | unit)
 }
 
 convertNameDeclaration = convertNameDeclarationImpl
@@ -867,8 +870,8 @@ fn convertWeaveImpl(node: any, pkg: any, tables: any): Expr {
     val tempVarName = nextTempVarName()
 
     // Create temp variable declaration
-    val tempDecl = nameDeclarationExpr(false, tempVarName, false, unit, inputValue as Expr, valNode.paSection())
-    addLocalSymbol(tempVarName, false, false, unit, pkg, tables)
+    val tempTarget = addLocalSymbol(tempVarName, false, false, unit, pkg, tables)
+    val tempDecl = declarationExpr(false, tempTarget, false, unit, inputValue as Expr, valNode.paSection())
 
     // Create read variable for the temp var
     val readVar: any = variableAccessExpr(localTarget(tempVarName), valNode.paSection())
@@ -1080,7 +1083,7 @@ pub fn lowerVariantTypes(parseProg: any, pkg: any, tables: any): array[Expr] {
             }
             fnTypeArr.push(dataType)
             val funcType = functionType(fnTypeArr as array[Type], [] as array[string], 0)
-            addLocalSymbol(ctorName, false, ctorIsPub, funcType, pkg, tables)
+            val ctorTarget = addLocalSymbol(ctorName, false, ctorIsPub, funcType, pkg, tables)
 
             // Body: createVariantExpr binding each field to its parameter.
             // A FnSymbolTable makes the parameter reads resolve as locals.
@@ -1106,7 +1109,7 @@ pub fn lowerVariantTypes(parseProg: any, pkg: any, tables: any): array[Expr] {
 
             val body = createVariantExpr(exprFields as array[ExprField], ctorName, ctorSec as Section | unit)
             val fnBody = fnExpr(params as array[FnParam], unit, body as Expr, ctorSec as Section | unit)
-            val decl = nameDeclarationExpr(ctorIsPub, ctorName, false, funcType as Type | unit, fnBody as Expr, ctorSec as Section | unit)
+            val decl = declarationExpr(ctorIsPub, ctorTarget, false, funcType as Type | unit, fnBody as Expr, ctorSec as Section | unit)
             decls.push(decl)
             ci = ci + 1
         }

@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/util { newStringBuilder, StringBuilder, toString }
-import chicc/ast { Program, Package, newPackage, newProgram, variableAccessExpr, nameDeclarationExpr, assignmentExpr, atomExpr, localTarget, packageTarget }
+import chicc/ast { Program, Package, newPackage, newProgram, variableAccessExpr, declarationExpr, assignmentExpr, atomExpr, localTarget, packageTarget }
 import chicc/types { tInt, tString }
 import chicc/emitter { EmitterState, newState, emit, nextTmpName, topLevelName, localQualifiedName, emitVariableAccess, emitNameDeclaration, emitAssignment, emitExpr, emitAtom }
 
@@ -53,7 +53,7 @@ test("emitNameDeclaration - inside function") {
     st.inFunction = true
     st.functionDepth = 1
     val valExpr = atomExpr("42", tInt, unit)
-    val expr = nameDeclarationExpr(false, "x", false, unit, valExpr, unit)
+    val expr = declarationExpr(false, localTarget("x"), false, unit, valExpr, unit)
     val result = emitNameDeclaration(st, expr)
     assertEqual(result, "x")
     assertEqual(st.sb.toString(), "local x=(42);")
@@ -62,7 +62,7 @@ test("emitNameDeclaration - inside function") {
 test("emitNameDeclaration - at top level") {
     val st = freshState()
     val valExpr = atomExpr("42", tInt, unit)
-    val expr = nameDeclarationExpr(false, "x", false, unit, valExpr, unit)
+    val expr = declarationExpr(false, packageTarget("mymod", "mypkg", "x"), false, unit, valExpr, unit)
     val result = emitNameDeclaration(st, expr)
     assertEqual(result, "__P_.x")
     assertEqual(st.sb.toString(), "__P_.x=(42);")

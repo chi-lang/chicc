@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, functionType }
-import chicc/ast { localTarget, packageTarget, atomExpr, variableAccessExpr, fnCallExpr, nameDeclarationExpr, assignmentExpr, fnExpr, blockExpr, returnExpr, newFnParam, newImport, newImportEntry }
+import chicc/ast { localTarget, packageTarget, atomExpr, variableAccessExpr, fnCallExpr, declarationExpr, assignmentExpr, fnExpr, blockExpr, returnExpr, newFnParam, newImport, newImportEntry }
 import chicc/checks { importConflictCheck }
 import chicc/parse_ast { parseVariableRead, parseNameDeclaration, parseLambda, parseFor, parseFuncWithName, parseEffectDefinition, parseHandle, parseFnCall, parseBlock, parseBinaryOp, parseIfElse, newFormalArgument, newParseHandleCase }
 import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol }
@@ -488,7 +488,7 @@ test("returnTypeCheck: name_declaration with fn value sets expected return type"
     val fnNode = fnExpr(params, unit, body, testSection)
     fnNode.setExprType(fnType)
 
-    val decl = nameDeclarationExpr(false, "f", false, unit, fnNode, testSection)
+    val decl = declarationExpr(false, localTarget("f"), false, unit, fnNode, testSection)
     decl.setExprType(fnType)
 
     val exprs: any = luaExpr("{}")

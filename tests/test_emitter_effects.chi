@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/util { newStringBuilder, StringBuilder, toString }
-import chicc/ast { Program, Package, newPackage, newProgram, atomExpr, blockExpr, effectDefinitionExpr, handleExpr, newHandleCase, nameDeclarationExpr, variableAccessExpr, localTarget, packageTarget, newFnParam }
+import chicc/ast { Program, Package, newPackage, newProgram, atomExpr, blockExpr, effectDefinitionExpr, handleExpr, newHandleCase, declarationExpr, variableAccessExpr, localTarget, packageTarget, newFnParam }
 import chicc/types { tInt, tString, tBool, tUnit }
 import chicc/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitBlock, emitEffectDefinition, emitHandle, emitPackageInfo, collectRequires, topLevelName, normaliseEffectName, localQualifiedName, localPackagePath }
 import std/lang { luaExpr, embedLua }
@@ -117,7 +117,7 @@ test("emitHandle - multiple cases have comma separator") {
 test("emitPackageInfo - name_declaration with type") {
     val st = freshState()
     val valExpr = atomExpr("42", tInt, unit)
-    val decl = nameDeclarationExpr(true, "x", false, unit, valExpr, unit)
+    val decl = declarationExpr(true, packageTarget("m", "p", "x"), false, unit, valExpr, unit)
     embedLua("decl.exprType = {tag='primitive', ids={{moduleName='std',packageName='lang.int',name='int'}}}")
     val prog = newProgram(newPackage("m", "p"), [], [], [decl], unit)
     st.program = prog
@@ -136,7 +136,7 @@ test("emitPackageInfo - name_declaration with type") {
 test("emitPackageInfo - mutable name_declaration") {
     val st = freshState()
     val valExpr = atomExpr("0", tInt, unit)
-    val decl = nameDeclarationExpr(false, "counter", true, unit, valExpr, unit)
+    val decl = declarationExpr(false, packageTarget("m", "p", "counter"), true, unit, valExpr, unit)
     val prog = newProgram(newPackage("m", "p"), [], [], [decl], unit)
     st.program = prog
     emitPackageInfo(st)
@@ -167,7 +167,7 @@ test("emitPackageInfo - effect_definition entry") {
 test("emitPackageInfo - no type on declaration") {
     val st = freshState()
     val valExpr = atomExpr("42", tInt, unit)
-    val decl = nameDeclarationExpr(true, "y", false, unit, valExpr, unit)
+    val decl = declarationExpr(true, packageTarget("m", "p", "y"), false, unit, valExpr, unit)
     // exprType is unit (nil) by default from constructor
     val prog = newProgram(newPackage("m", "p"), [], [], [decl], unit)
     st.program = prog
