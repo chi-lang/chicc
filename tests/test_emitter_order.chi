@@ -1,0 +1,116 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { loadLuaCode }
+import std/lang.string { contains }
+
+// Short-circuit of `&&`/`||` and left-to-right evaluation of sibling
+// operands in emitted Lua (issue #57).
+
+fn luaOf(src: string): string {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val code = result.luaCode
+    if code == unit { return "" }
+    code as string
+}
+
+// Returns the module's package table, or unit when compilation or Lua
+// loading fails.
+fn runModule(src: string): any {
+    val code = luaOf(src)
+    if code == "" { return unit }
+    val loader: any = loadLuaCode(code)
+    if loader == unit { return unit }
+    val run = loader as () -> any
+    run()
+}
+
+val side = "var calls = 0\nfn side(): bool {\n    calls = calls + 1\n    true\n}\n"
+val bump = "var counter = 0\nfn bump(): int {\n    counter += 1\n    counter\n}\n"
+
+test("&& and || skip a right operand with a call") {
+    val pkg = runModule(side + "val a = false && side()\nval b = true || side()\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.a, false)
+    assertEqual(pkg.b, true)
+    assertEqual(pkg.calls, 0)
+}
+
+test("&& and || run a right operand with a call when needed") {
+    val pkg = runModule(side + "val a = true && side()\nval b = false || side()\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.a, true)
+    assertEqual(pkg.b, true)
+    assertEqual(pkg.calls, 2)
+}
+
+test("&& in an if condition skips the right operand") {
+    val pkg = runModule(side + "var r = \"\"\nif false && side() { r = \"then\" } else { r = \"else\" }\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, "else")
+    assertEqual(pkg.calls, 0)
+}
+
+test("&& in a while condition skips the right operand") {
+    val pkg = runModule(side + "var n = 0\nwhile false && side() { n += 1 }\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.n, 0)
+    assertEqual(pkg.calls, 0)
+}
+
+test("null guard protects the right operand") {
+    val src = "fn nonEmpty(x: string | unit): bool {\n    x != unit && (x as string).len() > 0\n}\nval a = nonEmpty(\"abc\")\nval b = nonEmpty(unit)\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.a, true)
+    assertEqual(pkg.b, false)
+}
+
+test("nested && and || short-circuit") {
+    val pkg = runModule(side + "val a = true && (false || side())\nval c1 = calls\nval b = false && (false || side())\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.a, true)
+    assertEqual(pkg.c1, 1)
+    assertEqual(pkg.b, false)
+    assertEqual(pkg.calls, 1)
+}
+
+test("infix left operand is read before a call on the right") {
+    val pkg = runModule(bump + "val r = counter + bump()\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, 1)
+}
+
+test("call arguments are evaluated left to right") {
+    val src = bump + "fn pair(a: int, b: int): string { \"\$a,\$b\" }\nval r = pair(counter, bump())\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, "0,1")
+}
+
+test("array elements are evaluated left to right") {
+    val pkg = runModule(bump + "val arr = [counter, bump()]\nval e1 = arr[1]\nval e2 = arr[2]\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.e1, 0)
+    assertEqual(pkg.e2, 1)
+}
+
+test("record fields are evaluated left to right") {
+    val pkg = runModule(bump + "val rec = { a: counter, b: bump() }\nval a = rec.a\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.a, 0)
+}
+
+test("interpolation reads a field before a later part mutates it") {
+    val src = "fn setX(r: { x: int }): int {\n    r.x = 99\n    0\n}\nval r = { x: 1 }\nval s = \"\${r.x} \${setX(r)}\"\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.s, "1 0")
+}
+
+test("operands without statements stay inline") {
+    val code = luaOf("fn f(a: bool, b: bool): bool { a && b }\nfn g(a: int, b: int): int { a + b }\n")
+    assertTrue(code.contains("(a and b)"))
+    assertTrue(code.contains("(a + b)"))
+}
+
+summary()

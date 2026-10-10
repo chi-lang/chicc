@@ -100,6 +100,67 @@ pub fn escapeLuaString(value: string): string {
     result
 }
 
+// A temporary is bound once and not reassigned after the expression that
+// produced it returns, so it already holds its value.
+fn isTemporary(value: string): bool {
+    if value.startsWith("_chi_tmp") == false { return false }
+    val n = value.len()
+    if n == 8 { return false }
+    var i = 9
+    while i <= n {
+        val c = value.charCodeAt(i)
+        if c < 48 || c > 57 { return false }
+        i = i + 1
+    }
+    true
+}
+
+// True iff evaluating `e` may assign a variable, field or element, directly
+// or through a call or effect. A fn literal's body runs only when called; a
+// for loop may call its generator.
+fn mayMutate(e: Expr): bool {
+    val kind = e.kind
+    if kind == "fn" { return false }
+    if kind == "fn_call" || kind == "assignment" || kind == "field_assignment" || kind == "indexed_assignment" || kind == "handle" || kind == "for_loop" { return true }
+    exprChildren(e).any { c -> mayMutate(c as Expr) }
+}
+
+// Emits sibling operands left to right and returns their values. A read of a
+// variable or field is returned as inline Lua, evaluated only where the value
+// is used, i.e. after the statements emitted for later operands; it is bound
+// to a temporary first when a later operand may mutate what it reads.
+fn emitOperands(st: EmitterState, operands: array[Expr]): array[string] {
+    val count = operands.size()
+    val values: array[string] = []
+    var i = 1
+    while i <= count {
+        val operand = operands[i]
+        var value = emitExpr(st, operand)
+        if i < count {
+            val settled = operand.kind == "atom" || value == "nil" || isTemporary(value)
+            if settled == false {
+                var later = false
+                var j = i + 1
+                while j <= count {
+                    if mayMutate(operands[j]) {
+                        later = true
+                        j = count
+                    }
+                    j = j + 1
+                }
+                if later {
+                    val tmp = nextTmpName(st)
+                    emit(st, "local $tmp=$value;")
+                    value = tmp
+                }
+            }
+        }
+        values.push(value)
+        i = i + 1
+    }
+    values
+}
+
 pub fn emitAtom(st: EmitterState, expr: Expr): string {
     val et = expr.exprType
     val typName = if et != unit { luaExpr("et.ids and et.ids[1] and et.ids[1].name or 'unknown'") as string } else { "unknown" }
@@ -119,15 +180,14 @@ pub fn emitAtom(st: EmitterState, expr: Expr): string {
 pub fn emitInterpolatedString(st: EmitterState, expr: Expr): string {
     val parts = expr.parts
     val partCount = (parts as array[any]).size()
-    // Emit all parts first (they may allocate their own tmps)
-    var partResults: array[string] = []
+    val partExprs: array[Expr] = []
     var i = 1
     while i <= partCount {
-        val part = parts[i] as Expr
-        val partResult = emitExpr(st, part)
-        partResults.push(partResult)
+        partExprs.push(parts[i] as Expr)
         i = i + 1
     }
+    // Emit all parts first (they may allocate their own tmps)
+    val partResults = emitOperands(st, partExprs)
     // Now allocate the result name (after all parts)
     val resultName = nextTmpName(st)
     emit(st, "local $resultName=")
@@ -427,27 +487,22 @@ pub fn emitFnCall(st: EmitterState, expr: Expr): string {
     val fnName = emitExpr(st, callee)
     val callParams = expr.callParams
     val paramCount = luaExpr("#callParams") as int
-    var paramList = ""
+    val args: array[Expr] = []
     var pi = 1
     while pi <= paramCount {
         val param = callParams[pi] as Expr
-        val pKind = param.kind
-        val pValue = param.atomValue
-        if pKind == "atom" {
-            if pValue == "@" {
-                pi = pi + 1
-            } else {
-                val pResult = emitExpr(st, param)
-                if paramList.len() > 0 { paramList = "$paramList," }
-                paramList = "$paramList$pResult"
-                pi = pi + 1
-            }
-        } else {
-            val pResult = emitExpr(st, param)
-            if paramList.len() > 0 { paramList = "$paramList," }
-            paramList = "$paramList$pResult"
-            pi = pi + 1
+        if param.kind != "atom" || param.atomValue != "@" {
+            args.push(param)
         }
+        pi = pi + 1
+    }
+    val argValues = emitOperands(st, args)
+    var paramList = ""
+    var ai = 1
+    while ai <= argValues.size() {
+        if ai > 1 { paramList = "$paramList," }
+        paramList = "$paramList${argValues[ai]}"
+        ai = ai + 1
     }
     val tmpName = nextTmpName(st)
     emit(st, "local $tmpName=$fnName($paramList);")
@@ -667,15 +722,38 @@ pub fn emitForLoop(st: EmitterState, expr: Expr): string {
 
 // --- Operators, Casts, Type Checks ---
 
-pub fn emitInfixOp(st: EmitterState, expr: Expr): string {
-    val leftExpr = expr.left as Expr
-    val rightExpr = expr.right as Expr
-    val leftVar = emitExpr(st, leftExpr)
-    val rightVar = emitExpr(st, rightExpr)
+// The right operand's statements run only when the left one does not decide
+// the result. Without statements it stays inline, where Lua's `and`/`or`
+// short-circuit on their own.
+fn emitShortCircuit(st: EmitterState, expr: Expr): string {
     val op = expr.op
+    val leftVar = emitExpr(st, expr.left as Expr)
+    val outer = st.sb
+    st.sb = newStringBuilder()
+    val rightVar = emitExpr(st, expr.right as Expr)
+    val rightCode = toString(st.sb)
+    st.sb = outer
+    if rightCode == "" {
+        return mapInfixOperation(leftVar, rightVar, op, "unknown")
+    }
+    val tmp = nextTmpName(st)
+    val cond = if op == "&&" { tmp } else { "not $tmp" }
+    emit(st, "local $tmp=$leftVar;if $cond then ")
+    emit(st, rightCode)
+    emit(st, "$tmp=$rightVar end;")
+    tmp
+}
+
+pub fn emitInfixOp(st: EmitterState, expr: Expr): string {
+    val op = expr.op
+    if op == "&&" || op == "||" {
+        return emitShortCircuit(st, expr)
+    }
+    val leftExpr = expr.left as Expr
+    val values = emitOperands(st, [leftExpr, expr.right as Expr])
     val leftET = leftExpr.exprType
     val leftTypeName = if leftET != unit { luaExpr("leftET.ids and leftET.ids[1] and leftET.ids[1].name or 'unknown'") as string } else { "unknown" }
-    mapInfixOperation(leftVar, rightVar, op, leftTypeName)
+    mapInfixOperation(values[1], values[2], op, leftTypeName)
 }
 
 pub fn emitPrefixOp(st: EmitterState, expr: Expr): string {
@@ -718,13 +796,18 @@ pub fn emitCast(st: EmitterState, expr: Expr): string {
 pub fn emitCreateArray(st: EmitterState, expr: Expr): string {
     val arrayVals = expr.arrayValues
     val count = luaExpr("#arrayVals") as int
+    val items: array[Expr] = []
+    var k = 1
+    while k <= count {
+        items.push(arrayVals[k] as Expr)
+        k = k + 1
+    }
+    val itemValues = emitOperands(st, items)
     var contents = ""
     var i = 1
     while i <= count {
-        val item = arrayVals[i] as Expr
-        val itemResult = emitExpr(st, item)
         if i > 1 { contents = "$contents," }
-        contents = "$contents$itemResult"
+        contents = "$contents${itemValues[i]}"
         i = i + 1
     }
     val name = nextTmpName(st)
@@ -736,15 +819,19 @@ pub fn emitCreateArray(st: EmitterState, expr: Expr): string {
 pub fn emitCreateRecord(st: EmitterState, expr: Expr): string {
     val recFields = expr.recordFields
     val count = luaExpr("#recFields") as int
+    val fieldExprs: array[Expr] = []
+    var k = 1
+    while k <= count {
+        fieldExprs.push((recFields[k] as ExprField).value)
+        k = k + 1
+    }
+    val fieldValues = emitOperands(st, fieldExprs)
     var contents = ""
     var i = 1
     while i <= count {
-        val field = recFields[i] as ExprField
-        val fieldName = luaName(field.name)
-        val fieldValue = field.value
-        val valueResult = emitExpr(st, fieldValue)
+        val fieldName = luaName((recFields[i] as ExprField).name)
         if i > 1 { contents = "$contents," }
-        contents = "$contents$fieldName=$valueResult"
+        contents = "$contents$fieldName=${fieldValues[i]}"
         i = i + 1
     }
     val name = nextTmpName(st)
