@@ -1,0 +1,70 @@
+import chicc/test_util { test, assertEqual, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv, formatMessage }
+
+// Diagnostics are written for the user: syntax errors name tokens instead of
+// internal kind numbers, type errors point at the offending element, and
+// MEMBER_NOT_FOUND names the receiver type (#33).
+//
+// Programs are compiled by the chicc modules under test, not eval(): eval()
+// compiles with the prebuilt chicc.lua, which would pass even if the sources
+// regressed.
+
+// All compilation messages, formatted and joined; "compiled" if it compiled.
+fn compileErrors(src: string): string {
+    val result = compileToLua(src, newLuaCompilationEnv())
+    if result.luaCode != unit { return "compiled" }
+    var out = ""
+    for m in result.messages as array[any] {
+        out = if out == "" { formatMessage(m) } else { "$out | ${formatMessage(m)}" }
+    }
+    out
+}
+
+// The first compilation message, formatted.
+fn firstError(src: string): string {
+    val result = compileToLua(src, newLuaCompilationEnv())
+    if result.luaCode != unit { return "compiled" }
+    formatMessage((result.messages as array[any])[1])
+}
+
+val syntax = "[SYNTAX_ERROR] Syntax error:"
+
+test("expected token at end of line") {
+    assertEqual(firstError("val x = when {\n  true\n  -> 1\n  else -> 2\n}\n"),
+        "$syntax expected '->' but got end of line (line 2, col 7)")
+}
+
+test("unexpected token names the token") {
+    assertEqual(compileErrors("val x = )\n"), "$syntax unexpected ')' (line 1, col 9)")
+}
+
+test("unexpected token at end of line") {
+    assertEqual(compileErrors("val x = -\n1\n"), "$syntax unexpected end of line (line 1, col 10)")
+}
+
+test("missing brace names the brace and the token found") {
+    assertEqual(compileErrors("if true println(1)"),
+        "$syntax expected '{' but got 'println' (line 1, col 9) | $syntax unexpected end of file (line 1, col 19)")
+}
+
+test("missing type names the token found") {
+    assertEqual(firstError("val x: = 1\n"), "$syntax expected a type but got '=' (line 1, col 8)")
+}
+
+test("type error in an array element points at the element") {
+    val mismatch = "[TYPE_MISMATCH] Expected type is 'int' but got 'string'"
+    assertEqual(compileErrors("val xs = [\n  1,\n  \"a\"\n]\n"), "$mismatch (line 3, col 3)")
+    assertEqual(compileErrors("val xs = [1, \"a\"]\n"), "$mismatch (line 1, col 14)")
+}
+
+test("missing record field names the record type") {
+    assertEqual(compileErrors("val r = { a: 1 }\nprintln(r.b)\n"),
+        "[MEMBER_NOT_FOUND] Type { a: int } does not have field 'b' (line 2, col 11)")
+}
+
+test("missing field on a primitive names the primitive") {
+    assertEqual(compileErrors("val x = 5\nprintln(x.b)\n"),
+        "[MEMBER_NOT_FOUND] Type int does not have field 'b' (line 2, col 11)")
+}
+
+summary()

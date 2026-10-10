@@ -128,3 +128,88 @@ pub fn lookupKeyword(name: string): int {
     else if name == "unit" { TK_UNIT }
     else { TK_ID }
 }
+
+// Display name of a token kind for diagnostics: punctuation and keywords
+// quoted as written in source, other kinds named in words.
+pub fn tokenKindName(kind: int): string {
+    if kind == TK_INT { "integer" }
+    else if kind == TK_FLOAT { "float" }
+    else if kind == TK_STRING || kind == TK_INTERP_START || kind == TK_INTERP_TEXT { "string" }
+    else if kind == TK_INTERP_EXPR_START { "'\${'" }
+    else if kind == TK_INTERP_EXPR_END { "'}'" }
+    else if kind == TK_INTERP_END { "end of string" }
+    else if kind == TK_ID { "identifier" }
+    else if kind == TK_PUB { "'pub'" }
+    else if kind == TK_VAL { "'val'" }
+    else if kind == TK_VAR { "'var'" }
+    else if kind == TK_FN { "'fn'" }
+    else if kind == TK_IF { "'if'" }
+    else if kind == TK_ELSE { "'else'" }
+    else if kind == TK_AS { "'as'" }
+    else if kind == TK_WHILE { "'while'" }
+    else if kind == TK_FOR { "'for'" }
+    else if kind == TK_IN { "'in'" }
+    else if kind == TK_PACKAGE { "'package'" }
+    else if kind == TK_IMPORT { "'import'" }
+    else if kind == TK_DATA { "'data'" }
+    else if kind == TK_WHEN { "'when'" }
+    else if kind == TK_MATCH { "'match'" }
+    else if kind == TK_IS { "'is'" }
+    else if kind == TK_BREAK { "'break'" }
+    else if kind == TK_CONTINUE { "'continue'" }
+    else if kind == TK_EFFECT { "'effect'" }
+    else if kind == TK_HANDLE { "'handle'" }
+    else if kind == TK_WITH { "'with'" }
+    else if kind == TK_RETURN { "'return'" }
+    else if kind == TK_TRAIT { "'trait'" }
+    else if kind == TK_TYPE { "'type'" }
+    else if kind == TK_TRUE { "'true'" }
+    else if kind == TK_FALSE { "'false'" }
+    else if kind == TK_UNIT { "'unit'" }
+    else if kind == TK_PLUS { "'+'" }
+    else if kind == TK_MINUS { "'-'" }
+    else if kind == TK_STAR { "'*'" }
+    else if kind == TK_SLASH { "'/'" }
+    else if kind == TK_PERCENT { "'%'" }
+    else if kind == TK_EQ { "'='" }
+    else if kind == TK_EQEQ { "'=='" }
+    else if kind == TK_NEQ { "'!='" }
+    else if kind == TK_LT { "'<'" }
+    else if kind == TK_LTEQ { "'<='" }
+    else if kind == TK_GT { "'>'" }
+    else if kind == TK_GTEQ { "'>='" }
+    else if kind == TK_NOT { "'!'" }
+    else if kind == TK_AND { "'&&'" }
+    else if kind == TK_OR { "'||'" }
+    else if kind == TK_AMP { "'&'" }
+    else if kind == TK_PIPE { "'|'" }
+    else if kind == TK_LSHIFT { "'<<'" }
+    else if kind == TK_RSHIFT { "'>>'" }
+    else if kind == TK_ARROW { "'->'" }
+    else if kind == TK_WEAVE { "'~>'" }
+    else if kind == TK_UNDERSCORE { "'_'" }
+    else if kind == TK_DOT { "'.'" }
+    else if kind == TK_COMMA { "','" }
+    else if kind == TK_COLON { "':'" }
+    else if kind == TK_PLUSEQ { "'+='" }
+    else if kind == TK_MINUSEQ { "'-='" }
+    else if kind == TK_STAREQ { "'*='" }
+    else if kind == TK_SLASHEQ { "'/='" }
+    else if kind == TK_LPAREN { "'('" }
+    else if kind == TK_RPAREN { "')'" }
+    else if kind == TK_LBRACE { "'{'" }
+    else if kind == TK_RBRACE { "'}'" }
+    else if kind == TK_LBRACKET { "'['" }
+    else if kind == TK_RBRACKET { "']'" }
+    else if kind == TK_EOF { "end of file" }
+    else if kind == TK_NEWLINE { "end of line" }
+    else { "unknown token" }
+}
+
+// Display of a token found in source: names and numbers quoted with their
+// text, every other token by its kind name.
+pub fn describeToken(tok: Token): string {
+    val kind = tok.kind
+    if kind == TK_ID || kind == TK_INT || kind == TK_FLOAT { "'${tok.value}'" }
+    else { tokenKindName(kind) }
+}

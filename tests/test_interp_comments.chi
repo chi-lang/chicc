@@ -1,6 +1,5 @@
 import chicc/test_util { test, assertEqual, summary }
 import chicc/compiler { compileToLua, newLuaCompilationEnv, formatMessage }
-import chicc/token { TK_RPAREN, TK_INTERP_EXPR_END }
 import std/lang { loadLuaCode }
 
 // Inside `${...}` whitespace and comments are skipped as outside strings and
@@ -59,8 +58,8 @@ test("newline before the closing brace") {
 test("line comment then operator on the next line fails like in parentheses") {
     val inParens = errorMessages("val a = 1\nprintln((a // c\n + 1))")
     val inInterp = errorMessages("val a = 1\nprintln(\"v=\${a // c\n + 1}\")")
-    assertEqual(inParens[1], "[SYNTAX_ERROR] Syntax error: expected token kind $TK_RPAREN but got + (line 3, col 2)")
-    assertEqual(inInterp[1], "[SYNTAX_ERROR] Syntax error: expected token kind $TK_INTERP_EXPR_END but got + (line 3, col 2)")
+    assertEqual(inParens[1], "[SYNTAX_ERROR] Syntax error: expected ')' but got '+' (line 3, col 2)")
+    assertEqual(inInterp[1], "[SYNTAX_ERROR] Syntax error: expected '}' but got '+' (line 3, col 2)")
 }
 
 summary()

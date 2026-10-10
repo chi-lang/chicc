@@ -1,7 +1,7 @@
 // chicc/chicc/typer.chi
 package chicc/typer
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tFloat, tString, tAny, sumCreate, recordType, arrayType, functionType, polyType, mapType, optionTypeId, intTypeId, floatTypeId, unfoldRecursive }
+import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tFloat, tString, tAny, sumCreate, recordType, arrayType, functionType, polyType, mapType, optionTypeId, intTypeId, floatTypeId, unfoldRecursive, typeToString }
 import chicc/source { Section, toCodePoint }
 import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget, atomExpr }
 import chicc/unification { unify, unifyWithUf, ufNew, ufResolve, ufAllBindings, newConstraint }
@@ -283,8 +283,8 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         var i = 1
         while i <= vtCount {
             val vt = valueTypes[i]
-            val section = luaExpr("term.section") as any
-            addConstraint(constraints, elementType, vt, section)
+            val value: any = (values as array[any])[i]
+            addConstraint(constraints, elementType, vt, value.section)
             i = i + 1
         }
         arrayType(elementType as Type, [] as array[string])
@@ -536,7 +536,8 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
                 } else {
                     // No matching field or function found
                     val cp = luaExpr("memberSection and require('chicc/source').toCodePoint(memberSection) or nil") as any
-                    embedLua("error(require('chicc/messages').memberDoesNotExist(finalReceiverType.tag or 'unknown', fieldName, cp))")
+                    val receiverDesc = typeToString(finalReceiverType as Type)
+                    embedLua("error(require('chicc/messages').memberDoesNotExist(receiverDesc, fieldName, cp))")
                     unit // unreachable
                 }
             }

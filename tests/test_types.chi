@@ -1,5 +1,5 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import chicc/types { Type, newTypeId, typeIdToString, anyTypeId, intTypeId, stringTypeId, tInt, tString, tUnit, tBool, tAny, primitiveType, functionType, recordType, sumType, arrayType, variableType }
+import chicc/types { Type, newTypeId, typeIdToString, anyTypeId, intTypeId, stringTypeId, tInt, tString, tUnit, tBool, tAny, primitiveType, functionType, recordType, sumType, arrayType, variableType, recursiveType, polyType, typeToString }
 import std/lang.array { size }
 
 test("newTypeId") {
@@ -55,6 +55,38 @@ test("variableType") {
     val v = variableType("T", 0)
     assertTrue(v.tag == "var")
     assertEqual(v.name, "T")
+}
+
+// typeToString writes a type the way a user writes it in Chi source (#33).
+test("typeToString: primitives by name") {
+    assertEqual(typeToString(tInt), "int")
+    assertEqual(typeToString(tString), "string")
+}
+
+test("typeToString: record lists its fields") {
+    val rec = recordType([], [{ name: "a", fieldType: tInt }, { name: "b", fieldType: tString }], [])
+    assertEqual(typeToString(rec), "{ a: int, b: string }")
+    assertEqual(typeToString(recordType([], [], [])), "{}")
+}
+
+test("typeToString: array, function, sum and variable") {
+    assertEqual(typeToString(arrayType(tInt, [])), "array[int]")
+    assertEqual(typeToString(functionType([tInt, tString, tBool], [], 0)), "(int, string) -> bool")
+    assertEqual(typeToString(functionType([tUnit], [], 0)), "() -> unit")
+    assertEqual(typeToString(sumType([], tInt, tString, [])), "int | string")
+    assertEqual(typeToString(variableType("T", 0)), "T")
+}
+
+test("typeToString: nested types") {
+    val rec = recordType([], [{ name: "xs", fieldType: arrayType(tInt, []) }], [])
+    assertEqual(typeToString(arrayType(rec, [])), "array[{ xs: array[int] }]")
+}
+
+test("typeToString: recursive and poly types show their inner type") {
+    val v = variableType("T", 0)
+    val node = recordType([], [{ name: "next", fieldType: v }], [])
+    assertEqual(typeToString(recursiveType(v, node)), "{ next: T }")
+    assertEqual(typeToString(polyType(0, arrayType(v, []))), "array[T]")
 }
 
 summary()
