@@ -1,0 +1,77 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { loadLuaCode }
+
+// A float literal is emitted as Lua text that reads back as exactly the same
+// double and is valid Lua for any magnitude (issue #43).
+
+fn luaOf(src: string): string {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val code = result.luaCode
+    if code == unit { return "" }
+    code as string
+}
+
+// Returns the module's package table, or unit when compilation or Lua
+// loading fails.
+fn runModule(src: string): any {
+    val code = luaOf(src)
+    if code == "" { return unit }
+    val loader: any = loadLuaCode(code)
+    if loader == unit { return unit }
+    val run = loader as () -> any
+    run()
+}
+
+test("17 significant digits survive emission") {
+    val pkg = runModule("val a = 1.0000000000000002 > 1.0\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.a, true)
+}
+
+test("pi literal equals math pi") {
+    val pkg = runModule("import std/math { pi }\nval a = pi == 3.141592653589793\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.a, true)
+}
+
+test("pi literal is not rounded to 14 digits") {
+    val pkg = runModule("val a = 3.141592653589793 == 3.1415926535898\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.a, false)
+}
+
+test("large literal is valid Lua") {
+    val pkg = runModule("val s = \"\${100000000000000000000.0}\"\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.s, "1e+20")
+}
+
+test("tiny literal is valid Lua") {
+    val pkg = runModule("val s = \"\${0.000001}\"\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.s, "1e-06")
+}
+
+test("literal beyond double range is infinity") {
+    var digits = "1"
+    var i = 1
+    while i <= 400 {
+        digits = "${digits}0"
+        i = i + 1
+    }
+    val pkg = runModule("val s = \"\${$digits.0}\"\nval n = \"\${-$digits.0}\"\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.s, "inf")
+    assertEqual(pkg.n, "-inf")
+}
+
+test("short literals print as before") {
+    val pkg = runModule("val a = \"\${0.1}\"\nval b = \"\${1.5}\"\nval c = \"\${2.0}\"\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.a, "0.1")
+    assertEqual(pkg.b, "1.5")
+    assertEqual(pkg.c, "2")
+}
+
+summary()
