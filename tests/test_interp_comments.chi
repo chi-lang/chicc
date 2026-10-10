@@ -1,75 +1,64 @@
 import chicc/test_util { test, assertEqual, summary }
 import chicc/compiler { compileToLua, newLuaCompilationEnv, formatMessage }
 import chicc/token { TK_RPAREN, TK_INTERP_EXPR_END }
-import std/lang { luaExpr, embedLua }
+import std/lang { loadLuaCode }
 
 // Inside `${...}` whitespace and comments are skipped as outside strings and
 // newlines are accepted where `( )` accepts them (#25). A `}` or `"` inside a
 // comment is not an interpolation brace or a nested string.
 //
-// Each program is compiled by the chicc modules under test and run with
-// io.write captured. eval() is not used: it compiles with the prebuilt
-// chicc.lua, which would pass even if the sources regressed.
+// Each program is compiled by the chicc modules under test and run. eval() is
+// not used: it compiles with the prebuilt chicc.lua, which would pass even if
+// the sources regressed.
 
-fn runCaptured(src: string): string {
-    val result = compileToLua(src, newLuaCompilationEnv())
-    if result.luaCode == unit {
-        val messages = result.messages as array[any]
-        var msg = "compilation failed:"
-        for m in messages { msg = "$msg ${formatMessage(m)}" }
-        embedLua("error(msg)")
-    }
-    val code = result.luaCode as string
-    embedLua("__icmt_buf = {}")
-    embedLua("__icmt_write = io.write")
-    embedLua("io.write = function(...) for _,a in ipairs({...}) do __icmt_buf[#__icmt_buf+1] = tostring(a) end end")
-    embedLua("__icmt_ok, __icmt_err = pcall(assert(load(code)))")
-    embedLua("io.write = __icmt_write")
-    if !(luaExpr("__icmt_ok") as bool) {
-        embedLua("error('run raised: ' .. tostring(__icmt_err))")
-    }
-    luaExpr("table.concat(__icmt_buf)") as string
-}
-
-fn compileErrors(src: string): array[string] {
+fn errorMessages(src: string): array[string] {
     val result = compileToLua(src, newLuaCompilationEnv())
     val errors: array[string] = []
     for m in result.messages as array[any] { errors.push(formatMessage(m)) }
     errors
 }
 
+// Returns the module's `s` value, or its compilation errors so that a failing
+// assertion shows them.
+fn valueOfS(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    if result.luaCode == unit { return errorMessages(src) }
+    val run = loadLuaCode(result.luaCode as string) as () -> any
+    run().s
+}
+
 // ---- Comments ----
 
 test("block comment inside interpolation") {
-    assertEqual(runCaptured("val a = 1\nprintln(\"v=\${a /* c */ + 1}\")"), "v=2\n")
+    assertEqual(valueOfS("val a = 1\nval s = \"v=\${a /* c */ + 1}\""), "v=2")
 }
 
 test("line comment inside interpolation continues after the operator") {
-    assertEqual(runCaptured("val a = 1\nprintln(\"v=\${a + // c\n 1}\")"), "v=2\n")
+    assertEqual(valueOfS("val a = 1\nval s = \"v=\${a + // c\n 1}\""), "v=2")
 }
 
 test("line comment before the closing brace") {
-    assertEqual(runCaptured("val a = 1\nprintln(\"v=\${a // c\n}\")"), "v=1\n")
+    assertEqual(valueOfS("val a = 1\nval s = \"v=\${a // c\n}\""), "v=1")
 }
 
 test("brace and quote inside a comment are ignored") {
-    assertEqual(runCaptured("val a = 1\nprintln(\"v=\${ /* } \" */ a}\")"), "v=1\n")
+    assertEqual(valueOfS("val a = 1\nval s = \"v=\${ /* } \" */ a}\""), "v=1")
 }
 
 // ---- Newlines ----
 
 test("newline after the opening brace") {
-    assertEqual(runCaptured("val a = 1\nprintln(\"v=\${\n a}\")"), "v=1\n")
+    assertEqual(valueOfS("val a = 1\nval s = \"v=\${\n a}\""), "v=1")
 }
 
 test("newline before the closing brace") {
-    assertEqual(runCaptured("val a = 1\nprintln(\"v=\${a\n}\")"), "v=1\n")
+    assertEqual(valueOfS("val a = 1\nval s = \"v=\${a\n}\""), "v=1")
 }
 
 // A newline before a binary operator ends the expression, as inside `( )`.
 test("line comment then operator on the next line fails like in parentheses") {
-    val inParens = compileErrors("val a = 1\nprintln((a // c\n + 1))")
-    val inInterp = compileErrors("val a = 1\nprintln(\"v=\${a // c\n + 1}\")")
+    val inParens = errorMessages("val a = 1\nprintln((a // c\n + 1))")
+    val inInterp = errorMessages("val a = 1\nprintln(\"v=\${a // c\n + 1}\")")
     assertEqual(inParens[1], "[SYNTAX_ERROR] Syntax error: expected token kind $TK_RPAREN but got + (line 3, col 2)")
     assertEqual(inInterp[1], "[SYNTAX_ERROR] Syntax error: expected token kind $TK_INTERP_EXPR_END but got + (line 3, col 2)")
 }

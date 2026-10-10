@@ -626,7 +626,6 @@ pub fn readToken(lex: Lexer) {
     }
 }
 
-// --- Now wire up readExpressionTokensImpl to use readToken ---
 // Lexes a `${...}` expression up to, but not including, its closing `}`.
 // Only `{`/`}` tokens change the depth, so braces inside comments and nested
 // strings do not close the interpolation.
