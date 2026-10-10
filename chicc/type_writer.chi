@@ -187,14 +187,13 @@ fn writeLuaTypeImpl(sb: StringBuilder, t: Type) {
         writeLuaType(sb, b)
         sb.append("}")
     } else if tag == "recursive" {
-        // If the inner type has ids (it's a named type), emit the whole rec as a typeref
-        // to avoid double-wrapping when the typeref resolves to the full rec(var, record)
+        // A named non-generic inner type emits the whole rec as a typeref, to avoid
+        // double-wrapping when the typeref resolves to the full rec(var, record).
+        // A generic one is written structurally, like a generic record.
         val inner = luaExpr("t.innerType") as Type
         val innerIds = inner.ids
         val innerIdCount = innerIds.size()
         val useRef = luaExpr("innerIdCount > 0 and (__defining_type_id == nil or not (innerIds[1].moduleName == __defining_type_id.moduleName and innerIds[1].packageName == __defining_type_id.packageName and innerIds[1].name == __defining_type_id.name))") as bool
-        // A generic recursive type is written structurally for the same reason
-        // as a generic record; the record branch then writes its body structurally too.
         if useRef && inner.typeParams.size() == 0 {
             writeTypeRef(sb, innerIds)
         } else {
