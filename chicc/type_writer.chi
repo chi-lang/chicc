@@ -126,7 +126,9 @@ fn writeLuaTypeImpl(sb: StringBuilder, t: Type) {
         val ids = t.ids
         val idCount = ids.size()
         val useRef = luaExpr("idCount > 0 and (__defining_type_id == nil or not (ids[1].moduleName == __defining_type_id.moduleName and ids[1].packageName == __defining_type_id.packageName and ids[1].name == __defining_type_id.name))") as bool
-        if useRef {
+        // A generic record carries its type arguments only in its field types;
+        // a typeref would resolve to the uninstantiated declaration.
+        if useRef && t.typeParams.size() == 0 {
             writeTypeRef(sb, ids)
         } else {
             sb.append("{tag=\"record\",ids=")
@@ -191,7 +193,9 @@ fn writeLuaTypeImpl(sb: StringBuilder, t: Type) {
         val innerIds = inner.ids
         val innerIdCount = innerIds.size()
         val useRef = luaExpr("innerIdCount > 0 and (__defining_type_id == nil or not (innerIds[1].moduleName == __defining_type_id.moduleName and innerIds[1].packageName == __defining_type_id.packageName and innerIds[1].name == __defining_type_id.name))") as bool
-        if useRef {
+        // A generic recursive type is written structurally for the same reason
+        // as a generic record; the record branch then writes its body structurally too.
+        if useRef && inner.typeParams.size() == 0 {
             writeTypeRef(sb, innerIds)
         } else {
             sb.append("{tag=\"rec\",var=")

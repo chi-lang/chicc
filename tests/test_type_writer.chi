@@ -69,10 +69,10 @@ test("encode empty record") {
     assertEqual(encoded, "{tag=\"record\",ids={},fields={},typeParams={}}")
 }
 
-test("encode record with type params") {
-    val r = recordType([newTypeId("std", "lang.map", "Map")], [{ name: "key", fieldType: variableType("K", 0) }], ["K", "V"])
+test("encode generic record structurally") {
+    val r = recordType([newTypeId("test", "pkg", "Box")], [{ name: "v", fieldType: tInt }], ["T"])
     val encoded = encodeType(r)
-    assertEqual(encoded, "{tag=\"typeref\",ids={{\"std\",\"lang.map\",\"Map\"}}}")
+    assertEqual(encoded, "{tag=\"record\",ids={{\"test\",\"pkg\",\"Box\"}},fields={{\"v\",{tag=\"int\"}}},typeParams={\"T\"}}")
 }
 
 test("encode sum type") {
@@ -118,6 +118,13 @@ test("encode recursive type") {
     // recurse infinitely on self-referential types. The defining occurrence
     // (encodeTypeWithContext) is what serialises the structure; see roundtrip below.
     assertEqual(encoded, "{tag=\"typeref\",ids={{\"test\",\"pkg\",\"List\"}}}")
+}
+
+test("encode generic recursive type structurally") {
+    val v = variableType("X", 0)
+    val r = recordType([newTypeId("test", "pkg", "Node")], [{ name: "v", fieldType: tInt }, { name: "next", fieldType: v }], ["T"])
+    val encoded = encodeType(recursiveType(v, r))
+    assertEqual(encoded, "{tag=\"rec\",var={tag=\"var\",name=\"X\",level=0},type={tag=\"record\",ids={{\"test\",\"pkg\",\"Node\"}},fields={{\"v\",{tag=\"int\"}},{\"next\",{tag=\"var\",name=\"X\",level=0}}},typeParams={\"T\"}}}")
 }
 
 test("decode primitive int") {

@@ -1,0 +1,46 @@
+import chicc/test_util { test, assertEqual, summary, withinLimits }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { loadLuaCode }
+
+// Instantiated generic named records in package metadata (issue #52): an
+// importing package sees the type arguments, plain and recursive.
+
+// Compiles `src`; returns the codes of the reported messages, comma-separated.
+fn messageCodes(src: string): string {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    messages.map { m -> m.code as string }.joinToStringWithSeparator(",")
+}
+
+// Compiles and runs `src`, so its package is in package.loaded for importers.
+fn loadPackage(src: string) {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    assertEqual(messages.map { m -> "${m.code}: ${m.text}" }.joinToStringWithSeparator("\n"), "")
+    val run = loadLuaCode(result.luaCode as string) as () -> any
+    run()
+}
+
+test("an imported Box[int] field is int") {
+    withinLimits(30) {
+        loadPackage("package t52/pa\ntype Box[T] = { v: T }\npub fn mk(): Box[int] { { v: 1 } }")
+        assertEqual(messageCodes("package t52/pb\nimport t52/pa { mk }\nval s: string = mk().v"), "TYPE_MISMATCH")
+    }
+}
+
+test("an imported recursive Node[int] field is int") {
+    withinLimits(30) {
+        loadPackage("package t52/ra\ntype Node[T] = { v: T, next: Node[T] | unit }\npub fn mkn(): Node[int] { { v: 1, next: unit } }")
+        assertEqual(messageCodes("package t52/rb\nimport t52/ra { mkn }\nval s: string = mkn().v"), "TYPE_MISMATCH")
+    }
+}
+
+test("imported Box[int] and Box[string] keep their own arguments") {
+    withinLimits(30) {
+        loadPackage("package t52/pc\ntype Box[T] = { v: T }\npub fn mkI(): Box[int] { { v: 1 } }\npub fn mkS(): Box[string] { { v: \"a\" } }")
+        assertEqual(messageCodes("package t52/pd\nimport t52/pc { mkI, mkS }\nval a: int = mkI().v\nval b: string = mkS().v"), "")
+        assertEqual(messageCodes("package t52/pe\nimport t52/pc { mkS }\nval c: int = mkS().v"), "TYPE_MISMATCH")
+    }
+}
+
+summary()
