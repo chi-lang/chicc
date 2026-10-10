@@ -1,0 +1,84 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { loadLuaCode }
+
+// A UFCS call on a local binding (a lambda val or a nested fn) calls that
+// binding, in its own scope and from nested lambdas; a same-package
+// top-level function is still reached through the package (issue #50).
+
+// Compiles `src`, expecting no messages, and runs it. Returns the package.
+// Each source declares its own package so that members left by one test are
+// not seen by the next.
+fn compileAndRun(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    assertEqual(messages.map { m -> m.code as string }.joinToStringWithSeparator(","), "")
+    if result.luaCode == unit { return unit }
+    val run = loadLuaCode(result.luaCode as string) as () -> any
+    run()
+}
+
+fn runR(src: string): any {
+    val pkg = compileAndRun(src)
+    if pkg == unit { unit } else { pkg.r }
+}
+
+test("a local lambda called via UFCS in a function body") {
+    val src = "package t50/b1\nfn run(): int {\n    val dblB1 = { x: int -> x * 100 }\n    5.dblB1()\n}\nval r = run()\n"
+    assertEqual(runR(src), 500)
+}
+
+test("a local lambda shadows a same-named package function") {
+    val src = "package t50/b2\nfn dblB2(x: int): int { x * 2 }\nfn run(): int {\n    val dblB2 = { x: int -> x * 100 }\n    5.dblB2()\n}\nval r = run()\n"
+    assertEqual(runR(src), 500)
+}
+
+test("a local lambda called via UFCS from a nested lambda") {
+    val src = "package t50/a1\nfn run(): int {\n    val dblA1 = { x: int -> x * 100 }\n    val f = { y: int -> y.dblA1() }\n    f(5)\n}\nval r = run()\n"
+    assertEqual(runR(src), 500)
+}
+
+test("a nested fn called via UFCS") {
+    val src = "package t50/c4\nfn run(): int {\n    fn dblC4(x: int): int { x * 100 }\n    5.dblC4()\n}\nval r = run()\n"
+    assertEqual(runR(src), 500)
+}
+
+test("a fn declared in a top-level block called via UFCS") {
+    val src = "package t50/f2\nval r = if true {\n    fn dblF2(x: int): int { x * 100 }\n    5.dblF2()\n} else { 0 }\n"
+    assertEqual(runR(src), 500)
+}
+
+test("a same-package top-level function called via UFCS from a function and a nested lambda") {
+    val src = "package t50/c5\nfn dblC5(x: int): int { x * 2 }\nfn run(): int {\n    val f = { y: int -> y.dblC5() }\n    f(5) + 5.dblC5()\n}\nval r = run()\n"
+    assertEqual(runR(src), 20)
+}
+
+test("a local whose type does not fit the receiver does not shadow the package one") {
+    val src = "package t50/c6\nval dblC6 = { x: int -> x * 100 }\nfn run(): int {\n    val dblC6 = { s: string -> 1 }\n    5.dblC6()\n}\nval r = run()\n"
+    assertEqual(runR(src), 500)
+}
+
+test("a local lambda does not take the default arguments of a same-named package function") {
+    val src = "package t50/d2\nfn dblD2(x: int, y: int = 3): int { x * y }\nfn run(): int {\n    val dblD2 = { x: int -> x * 100 }\n    5.dblD2()\n}\nval r = run()\n"
+    assertEqual(runR(src), 500)
+}
+
+test("a same-package function called via UFCS in a function body gets its default arguments") {
+    val src = "package t50/d1\nfn addD1(x: int, y: int = 2): int { x + y }\nfn run(): int {\n    5.addD1()\n}\nval r = run()\n"
+    assertEqual(runR(src), 7)
+}
+
+test("a local shadowed by an inner one of another type is not called") {
+    // The emitted Lua call would reach the inner binding, so the outer one
+    // is not a candidate.
+    val src = "package t50/s1\nfn run(): int {\n    val dblS1 = { x: int -> x * 100 }\n    if true {\n        val dblS1 = { s: string -> 1 }\n        5.dblS1()\n    } else { 0 }\n}\nval r = run()\n"
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    assertTrue(result.luaCode == unit)
+    val msgs: array[any] = result.messages
+    assertTrue(msgs.size() > 0)
+    if msgs.size() > 0 {
+        assertEqual(msgs[1].code, "MEMBER_NOT_FOUND")
+    }
+}
+
+summary()

@@ -29,8 +29,14 @@ pub fn fieldDotTarget(name: string): DotTarget {
     { tag: "field", moduleName: "", packageName: "", name: name }
 }
 
+// A function of the current package, reached through the package table.
 pub fn localFnDotTarget(name: string): DotTarget {
     { tag: "local_fn", moduleName: "", packageName: "", name: name }
+}
+
+// A function bound to a local name: a lambda val or a nested fn.
+pub fn localBindingDotTarget(name: string): DotTarget {
+    { tag: "local_binding", moduleName: "", packageName: "", name: name }
 }
 
 pub fn packageFnDotTarget(mod: string, pkg: string, name: string): DotTarget {

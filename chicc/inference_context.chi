@@ -3,7 +3,7 @@ package chicc/inference_context
 import std/lang { luaExpr, embedLua }
 import std/lang.map { emptyMap, forEach }
 import chicc/types { Type, TypeId, variableType, polyType }
-import chicc/ast { DotTarget }
+import chicc/ast { DotTarget, localBindingDotTarget }
 import chicc/unification { tryUnify, newConstraint }
 
 // --- Module-level state ---
@@ -198,40 +198,52 @@ pub fn icTrialUnify(typeScheme: any, receiverType: any): bool {
     tryUnify([newConstraint(firstParam, receiverType, unit, [])]) != unit
 }
 
-// List local scope functions matching a UFCS call
+// List scope-chain functions matching a UFCS call, innermost first. Of the
+// local scopes only the innermost binding of the name is a candidate: the
+// emitted Lua call cannot reach an outer one. A binding that does not fit the
+// receiver is skipped, so the package symbol is still tried.
 pub fn icListLocalFunctionsForType(name: string, receiverType: any): array[any] {
     val results: array[any] = []
-    // Walk the scope chain
     var scope = icLocalSymbols
-    while scope != unit {
-        val sym = icLocalSymbolsGet(scope, name)
-        if sym != unit {
-            if icTrialUnify(sym, receiverType) {
-                // Determine the correct dot target: check if this is an imported symbol
-                val dotTarget: any = if icCompileTables != unit {
-                    val ct = icCompileTables
-                    val fullSym: any = luaExpr("require('chicc/symbols').ctGetLocalSymbol(ct, name)")
-                    if fullSym != unit {
-                        val symMod = luaExpr("fullSym.moduleName") as string
-                        val symPkg = luaExpr("fullSym.packageName") as string
-                        val pkgMod = luaExpr("__P_.icPkg.moduleName") as string
-                        val pkgPkg = luaExpr("__P_.icPkg.packageName") as string
-                        if symMod == pkgMod && symPkg == pkgPkg {
-                            luaExpr("require('chicc/ast').localFnDotTarget(name)")
-                        } else {
-                            luaExpr("require('chicc/ast').packageFnDotTarget(symMod, symPkg, name)")
-                        }
-                    } else {
+    var bound = false
+    while scope != icPackageSymbols && !bound {
+        val symbols: any = luaExpr("scope.symbols")
+        val localSym: any = symbols.get(name)
+        if localSym != unit {
+            bound = true
+            if icTrialUnify(localSym, receiverType) {
+                val localEntry: any = { dotTarget: localBindingDotTarget(name), typeScheme: localSym }
+                results.push(localEntry)
+            }
+        }
+        scope = luaExpr("scope.parent")
+    }
+    val sym = icLocalSymbolsGet(icPackageSymbols, name)
+    if sym != unit {
+        if icTrialUnify(sym, receiverType) {
+            // Determine the correct dot target: check if this is an imported symbol
+            val dotTarget: any = if icCompileTables != unit {
+                val ct = icCompileTables
+                val fullSym: any = luaExpr("require('chicc/symbols').ctGetLocalSymbol(ct, name)")
+                if fullSym != unit {
+                    val symMod = luaExpr("fullSym.moduleName") as string
+                    val symPkg = luaExpr("fullSym.packageName") as string
+                    val pkgMod = luaExpr("__P_.icPkg.moduleName") as string
+                    val pkgPkg = luaExpr("__P_.icPkg.packageName") as string
+                    if symMod == pkgMod && symPkg == pkgPkg {
                         luaExpr("require('chicc/ast').localFnDotTarget(name)")
+                    } else {
+                        luaExpr("require('chicc/ast').packageFnDotTarget(symMod, symPkg, name)")
                     }
                 } else {
                     luaExpr("require('chicc/ast').localFnDotTarget(name)")
                 }
-                val entry: any = luaExpr("{ dotTarget = dotTarget, typeScheme = sym }")
-                results.push(entry)
+            } else {
+                luaExpr("require('chicc/ast').localFnDotTarget(name)")
             }
+            val entry: any = luaExpr("{ dotTarget = dotTarget, typeScheme = sym }")
+            results.push(entry)
         }
-        scope = luaExpr("scope.parent")
     }
     results
 }

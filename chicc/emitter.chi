@@ -2,7 +2,7 @@
 package chicc/emitter
 import std/lang { luaExpr, embedLua }
 import chicc/util { newStringBuilder, StringBuilder, append, toString }
-import chicc/ast { Program, Expr, Target, HandleCase, FnParam, ExprField, exprChildren }
+import chicc/ast { Program, Expr, Target, DotTarget, HandleCase, FnParam, ExprField, exprChildren }
 import std/lang.map { emptyMap, Map }
 
 type EmitterState = {
@@ -862,6 +862,9 @@ pub fn emitFieldAccess(st: EmitterState, expr: Expr): string {
         // Fallback: emit as top-level name if UFCS rewriting missed this
         val dtName = luaExpr("dt.name") as string
         topLevelName(dtName)
+    } else if targetTag == "local_binding" {
+        // Fallback: emit the local name if UFCS rewriting missed this
+        luaName((dt as DotTarget).name)
     } else {
         "nil"
     }

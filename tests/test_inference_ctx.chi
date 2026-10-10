@@ -313,6 +313,32 @@ test("icListLocalFunctionsForType: no match for non-function") {
     assertEqual(count, 0)
 }
 
+test("icListLocalFunctionsForType: a local binding seen from nested scopes is one candidate") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    val results = icWithNewLocalScope {
+        icDefineLocalSymbol("dbl", functionType([tInt, tInt], [], 0))
+        icWithNewLocalScope {
+            icWithNewLocalScope { icListLocalFunctionsForType("dbl", tInt) }
+        }
+    } as array[any]
+    assertEqual(results.size(), 1)
+    assertEqual(results[1].dotTarget.tag, "local_binding")
+}
+
+test("icListLocalFunctionsForType: a local binding comes before the package symbol") {
+    val pkg: any = { moduleName: "test", packageName: "pkg" }
+    icInit(pkg, unit, unit)
+    icDefineLocalSymbol("dbl", functionType([tInt, tInt], [], 0))
+    val results = icWithNewLocalScope {
+        icDefineLocalSymbol("dbl", functionType([tInt, tInt], [], 0))
+        icListLocalFunctionsForType("dbl", tInt)
+    } as array[any]
+    assertEqual(results.size(), 2)
+    assertEqual(results[1].dotTarget.tag, "local_binding")
+    assertEqual(results[2].dotTarget.tag, "local_fn")
+}
+
 test("icListCurrentPackageFunctionsForType: finds matching package function") {
     val pkg: any = { moduleName: "test", packageName: "pkg" }
     val ct = newCompileTables(pkg, unit, [])
