@@ -49,7 +49,7 @@ test("escapeLuaString - multibyte characters are kept whole") {
 }
 
 test("escapeLuaString - NUL followed by a digit") {
-    assertEqual(escapeLuaString("a\0" + "1"), "a\\0001")
+    assertEqual(escapeLuaString("a\01"), "a\\0001")
 }
 
 // --- emitAtom tests ---
