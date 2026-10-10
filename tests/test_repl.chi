@@ -78,8 +78,7 @@ test("data constructors and type are available on later lines") {
     val out = repl("data Shape = Circle(radius: float) | Square(side: float)\nCircle(3.14)\nval s: Shape = Square(1.0)\ns is Square\ns is Circle\n")
     val lines = out.split("\n")
     assertEqual(lines.size(), 3)
-    // How a variant value prints is not settled here, only that it does.
-    assertEqual(lines[1].startsWith("Error") || lines[1].startsWith("ERROR"), false)
+    assertEqual(lines[1], "Circle(radius: 3.14)")
     assertEqual(lines[2], "true")
     assertEqual(lines[3], "false")
 }
@@ -90,6 +89,51 @@ test("a type alias is available on later lines") {
 
 test("the Option type is auto-imported") {
     assertEqual(repl("val o: Option[int] = 5\no\n"), "5")
+}
+
+test("a named function prints its signature with parameter names") {
+    assertEqual(repl("fn greet(name: string): string { \"Hello, \$name!\" }\ngreet\n"), "<function greet(name: string): string>")
+}
+
+test("a named function keeps its name when bound to another name or nested") {
+    val out = repl("fn inc(n: int): int { n + 1 }\nval f = inc\nf\n{ g: inc }\n")
+    assertEqual(out, "<function inc(n: int): int>\n{ g: <function inc(n: int): int> }")
+}
+
+test("an anonymous function prints its type") {
+    assertEqual(repl("{ x: int -> x * 2 }\n"), "<function (int) -> int>")
+}
+
+test("a whole float prints with a fractional part, an int without") {
+    assertEqual(repl("import std/math { sqrt }\nsqrt(16.0)\n4.0\n4\n3.14\n"), "4.0\n4.0\n4\n3.14")
+}
+
+test("floats inside arrays and records print as floats") {
+    assertEqual(repl("[1.0, 2.5]\n{ x: 1.0, n: 2 }\n"), "[1.0, 2.5]\n{ x: 1.0, n: 2 }")
+}
+
+test("record fields print in declaration order") {
+    assertEqual(repl("val p = { name: \"Alice\", age: 30 }\np\n{ z: 1, a: { y: true, b: \"s\" } }\n"), "{ name: \"Alice\", age: 30 }\n{ z: 1, a: { y: true, b: \"s\" } }")
+}
+
+test("a variant value prints in constructor syntax") {
+    val out = repl("data Shape = Circle(radius: float) | Square(side: float)\nval s: Shape = Square(1.0)\ns\n[Circle(2.0), s]\n")
+    assertEqual(out, "Square(side: 1.0)\n[Circle(radius: 2.0), Square(side: 1.0)]")
+}
+
+test("a variant value of unknown static type prints in constructor syntax") {
+    val out = repl("data Shape = Circle(radius: float) | Square(side: float)\nimport std/lang { luaExpr }\nluaExpr(\"package.loaded[\\\"user/default\\\"].Circle(3.14)\")\n")
+    assertEqual(out, "Circle(radius: 3.14)")
+}
+
+test("an Option value prints as its underlying value") {
+    assertEqual(repl("val o: Option[float] = 2.0\no\n"), "2.0")
+}
+
+test("the spec example session") {
+    val input = "val x = 42\nx + 1\nfn greet(name: string): string { \"Hello, \$name!\" }\ngreet(\"World\")\nimport std/math { sqrt }\nsqrt(16.0)\nval xs = [1, 2, 3]\nxs\nval p = { name: \"Alice\", age: 30 }\np\ngreet\nx\nval x = \"now a string\"\nx\n"
+    val expected = "43\n\"Hello, World!\"\n4.0\n[1, 2, 3]\n{ name: \"Alice\", age: 30 }\n<function greet(name: string): string>\n42\n\"now a string\""
+    assertEqual(repl(input), expected)
 }
 
 summary()
