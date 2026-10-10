@@ -14,13 +14,23 @@ fn messageCodes(src: string): string {
     messages.map { m -> m.code as string }.joinToStringWithSeparator(",")
 }
 
-// Compiles and runs `src`; returns its top-level `r`.
-fn runR(src: string): any {
+// Compiles `src`, expecting exactly one message with this code and text.
+fn assertOnlyMessage(src: string, code: string, text: string) {
     val result: any = compileToLua(src, newLuaCompilationEnv())
-    assertEqual(messageCodes(src), "")
+    val messages = result.messages as array[any]
+    assertEqual(messages.size(), 1)
+    assertEqual(messages[1].code as string, code)
+    assertEqual(messages[1].text as string, text)
+}
+
+// Compiles and runs `src`; returns its package table. Each source declares
+// its own package so that members left by one test are not seen by the next.
+fn compileAndRun(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    assertEqual(messages.map { m -> m.code as string }.joinToStringWithSeparator(","), "")
     val run = loadLuaCode(result.luaCode as string) as () -> any
-    val pkg: any = run()
-    pkg.r
+    run()
 }
 
 val applyNarrow = "fn apply(f: ({ a: int }) -> int): int { f({ a: 1 }) }\n"
@@ -40,19 +50,15 @@ test("a lambda needing a wider record than supplied is rejected") {
 
 test("a callback accepting a narrower record is accepted") {
     withinLimits(30) {
-        val src = "fn apply(f: ({ a: int, b: int }) -> int): int { f({ a: 1, b: 2 }) }\nfn g(r: { a: int }): int { r.a }\nval r = apply(g)"
-        assertEqual(runR(src) as int, 1)
+        val src = "package t/narrow\nfn apply(f: ({ a: int, b: int }) -> int): int { f({ a: 1, b: 2 }) }\nfn g(r: { a: int }): int { r.a }\nval r = apply(g)"
+        assertEqual(compileAndRun(src).r as int, 1)
     }
 }
 
 test("a plain call still checks the argument against the declared parameter") {
     withinLimits(30) {
         val src = "${gWide}val r = g({ a: 1 })"
-        val result: any = compileToLua(src, newLuaCompilationEnv())
-        val messages = result.messages as array[any]
-        assertEqual(messages.size(), 1)
-        assertEqual(messages[1].code as string, "TYPE_MISMATCH")
-        assertEqual(messages[1].text as string, "Expected type is 'record with field 'b'' but got 'record without field 'b''")
+        assertOnlyMessage(src, "TYPE_MISMATCH", "Expected type is 'record with field 'b'' but got 'record without field 'b''")
     }
 }
 
@@ -60,43 +66,35 @@ test("a plain call with too few arguments reports the declared arity first") {
     withinLimits(30) {
         // Nested, so the call is not padded with unit arguments (#39).
         val src = "fn outer(): int {\n    fn inner(a: int, b: int): int { a + b }\n    inner(1)\n}"
-        val result: any = compileToLua(src, newLuaCompilationEnv())
-        val messages = result.messages as array[any]
-        assertEqual(messages.size(), 1)
-        assertEqual(messages[1].code as string, "FUNCTION_ARITY_ERROR")
-        assertEqual(messages[1].text as string, "Function requires 2 parameters, but was called with 1")
+        assertOnlyMessage(src, "FUNCTION_ARITY_ERROR", "Function requires 2 parameters, but was called with 1")
     }
 }
 
 test("a callback with too many parameters reports its own arity first") {
     withinLimits(30) {
         val src = "fn apply(f: (int) -> int): int { f(1) }\nfn g(x: int, y: int): int { x + y }\nval r = apply(g)"
-        val result: any = compileToLua(src, newLuaCompilationEnv())
-        val messages = result.messages as array[any]
-        assertEqual(messages.size(), 1)
-        assertEqual(messages[1].code as string, "FUNCTION_ARITY_ERROR")
-        assertEqual(messages[1].text as string, "Function requires 2 parameters, but was called with 1")
+        assertOnlyMessage(src, "FUNCTION_ARITY_ERROR", "Function requires 2 parameters, but was called with 1")
     }
 }
 
 test("a callback returning a wider record is accepted") {
     withinLimits(30) {
-        val src = "fn apply(f: (int) -> { a: int }): int { f(1).a }\nfn g(x: int): { a: int, b: int } { { a: x, b: 2 } }\nval r = apply(g)"
-        assertEqual(runR(src) as int, 1)
+        val src = "package t/wide_return\nfn apply(f: (int) -> { a: int }): int { f(1).a }\nfn g(x: int): { a: int, b: int } { { a: x, b: 2 } }\nval r = apply(g)"
+        assertEqual(compileAndRun(src).r as int, 1)
     }
 }
 
 test("a callback is accepted where the expected parameter is any") {
     withinLimits(30) {
-        val src = "fn apply(f: (any) -> int): int { f(1) }\nfn g(x: int): int { x + 1 }\nval r = apply(g)"
-        assertEqual(runR(src) as int, 2)
+        val src = "package t/any_expected\nfn apply(f: (any) -> int): int { f(1) }\nfn g(x: int): int { x + 1 }\nval r = apply(g)"
+        assertEqual(compileAndRun(src).r as int, 2)
     }
 }
 
 test("a callback taking any is accepted") {
     withinLimits(30) {
-        val src = "fn apply(f: (int) -> int): int { f(1) }\nfn g(x: any): int { 7 }\nval r = apply(g)"
-        assertEqual(runR(src) as int, 7)
+        val src = "package t/any_actual\nfn apply(f: (int) -> int): int { f(1) }\nfn g(x: any): int { 7 }\nval r = apply(g)"
+        assertEqual(compileAndRun(src).r as int, 7)
     }
 }
 
