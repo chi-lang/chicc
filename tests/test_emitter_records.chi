@@ -2,7 +2,7 @@ import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/util { newStringBuilder, StringBuilder, toString }
 import chicc/ast { Program, Package, newPackage, newProgram }
 import chicc/types { tInt, tString }
-import chicc/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitCreateArray, emitCreateRecord, emitIndexOperator, emitIndexAssignment, emitFieldAccess, emitFieldAssignment }
+import chicc/emitter { EmitterState, newState, emit, nextTmpName, emitExpr, emitAtom, emitCreateArray, emitCreateRecord, emitIndexOperator, emitIndexAssignment, emitFieldAccess, emitFieldAssignment, luaName }
 import std/lang { luaExpr, embedLua }
 
 fn freshState(): EmitterState {
@@ -82,6 +82,14 @@ test("emitCreateRecord - multiple fields") {
     assertEqual(st.sb.toString(), "local _chi_tmp0={x=(1),y=(2)};setmetatable(_chi_tmp0, record_meta_table);")
 }
 
+test("emitCreateRecord - keyword field uses bracket key, builtin field stays plain") {
+    val st = freshState()
+    embedLua("test_rec3 = {kind='create_record', recordFields={{name='end', value={kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}, {name='pairs', value={kind='atom', atomValue='2', exprType={tag='primitive',ids={{name='int'}}}}}}}")
+    val e: any = luaExpr("test_rec3")
+    emitCreateRecord(st, e)
+    assertEqual(st.sb.toString(), "local _chi_tmp0={[\"end\"]=(1),pairs=(2)};setmetatable(_chi_tmp0, record_meta_table);")
+}
+
 // ===== emitIndexOperator tests =====
 
 test("emitIndexOperator - basic index") {
@@ -123,6 +131,20 @@ test("emitFieldAccess - nil dotTarget defaults to field") {
     assertEqual(result, "(rec).x")
 }
 
+test("emitFieldAccess - keyword field uses bracket key") {
+    val st = freshState()
+    embedLua("test_fa3 = {kind='field_access', receiver={kind='atom', atomValue='obj', exprType={tag='primitive',ids={{name='int'}}}}, fieldName='end', dotTarget={tag='field'}}")
+    val e: any = luaExpr("test_fa3")
+    assertEqual(emitFieldAccess(st, e), "(obj)[\"end\"]")
+}
+
+test("emitFieldAccess - builtin-named field is not mangled") {
+    val st = freshState()
+    embedLua("test_fa4 = {kind='field_access', receiver={kind='atom', atomValue='obj', exprType={tag='primitive',ids={{name='int'}}}}, fieldName='next', dotTarget={tag='field'}}")
+    val e: any = luaExpr("test_fa4")
+    assertEqual(emitFieldAccess(st, e), "(obj).next")
+}
+
 // ===== emitFieldAssignment tests =====
 
 test("emitFieldAssignment - basic assignment") {
@@ -141,6 +163,23 @@ test("emitFieldAssignment - string value") {
     val result = emitFieldAssignment(st, e)
     assertEqual(result, "(_chi_tmp0)")
     assertEqual(st.sb.toString(), "local _chi_tmp0 = 'hello';(rec).name=(_chi_tmp0);")
+}
+
+test("emitFieldAssignment - keyword field uses bracket key") {
+    val st = freshState()
+    embedLua("test_faa3 = {kind='field_assignment', receiver={kind='atom', atomValue='obj', exprType={tag='primitive',ids={{name='int'}}}}, fieldName='repeat', value={kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='int'}}}}}")
+    val e: any = luaExpr("test_faa3")
+    emitFieldAssignment(st, e)
+    assertEqual(st.sb.toString(), "(obj)[\"repeat\"]=(42);")
+}
+
+// ===== luaName tests =====
+
+test("luaName - mangles Lua keywords, builtins and the _chi_ namespace") {
+    assertEqual(luaName("end"), "_chi_end")
+    assertEqual(luaName("pairs"), "_chi_pairs")
+    assertEqual(luaName("_chi_x"), "_chi__chi_x")
+    assertEqual(luaName("name"), "name")
 }
 
 summary()

@@ -1,0 +1,75 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { loadLuaCode }
+
+// A record field is stored in Lua under its exact Chi name, also when the
+// name is a Lua builtin (`pairs`) or a Lua keyword (`end`) (issue #59).
+
+fn luaOf(src: string): string {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val code = result.luaCode
+    if code == unit { return "" }
+    code as string
+}
+
+// Returns the module's package table, or unit when compilation or Lua
+// loading fails.
+fn runModule(src: string): any {
+    val code = luaOf(src)
+    if code == "" { return unit }
+    val loader: any = loadLuaCode(code)
+    if loader == unit { return unit }
+    val run = loader as () -> any
+    run()
+}
+
+test("builtin-named fields: create and read") {
+    val pkg = runModule("val r = { pairs: 1, next: 2 }\nval a = r.pairs\nval b = r.next\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.a, 1)
+    assertEqual(pkg.b, 2)
+}
+
+test("builtin-named field: printed and iterated under its Chi name") {
+    val pkg = runModule("val r = { next: 2 }\nval s = \"\$r\"\nvar seen = \"\"\nfor k, v in r { seen = \"\$seen\$k,\" }\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.s, "{next: 2}")
+    assertEqual(pkg.seen, "next,")
+}
+
+test("builtin-named field: visible to Lua under its Chi name") {
+    val pkg = runModule("import std/lang { luaExpr }\nfn probe(): any {\n    val r = { next: 2 }\n    luaExpr(\"r.next\")\n}\nval fromChi = probe()\nval fromLua = luaExpr(\"{ next = 5 }\") as { next: int }\nval b = fromLua.next\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.fromChi, 2)
+    assertEqual(pkg.b, 5)
+}
+
+test("builtin-named field: write") {
+    val pkg = runModule("val r = { pairs: 1 }\nr.pairs = 7\nval a = r.pairs\nval s = \"\$r\"\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.a, 7)
+    assertEqual(pkg.s, "{pairs: 7}")
+}
+
+test("keyword-named fields: create, read and write") {
+    val pkg = runModule("val r = { end: 1, repeat: 2 }\nval a = r.end\nr.repeat = 5\nval b = r.repeat\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.a, 1)
+    assertEqual(pkg.b, 5)
+}
+
+test("keyword-named field: visible to Lua under its Chi name") {
+    val pkg = runModule("import std/lang { luaExpr }\nfn probe(): any {\n    val r = { end: 1 }\n    luaExpr(\"r['end']\")\n}\nval fromChi = probe()\nval r = { end: 1 }\nval s = \"\$r\"\nval fromLua = luaExpr(\"{ ['until'] = 3 }\") as { until: int }\nval b = fromLua.until\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.fromChi, 1)
+    assertEqual(pkg.s, "{end: 1}")
+    assertEqual(pkg.b, 3)
+}
+
+test("variant constructor field: stored under its Chi name") {
+    val pkg = runModule("data Opt = Some(next: int) | Nothing\nval v = Some(3)\nval s = \"\$v\"\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.s, "{next: 3}")
+}
+
+summary()

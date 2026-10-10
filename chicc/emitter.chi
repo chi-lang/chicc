@@ -3,7 +3,7 @@ package chicc/emitter
 import std/lang { luaExpr, embedLua }
 import chicc/util { newStringBuilder, StringBuilder, append, toString }
 import chicc/ast { Program, Expr, HandleCase, FnParam, ExprField, exprChildren }
-import std/lang.map { emptyMap }
+import std/lang.map { emptyMap, Map }
 
 type EmitterState = {
     sb: StringBuilder,
@@ -29,15 +29,36 @@ pub fn nextTmpName(st: EmitterState): string {
     "_chi_tmp$id"
 }
 
+fn nameSet(names: array[string]): Map[string, bool] {
+    val set = emptyMap[string, bool]()
+    names.forEach { n -> set.put(n, true) }
+    set
+}
+
+val luaKeywords = nameSet(["and", "break", "do", "else", "elseif", "end", "false", "for", "function", "goto", "if", "in", "local", "nil", "not", "or", "repeat", "return", "then", "true", "until", "while"])
+
+// Runtime builtins a local or package member of the same name would shadow.
+val luaBuiltins = nameSet(["type", "error", "load", "require", "select", "pairs", "ipairs", "next", "pcall", "xpcall", "tostring", "tonumber", "unpack", "rawget", "rawset"])
+
 // `_chi_` is the emitter's namespace (mangled reserved words, temporaries);
 // user names inside it are mangled too, so they can never collide.
 pub fn luaName(name: string): string {
-    val isReserved = luaExpr("({['and']=1,['break']=1,['do']=1,['else']=1,['elseif']=1,['end']=1,['false']=1,['for']=1,['function']=1,['goto']=1,['if']=1,['in']=1,['local']=1,['nil']=1,['not']=1,['or']=1,['repeat']=1,['return']=1,['then']=1,['true']=1,['until']=1,['while']=1,['type']=1,['error']=1,['load']=1,['require']=1,['select']=1,['pairs']=1,['ipairs']=1,['next']=1,['pcall']=1,['xpcall']=1,['tostring']=1,['tonumber']=1,['unpack']=1,['rawget']=1,['rawset']=1})[name] == 1") as bool
-    if isReserved || name.startsWith("_chi_") {
+    if luaKeywords.has(name) || luaBuiltins.has(name) || name.startsWith("_chi_") {
         "_chi_$name"
     } else {
         name
     }
+}
+
+// Record fields keep their Chi name as the Lua key (Lua code and `pairs`
+// see it). Keywords can't follow `.` or stand bare in a constructor, so
+// they get bracket syntax: `{["end"]=v}`, `t["end"]`.
+fn fieldKey(name: string): string {
+    if luaKeywords.has(name) { "[\"$name\"]" } else { name }
+}
+
+fn fieldSuffix(name: string): string {
+    if luaKeywords.has(name) { "[\"$name\"]" } else { ".$name" }
 }
 
 pub fn topLevelName(name: string): string {
@@ -812,9 +833,9 @@ pub fn emitCreateRecord(st: EmitterState, expr: Expr): string {
     var contents = ""
     var i = 1
     while i <= count {
-        val fieldName = luaName((recFields[i] as ExprField).name)
+        val key = fieldKey((recFields[i] as ExprField).name)
         if i > 1 { contents = "$contents," }
-        contents = "$contents$fieldName=${fieldValues[i]}"
+        contents = "$contents$key=${fieldValues[i]}"
         i = i + 1
     }
     val name = nextTmpName(st)
@@ -870,8 +891,7 @@ pub fn emitFieldAccess(st: EmitterState, expr: Expr): string {
     if targetTag == "field" {
         val receiver = expr.receiver as Expr
         val receiverVar = emitExpr(st, receiver)
-        val fName = luaName(expr.fieldName)
-        "$receiverVar.$fName"
+        "$receiverVar${fieldSuffix(expr.fieldName)}"
     } else if targetTag == "package_fn" {
         // Fallback: emit qualified name if UFCS rewriting missed this
         val dtMod = luaExpr("dt.moduleName") as string
@@ -892,10 +912,8 @@ pub fn emitFieldAssignment(st: EmitterState, expr: Expr): string {
     val value = expr.value as Expr
     val receiverVar = emitExpr(st, receiver)
     val valueVar = emitExpr(st, value)
-    val fName = luaName(expr.fieldName)
     emit(st, receiverVar)
-    emit(st, ".")
-    emit(st, fName)
+    emit(st, fieldSuffix(expr.fieldName))
     emit(st, "=")
     emit(st, valueVar)
     emit(st, ";")
