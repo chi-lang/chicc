@@ -567,7 +567,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         val polymorphicType = polyType(level, mappedType as Type)
         // By target: a package member declared inside a block scope (a
         // top-level weave temp) must still land in the package symbols.
-        icUpdateSymbolType(luaExpr("term.target"), polymorphicType)
+        icUpdateSymbolType(term.target, polymorphicType)
         expectedType
     } else if kind == "assignment" {
         // 10. assignment: get target type, type value, constrain
