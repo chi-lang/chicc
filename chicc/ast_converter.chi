@@ -585,7 +585,9 @@ fn convertFuncWithNameImpl(node: any, pkg: any, tables: any): Expr {
     val defaults: any = if defaultArgCount > 0 { defaultArgs } else { unit }
     val fnBody = fnExpr(params as array[FnParam], defaults, body as Expr, sec as Section | unit)
 
-    declarationExpr(isPub, fnTarget, false, funcType as Type | unit, fnBody as Expr, sec as Section | unit)
+    val decl = declarationExpr(isPub, fnTarget, false, funcType as Type | unit, fnBody as Expr, sec as Section | unit)
+    decl.isNamedFn = true
+    decl
 }
 
 convertFuncWithName = convertFuncWithNameImpl

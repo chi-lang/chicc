@@ -553,6 +553,11 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         } else {
             icFreshVariable(level + 1)
         }
+        // A fn sees its own name in its body. Package-level fns are already
+        // defined, before any body is typed.
+        if term.isNamedFn && term.target.tag == "local" {
+            icDefineLocalSymbol(term.declName, expectedType)
+        }
         val value = luaExpr("term.value") as any
         val valueType = typeTerm(value, level + 1, constraints)
         val valueSection = luaExpr("value.section") as any

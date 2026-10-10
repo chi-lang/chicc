@@ -1,0 +1,62 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { loadLuaCode }
+
+// A named fn declared inside a function or a block can call itself; a lambda
+// bound with val cannot see its own name (issue #66).
+
+// Returns the module's package table, or unit when compilation or Lua
+// loading fails. Each source declares its own package so that members left
+// by one test are not seen by the next.
+fn runModule(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val code = result.luaCode
+    if code == unit { return unit }
+    val loader: any = loadLuaCode(code as string)
+    if loader == unit { return unit }
+    val run = loader as () -> any
+    run()
+}
+
+val note = "var trace = \"\"\nfn note(x: any) {\n    trace = \"\$trace\$x,\"\n}\n"
+
+// The test runtime resolves unknown Lua globals through package tables, so
+// each recursive fn has a name no package defines: a call that misses the
+// local fails instead of finding a namesake.
+
+test("a fn declared in a fn calls itself") {
+    val src = "package t/s66a\nfn outer(): int {\n    fn fact66a(n: int): int { if n <= 1 { 1 } else { n * fact66a(n - 1) } }\n    fact66a(5)\n}\nval r = outer()\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, 120)
+}
+
+test("top level: a fn declared in an if body calls itself") {
+    val src = "package t/s66b\n" + note + "if true {\n    fn fact66b(n: int): int { if n <= 1 { 1 } else { n * fact66b(n - 1) } }\n    note(fact66b(5))\n}\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.trace, "120,")
+}
+
+test("top level: a fn declared in a while body calls itself") {
+    val src = "package t/s66c\n" + note + "var i = 0\nwhile i < 1 {\n    fn fact66c(n: int): int { if n <= 1 { 1 } else { n * fact66c(n - 1) } }\n    note(fact66c(5))\n    i = i + 1\n}\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.trace, "120,")
+}
+
+test("top level: a fn declared in a for body calls itself") {
+    val src = "package t/s66d\n" + note + "for x in [4, 5] {\n    fn fact66d(n: int): int { if n <= 1 { 1 } else { n * fact66d(n - 1) } }\n    note(fact66d(x))\n}\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.trace, "24,120,")
+}
+
+test("a lambda bound with val reads the outer binding of its own name") {
+    val src = "package t/s66e\nfn f(): int {\n    val g66e: (int) -> int = { n -> n + 1 }\n    if true {\n        val g66e: (int) -> int = { n -> g66e(n) * 10 }\n        return g66e(1)\n    }\n    0\n}\nval r = f()\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, 20)
+}
+
+summary()
