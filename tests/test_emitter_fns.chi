@@ -77,8 +77,8 @@ test("emitBlock - stops at return") {
     val a2 = atomExpr("99", tInt, unit)
     val block = blockExpr([a1, ret, a2], unit)
     val result = emitBlock(st, block)
-    // Should have emitted a1 and ret, but not a2
-    assertEqual(st.sb.toString(), "return (42);")
+    // Should have emitted a1 (scoped, emits no code) and ret, but not a2
+    assertEqual(st.sb.toString(), "do  end;return (42);")
 }
 
 // --- emitFn tests ---
@@ -88,8 +88,8 @@ test("emitFn - simple function no params") {
     val body = blockExpr([atomExpr("42", tInt, unit)], unit)
     val fnE = fnExpr([], unit, body, unit)
     val result = emitFn(st, fnE, "", false)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local function tmp0() return (42) end;")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local function _chi_tmp0() return (42) end;")
 }
 
 test("emitFn - function with params") {
@@ -98,8 +98,8 @@ test("emitFn - function with params") {
     val params = [newFnParam("a", tInt, unit), newFnParam("b", tInt, unit)]
     val fnE = fnExpr(params, unit, body, unit)
     val result = emitFn(st, fnE, "", false)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local function tmp0(a,b) return (0) end;")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local function _chi_tmp0(a,b) return (0) end;")
 }
 
 test("emitFn - top-level function") {
@@ -117,9 +117,9 @@ test("emitFn - body ends with return no duplicate") {
     val body = blockExpr([ret], unit)
     val fnE = fnExpr([], unit, body, unit)
     val result = emitFn(st, fnE, "", false)
-    assertEqual(result, "tmp0")
+    assertEqual(result, "_chi_tmp0")
     // Body has return so no extra "return" should be emitted
-    assertEqual(st.sb.toString(), "local function tmp0() return (7); end;")
+    assertEqual(st.sb.toString(), "local function _chi_tmp0() return (7); end;")
 }
 
 // --- emitFnCall tests ---
@@ -131,8 +131,8 @@ test("emitFnCall - normal call") {
     val call = fnCallExpr(callee, [arg1], unit)
     // We're not in a function, so callee resolves to __P_.foo
     val result = emitFnCall(st, call)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0=__P_.foo((42));")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0=__P_.foo((42));")
 }
 
 test("emitFnCall - embedLua special case") {
@@ -151,8 +151,8 @@ test("emitFnCall - luaExpr special case") {
     val codeArg = atomExpr("os.time()", tString, unit)
     val call = fnCallExpr(callee, [codeArg], unit)
     val result = emitFnCall(st, call)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0=os.time();")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0=os.time();")
 }
 
 test("emitFnCall - call with default param @ placeholder") {
@@ -166,9 +166,9 @@ test("emitFnCall - call with default param @ placeholder") {
     embedLua("__fn_test_call = {kind='fn_call', callee=callee, callParams={arg1, __placeholder, arg2}, exprType=nil, section=nil, used=false}")
     val call = luaExpr("__fn_test_call")
     val result = emitFnCall(st, call)
-    assertEqual(result, "tmp0")
+    assertEqual(result, "_chi_tmp0")
     // Should skip the "@" placeholder
-    assertEqual(st.sb.toString(), "local tmp0=__P_.bar((1),(3));")
+    assertEqual(st.sb.toString(), "local _chi_tmp0=__P_.bar((1),(3));")
 }
 
 // --- emitNameDeclaration with fn shortcut ---
@@ -193,9 +193,9 @@ test("emitNameDeclaration - fn inside function does NOT use shortcut") {
     val result = emitNameDeclaration(st, decl)
     // Inside a function, it should NOT use the top-level shortcut
     // It should emitExpr on the fn (which calls emitFn with empty name, non-topLevel)
-    // then do local inner=tmp0;
+    // then do local inner=_chi_tmp0;
     assertEqual(result, "inner")
-    assertEqual(st.sb.toString(), "local function tmp0() return (5) end;local inner=tmp0;")
+    assertEqual(st.sb.toString(), "local function _chi_tmp0() return (5) end;local inner=_chi_tmp0;")
 }
 
 // Restore the real dispatcher so packages compiled after this one (under

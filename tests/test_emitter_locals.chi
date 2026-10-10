@@ -1,0 +1,85 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { loadLuaCode }
+
+// Emitter temporaries vs Lua's 200-live-locals-per-function limit and vs
+// user identifiers (issue #58).
+
+// Returns the module's package table, or unit when compilation or Lua
+// loading fails.
+fn runModule(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val code = result.luaCode
+    if code == unit { return unit }
+    val loader: any = loadLuaCode(code as string)
+    if loader == unit { return unit }
+    val run = loader as () -> any
+    run()
+}
+
+fn repeatLine(line: string, n: int): string {
+    var out = ""
+    var i = 0
+    while i < n {
+        out = out + line
+        i = i + 1
+    }
+    out
+}
+
+val counter = "var calls = 0\nfn tick(i: int) { calls = calls + i }\n"
+
+test("fn body with 500 calls loads and runs every call") {
+    val src = counter + "fn f(i: int) {\n" + repeatLine("    tick(i)\n", 500) + "}\nf(1)\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.calls, 500)
+}
+
+test("lambda body with 500 calls loads and runs every call") {
+    val src = counter + "val g = { i: int ->\n" + repeatLine("    tick(i)\n", 500) + "}\ng(1)\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.calls, 500)
+}
+
+test("fn body with 250 luaExpr statements loads and runs every call") {
+    val src = "import std/lang { luaExpr }\n" + counter + "fn f(i: int) {\n" + repeatLine("    tick(luaExpr(\"i\") as int)\n", 250) + "}\nf(1)\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.calls, 250)
+}
+
+test("parameter spelled like a temporary is not overwritten") {
+    val pkg = runModule("fn f(tmp0: int): int {\n    val a = [1]\n    tmp0\n}\nval r = f(42)\n")
+    assertEqual(pkg.r, 42)
+}
+
+test("local spelled like a temporary is not overwritten") {
+    val pkg = runModule("fn g(): int {\n    val tmp0 = 5\n    val arr = [1]\n    tmp0\n}\nval r = g()\n")
+    assertEqual(pkg.r, 5)
+}
+
+test("identifier spelled like the emitter's temporary is not overwritten") {
+    val pkg = runModule("fn f(_chi_tmp0: int): int {\n    val a = [1]\n    _chi_tmp0\n}\nval r = f(42)\n")
+    assertEqual(pkg.r, 42)
+}
+
+test("shadowing val reads the outer binding in its initializer") {
+    val pkg = runModule("fn s(x: int): int {\n    val x = [x][1] + 1\n    val y = [x]\n    x\n}\nval r = s(1)\n")
+    assertEqual(pkg.r, 2)
+}
+
+test("val stays visible to raw Lua in later statements") {
+    val src = "import std/lang { luaExpr }\nfn h(): int {\n    val x = 7\n    val s = \"a\"\n    luaExpr(\"x\") as int\n}\nval r = h()\n"
+    val pkg = runModule(src)
+    assertEqual(pkg.r, 7)
+}
+
+test("local declared by embedLua stays visible to later statements") {
+    val src = "import std/lang { luaExpr, embedLua }\nfn h(): int {\n    embedLua(\"local q = 3\")\n    val s = \"a\"\n    luaExpr(\"q\") as int\n}\nval r = h()\n"
+    val pkg = runModule(src)
+    assertEqual(pkg.r, 3)
+}
+
+summary()

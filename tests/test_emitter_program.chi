@@ -25,7 +25,7 @@ test("emitExpr dispatches interpolated_string") {
     val expr: any = luaExpr("__ip_expr")
     val result = emitExpr(st, expr)
     // result should be a tmp name for the interpolated string
-    assertEqual(result, "tmp1")
+    assertEqual(result, "_chi_tmp1")
 }
 
 test("emitExpr dispatches variable_access") {
@@ -75,8 +75,8 @@ test("emitExpr dispatches prefix_op") {
     embedLua("__pre_expr = {kind='prefix_op', op='!', prefixExpr={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}}")
     val expr: any = luaExpr("__pre_expr")
     val result = emitExpr(st, expr)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0=not (true);")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0=not (true);")
 }
 
 test("emitExpr dispatches break") {
@@ -142,7 +142,7 @@ test("emitExpr dispatches create_array") {
     embedLua("__arr_expr = {kind='create_array', arrayValues={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}")
     val expr: any = luaExpr("__arr_expr")
     val result = emitExpr(st, expr)
-    assertEqual(result, "tmp0")
+    assertEqual(result, "_chi_tmp0")
     val output = st.sb.toString()
     embedLua("__arr_ok = string.find(output, 'setmetatable', 1, true) ~= nil")
     assertTrue(luaExpr("__arr_ok") as bool)
@@ -191,9 +191,9 @@ test("emitExpr dispatches fn") {
     val expr: any = luaExpr("__fn_expr")
     val result = emitExpr(st, expr)
     // Should be a local function with auto-generated name
-    assertEqual(result, "tmp0")
+    assertEqual(result, "_chi_tmp0")
     val output = st.sb.toString()
-    embedLua("__fn_ok = string.find(output, 'local function tmp0(x)', 1, true) ~= nil")
+    embedLua("__fn_ok = string.find(output, 'local function _chi_tmp0(x)', 1, true) ~= nil")
     assertTrue(luaExpr("__fn_ok") as bool)
 }
 

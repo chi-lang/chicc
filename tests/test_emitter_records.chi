@@ -31,8 +31,8 @@ test("emitCreateArray - empty array") {
     embedLua("test_arr_empty = {kind='create_array', arrayValues={}}")
     val e: any = luaExpr("test_arr_empty")
     val result = emitCreateArray(st, e)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0={};setmetatable(tmp0, array_meta_table);")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0={};setmetatable(_chi_tmp0, array_meta_table);")
 }
 
 test("emitCreateArray - single element") {
@@ -40,8 +40,8 @@ test("emitCreateArray - single element") {
     embedLua("test_arr1 = {kind='create_array', arrayValues={{kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='int'}}}}}}")
     val e: any = luaExpr("test_arr1")
     val result = emitCreateArray(st, e)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0={(42)};setmetatable(tmp0, array_meta_table);")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0={(42)};setmetatable(_chi_tmp0, array_meta_table);")
 }
 
 test("emitCreateArray - multiple elements") {
@@ -49,8 +49,8 @@ test("emitCreateArray - multiple elements") {
     embedLua("test_arr2 = {kind='create_array', arrayValues={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}, {kind='atom', atomValue='2', exprType={tag='primitive',ids={{name='int'}}}}, {kind='atom', atomValue='3', exprType={tag='primitive',ids={{name='int'}}}}}}")
     val e: any = luaExpr("test_arr2")
     val result = emitCreateArray(st, e)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0={(1),(2),(3)};setmetatable(tmp0, array_meta_table);")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0={(1),(2),(3)};setmetatable(_chi_tmp0, array_meta_table);")
 }
 
 // ===== emitCreateRecord tests =====
@@ -60,8 +60,8 @@ test("emitCreateRecord - empty record") {
     embedLua("test_rec_empty = {kind='create_record', recordFields={}}")
     val e: any = luaExpr("test_rec_empty")
     val result = emitCreateRecord(st, e)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0={};setmetatable(tmp0, record_meta_table);")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0={};setmetatable(_chi_tmp0, record_meta_table);")
 }
 
 test("emitCreateRecord - single field") {
@@ -69,8 +69,8 @@ test("emitCreateRecord - single field") {
     embedLua("test_rec1 = {kind='create_record', recordFields={{name='x', value={kind='atom', atomValue='10', exprType={tag='primitive',ids={{name='int'}}}}}}}")
     val e: any = luaExpr("test_rec1")
     val result = emitCreateRecord(st, e)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0={x=(10)};setmetatable(tmp0, record_meta_table);")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0={x=(10)};setmetatable(_chi_tmp0, record_meta_table);")
 }
 
 test("emitCreateRecord - multiple fields") {
@@ -78,8 +78,8 @@ test("emitCreateRecord - multiple fields") {
     embedLua("test_rec2 = {kind='create_record', recordFields={{name='x', value={kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}, {name='y', value={kind='atom', atomValue='2', exprType={tag='primitive',ids={{name='int'}}}}}}}")
     val e: any = luaExpr("test_rec2")
     val result = emitCreateRecord(st, e)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0={x=(1),y=(2)};setmetatable(tmp0, record_meta_table);")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0={x=(1),y=(2)};setmetatable(_chi_tmp0, record_meta_table);")
 }
 
 // ===== emitIndexOperator tests =====
@@ -89,8 +89,8 @@ test("emitIndexOperator - basic index") {
     embedLua("test_idx1 = {kind='index_op', indexVariable={kind='atom', atomValue='arr', exprType={tag='primitive',ids={{name='int'}}}}, indexExpr={kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}")
     val e: any = luaExpr("test_idx1")
     val result = emitIndexOperator(st, e)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0=(arr)[(1)];")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0=(arr)[(1)];")
 }
 
 // ===== emitIndexAssignment tests =====
@@ -139,8 +139,8 @@ test("emitFieldAssignment - string value") {
     embedLua("test_faa2 = {kind='field_assignment', receiver={kind='atom', atomValue='rec', exprType={tag='primitive',ids={{name='int'}}}}, fieldName='name', value={kind='atom', atomValue='hello', exprType={tag='primitive',ids={{name='string'}}}}}")
     val e: any = luaExpr("test_faa2")
     val result = emitFieldAssignment(st, e)
-    assertEqual(result, "(tmp0)")
-    assertEqual(st.sb.toString(), "local tmp0 = 'hello';(rec).name=(tmp0);")
+    assertEqual(result, "(_chi_tmp0)")
+    assertEqual(st.sb.toString(), "local _chi_tmp0 = 'hello';(rec).name=(_chi_tmp0);")
 }
 
 summary()

@@ -58,10 +58,10 @@ test("emitHandle - single case no args") {
     val handleBody = blockExpr([atomExpr("1", tInt, unit)], unit)
     val expr = handleExpr(handleBody, cases, unit)
     val result = emitHandle(st, expr)
-    assertEqual(result, "tmp0")
+    assertEqual(result, "_chi_tmp0")
     val output = st.sb.toString()
     // Check handlers table
-    embedLua("__eh1_hasHandlers = string.find(output, 'local tmp0_handlers={', 1, true) ~= nil")
+    embedLua("__eh1_hasHandlers = string.find(output, 'local _chi_tmp0_handlers={', 1, true) ~= nil")
     assertTrue(luaExpr("__eh1_hasHandlers") as bool)
     // Check handler key
     embedLua("__eh1_hasKey = string.find(output, '__mymod__mypkg_ask=function(args)', 1, true) ~= nil")
@@ -70,10 +70,10 @@ test("emitHandle - single case no args") {
     embedLua("__eh1_hasResume = string.find(output, 'local function resume(x) return x end', 1, true) ~= nil")
     assertTrue(luaExpr("__eh1_hasResume") as bool)
     // Check coroutine body
-    embedLua("__eh1_hasBody = string.find(output, 'local tmp0_body=coroutine.create(function()', 1, true) ~= nil")
+    embedLua("__eh1_hasBody = string.find(output, 'local _chi_tmp0_body=coroutine.create(function()', 1, true) ~= nil")
     assertTrue(luaExpr("__eh1_hasBody") as bool)
     // Check chi_handle_effect call
-    embedLua("__eh1_hasHandle = string.find(output, 'local tmp0=chi_handle_effect(tmp0_body,nil,tmp0_handlers)', 1, true) ~= nil")
+    embedLua("__eh1_hasHandle = string.find(output, 'local _chi_tmp0=chi_handle_effect(_chi_tmp0_body,nil,_chi_tmp0_handlers)', 1, true) ~= nil")
     assertTrue(luaExpr("__eh1_hasHandle") as bool)
 }
 

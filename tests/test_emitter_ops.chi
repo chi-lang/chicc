@@ -36,7 +36,7 @@ test("emitInfixOp - string concatenation with +") {
     embedLua("test_infix2 = {kind='infix_op', op='+', left={kind='atom', atomValue='hello', exprType={tag='primitive',ids={{name='string'}}}}, right={kind='atom', atomValue='world', exprType={tag='primitive',ids={{name='string'}}}}}")
     val e: any = luaExpr("test_infix2")
     val result = emitInfixOp(st, e)
-    assertEqual(result, "((tmp0) .. (tmp1))")
+    assertEqual(result, "((_chi_tmp0) .. (_chi_tmp1))")
 }
 
 test("emitInfixOp - != maps to ~=") {
@@ -68,7 +68,7 @@ test("emitInfixOp - == on strings") {
     embedLua("test_infix6 = {kind='infix_op', op='==', left={kind='atom', atomValue='a', exprType={tag='primitive',ids={{name='string'}}}}, right={kind='atom', atomValue='b', exprType={tag='primitive',ids={{name='string'}}}}}")
     val e: any = luaExpr("test_infix6")
     val result = emitInfixOp(st, e)
-    assertEqual(result, "((tmp0) == (tmp1))")
+    assertEqual(result, "((_chi_tmp0) == (_chi_tmp1))")
 }
 
 test("emitInfixOp - comparison > passes through") {
@@ -95,8 +95,8 @@ test("emitPrefixOp - negation with !") {
     embedLua("test_prefix1 = {kind='prefix_op', op='!', prefixExpr={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}}")
     val e: any = luaExpr("test_prefix1")
     val result = emitPrefixOp(st, e)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0=not (true);")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0=not (true);")
 }
 
 test("emitPrefixOp - minus operator") {
@@ -105,8 +105,8 @@ test("emitPrefixOp - minus operator") {
     embedLua("test_prefix2 = {kind='prefix_op', op='-', prefixExpr={kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='int'}}}}}")
     val e: any = luaExpr("test_prefix2")
     val result = emitPrefixOp(st, e)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0=-(42);")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0=-(42);")
 }
 
 // ===== emitCast tests =====
@@ -116,7 +116,7 @@ test("emitCast - string to int uses tonumber") {
     embedLua("test_cast1 = {kind='cast', castExpr={kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='string'}}}}, targetType={tag='primitive',ids={{name='int'}}}}")
     val e: any = luaExpr("test_cast1")
     val result = emitCast(st, e)
-    assertEqual(result, "tmp1")
+    assertEqual(result, "_chi_tmp1")
     val output = st.sb.toString()
     embedLua("__cast1_a = string.find(output, 'tonumber', 1, true) ~= nil")
     assertTrue(luaExpr("__cast1_a") as bool)
@@ -127,7 +127,7 @@ test("emitCast - string to float uses tonumber") {
     embedLua("test_cast2 = {kind='cast', castExpr={kind='atom', atomValue='3.14', exprType={tag='primitive',ids={{name='string'}}}}, targetType={tag='primitive',ids={{name='float'}}}}")
     val e: any = luaExpr("test_cast2")
     val result = emitCast(st, e)
-    assertEqual(result, "tmp1")
+    assertEqual(result, "_chi_tmp1")
     val output = st.sb.toString()
     embedLua("__cast2_a = string.find(output, 'tonumber', 1, true) ~= nil")
     assertTrue(luaExpr("__cast2_a") as bool)
@@ -148,9 +148,9 @@ test("emitCast - string to string is passthrough") {
     val e: any = luaExpr("test_cast4")
     val result = emitCast(st, e)
     // string to string: no tonumber, just return the value directly
-    assertEqual(result, "(tmp0)")
+    assertEqual(result, "(_chi_tmp0)")
     // Only the atom's string allocation is emitted
-    assertEqual(st.sb.toString(), "local tmp0 = 'hello';")
+    assertEqual(st.sb.toString(), "local _chi_tmp0 = 'hello';")
 }
 
 // ===== emitIs tests =====
@@ -186,7 +186,7 @@ test("emitIs - check int type") {
     embedLua("test_is4 = {kind='is', castExpr={kind='atom', atomValue='x', exprType={tag='primitive',ids={{name='string'}}}}, checkedType={tag='primitive',ids={{name='int'}}}}")
     val e: any = luaExpr("test_is4")
     val result = emitIs(st, e)
-    assertEqual(result, "chi_is_int((tmp0))")
+    assertEqual(result, "chi_is_int((_chi_tmp0))")
 }
 
 test("emitIs - check bool type") {

@@ -28,9 +28,9 @@ test("nextTmpName sequential") {
     val pkg = newPackage("m", "p")
     val prog = newProgram(pkg, [], [], [], unit)
     val st = newState(prog)
-    assertEqual(nextTmpName(st), "tmp0")
-    assertEqual(nextTmpName(st), "tmp1")
-    assertEqual(nextTmpName(st), "tmp2")
+    assertEqual(nextTmpName(st), "_chi_tmp0")
+    assertEqual(nextTmpName(st), "_chi_tmp1")
+    assertEqual(nextTmpName(st), "_chi_tmp2")
 }
 
 test("nextTmpName increments nextTmpId") {

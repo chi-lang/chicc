@@ -26,12 +26,14 @@ pub fn emit(st: EmitterState, code: string) {
 pub fn nextTmpName(st: EmitterState): string {
     val id = st.nextTmpId
     st.nextTmpId = id + 1
-    "tmp$id"
+    "_chi_tmp$id"
 }
 
+// `_chi_` is the emitter's namespace (mangled reserved words, temporaries);
+// user names inside it are mangled too, so they can never collide.
 pub fn luaName(name: string): string {
     val isReserved = luaExpr("({['and']=1,['break']=1,['do']=1,['else']=1,['elseif']=1,['end']=1,['false']=1,['for']=1,['function']=1,['goto']=1,['if']=1,['in']=1,['local']=1,['nil']=1,['not']=1,['or']=1,['repeat']=1,['return']=1,['then']=1,['true']=1,['until']=1,['while']=1,['type']=1,['error']=1,['load']=1,['require']=1,['select']=1,['pairs']=1,['ipairs']=1,['next']=1,['pcall']=1,['xpcall']=1,['tostring']=1,['tonumber']=1,['unpack']=1,['rawget']=1,['rawset']=1})[name] == 1") as bool
-    if isReserved {
+    if isReserved || name.startsWith("_chi_") {
         "_chi_$name"
     } else {
         name
@@ -170,11 +172,7 @@ pub fn emitVariableAccess(st: EmitterState, expr: Expr): string {
 }
 
 pub fn emitFn(st: EmitterState, expr: Expr, name: string, isTopLevel: bool): string {
-    var tmpName = name
-    if tmpName.len() == 0 {
-        tmpName = nextTmpName(st)
-    }
-    val safeTmpName = luaName(tmpName)
+    val safeTmpName = if name.len() == 0 { nextTmpName(st) } else { luaName(name) }
     if isTopLevel {
         emit(st, "function __P_.$safeTmpName(")
     } else {
@@ -281,14 +279,114 @@ pub fn emitAssignment(st: EmitterState, expr: Expr): string {
     varName
 }
 
+// True iff this fn_call expression calls raw embedLua (or luaExpr, when
+// `withLuaExpr`) — mirrors the std/lang special-case in emitFnCall, which is
+// what emits the raw Lua code.
+fn isRawLuaCall(e: Expr, withLuaExpr: bool): bool {
+    val callee = e.callee
+    if callee == unit { return false }
+    val tgt = (callee as Expr).target
+    if tgt == unit { return false }
+    val t = tgt as any
+    val tgtMod = t.moduleName as string
+    val tgtPkg = t.packageName as string
+    val name = t.name as string
+    tgtMod == "std" && tgtPkg == "lang" && (name == "embedLua" || (withLuaExpr && name == "luaExpr"))
+}
+
+// True iff emitting `e` may reach a raw call (see isRawLuaCall), which can
+// declare a local that later statements of the same scope rely on (e.g. the
+// chunk-local `local __defining_type_id` in type_writer). Fn bodies are not
+// descended into: everything inside them emits function-scoped, so it cannot
+// leak a local into the enclosing scope. That early return also covers
+// defaultValues, which only exists on "fn" exprs. The child list below must
+// stay in sync with the Expr fields in ast.chi.
+fn containsRawLuaCall(e: Expr, withLuaExpr: bool): bool {
+    val kind = e.kind
+    if kind == "fn" { return false }
+    if kind == "fn_call" && isRawLuaCall(e, withLuaExpr) { return true }
+    val child = { c: any -> if c != unit { containsRawLuaCall(c as Expr, withLuaExpr) } else { false } }
+    val each = { items: array[any] -> items.any { it -> containsRawLuaCall(it as Expr, withLuaExpr) } }
+    if child(e.receiver) { return true }
+    if child(e.value) { return true }
+    if child(e.callee) { return true }
+    if child(e.condition) { return true }
+    if child(e.thenBranch) { return true }
+    if child(e.elseBranch) { return true }
+    if child(e.left) { return true }
+    if child(e.right) { return true }
+    if child(e.prefixExpr) { return true }
+    if child(e.castExpr) { return true }
+    if child(e.loopCondition) { return true }
+    if child(e.loopBody) { return true }
+    if child(e.iterable) { return true }
+    if child(e.forState) { return true }
+    if child(e.forInit) { return true }
+    if child(e.forBody) { return true }
+    if child(e.indexVariable) { return true }
+    if child(e.indexExpr) { return true }
+    if child(e.indexValue) { return true }
+    if child(e.handleBody) { return true }
+    if child(e.returnValue) { return true }
+    if each(e.parts) { return true }
+    if each(e.arrayValues) { return true }
+    if each(e.callParams) { return true }
+    if each(e.blockBody) { return true }
+    if e.recordFields.any { f -> containsRawLuaCall(f.value as Expr, withLuaExpr) } { return true }
+    if e.handleCases.any { c -> containsRawLuaCall(c.body as Expr, withLuaExpr) } { return true }
+    false
+}
+
+// A statement can get its own `do ... end` scope unless it ends the block or
+// reaches embedLua, which may declare a local that later statements use.
+// luaExpr is meant to hold an expression bound to a temporary, so it does not
+// block scoping here.
+fn scopableStatement(expr: Expr): bool {
+    val kind = expr.kind
+    if kind == "return" || kind == "break" || kind == "continue" { return false }
+    containsRawLuaCall(expr, false) == false
+}
+
+// Emits a statement inside `do ... end`, so its temporaries die with it
+// instead of piling up toward Lua's limit of 200 live locals per function.
+// A local declaration's value leaves the scope through `slot`, a block-level
+// local declared on first use. Declaring the name itself before the scope
+// would make `val x = x + 1` read the new, still-nil `x`. Returns the slot.
+fn emitScopedStatement(st: EmitterState, stmt: Expr, slot: string): string {
+    if stmt.kind == "name_declaration" && st.functionDepth > 0 {
+        var slotName = slot
+        if slotName == "" {
+            slotName = nextTmpName(st)
+            emit(st, "local $slotName;")
+        }
+        emit(st, "do ")
+        val value = emitExpr(st, stmt.value as Expr)
+        emit(st, "$slotName=$value end;")
+        emit(st, "local ${luaName(stmt.declName)}=$slotName;")
+        slotName
+    } else {
+        emit(st, "do ")
+        emitExpr(st, stmt)
+        emit(st, " end;")
+        slot
+    }
+}
+
+// The last statement is never scoped: its result is the block's value.
 pub fn emitBlock(st: EmitterState, expr: Expr): string {
     val blockItems = expr.blockBody
     val bodyCount = luaExpr("#blockItems") as int
     var lastResult = "nil"
+    var slot = ""
     var i = 1
     while i <= bodyCount {
         val child = blockItems[i] as Expr
-        lastResult = emitExpr(st, child)
+        val scoped = if i < bodyCount { scopableStatement(child) } else { false }
+        if scoped {
+            slot = emitScopedStatement(st, child, slot)
+        } else {
+            lastResult = emitExpr(st, child)
+        }
         val childKind = child.kind
         if childKind == "return" {
             i = bodyCount + 1
@@ -985,62 +1083,6 @@ emitExpr = { st: EmitterState, expr: Expr ->
 
 // --- Top-level program emitter ---
 
-// True iff this fn_call expression calls raw embedLua/luaExpr — mirrors the
-// std/lang special-case in emitFnCall, which is what emits the raw Lua code.
-fn isRawLuaCall(e: Expr): bool {
-    val callee = e.callee
-    if callee == unit { return false }
-    val tgt = (callee as Expr).target
-    if tgt == unit { return false }
-    val t = tgt as any
-    val tgtMod = t.moduleName as string
-    val tgtPkg = t.packageName as string
-    val name = t.name as string
-    tgtMod == "std" && tgtPkg == "lang" && (name == "embedLua" || name == "luaExpr")
-}
-
-// True iff emitting `e` at chunk level may reach a raw embedLua/luaExpr call,
-// which can declare a persistent chunk-local (e.g. `local __defining_type_id`
-// in type_writer). Fn bodies are not descended into: everything inside them
-// emits function-scoped, so it cannot leak a chunk-local. That early return
-// also covers defaultValues, which only exists on "fn" exprs. The child list
-// below must stay in sync with the Expr fields in ast.chi.
-fn containsRawLuaCall(e: Expr): bool {
-    val kind = e.kind
-    if kind == "fn" { return false }
-    if kind == "fn_call" && isRawLuaCall(e) { return true }
-    val child = { c: any -> if c != unit { containsRawLuaCall(c as Expr) } else { false } }
-    val each = { items: array[any] -> items.any { it -> containsRawLuaCall(it as Expr) } }
-    if child(e.receiver) { return true }
-    if child(e.value) { return true }
-    if child(e.callee) { return true }
-    if child(e.condition) { return true }
-    if child(e.thenBranch) { return true }
-    if child(e.elseBranch) { return true }
-    if child(e.left) { return true }
-    if child(e.right) { return true }
-    if child(e.prefixExpr) { return true }
-    if child(e.castExpr) { return true }
-    if child(e.loopCondition) { return true }
-    if child(e.loopBody) { return true }
-    if child(e.iterable) { return true }
-    if child(e.forState) { return true }
-    if child(e.forInit) { return true }
-    if child(e.forBody) { return true }
-    if child(e.indexVariable) { return true }
-    if child(e.indexExpr) { return true }
-    if child(e.indexValue) { return true }
-    if child(e.handleBody) { return true }
-    if child(e.returnValue) { return true }
-    if each(e.parts) { return true }
-    if each(e.arrayValues) { return true }
-    if each(e.callParams) { return true }
-    if each(e.blockBody) { return true }
-    if e.recordFields.any { f -> containsRawLuaCall(f.value as Expr) } { return true }
-    if e.handleCases.any { c -> containsRawLuaCall(c.body as Expr) } { return true }
-    false
-}
-
 // A top-level statement is safe to wrap in a `do ... end` scope iff it does not
 // introduce a chunk-local that later statements rely on. Value/function
 // declarations and ordinary calls bind onto __P_ (or use transient temps), so
@@ -1049,7 +1091,7 @@ fn containsRawLuaCall(e: Expr): bool {
 fn topLevelWrappable(expr: Expr): bool {
     val kind = expr.kind
     val wrappableKind = kind == "name_declaration" || kind == "assignment" || kind == "fn_call"
-    wrappableKind && containsRawLuaCall(expr) == false
+    wrappableKind && containsRawLuaCall(expr, true) == false
 }
 
 pub fn emitProgram(prog: Program, emitModule: bool): string {

@@ -81,16 +81,16 @@ test("emitAtom - string") {
     val st = freshState()
     val expr = atomExpr("hello", tString, unit)
     val result = emitAtom(st, expr)
-    assertEqual(result, "(tmp0)")
-    assertEqual(st.sb.toString(), "local tmp0 = 'hello';")
+    assertEqual(result, "(_chi_tmp0)")
+    assertEqual(st.sb.toString(), "local _chi_tmp0 = 'hello';")
 }
 
 test("emitAtom - string with special chars") {
     val st = freshState()
     val expr = atomExpr("it's a\ntest", tString, unit)
     val result = emitAtom(st, expr)
-    assertEqual(result, "(tmp0)")
-    assertEqual(st.sb.toString(), "local tmp0 = 'it\\'s a\\ntest';")
+    assertEqual(result, "(_chi_tmp0)")
+    assertEqual(st.sb.toString(), "local _chi_tmp0 = 'it\\'s a\\ntest';")
 }
 
 test("emitAtom - unit type") {
@@ -115,9 +115,9 @@ test("emitAtom - sequential tmp names") {
     val e2 = atomExpr("world", tString, unit)
     val r1 = emitAtom(st, e1)
     val r2 = emitAtom(st, e2)
-    assertEqual(r1, "(tmp0)")
-    assertEqual(r2, "(tmp1)")
-    assertEqual(st.sb.toString(), "local tmp0 = 'hello';local tmp1 = 'world';")
+    assertEqual(r1, "(_chi_tmp0)")
+    assertEqual(r2, "(_chi_tmp1)")
+    assertEqual(st.sb.toString(), "local _chi_tmp0 = 'hello';local _chi_tmp1 = 'world';")
 }
 
 // --- emitInterpolatedString tests ---
@@ -129,9 +129,9 @@ test("emitInterpolatedString - single part") {
     val part1 = atomExpr("hello", tString, unit)
     val expr = interpolatedStringExpr([part1], unit)
     val result = emitInterpolatedString(st, expr)
-    assertEqual(result, "tmp1")
-    // tmp0 is used by emitAtom for the string, tmp1 is the interpolation result
-    assertEqual(st.sb.toString(), "local tmp0 = 'hello';local tmp1=chi_tostring((tmp0));")
+    assertEqual(result, "_chi_tmp1")
+    // _chi_tmp0 is used by emitAtom for the string, _chi_tmp1 is the interpolation result
+    assertEqual(st.sb.toString(), "local _chi_tmp0 = 'hello';local _chi_tmp1=chi_tostring((_chi_tmp0));")
 }
 
 test("emitInterpolatedString - multiple parts") {
@@ -141,8 +141,8 @@ test("emitInterpolatedString - multiple parts") {
     val part2 = atomExpr("42", tInt, unit)
     val expr = interpolatedStringExpr([part1, part2], unit)
     val result = emitInterpolatedString(st, expr)
-    assertEqual(result, "tmp1")
-    assertEqual(st.sb.toString(), "local tmp0 = 'hello ';local tmp1=chi_tostring((tmp0)) .. chi_tostring((42));")
+    assertEqual(result, "_chi_tmp1")
+    assertEqual(st.sb.toString(), "local _chi_tmp0 = 'hello ';local _chi_tmp1=chi_tostring((_chi_tmp0)) .. chi_tostring((42));")
 }
 
 test("emitInterpolatedString - empty parts") {
@@ -150,8 +150,8 @@ test("emitInterpolatedString - empty parts") {
     emitExpr = { s, e -> emitAtom(s, e) }
     val expr = interpolatedStringExpr([], unit)
     val result = emitInterpolatedString(st, expr)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0=;")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0=;")
 }
 
 summary()

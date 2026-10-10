@@ -110,8 +110,8 @@ test("emitIfElse - simple if-then-else with blocks") {
     embedLua("test_if1 = {kind='if_else', condition={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}, thenBranch={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}, elseBranch={kind='block', blockBody={{kind='atom', atomValue='2', exprType={tag='primitive',ids={{name='int'}}}}}}}")
     val e: any = luaExpr("test_if1")
     val result = emitIfElse(st, e)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0;if (true) then tmp0=(1) else tmp0=(2) end;")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0;if (true) then _chi_tmp0=(1) else _chi_tmp0=(2) end;")
 }
 
 test("emitIfElse - if without else") {
@@ -120,8 +120,8 @@ test("emitIfElse - if without else") {
     embedLua("test_if2 = {kind='if_else', condition={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}, thenBranch={kind='block', blockBody={{kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='int'}}}}}}, elseBranch=nil}")
     val e: any = luaExpr("test_if2")
     val result = emitIfElse(st, e)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0;if (true) then tmp0=(42) end;")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0;if (true) then _chi_tmp0=(42) end;")
 }
 
 test("emitIfElse - then branch ends with return skips assignment") {
@@ -130,8 +130,8 @@ test("emitIfElse - then branch ends with return skips assignment") {
     embedLua("test_if3 = {kind='if_else', condition={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}, thenBranch={kind='block', blockBody={{kind='return', returnValue={kind='atom', atomValue='7', exprType={tag='primitive',ids={{name='int'}}}}}}}, elseBranch={kind='block', blockBody={{kind='atom', atomValue='0', exprType={tag='primitive',ids={{name='int'}}}}}}}")
     val e: any = luaExpr("test_if3")
     val result = emitIfElse(st, e)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0;if (true) then return (7); else tmp0=(0) end;")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0;if (true) then return (7); else _chi_tmp0=(0) end;")
 }
 
 test("emitIfElse - else branch ends with break skips assignment") {
@@ -140,8 +140,8 @@ test("emitIfElse - else branch ends with break skips assignment") {
     embedLua("test_if4 = {kind='if_else', condition={kind='atom', atomValue='false', exprType={tag='primitive',ids={{name='bool'}}}}, thenBranch={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}, elseBranch={kind='block', blockBody={{kind='break'}}}}")
     val e: any = luaExpr("test_if4")
     val result = emitIfElse(st, e)
-    assertEqual(result, "tmp0")
-    assertEqual(st.sb.toString(), "local tmp0;if (false) then tmp0=(1) else break; end;")
+    assertEqual(result, "_chi_tmp0")
+    assertEqual(st.sb.toString(), "local _chi_tmp0;if (false) then _chi_tmp0=(1) else break; end;")
 }
 
 // ===== emitWhile tests =====
@@ -154,9 +154,9 @@ test("emitWhile - simple while loop with atom condition") {
     val result = emitWhile(st, e)
     assertEqual(result, "nil")
     val output = st.sb.toString()
-    embedLua("__wh_hasThunk = string.find(output, 'local function tmp0', 1, true) ~= nil")
+    embedLua("__wh_hasThunk = string.find(output, 'local function _chi_tmp0', 1, true) ~= nil")
     assertTrue(luaExpr("__wh_hasThunk") as bool)
-    embedLua("__wh_hasWhile = string.find(output, 'while tmp0() do', 1, true) ~= nil")
+    embedLua("__wh_hasWhile = string.find(output, 'while _chi_tmp0() do', 1, true) ~= nil")
     assertTrue(luaExpr("__wh_hasWhile") as bool)
     embedLua("__wh_hasCont = string.find(output, '::__continue_0::', 1, true) ~= nil")
     assertTrue(luaExpr("__wh_hasCont") as bool)
