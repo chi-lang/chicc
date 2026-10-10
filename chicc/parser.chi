@@ -74,6 +74,16 @@ pub fn skipNewlines(p: Parser) {
     }
 }
 
+// noTrailingLambda makes `{` end the expression (it opens the body of an
+// if/while/for/when condition). It holds only at the condition's top level:
+// nested constructs and delimited subexpressions set their own value and
+// restore the returned previous one on exit.
+fn setNoTrailingLambda(p: Parser, value: bool): bool {
+    val prev = p.noTrailingLambda
+    p.noTrailingLambda = value
+    prev
+}
+
 // -- Forward declarations for functions implemented in later tasks --
 pub var parseExpression: (Parser) -> any = { p -> advance(p) }
 pub var parseTypeAlias: (Parser) -> any = { p -> advance(p) }
@@ -146,6 +156,7 @@ fn infixPrecedence(tokenKind: int): int {
 fn parseArgList(p: Parser): array[any] {
     val args: array[any] = []
     expect(p, TK_LPAREN)
+    val saved = setNoTrailingLambda(p, false)
     skipNewlines(p)
     if peek(p) != TK_RPAREN {
         args.push(parseExprFwd(p, 1))
@@ -156,6 +167,7 @@ fn parseArgList(p: Parser): array[any] {
         }
     }
     skipNewlines(p)
+    p.noTrailingLambda = saved
     expect(p, TK_RPAREN)
     args
 }
@@ -165,6 +177,7 @@ fn parseArrayLiteral(p: Parser): any {
     val startTok = expect(p, TK_LBRACKET)
     val startSec = tokenSection(startTok)
     val values: array[any] = []
+    val saved = setNoTrailingLambda(p, false)
     skipNewlines(p)
     if peek(p) != TK_RBRACKET {
         values.push(parseExprFwd(p, 1))
@@ -177,6 +190,7 @@ fn parseArrayLiteral(p: Parser): any {
         }
     }
     skipNewlines(p)
+    p.noTrailingLambda = saved
     val endTok = expect(p, TK_RBRACKET)
     val endSec = tokenSection(endTok)
     parseCreateArray(values, newSection(startSec.startLine, startSec.startCol, endSec.startLine, endSec.startCol))
@@ -275,6 +289,7 @@ fn parseBraceRecordImpl(p: Parser): any {
     val startTok = expect(p, TK_LBRACE)
     val startSec = tokenSection(startTok)
     val fields: array[any] = []
+    val saved = setNoTrailingLambda(p, false)
     skipNewlines(p)
     if peek(p) != TK_RBRACE {
         val nameTok = expect(p, TK_ID)
@@ -295,6 +310,7 @@ fn parseBraceRecordImpl(p: Parser): any {
         }
     }
     skipNewlines(p)
+    p.noTrailingLambda = saved
     val endTok = expect(p, TK_RBRACE)
     val endSec = tokenSection(endTok)
     parseCreateRecord(fields, newSection(startSec.startLine, startSec.startCol, endSec.startLine, endSec.startCol))
@@ -389,9 +405,11 @@ fn parsePrefixExpr(p: Parser): any {
     if kind == TK_LPAREN {
         val tok = advance(p)
         val sec = tokenSection(tok)
+        val saved = setNoTrailingLambda(p, false)
         skipNewlines(p)
         val expr = parseExprFwd(p, 0)
         skipNewlines(p)
+        p.noTrailingLambda = saved
         expect(p, TK_RPAREN)
         return parseGroup(expr, sec)
     }
@@ -565,9 +583,11 @@ fn parseInfixExpr(p: Parser, left: any, prec: int): any {
         } else {
             // Index access: expr[idx]
             advance(p)
+            val saved = setNoTrailingLambda(p, false)
             skipNewlines(p)
             val idxExpr = parseExprFwd(p, 0)
             skipNewlines(p)
+            p.noTrailingLambda = saved
             expect(p, TK_RBRACKET)
             val idxOp = parseIndexOperator(left, idxExpr, sec)
             // Check for indexed assignment: expr[idx] = value
@@ -879,7 +899,7 @@ fn parseNameDecl(p: Parser, isPub: bool): any {
 // When we get here, `{` is NOT yet consumed.
 // Lambda cases reaching here: { }, { -> body }, { id -> body }, { id, id -> body }
 // Block cases: { expr; expr; ... }
-fn parseBlockOrLambda(p: Parser): any {
+fn parseBlockOrLambdaBody(p: Parser): any {
     val startTok = expect(p, TK_LBRACE)
     val startSec = tokenSection(startTok)
     skipNewlines(p)
@@ -993,6 +1013,13 @@ fn parseBlockOrLambda(p: Parser): any {
     parseBlock(blockBody, newSection(startSec.startLine, startSec.startCol, endSec.startLine, endSec.startCol))
 }
 
+fn parseBlockOrLambda(p: Parser): any {
+    val saved = setNoTrailingLambda(p, false)
+    val result = parseBlockOrLambdaBody(p)
+    p.noTrailingLambda = saved
+    result
+}
+
 // -- parseIfElseExpr: parse if/else expressions --
 // if CONDITION { BODY } [else { BODY }]
 // if CONDITION { BODY } else if CONDITION { BODY } ...
@@ -1000,9 +1027,9 @@ fn parseIfElseExpr(p: Parser): any {
     val startTok = expect(p, TK_IF)
     val startSec = tokenSection(startTok)
     // Parse condition (no trailing lambda - { starts the then-block)
-    p.noTrailingLambda = true
+    val saved = setNoTrailingLambda(p, true)
     val cond = parseExpr(p, 0)
-    p.noTrailingLambda = false
+    p.noTrailingLambda = saved
     // Parse then block
     skipNewlines(p)
     val thenBody = parseBlockFwd(p)
@@ -1029,9 +1056,9 @@ fn parseWhileExpr(p: Parser): any {
     val startTok = expect(p, TK_WHILE)
     val startSec = tokenSection(startTok)
     // Parse condition (no trailing lambda - { starts the body block)
-    p.noTrailingLambda = true
+    val saved = setNoTrailingLambda(p, true)
     val cond = parseExpr(p, 0)
-    p.noTrailingLambda = false
+    p.noTrailingLambda = saved
     // Parse body block
     skipNewlines(p)
     val body = parseBlockFwd(p)
@@ -1057,7 +1084,7 @@ fn parseForExpr(p: Parser): any {
     expect(p, TK_IN)
     skipNewlines(p)
     // Parse iterable expression (no trailing lambda - { starts the body block)
-    p.noTrailingLambda = true
+    val saved = setNoTrailingLambda(p, true)
     val iter = parseExpr(p, 1)
     // Optional state and init: , STATE, INIT
     var state: any = unit
@@ -1072,7 +1099,7 @@ fn parseForExpr(p: Parser): any {
             init = parseExpr(p, 1)
         }
     }
-    p.noTrailingLambda = false
+    p.noTrailingLambda = saved
     // Parse body block
     skipNewlines(p)
     val body = parseBlockFwd(p)
@@ -1086,6 +1113,7 @@ fn parseWhenExpr(p: Parser): any {
     val startSec = tokenSection(startTok)
     skipNewlines(p)
     expect(p, TK_LBRACE)
+    val saved = setNoTrailingLambda(p, false)
     skipNewlines(p)
     val cases: array[any] = []
     var elsCase: any = unit
@@ -1097,17 +1125,15 @@ fn parseWhenExpr(p: Parser): any {
             expect(p, TK_ARROW)
             skipNewlines(p)
             // Parse else body: collect expressions until newline or }
-            p.noTrailingLambda = true
             val elseBody = parseExpr(p, 0)
-            p.noTrailingLambda = false
             elsCase = newParseElseCase(elseBody, elseSec)
             skipNewlines(p)
         } else {
             // Regular case: COND -> BODY
             val caseSec = tokenSection(current(p))
-            p.noTrailingLambda = true
+            val savedCase = setNoTrailingLambda(p, true)
             val caseCond = parseExpr(p, 0)
-            p.noTrailingLambda = false
+            p.noTrailingLambda = savedCase
             expect(p, TK_ARROW)
             skipNewlines(p)
             val caseBody = parseExpr(p, 0)
@@ -1115,6 +1141,7 @@ fn parseWhenExpr(p: Parser): any {
             skipNewlines(p)
         }
     }
+    p.noTrailingLambda = saved
     expect(p, TK_RBRACE)
     parseWhen(cases, elsCase, startSec)
 }
@@ -1412,6 +1439,7 @@ fn parseEffectDef(p: Parser, isPub: bool): any {
 fn parseHandleExpr(p: Parser): any {
     val startTok = expect(p, TK_HANDLE)
     val startSec = tokenSection(startTok)
+    val saved = setNoTrailingLambda(p, false)
     skipNewlines(p)
     // Parse body block
     expect(p, TK_LBRACE)
@@ -1459,6 +1487,7 @@ fn parseHandleExpr(p: Parser): any {
         skipNewlines(p)
     }
     expect(p, TK_RBRACE)
+    p.noTrailingLambda = saved
     parseHandle(hBody, cases, startSec)
 }
 
@@ -1477,7 +1506,9 @@ fn parseInterpString(p: Parser): any {
         } else if peek(p) == TK_INTERP_EXPR_START {
             val exprStartTok = advance(p)
             val exprSec = tokenSection(exprStartTok)
+            val saved = setNoTrailingLambda(p, false)
             val expr = parseExpr(p, 0)
+            p.noTrailingLambda = saved
             expect(p, TK_INTERP_EXPR_END)
             parts.push(parseInterpolation(expr, exprSec) as any)
         } else {
