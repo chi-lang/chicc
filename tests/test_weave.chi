@@ -28,18 +28,18 @@ fn compileErrors(src: string): string {
     out
 }
 
-val upper = "import std/lang.string { toUpper }\n"
+val importToUpper = "import std/lang.string { toUpper }\n"
 
-// The top-level weave temp is a package member, read through the target it
-// was declared with.
+// At top level the weave temp lives on the package table, in a function body
+// it is a Lua local.
 test("top-level weave fills the placeholder") {
-    val pkg = runModule("package t/w24a\n" + upper + "val r = \"hello\" ~> toUpper(_) ~> \"\${_}!\"\n")
+    val pkg = runModule("package t/w24a\n" + importToUpper + "val r = \"hello\" ~> toUpper(_) ~> \"\${_}!\"\n")
     assertTrue(pkg != unit)
     assertEqual(pkg.r, "HELLO!")
 }
 
 test("weave in a function body fills the placeholder") {
-    val pkg = runModule("package t/w24b\n" + upper + "fn f(): string {\n    \"hello\" ~> toUpper(_) ~> \"\${_}!\"\n}\nval r = f()\n")
+    val pkg = runModule("package t/w24b\n" + importToUpper + "fn f(): string {\n    \"hello\" ~> toUpper(_) ~> \"\${_}!\"\n}\nval r = f()\n")
     assertTrue(pkg != unit)
     assertEqual(pkg.r, "HELLO!")
 }
