@@ -431,6 +431,20 @@ fn emitScopedStatement(st: EmitterState, stmt: Expr, slot: string): string {
     }
 }
 
+fn isExprTerminator(expr: Expr): bool {
+    val kind = expr.kind
+    if kind == "return" { true }
+    else if kind == "break" { true }
+    else if kind == "continue" { true }
+    else { false }
+}
+
+// emitBlock stops at the first terminator, so a terminator anywhere in the
+// block ends the emitted Lua block.
+fn isBlockTerminator(expr: Expr): bool {
+    expr.blockBody.any { it -> isExprTerminator(it as Expr) }
+}
+
 // The last statement is never scoped: its result is the block's value.
 pub fn emitBlock(st: EmitterState, expr: Expr): string {
     val blockItems = expr.blockBody
@@ -446,8 +460,7 @@ pub fn emitBlock(st: EmitterState, expr: Expr): string {
         } else {
             lastResult = emitExpr(st, child)
         }
-        val childKind = child.kind
-        if childKind == "return" {
+        if isExprTerminator(child) {
             i = bodyCount + 1
         } else {
             i = i + 1
@@ -552,28 +565,6 @@ pub fn mapInfixOperation(leftVar: string, rightVar: string, op: string, leftType
     }
 }
 
-fn isBlockTerminator(expr: Expr): bool {
-    val blockItems = expr.blockBody
-    val bodyCount = luaExpr("#blockItems") as int
-    if bodyCount == 0 {
-        false
-    } else {
-        val lastKind = (blockItems[bodyCount] as Expr).kind
-        if lastKind == "return" { true }
-        else if lastKind == "break" { true }
-        else if lastKind == "continue" { true }
-        else { false }
-    }
-}
-
-fn isExprTerminator(expr: Expr): bool {
-    val kind = expr.kind
-    if kind == "return" { true }
-    else if kind == "break" { true }
-    else if kind == "continue" { true }
-    else { false }
-}
-
 pub fn emitIfElse(st: EmitterState, expr: Expr): string {
     val tmpName = nextTmpName(st)
     emit(st, "local $tmpName;")
@@ -639,6 +630,9 @@ fn extractConditionThunks(st: EmitterState, expr: Expr): string {
     }
 }
 
+// A loop body gets its own `do ... end`: `goto __continue_N` must not jump
+// into the scope of a body local, and Lua allows no statement after a
+// trailing `break` or `return`, so the label cannot share the body's block.
 pub fn emitWhile(st: EmitterState, expr: Expr): string {
     val prevLoopId = st.currentLoopId
     val loopId = st.nextLoopId
@@ -648,13 +642,12 @@ pub fn emitWhile(st: EmitterState, expr: Expr): string {
     val condition = expr.loopCondition as Expr
     val condResult = extractConditionThunks(st, condition)
 
-    emit(st, "while $condResult do ")
+    emit(st, "while $condResult do do ")
     val prevInFunction = st.inFunction
     st.inFunction = true
     val loopBody = expr.loopBody as Expr
     emitExpr(st, loopBody)
-    emit(st, "::__continue_$loopId::;")
-    emit(st, "end;")
+    emit(st, " end ::__continue_$loopId:: end;")
     st.inFunction = prevInFunction
 
     st.currentLoopId = prevLoopId
@@ -706,13 +699,12 @@ pub fn emitForLoop(st: EmitterState, expr: Expr): string {
         elements = iterResult
     }
 
-    emit(st, "for $vars in $elements do ")
+    emit(st, "for $vars in $elements do do ")
     val prevInFunction = st.inFunction
     st.inFunction = true
     val forBody = expr.forBody as Expr
     emitExpr(st, forBody)
-    emit(st, "::__continue_$loopId::;")
-    emit(st, " end;")
+    emit(st, " end ::__continue_$loopId:: end;")
     st.inFunction = prevInFunction
 
     st.currentLoopId = prevLoopId

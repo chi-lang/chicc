@@ -1,0 +1,115 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { loadLuaCode }
+
+// Loop bodies with `continue`, `break` and `return` load as valid Lua and
+// keep Chi semantics, including unreachable code after a terminator
+// (issue #56).
+
+fn luaOf(src: string): string {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val code = result.luaCode
+    if code == unit { return "" }
+    code as string
+}
+
+// Returns the module's package table, or unit when compilation or Lua
+// loading fails.
+fn runModule(src: string): any {
+    val code = luaOf(src)
+    if code == "" { return unit }
+    val loader: any = loadLuaCode(code)
+    if loader == unit { return unit }
+    val run = loader as () -> any
+    run()
+}
+
+// `note(x)` is a call, so each use allocates a temporary local.
+// Counters are not named `i`: chi_record_pairs reads a global `i`, which
+// resolves to a package var `i` left by an earlier test.
+val noteFn = "var trace = \"\"\nfn note(x: any) {\n    trace = \"\$trace\$x,\"\n}\n"
+
+test("while: continue followed by a statement with a temporary") {
+    val pkg = runModule(noteFn + "var n = 0\nwhile n < 10 {\n    n += 1\n    if n == 5 { continue }\n    note(n)\n}\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.trace, "1,2,3,4,6,7,8,9,10,")
+}
+
+test("for array: continue followed by a statement with a temporary") {
+    val pkg = runModule(noteFn + "for x in [1, 2, 3] {\n    if x == 2 { continue }\n    note(x)\n}\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.trace, "1,3,")
+}
+
+test("for record: continue followed by a statement with a temporary") {
+    val pkg = runModule(noteFn + "for k, v in { a: 1, b: 2 } {\n    if v == 1 { continue }\n    note(k)\n}\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.trace, "b,")
+}
+
+test("while: body ends with break") {
+    val pkg = runModule("var n = 0\nwhile true {\n    n += 1\n    break\n}\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.n, 1)
+}
+
+test("for: body ends with break") {
+    val pkg = runModule("var n = 0\nfor x in [1, 2, 3] {\n    n += x\n    break\n}\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.n, 1)
+}
+
+test("for: body ends with return") {
+    val pkg = runModule("fn first(arr: array[int]): int {\n    for x in arr { return x }\n    0\n}\nval r = first([7, 8])\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, 7)
+}
+
+test("while: body ends with return") {
+    val pkg = runModule("fn find(limit: int): int {\n    var n = 0\n    while n < limit {\n        n += 1\n        return n * 10\n    }\n    0\n}\nval r = find(5)\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, 10)
+}
+
+test("while: dead code after break never runs") {
+    val pkg = runModule(noteFn + "var n = 0\nwhile n < 3 {\n    n += 1\n    break\n    note(\"dead\")\n}\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.n, 1)
+    assertEqual(pkg.trace, "")
+}
+
+test("while: dead code after continue never runs") {
+    val pkg = runModule(noteFn + "var n = 0\nwhile n < 3 {\n    n += 1\n    continue\n    note(\"dead\")\n}\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.n, 3)
+    assertEqual(pkg.trace, "")
+}
+
+test("for: dead code after break never runs") {
+    val pkg = runModule(noteFn + "var n = 0\nfor x in [1, 2, 3] {\n    n += 1\n    break\n    note(\"dead\")\n}\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.n, 1)
+    assertEqual(pkg.trace, "")
+}
+
+test("for: dead code after continue never runs") {
+    val pkg = runModule(noteFn + "var n = 0\nfor x in [1, 2, 3] {\n    n += 1\n    continue\n    note(\"dead\")\n}\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.n, 3)
+    assertEqual(pkg.trace, "")
+}
+
+test("dead code after break inside an if branch never runs") {
+    val pkg = runModule(noteFn + "var n = 0\nwhile n < 3 {\n    n += 1\n    if n == 2 {\n        break\n        note(\"dead\")\n    }\n}\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.n, 2)
+    assertEqual(pkg.trace, "")
+}
+
+test("nested loops: continue in the outer, break in the inner") {
+    val pkg = runModule(noteFn + "var n = 0\nwhile n < 3 {\n    n += 1\n    if n == 2 { continue }\n    while true { break }\n    note(n)\n}\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.trace, "1,3,")
+}
+
+summary()
