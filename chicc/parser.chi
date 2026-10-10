@@ -1497,7 +1497,9 @@ fn parseInterpString(p: Parser): any {
             val exprStartTok = advance(p)
             val exprSec = tokenSection(exprStartTok)
             val saved = swapNoTrailingLambda(p, false)
+            skipNewlines(p)
             val expr = parseExpr(p, 0)
+            skipNewlines(p)
             p.noTrailingLambda = saved
             expect(p, TK_INTERP_EXPR_END)
             parts.push(parseInterpolation(expr, exprSec) as any)

@@ -610,40 +610,6 @@ pub fn lexReadString(lex: Lexer) {
     }
 }
 
-// --- Now wire up readExpressionTokensImpl to use lexReadString ---
-readExpressionTokensImpl = { lex: Lexer ->
-    var braceDepth = 1
-    while lexPeek(lex) != 0 && braceDepth > 0 {
-        val ch = lexPeek(lex)
-        // Skip whitespace (but not newlines, those are tokens)
-        if ch == 32 || ch == 9 { // space or tab
-            lexAdvance(lex)
-        } else if ch == 125 { // '}'
-            braceDepth = braceDepth - 1
-            if braceDepth == 0 {
-                // This is the closing brace of the interpolation - don't consume it
-                // break out of loop
-            } else {
-                // It's a nested brace - emit it as a regular RBRACE
-                readOperatorOrDelimiter(lex)
-            }
-        } else if ch == 123 { // '{'
-            braceDepth = braceDepth + 1
-            readOperatorOrDelimiter(lex)
-        } else if isDigit(ch) {
-            readNumber(lex)
-        } else if isLetter(ch) {
-            readIdentOrKeyword(lex)
-        } else if ch == 34 { // '"' - nested string
-            lexReadString(lex)
-        } else if ch == 10 || ch == 13 { // newline
-            readOperatorOrDelimiter(lex)
-        } else {
-            readOperatorOrDelimiter(lex)
-        }
-    }
-}
-
 // --- Token dispatch ---
 // Dispatches to the appropriate reader based on the current character.
 pub fn readToken(lex: Lexer) {
@@ -657,6 +623,25 @@ pub fn readToken(lex: Lexer) {
         lexReadString(lex)
     } else {
         readOperatorOrDelimiter(lex)
+    }
+}
+
+// --- Now wire up readExpressionTokensImpl to use readToken ---
+// Lexes a `${...}` expression up to, but not including, its closing `}`.
+// Only `{`/`}` tokens change the depth, so braces inside comments and nested
+// strings do not close the interpolation.
+readExpressionTokensImpl = { lex: Lexer ->
+    var braceDepth = 1
+    skipWhitespaceAndComments(lex)
+    while lexPeek(lex) != 0 && (lexPeek(lex) != 125 || braceDepth > 1) {
+        val ch = lexPeek(lex)
+        if ch == 123 { // '{'
+            braceDepth = braceDepth + 1
+        } else if ch == 125 { // '}' closing a nested brace
+            braceDepth = braceDepth - 1
+        }
+        readToken(lex)
+        skipWhitespaceAndComments(lex)
     }
 }
 
