@@ -12,7 +12,7 @@ import chicc/symbols { CompileTables, newCompileTables, ctDefineTypeAlias, ttGet
 import chicc/checks { checkNames, importConflictCheck, visibilityCheck, fnCallCheck, immutabilityCheck, returnTypeCheck }
 import chicc/inference_context { icInit, icDefineLocalSymbol }
 import chicc/emitter { emitProgram }
-import chicc/parse_ast { ParseImport, ParseVariantTypeDefinition, VariantConstructor }
+import chicc/parse_ast { ParseImport, ParseImportEntry, ParseVariantTypeDefinition, VariantConstructor, newParseImport, newParseImportEntry }
 import std/lang.map { emptyMap, remove, values }
 
 // ============================================================================
@@ -754,15 +754,6 @@ pub fn compileToLua(source: string, ns: any): any {
 // REPL compilation support
 // ============================================================================
 
-// Imports in the raw shape compile() reads from getPreludeImports.
-fn rawImport(mod: string, pkg: string, pkgAlias: string | unit, entries: array[any]): any {
-    { moduleName: mod, packageName: pkg, packageAlias: pkgAlias, entries: entries, section: unit }
-}
-
-fn rawImportEntry(name: string, alias: string | unit): any {
-    { name: name, alias: alias, section: unit }
-}
-
 type ReplAutoImport = { moduleName: string, packageName: string, names: array[string] }
 
 // The normal prelude plus the modules the REPL spec auto-imports.
@@ -775,41 +766,56 @@ val replAutoImports: array[ReplAutoImport] = [
     { moduleName: "std", packageName: "io", names: ["readLine"] }
 ]
 
+fn luaTableKeys(t: any): array[string] {
+    luaExpr("(function() local keys = {}; for k in pairs(t) do keys[#keys + 1] = k end; return keys end)()") as array[string]
+}
+
 // Names earlier REPL lines defined in user/default: values (`_package`) and
 // types (`_types`).
 fn replUserNames(): array[string] {
-    luaExpr("(function() local names, seen = {}, {}; local p = package.loaded['user/default']; if p == nil then return names end; for _, t in ipairs({ p._package or {}, p._types or {} }) do for n in pairs(t) do if not seen[n] then seen[n] = true; names[#names + 1] = n end end end; return names end)()") as array[string]
+    val pkg: any = luaExpr("package.loaded['user/default']")
+    if pkg == unit {
+        return []
+    }
+    val names = luaTableKeys(luaExpr("pkg._package"))
+    for name in luaTableKeys(luaExpr("pkg._types")) {
+        names.push(name)
+    }
+    names
+}
+
+type ReplSession = {
+    // Explicit imports by the name they bind.
+    imports: any
+}
+
+pub fn newReplCompilationEnv(): ReplSession {
+    { imports: emptyMap[string, ParseImport]() }
 }
 
 // The imports in effect for the next REPL line. newCompileTables lets a later
-// import of a name win, so the auto-imports go first. A user name and an
-// explicit import never bind the same name (see commitReplLine).
-fn replPrelude(session: any): array[any] {
-    val explicit: any = session.replImports
-    val imports: array[any] = []
+// import of a name win, so the auto-imports go first. A name still among the
+// explicit imports was imported after its last definition (commitReplLine),
+// so the user's own name is left out.
+fn replPrelude(session: ReplSession): array[ParseImport] {
+    val explicit = session.imports
+    val imports: array[ParseImport] = []
     for auto in replAutoImports {
-        imports.push(rawImport(auto.moduleName, auto.packageName, unit, auto.names.map { n -> rawImportEntry(n, unit) }))
+        imports.push(newParseImport(auto.moduleName, auto.packageName, "", auto.names.map { n -> newParseImportEntry(n, "", unit) }, unit))
     }
-    val own: array[any] = []
+    val own: array[ParseImportEntry] = []
     for name in replUserNames() {
         if explicit.has(name) == false {
-            own.push(rawImportEntry(name, unit))
+            own.push(newParseImportEntry(name, "", unit))
         }
     }
     if own.size() > 0 {
-        imports.push(rawImport("user", "default", unit, own))
+        imports.push(newParseImport("user", "default", "", own, unit))
     }
-    for imp in explicit.values() as array[any] {
+    for imp in explicit.values() as array[ParseImport] {
         imports.push(imp)
     }
     imports
-}
-
-pub fn newReplCompilationEnv(): any {
-    val ns: any = luaExpr("__chicc_mkEnv()")
-    // Explicit imports of the session by the name they bind.
-    ns.replImports = emptyMap[string, any]()
-    ns
 }
 
 type ReplLine = {
@@ -836,11 +842,11 @@ fn replDefinedNames(prog: Program): array[string] {
     names
 }
 
-pub fn compileReplLine(source: string, ns: any): ReplLine {
+pub fn compileReplLine(source: string, session: ReplSession): ReplLine {
     // Each line changes user/default, so a fresh env per line drops symbol
-    // caches built from its earlier contents. Session state stays in `ns`.
+    // caches built from its earlier contents.
     val lineNs: any = luaExpr("__chicc_mkEnv()")
-    lineNs.getPreludeImports = { -> replPrelude(ns) }
+    lineNs.getPreludeImports = { -> replPrelude(session) }
     val result = compile(source, lineNs)
     if hasErrors(result) {
         return { messages: result.messages, luaCode: unit, shouldPrint: false, definedNames: [], imports: [] }
@@ -860,20 +866,30 @@ pub fn compileReplLine(source: string, ns: any): ReplLine {
 
 // Records the bindings of a line that compiled and ran: its imports take
 // their names, then its definitions take theirs back from earlier imports.
-pub fn commitReplLine(ns: any, line: ReplLine) {
-    val explicit: any = ns.replImports
+pub fn commitReplLine(session: ReplSession, line: ReplLine) {
+    val explicit = session.imports
     for imp in line.imports {
         if imp.packageAlias != "" {
-            explicit.put(imp.packageAlias, rawImport(imp.moduleName, imp.packageName, imp.packageAlias, []))
+            explicit.put(imp.packageAlias, newParseImport(imp.moduleName, imp.packageName, imp.packageAlias, [], unit))
         }
         for entry in imp.entries {
             val bound = if entry.alias != "" { entry.alias } else { entry.name }
-            explicit.put(bound, rawImport(imp.moduleName, imp.packageName, unit, [rawImportEntry(entry.name, entry.alias)]))
+            explicit.put(bound, newParseImport(imp.moduleName, imp.packageName, "", [newParseImportEntry(entry.name, entry.alias, unit)], unit))
         }
     }
     for name in line.definedNames {
         explicit.remove(name)
     }
+}
+
+// A copy of user/default's metadata. A line's chunk writes its declarations
+// there before running, so a line that fails at runtime restores the copy.
+pub fn saveReplMetadata(): any {
+    luaExpr("(function() local p = package.loaded['user/default'] or { _package = {}, _types = {} }; local saved = { _package = {}, _types = {} }; for k, v in pairs(p._package) do saved._package[k] = v end; for k, v in pairs(p._types) do saved._types[k] = v end; return saved end)()")
+}
+
+pub fn restoreReplMetadata(saved: any) {
+    embedLua("local p = package.loaded['user/default']; if p then p._package = saved._package; p._types = saved._types end")
 }
 
 // ============================================================================

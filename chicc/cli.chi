@@ -6,7 +6,7 @@ package chicc/cli
 import std/lang { luaExpr, embedLua }
 import std/os { getEnv }
 import std/io.file { readString, open, close, write }
-import chicc/compiler { newLuaCompilationEnv, newReplCompilationEnv, compileToLua, compileReplLine, commitReplLine, formatMessage }
+import chicc/compiler { newLuaCompilationEnv, newReplCompilationEnv, compileToLua, compileReplLine, commitReplLine, saveReplMetadata, restoreReplMetadata, formatMessage }
 
 // ============================================================================
 // Diagnostics output
@@ -291,9 +291,11 @@ pub fn runRepl(): int {
                     val errStr = luaExpr("tostring(__repl_err)") as string
                     eprintln("Error: $errStr")
                 } else {
+                    val saved = saveReplMetadata()
                     embedLua("__repl_ok, __repl_val = pcall(__repl_chunk)")
                     val runOk = luaExpr("__repl_ok") as bool
                     if runOk == false {
+                        restoreReplMetadata(saved)
                         val errStr = luaExpr("tostring(__repl_val)") as string
                         eprintln("Runtime error: $errStr")
                     } else {

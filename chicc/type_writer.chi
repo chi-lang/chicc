@@ -339,7 +339,7 @@ fn decodeTableImpl(tbl: any): Type {
         val fields = decodeLuaFields(tbl)
         val tps = decodeLuaStringList(tbl, "typeParams")
         val rec = recordType(ids, fields, tps)
-        val vname = luaExpr("tbl.name") as string | unit
+        val vname = tbl.name as string | unit
         if vname != unit {
             rec.name = vname as string
         }

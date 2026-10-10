@@ -59,6 +59,16 @@ test("a failed line keeps the earlier binding") {
     assertEqual(lines[2], "3")
 }
 
+test("a line that fails at runtime keeps the earlier bindings") {
+    val out = repl("val x = 1\nval x = if [1][5] + 1 > 0 { \"a\" } else { \"b\" }\nx + 1\nval y = [1][5] + 1\ny\n")
+    val lines = out.split("\n")
+    assertEqual(lines.size(), 4)
+    assertEqual(lines[1].startsWith("Runtime error: "), true)
+    assertEqual(lines[2], "2")
+    assertEqual(lines[3].startsWith("Runtime error: "), true)
+    assertEqual(lines[4], "Error: [UNRECOGNIZED_NAME] Name 'y' was not recognized (line 1, col 1)")
+}
+
 test("error positions refer to the typed line") {
     val err = "Error: [UNRECOGNIZED_NAME] Name 'foo' was not recognized (line 1, col 1)"
     assertEqual(repl("foo\nimport std/math { abs }\nfoo\n"), "$err\n$err")
