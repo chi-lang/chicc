@@ -1,7 +1,7 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/lexer { tokenize }
 import chicc/token { TK_EOF }
-import chicc/parser { newParser, parseTypeRefImpl, parseTypeAliasImpl, parseVariantTypeDef, peek }
+import chicc/parser { newParser, parseTypeRefImpl, parseTypeAliasImpl, parseVariantTypeDef, peek, parseProgram }
 import chicc/parse_ast { TypeRef }
 import std/lang { luaExpr }
 

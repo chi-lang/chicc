@@ -1,0 +1,71 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { luaExpr, embedLua, loadLuaCode }
+import std/io.file { writeString }
+
+// A user program reaches the compiler's own packages (module `chicc`) only
+// through an explicit import: not as bare Lua globals, import-free names or
+// UFCS candidates (issue #40).
+
+// The test process runs under compileModules, whose _G metatable resolves bare
+// globals from every loaded package, so bare-global behaviour is checked in a
+// fresh run_chicc.sh process.
+fn runInLauncher(src: string): string {
+    val base = luaExpr("os.tmpname()") as string
+    val path = "$base.chi"
+    writeString(path, src)
+    val out = luaExpr("(function() local p = io.popen('./run_chicc.sh ' .. path .. ' 2>&1'); local o = p:read('*a'); p:close(); return o end)()") as string
+    embedLua("os.remove(path); os.remove(base)")
+    out
+}
+
+// First compile message for `src`, or unit when it compiles cleanly.
+fn firstMessage(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    if messages.size() == 0 { return unit }
+    messages[1]
+}
+
+// Returns the module's package table, or unit when compilation or Lua
+// loading fails.
+fn runModule(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    if result.luaCode == unit { return unit }
+    val loader: any = loadLuaCode(result.luaCode as string)
+    if loader == unit { return unit }
+    val run = loader as () -> any
+    run()
+}
+
+test("unknown bare globals in Lua snippets are nil, not compiler exports") {
+    val out = runInLauncher("package test/n2a\nimport std/lang { luaExpr }\nprintln(luaExpr(\"syntaxError\"))\nprintln(luaExpr(\"type(_types)\"))\n")
+    assertEqual(out, "unit\nnil\n")
+}
+
+test("a name the stdlib and a compiler package both export resolves to the stdlib") {
+    val pkg = runModule("package test/n2b\nval n = len(\"abc\")\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.n, 3)
+}
+
+test("a compiler function is not a name without an import") {
+    val msg = firstMessage("package test/n2c\nval st = newSymbolTable()\n")
+    assertTrue(msg != unit)
+    assertEqual(msg.code, "UNRECOGNIZED_NAME")
+    assertTrue((msg.text as string).contains("newSymbolTable"))
+}
+
+test("a compiler function is not a UFCS candidate without an import") {
+    val msg = firstMessage("package test/n2d\nprintln(\"foo\".luaName())\n")
+    assertTrue(msg != unit)
+    assertEqual(msg.code, "MEMBER_NOT_FOUND")
+}
+
+test("a compiler function is reachable through an explicit import") {
+    val pkg = runModule("package test/n2e\nimport chicc/emitter { luaName }\nval s = luaName(\"foo\")\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.s, "foo")
+}
+
+summary()

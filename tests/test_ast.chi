@@ -1,7 +1,7 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/source { newSection }
 import chicc/types { tInt, tString }
-import chicc/ast { localTarget, packageTarget, atomExpr, blockExpr, fnCallExpr, variableAccessExpr, breakExpr, continueExpr, returnExpr, infixOpExpr, ifElseExpr, fnExpr, newFnParam, forLoopExpr }
+import chicc/ast { localTarget, packageTarget, atomExpr, blockExpr, fnCallExpr, variableAccessExpr, breakExpr, continueExpr, returnExpr, infixOpExpr, ifElseExpr, fnExpr, newFnParam, forLoopExpr, isTerminator }
 import std/lang.map { emptyMap }
 
 test("localTarget") {

@@ -2,7 +2,7 @@
 package chicc/inference_context
 import std/lang { luaExpr, embedLua }
 import std/lang.map { emptyMap, forEach }
-import chicc/types { Type, TypeId, variableType, polyType }
+import chicc/types { Type, TypeId, variableType, polyType, instantiate }
 import chicc/ast { DotTarget, localBindingDotTarget }
 import chicc/unification { tryUnify, newConstraint }
 
@@ -312,10 +312,11 @@ pub fn icListTypesPackageFunctionsForType(name: string, receiverType: any): arra
     results
 }
 
-// Tier 4: search ALL loaded packages for a matching UFCS function
+// Tier 4: search all loaded packages except the compiler's own (`chicc/*`)
+// for a matching UFCS function
 pub fn icListAllLoadedFunctionsForType(name: string, receiverType: any): array[any] {
     val results: array[any] = []
     if icNs == unit { return results }
-    embedLua("local _seen = {}; for qualifier, loaded in pairs(package.loaded) do if type(qualifier) == 'string' and type(loaded) == 'table' and loaded._package then local slashPos = qualifier:find('/'); if slashPos then local mod = qualifier:sub(1, slashPos - 1); local pkg = qualifier:sub(slashPos + 1); local sym = __P_.icNs.getSymbol(mod, pkg, name); if sym and sym.symbolType then local key = mod .. '/' .. pkg; if not _seen[key] then _seen[key] = true; local trialOk = require('chicc/inference_context').icTrialUnify(sym.symbolType, receiverType); if trialOk then table.insert(results, { dotTarget = require('chicc/ast').packageFnDotTarget(mod, pkg, name), typeScheme = sym.symbolType }) end end end end end end")
+    embedLua("local _seen = {}; for qualifier, loaded in pairs(package.loaded) do if type(qualifier) == 'string' and qualifier:sub(1, 6) ~= 'chicc/' and type(loaded) == 'table' and loaded._package then local slashPos = qualifier:find('/'); if slashPos then local mod = qualifier:sub(1, slashPos - 1); local pkg = qualifier:sub(slashPos + 1); local sym = __P_.icNs.getSymbol(mod, pkg, name); if sym and sym.symbolType then local key = mod .. '/' .. pkg; if not _seen[key] then _seen[key] = true; local trialOk = require('chicc/inference_context').icTrialUnify(sym.symbolType, receiverType); if trialOk then table.insert(results, { dotTarget = require('chicc/ast').packageFnDotTarget(mod, pkg, name), typeScheme = sym.symbolType }) end end end end end end")
     results
 }

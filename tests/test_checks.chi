@@ -1,8 +1,8 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/types { Type, tAny, tUnit, tBool, tInt, tFloat, tString, functionType }
 import chicc/ast { localTarget, packageTarget, atomExpr, variableAccessExpr, fnCallExpr, declarationExpr, variableAssignmentExpr, fnExpr, blockExpr, returnExpr, newFnParam, newImport, newImportEntry }
-import chicc/checks { importConflictCheck }
-import chicc/parse_ast { parseVariableRead, parseNameDeclaration, parseLambda, parseFor, parseFuncWithName, parseEffectDefinition, parseHandle, parseFnCall, parseBlock, parseBinaryOp, parseIfElse, newFormalArgument, newParseHandleCase }
+import chicc/checks { importConflictCheck, checkNames, fnCallCheck, immutabilityCheck, returnTypeCheck, visibilityCheck }
+import chicc/parse_ast { parseVariableRead, parseNameDeclaration, parseLambda, parseFor, parseFuncWithName, parseEffectDefinition, parseHandle, parseFnCall, parseBlock, parseBinaryOp, parseIfElse, newFormalArgument, newParseHandleCase, parseCreateArray, parseLongValue, parseUnitValue }
 import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol }
 import chicc/messages { Message, unrecognizedName, cannotAccessInternalName, notAFunction, cannotChangeImmutableVariable, typeMismatch, genericError }
 import chicc/source { newSection }

@@ -1,5 +1,7 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/parse_ast { PackageDefinition }
+import chicc/lexer { tokenize }
+import chicc/parser { newParser, parseProgram }
 import std/io.file { readString }
 import std/lang { luaExpr, embedLua }
 

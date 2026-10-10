@@ -1,6 +1,7 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import chicc/types { Type, TypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, variableType, polyType, intTypeId, stringTypeId }
+import chicc/types { Type, TypeId, tAny, tUnit, tBool, tInt, tFloat, tString, primitiveType, functionType, recordType, variableType, polyType, intTypeId, stringTypeId, typeEquals }
 import chicc/unification { Constraint, newConstraint, unify }
+import chicc/inference_context { icDefineLocalSymbol, icFreshVariable, icGetLocalSymbol, icGetTargetType, icInit, icListCurrentPackageFunctionsForType, icListLocalFunctionsForType, icListTypesPackageFunctionsForType, icUpdateSymbolType, icWithNewLocalScope }
 import chicc/ast { Target, DotTarget, localTarget, packageTarget, localFnDotTarget, packageFnDotTarget }
 import chicc/symbols { newSymbol, newCompileTables, ctDefineSymbol, ctGetLocalSymbol }
 import chicc/source { newSection }

@@ -143,8 +143,7 @@ static int load_compiler(lua_State *L) {
     lua_setglobal(L, "arg");
 
     /* Set up _G metatable for cross-package name resolution in embedLua/luaExpr.
-     * Must be BEFORE loading chicc.lua so it's active during module loading.
-     * messages.chi will chain its own metatable on top of this one. */
+     * Must be BEFORE loading chicc.lua so it's active during module loading. */
     if (luaL_dostring(L,
             "setmetatable(_G, { __index = function(t, k)\n"
             "  for pkgName, pkgTable in pairs(package.loaded) do\n"

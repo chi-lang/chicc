@@ -2,7 +2,7 @@ import std/lang { embedLua, luaExpr }
 import std/io.file { writeString, open }
 import std/os { getEnv }
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import chicc/cli { cliMain, loadStdlib }
+import chicc/cli { cliMain, loadStdlib, compileFile, runFile }
 
 // Test cli.chi functions
 // Tests for the CLI entry point module

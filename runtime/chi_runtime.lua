@@ -90,9 +90,9 @@ end
 
 -- Record iteration
 function chi_record_pairs(record)
-    f,s,i = pairs(record)
+    local f,s,i = pairs(record)
     local next = function(state, last)
-        k,v = f(state, last)
+        local k,v = f(state, last)
         if k then
             return k, v
         else
