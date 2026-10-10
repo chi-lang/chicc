@@ -134,7 +134,7 @@ static int load_runtime(lua_State *L) {
 /*
  * Load the chicc compiler on top of an already-loaded runtime.
  * Sets global arg=nil first so chicc's entry point doesn't fire.
- * After loading, overrides loadStdlib (stdlib already embedded) and
+ * After loading, marks the stdlib as loaded (it is embedded) and
  * sets up chi_compile for eval()/compileLua() support.
  */
 static int load_compiler(lua_State *L) {
@@ -166,13 +166,10 @@ static int load_compiler(lua_State *L) {
         return -1;
     lua_pop(L, 1);
 
-    /* Override loadStdlib — stdlib is already loaded from embedded data */
-    if (luaL_dostring(L,
-            "loadStdlib = function() return true end\n") != 0) {
-        fprintf(stderr, "Fatal: overriding loadStdlib: %s\n",
-                lua_tostring(L, -1));
-        return -1;
-    }
+    /* Stdlib is already loaded from embedded data: tells cli.chi's
+     * loadStdlib not to read CHI_HOME/lib/std.chim */
+    lua_pushboolean(L, 1);
+    lua_setglobal(L, "_CHI_STDLIB_LOADED");
 
     /* Set chi_compile for eval()/compileLua() in Chi programs.
      * Returns luaCode on success, nil + formatted messages on failure. */

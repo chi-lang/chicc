@@ -14,9 +14,8 @@ local sf = assert(io.open(chi_home .. "/lib/std.chim", "r"),
     "std.chim not found — set CHI_HOME to a Chi installation")
 local stdlib = sf:read("a"); sf:close()
 assert(load(stdlib, "@std.chim"))()
-
--- Note: cliMain will call its package-local loadStdlib() and reload
--- std.chim from CHI_HOME — harmless, it happens before any compilation.
+-- Tells cliMain's loadStdlib() not to load std.chim a second time.
+_CHI_STDLIB_LOADED = true
 
 -- Load chicc.lua with its entry point suppressed (it fires on `arg`)
 local saved_arg = arg

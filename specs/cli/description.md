@@ -5,7 +5,7 @@ type: product
 version: 1
 status: draft
 created_at: "2026-04-04T12:00:00+02:00"
-updated_at: "2026-04-04T12:00:00+02:00"
+updated_at: "2026-10-10T12:00:00+02:00"
 ---
 # Chi Compiler CLI
 
@@ -97,13 +97,19 @@ The version is defined in `cli.chi`. The native C launcher sets a `_CHI_NATIVE` 
 A thin C wrapper. Its responsibilities:
 
 - Detect and run payload mode (executables produced by `chi build`)
-- Initialize LuaJIT and load the runtime stack (utf8, chistr, chi_runtime, stdlib)
+- Initialize LuaJIT and load the runtime stack (utf8, chistr, chi_runtime, embedded stdlib)
 - Load the compiler (`chicc.lua`)
 - Load build support (`chi_build.lua`) and expose `_CHI_EXE_PATH`
 - Set `_CHI_NATIVE = true`
 - Forward all arguments to `cliMain`
 
 The launcher contains no command parsing or dispatch logic.
+
+### Standard library
+
+The native binary runs on the stdlib embedded at build time. `CHI_HOME` is needed only to build the binary; at runtime it is neither read nor required, so an installed `std.chim` of another version cannot change what `chi` compiles and runs against.
+
+Without the native binary (`run_chicc.sh`), the launcher loads `$CHI_HOME/lib/std.chim` once per process. `cliMain` loads the stdlib itself only when no launcher did; if that load fails, `compile`, `repl` and running a file report the error and exit with code 1.
 
 ### `cli.chi`
 
@@ -117,6 +123,7 @@ Owns all command parsing, dispatch, help text, and version output. Exports `cliM
 - Missing required argument (e.g. `-o` without value): prints error, exits with code 1
 - Compilation failure: prints compiler messages, exits with code 1
 - Runtime error in executed program: prints error, exits with code 1
+- Stdlib cannot be loaded (`CHI_HOME` unset, `std.chim` missing or failing to load): prints error, exits with code 1
 
 ## Non-Goals (v1)
 
