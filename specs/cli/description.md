@@ -101,6 +101,7 @@ A thin C wrapper. Its responsibilities:
 - Load the compiler (`chicc.lua`)
 - Load build support (`chi_build.lua`) and expose `_CHI_EXE_PATH`
 - Set `_CHI_NATIVE = true`
+- Set `_CHI_STDLIB_LOADED = true`, so `cli.chi` does not load the stdlib again
 - Forward all arguments to `cliMain`
 
 The launcher contains no command parsing or dispatch logic.

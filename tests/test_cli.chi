@@ -1,5 +1,6 @@
 import std/lang { embedLua, luaExpr }
 import std/io.file { writeString, open }
+import std/os { getEnv }
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/cli { cliMain, loadStdlib }
 
@@ -290,16 +291,15 @@ test("cliMain build does not build source that fails to compile") {
 // std/os cannot set the environment loadStdlib reads CHI_HOME from.
 embedLua("require('ffi').cdef('int setenv(const char *name, const char *value, int overwrite); int unsetenv(const char *name);')")
 
-val realChiHome = luaExpr("os.getenv('CHI_HOME')") as string
-val stdlibHomes = luaExpr("io.popen('mktemp -d /tmp/test_chicc_stdlib.XXXXXX'):read('*l')") as string
+val realChiHome = getEnv("CHI_HOME") as string
+val fakeChiHomes = luaExpr("io.popen('mktemp -d /tmp/test_chicc_stdlib.XXXXXX'):read('*l')") as string
 
 fn setChiHome(path: string) {
     embedLua("require('ffi').C.setenv('CHI_HOME', path, 1)")
 }
 
-// Creates a CHI_HOME whose lib/std.chim holds stdChim and points CHI_HOME at it.
 fn useStdlibHome(name: string, stdChim: string) {
-    val home = "$stdlibHomes/$name"
+    val home = "$fakeChiHomes/$name"
     embedLua("os.execute('mkdir -p ' .. home .. '/lib')")
     writeString("$home/lib/std.chim", stdChim)
     setChiHome(home)
@@ -344,7 +344,7 @@ test("loadStdlib fails on a std.chim that raises while loading") {
 }
 
 test("loadStdlib fails when CHI_HOME has no std.chim") {
-    setChiHome("$stdlibHomes/empty")
+    setChiHome("$fakeChiHomes/empty")
     embedLua("_CHI_STDLIB_LOADED = nil")
     assertFalse(loadStdlib())
     restoreStdlibEnv()
@@ -359,17 +359,17 @@ test("loadStdlib fails when CHI_HOME is not set") {
 test("cliMain neither runs nor compiles a program when the stdlib fails to load") {
     useStdlibHome("broken", "this is not lua")
     embedLua("_CHI_STDLIB_LOADED = nil; chi_test_program_ran = false")
-    val program = "$stdlibHomes/program.chi"
+    val program = "$fakeChiHomes/program.chi"
     writeString(program, "import std/lang { embedLua }\nembedLua(\"chi_test_program_ran = true\")\n")
     assertEqual(cliMain([program]), 1)
     assertFalse(luaExpr("chi_test_program_ran") as bool)
     assertEqual(cliMain(["compile", program]), 1)
-    assertTrue(open("$stdlibHomes/program.lua", "r") == unit)
+    assertTrue(open("$fakeChiHomes/program.lua", "r") == unit)
     embedLua("io.input('/dev/null')")
     assertEqual(cliMain(["repl"]), 1)
     restoreStdlibEnv()
 }
 
-embedLua("os.execute('rm -rf ' .. stdlibHomes)")
+embedLua("os.execute('rm -rf ' .. fakeChiHomes)")
 
 summary()
