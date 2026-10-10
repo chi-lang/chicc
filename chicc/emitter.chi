@@ -393,7 +393,7 @@ fn emitScopedStatement(st: EmitterState, stmt: Expr, slot: string): string {
         emit(st, "do ")
         val value = emitExpr(st, stmt.value as Expr)
         emit(st, "$slotName=$value end;")
-        emit(st, "local ${luaName(stmt.declName)}=$slotName;")
+        emit(st, "local ${targetName(st, stmt.target as Target)}=$slotName;")
         slotName
     } else {
         emit(st, "do ")

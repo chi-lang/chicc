@@ -188,8 +188,7 @@ test("emitNameDeclaration - local fn declaration does NOT use shortcut") {
     val fnE = fnExpr([], unit, body, unit)
     val decl = declarationExpr(false, localTarget("inner"), false, unit, fnE, unit)
     val result = emitNameDeclaration(st, decl)
-    // A local target does not use the package-member shortcut: emitExpr on
-    // the fn (emitFn with empty name, non-topLevel), then local inner=_chi_tmp0;
+    // A local target does not use the package-member shortcut.
     assertEqual(result, "inner")
     assertEqual(st.sb.toString(), "local function _chi_tmp0() return (5) end;local inner=_chi_tmp0;")
 }
