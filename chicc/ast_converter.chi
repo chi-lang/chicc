@@ -3,7 +3,7 @@ import std/lang { luaExpr, embedLua }
 import std/lang.map { emptyMap }
 import std/math { finf }
 import chicc/source { Section }
-import chicc/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, newTypeId }
+import chicc/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, newTypeId, variantNameOf }
 import chicc/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, packageTarget, setExprType, atomExpr, interpolatedStringExpr, createRecordExpr, createVariantExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, assignmentExpr, declarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam }
 import chicc/parse_ast { ParseAst }
 import chicc/symbols { FnSymbolTable, Symbol, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newSymbol, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, lookupLoadedPublicSymbol, CompileTables, TypeTable, resolveType }
@@ -582,10 +582,36 @@ convertFuncWithName = convertFuncWithNameImpl
 
 // --- FnCall conversion ---
 
+// Does the sum/record `t` include a field-less variant named `name`?
+fn includesNullaryVariant(t: Type, name: string): bool {
+    if t.tag == "sum" {
+        includesNullaryVariant(t.lhs as Type, name) || includesNullaryVariant(t.rhs as Type, name)
+    } else {
+        variantNameOf(t) == name && t.fields.size() == 0
+    }
+}
+
+// Is `name` a package-level nullary variant value (see lowerVariantTypes)?
+fn isNullaryVariant(name: string, tables: any): bool {
+    val fst: any = currentFnSymbolTable
+    if fst != unit && fstGet(fst as FnSymbolTable, name) != unit {
+        return false
+    }
+    val sym: any = ctGetLocalSymbol(tables as CompileTables, name)
+    if sym == unit { return false }
+    val symType: any = sym.symbolType
+    symType != unit && includesNullaryVariant(symType as Type, name)
+}
+
 fn convertFnCallImpl(node: any, pkg: any, tables: any): Expr {
     val sec = node.paSection()
     val calleeNode: any = node.paCallee()
     val argNodes = node.paArguments()
+
+    // `N()` on a nullary variant is the variant value itself.
+    if argNodes.size() == 0 && calleeNode.paTag() == "ParseVariableRead" && isNullaryVariant(calleeNode.paVariableName(), tables) {
+        return convert(calleeNode, pkg, tables)
+    }
 
     val callee: any = convert(calleeNode, pkg, tables)
 
@@ -957,7 +983,8 @@ convertHandle = convertHandleImpl
 
 // Register each `data` declaration's constructor types and sum type into the
 // type table, and materialise one constructor function declaration per variant
-// (a named fn whose body is a createVariantExpr). Runs in convertProgram after
+// (a named fn whose body is a createVariantExpr; a variant without fields is a
+// value declaration of the data type instead). Runs in convertProgram after
 // type aliases and before code, so casts/annotations resolve regardless of
 // source order. Returns the constructor declarations to prepend to the program.
 // Contract: registers each variant's constructor types + the data type into
@@ -1066,6 +1093,7 @@ pub fn lowerVariantTypes(parseProg: any, pkg: any, tables: any): array[Expr] {
 
         // Loop 2: build a constructor function per variant: a named fn whose
         // type is (fieldTypes...) -> dataType and whose body is a tagged record.
+        // A variant without fields is instead a value of the data type.
         ci = 1
         while ci <= ctorCount {
             val ctor = ctors[ci]
@@ -1075,6 +1103,14 @@ pub fn lowerVariantTypes(parseProg: any, pkg: any, tables: any): array[Expr] {
             val ctorSec = luaExpr("ctor.section") as any
             val paramTypes = ctorParamTypes[ci] as array[any]
             val fieldCount = fields.size()
+
+            if fieldCount == 0 {
+                val valueTarget = addLocalSymbol(ctorName, false, ctorIsPub, dataType, pkg, tables)
+                val value = createVariantExpr([] as array[ExprField], ctorName, ctorSec as Section | unit)
+                decls.push(declarationExpr(ctorIsPub, valueTarget, false, dataType as Type | unit, value, ctorSec as Section | unit))
+                ci = ci + 1
+                continue
+            }
 
             var fnTypeArr: array[any] = []
             var fi = 1

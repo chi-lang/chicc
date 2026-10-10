@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/compiler { compile, compileToLua, hasErrors, newLuaCompilationEnv }
-import std/lang { luaExpr, embedLua }
+import std/lang { luaExpr, embedLua, loadLuaCode }
 
 // =====================================================================
 // Contract tests for variant (`data`) type constructors — issue #14.
@@ -180,6 +180,44 @@ test("error: generic variant data Box[T] is rejected") {
     val src = "data Box[T] = Wrap(value: T)\nval x = 1"
     val r = compile(src, newLuaCompilationEnv())
     assertTrue(hasErrors(r))
+}
+
+// ---------------------------------------------------------------------
+// Nullary variants (issue #45): bare `N` is a value of the data type;
+// `N()` stays accepted and yields the same variant.
+// ---------------------------------------------------------------------
+
+// Compiles and runs `src`, asserting it compiles clean; returns the package.
+fn runVariantProgram(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    assertEqual(messages.map { m -> "${m.code}: ${m.text}" }.joinToStringWithSeparator("\n"), "")
+    val run = loadLuaCode(result.luaCode as string) as () -> any
+    run()
+}
+
+val nullaryDecl = "data S = C(x: int) | N\n"
+
+test("nullary: bare N is a value of the annotated data type") {
+    val pkg = runVariantProgram("${nullaryDecl}val e: S = N\nval r = e is N")
+    assertTrue(pkg.r as bool)
+}
+
+test("nullary: untyped binding of bare N is the variant, not a function") {
+    val pkg = runVariantProgram("${nullaryDecl}val e = N\nval isS = e is S\nval isC = e is C")
+    assertTrue(pkg.isS as bool)
+    assertFalse(pkg.isC as bool)
+}
+
+test("nullary: bare N passed as an argument matches its when branch") {
+    val pkg = runVariantProgram("${nullaryDecl}fn f(s: S): int {\n    when {\n        s is C -> 1\n        s is N -> 2\n        else -> 0\n    }\n}\nval r = f(N)")
+    assertEqual(pkg.r as int, 2)
+}
+
+test("nullary: N() is still accepted and yields the variant") {
+    val pkg = runVariantProgram("${nullaryDecl}val e: S = N()\nval isS = e is S\nval isN = e is N")
+    assertTrue(pkg.isS as bool)
+    assertTrue(pkg.isN as bool)
 }
 
 summary()
