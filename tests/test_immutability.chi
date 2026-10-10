@@ -3,7 +3,7 @@ import chicc/compiler { compileToLua, newLuaCompilationEnv }
 import std/lang { loadLuaCode }
 
 // An assignment to a local name is checked against the mutability of the
-// local binding the name resolves to at that point (issue #37).
+// local binding the name resolves to at that point.
 
 // Returns the module's package table, or unit when compilation or Lua
 // loading fails. Each source declares its own package so that members left
@@ -18,8 +18,6 @@ fn runModule(src: string): any {
     run()
 }
 
-// Asserts that compiling `src` fails and that the first message is a
-// CANNOT_CHANGE_IMMUTABLE on `line`.
 fn assertImmutableAt(src: string, line: int) {
     val result: any = compileToLua(src, newLuaCompilationEnv())
     assertTrue(result.luaCode == unit)
