@@ -3,7 +3,7 @@ import chicc/compiler { compileToLua, newLuaCompilationEnv }
 import std/lang { loadLuaCode }
 
 // A float literal is emitted as Lua text that reads back as exactly the same
-// double and is valid Lua for any magnitude (issue #43).
+// double and is valid Lua for any magnitude.
 
 fn luaOf(src: string): string {
     val result: any = compileToLua(src, newLuaCompilationEnv())
@@ -35,7 +35,7 @@ test("pi literal equals math pi") {
     assertEqual(pkg.a, true)
 }
 
-test("pi literal is not rounded to 14 digits") {
+test("pi literal differs from its 14-digit rounding") {
     val pkg = runModule("val a = 3.141592653589793 == 3.1415926535898\n")
     assertTrue(pkg != unit)
     assertEqual(pkg.a, false)
@@ -66,7 +66,7 @@ test("literal beyond double range is infinity") {
     assertEqual(pkg.n, "-inf")
 }
 
-test("short literals print as before") {
+test("short literals print in shortest form") {
     val pkg = runModule("val a = \"\${0.1}\"\nval b = \"\${1.5}\"\nval c = \"\${2.0}\"\n")
     assertTrue(pkg != unit)
     assertEqual(pkg.a, "0.1")

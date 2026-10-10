@@ -37,6 +37,23 @@ fn getTypeTable(tables: any): any {
     luaExpr("tables.localTypeTable")
 }
 
+fn formatSignificant(v: float, digits: int): string {
+    luaExpr("string.format('%.' .. digits .. 'g', v)") as string
+}
+
+// Lua text that reads back as exactly `v`. A source literal is never negative
+// or NaN, and one beyond double range arrives here as infinity.
+fn floatLiteral(v: float): string {
+    if v == finf { return "(1/0)" }
+    var digits = 15
+    var s = formatSignificant(v, digits)
+    while s.toFloat() != v {
+        digits = digits + 1
+        s = formatSignificant(v, digits)
+    }
+    if s.contains(".") || s.contains("e") { s } else { "$s.0" }
+}
+
 // --- Symbol management ---
 
 pub fn getSymbol(name: string, tables: any): Target {
@@ -173,23 +190,6 @@ fn convertEffectDefinition(node: any, pkg: any, tables: any): Expr {
     addLocalSymbol(effName, false, isPub, effType, pkg, tables)
 
     result
-}
-
-fn formatSignificant(v: float, digits: int): string {
-    luaExpr("string.format('%.' .. digits .. 'g', v)") as string
-}
-
-// Lua text that reads back as exactly `v`. A source literal is never negative
-// or NaN, and one beyond double range arrives here as infinity.
-fn floatLiteral(v: float): string {
-    if v == finf { return "(1/0)" }
-    var digits = 15
-    var s = formatSignificant(v, digits)
-    while s.toFloat() != v {
-        digits += 1
-        s = formatSignificant(v, digits)
-    }
-    if s.contains(".") || s.contains("e") { s } else { "$s.0" }
 }
 
 // --- Main converter ---
