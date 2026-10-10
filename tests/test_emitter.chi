@@ -7,7 +7,6 @@ test("newState initialises fields") {
     val pkg = newPackage("mymod", "mypkg")
     val prog = newProgram(pkg, [], [], [], unit)
     val st = newState(prog)
-    assertFalse(st.inFunction)
     assertEqual(st.nextTmpId, 0)
     assertEqual(st.nextLoopId, 0)
     assertEqual(st.currentLoopId, 0)

@@ -1,0 +1,69 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { loadLuaCode }
+
+// A name is declared, read and assigned in Lua the way the converter resolved
+// it: a local stays a Lua local at any depth, a package member lives on the
+// package table (issue #35).
+
+// Returns the module's package table, or unit when compilation or Lua
+// loading fails. Each source declares its own package so that members left
+// by one test are not seen by the next.
+fn runModule(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val code = result.luaCode
+    if code == unit { return unit }
+    val loader: any = loadLuaCode(code as string)
+    if loader == unit { return unit }
+    val run = loader as () -> any
+    run()
+}
+
+val note = "var trace = \"\"\nfn note(x: any) {\n    trace = \"\$trace\$x,\"\n}\n"
+
+test("top-level for: val and var in the body are locals of the body") {
+    val src = "package t/s35a\n" + note + "val y = 1\nfor x in [1, 2] {\n    val y = x * 10\n    note(y)\n    var acc = y\n    acc = acc + 1\n    note(acc)\n}\nnote(y)\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.trace, "10,11,20,21,1,")
+    assertEqual(pkg.acc, unit)
+}
+
+test("top-level for: closure captures the body's val") {
+    val src = "package t/s35b\n" + note + "val fns: array[() -> int] = []\nfor x in [1, 2, 3] {\n    val y = x * 10\n    fns.push({ -> y })\n}\nfor f in fns { note(f()) }\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.trace, "10,20,30,")
+    assertEqual(pkg.y, unit)
+}
+
+test("top-level for: fn declared in the body is callable") {
+    val src = "package t/s35c\n" + note + "for x in [1, 2] {\n    fn twice(): int { x * 2 }\n    note(twice())\n}\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.trace, "2,4,")
+    assertEqual(pkg.twice, unit)
+}
+
+test("top-level for: assignment to a package var stays on the package") {
+    val pkg = runModule("package t/s35d\nvar total = 0\nfor x in [1, 2, 3] { total = total + x }\n")
+    assertTrue(pkg != unit)
+    assertEqual(pkg.total, 6)
+}
+
+test("top-level handler case: val in the case body is a local") {
+    val src = "package t/s35e\neffect ask(): string\nval r = handle { ask() } with {\n    ask() -> {\n        val w = resume(\"v\")\n        w\n    }\n}\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, "v")
+    assertEqual(pkg.w, unit)
+}
+
+test("top-level handler case: var assigned in the case body") {
+    val src = "package t/s35f\neffect ask(): string\nval r = handle { ask() } with {\n    ask() -> {\n        var w = \"a\"\n        w = w + resume(\"b\")\n        w\n    }\n}\n"
+    val pkg = runModule(src)
+    assertTrue(pkg != unit)
+    assertEqual(pkg.r, "ab")
+}
+
+summary()

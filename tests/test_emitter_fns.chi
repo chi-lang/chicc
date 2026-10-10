@@ -126,10 +126,9 @@ test("emitFn - body ends with return no duplicate") {
 
 test("emitFnCall - normal call") {
     val st = freshState()
-    val callee = variableAccessExpr(localTarget("foo"), unit)
+    val callee = variableAccessExpr(packageTarget("mymod", "mypkg", "foo"), unit)
     val arg1 = atomExpr("42", tInt, unit)
     val call = fnCallExpr(callee, [arg1], unit)
-    // We're not in a function, so callee resolves to __P_.foo
     val result = emitFnCall(st, call)
     assertEqual(result, "_chi_tmp0")
     assertEqual(st.sb.toString(), "local _chi_tmp0=__P_.foo((42));")
@@ -157,7 +156,7 @@ test("emitFnCall - luaExpr special case") {
 
 test("emitFnCall - call with default param @ placeholder") {
     val st = freshState()
-    val callee = variableAccessExpr(localTarget("bar"), unit)
+    val callee = variableAccessExpr(packageTarget("mymod", "mypkg", "bar"), unit)
     val arg1 = atomExpr("1", tInt, unit)
     val arg2 = atomExpr("3", tInt, unit)
     // "@" can't be passed as a string literal - it's intercepted as default param marker by the Chi compiler.
@@ -183,17 +182,14 @@ test("emitNameDeclaration - top-level fn declaration uses emitFn") {
     assertEqual(st.sb.toString(), "function __P_.myFn() return (10) end;")
 }
 
-test("emitNameDeclaration - fn inside function does NOT use shortcut") {
+test("emitNameDeclaration - local fn declaration does NOT use shortcut") {
     val st = freshState()
-    st.inFunction = true
-    st.functionDepth = 1
     val body = blockExpr([atomExpr("5", tInt, unit)], unit)
     val fnE = fnExpr([], unit, body, unit)
     val decl = declarationExpr(false, localTarget("inner"), false, unit, fnE, unit)
     val result = emitNameDeclaration(st, decl)
-    // Inside a function, it should NOT use the top-level shortcut
-    // It should emitExpr on the fn (which calls emitFn with empty name, non-topLevel)
-    // then do local inner=_chi_tmp0;
+    // A local target does not use the package-member shortcut: emitExpr on
+    // the fn (emitFn with empty name, non-topLevel), then local inner=_chi_tmp0;
     assertEqual(result, "inner")
     assertEqual(st.sb.toString(), "local function _chi_tmp0() return (5) end;local inner=_chi_tmp0;")
 }

@@ -2,13 +2,11 @@
 package chicc/emitter
 import std/lang { luaExpr, embedLua }
 import chicc/util { newStringBuilder, StringBuilder, append, toString }
-import chicc/ast { Program, Expr, HandleCase, FnParam, ExprField, exprChildren }
+import chicc/ast { Program, Expr, Target, HandleCase, FnParam, ExprField, exprChildren }
 import std/lang.map { emptyMap, Map }
 
 type EmitterState = {
     sb: StringBuilder,
-    inFunction: bool,
-    functionDepth: int,
     nextTmpId: int,
     nextLoopId: int,
     currentLoopId: int,
@@ -16,7 +14,7 @@ type EmitterState = {
 }
 
 pub fn newState(prog: Program): EmitterState {
-    { sb: newStringBuilder(), inFunction: false, functionDepth: 0, nextTmpId: 0, nextLoopId: 0, currentLoopId: 0, program: prog }
+    { sb: newStringBuilder(), nextTmpId: 0, nextLoopId: 0, currentLoopId: 0, program: prog }
 }
 
 pub fn emit(st: EmitterState, code: string) {
@@ -222,33 +220,27 @@ pub fn emitInterpolatedString(st: EmitterState, expr: Expr): string {
     resultName
 }
 
-pub fn emitVariableAccess(st: EmitterState, expr: Expr): string {
-    val tgt = expr.target as any
-    val tag = luaExpr("tgt.tag") as string
-    val tgtName = luaExpr("tgt.name") as string
-    if tag == "local" {
-        if st.inFunction {
-            luaName(tgtName)
+// The converter resolves every declaration, read and assignment of a name to
+// the same target, so all three emit the same Lua name.
+fn targetName(st: EmitterState, tgt: Target): string {
+    if tgt.tag == "package" {
+        val progPkg = st.program.packageDef
+        if tgt.moduleName == progPkg.moduleName && tgt.packageName == progPkg.packageName {
+            topLevelName(tgt.name)
         } else {
-            topLevelName(tgtName)
-        }
-    } else if tag == "package" {
-        val progMod = st.program.packageDef.moduleName
-        val progPkg = st.program.packageDef.packageName
-        val tgtMod = luaExpr("tgt.moduleName") as string
-        val tgtPkg = luaExpr("tgt.packageName") as string
-        if tgtMod == progMod {
-            if tgtPkg == progPkg {
-                topLevelName(tgtName)
-            } else {
-                localQualifiedName(tgtMod, tgtPkg, tgtName)
-            }
-        } else {
-            localQualifiedName(tgtMod, tgtPkg, tgtName)
+            localQualifiedName(tgt.moduleName, tgt.packageName, tgt.name)
         }
     } else {
-        luaName(tgtName)
+        luaName(tgt.name)
     }
+}
+
+fn declaresLocal(decl: Expr): bool {
+    (decl.target as Target).tag == "local"
+}
+
+pub fn emitVariableAccess(st: EmitterState, expr: Expr): string {
+    targetName(st, expr.target as Target)
 }
 
 pub fn emitFn(st: EmitterState, expr: Expr, name: string, isTopLevel: bool): string {
@@ -269,10 +261,6 @@ pub fn emitFn(st: EmitterState, expr: Expr, name: string, isTopLevel: bool): str
         pi = pi + 1
     }
     emit(st, "$paramStr) ")
-    val prevInFunction = st.inFunction
-    val prevFunctionDepth = st.functionDepth
-    st.inFunction = true
-    st.functionDepth = prevFunctionDepth + 1
     // Emit `if <param> == nil then <param> = <default> end` guards for
     // default parameter values (a std/lang.map keyed by param name).
     val defaultValues: any = expr.defaultValues
@@ -295,61 +283,29 @@ pub fn emitFn(st: EmitterState, expr: Expr, name: string, isTopLevel: bool): str
         emit(st, "return $bodyResult")
     }
     emit(st, " end;")
-    st.inFunction = prevInFunction
-    st.functionDepth = prevFunctionDepth
     safeTmpName
 }
 
 pub fn emitNameDeclaration(st: EmitterState, expr: Expr): string {
-    val declName = expr.declName
-    val safeDeclName = luaName(declName)
+    val isLocal = declaresLocal(expr)
     val exprValue = expr.value
     val valueKind = if exprValue != unit { (exprValue as Expr).kind } else { "" }
-    if valueKind == "fn" {
-        if st.functionDepth == 0 {
-            return emitFn(st, exprValue as Expr, declName, true)
-        }
+    if valueKind == "fn" && !isLocal {
+        return emitFn(st, exprValue as Expr, expr.declName, true)
     }
     val value = emitExpr(st, exprValue as Expr)
-    if st.functionDepth > 0 {
-        emit(st, "local $safeDeclName=$value;")
-        safeDeclName
+    val name = targetName(st, expr.target as Target)
+    if isLocal {
+        emit(st, "local $name=$value;")
     } else {
-        val tlName = topLevelName(declName)
-        emit(st, "$tlName=$value;")
-        tlName
+        emit(st, "$name=$value;")
     }
+    name
 }
 
 pub fn emitAssignment(st: EmitterState, expr: Expr): string {
-    val tgt = expr.target as any
-    val exprValue = expr.value as Expr
-    val tag = luaExpr("tgt.tag") as string
-    val tgtName = luaExpr("tgt.name") as string
-    val varName = if tag == "local" {
-        if st.inFunction {
-            luaName(tgtName)
-        } else {
-            topLevelName(tgtName)
-        }
-    } else if tag == "package" {
-        val progMod = st.program.packageDef.moduleName
-        val progPkg = st.program.packageDef.packageName
-        val tgtMod = luaExpr("tgt.moduleName") as string
-        val tgtPkg = luaExpr("tgt.packageName") as string
-        if tgtMod == progMod {
-            if tgtPkg == progPkg {
-                topLevelName(tgtName)
-            } else {
-                localQualifiedName(tgtMod, tgtPkg, tgtName)
-            }
-        } else {
-            localQualifiedName(tgtMod, tgtPkg, tgtName)
-        }
-    } else {
-        luaName(tgtName)
-    }
-    val valueName = emitExpr(st, exprValue)
+    val varName = targetName(st, expr.target as Target)
+    val valueName = emitExpr(st, expr.value as Expr)
     emit(st, "$varName=$valueName;")
     varName
 }
@@ -428,7 +384,7 @@ fn scopableStatement(expr: Expr): bool {
 // local declared on first use. Declaring the name itself before the scope
 // would make `val x = x + 1` read the new, still-nil `x`. Returns the slot.
 fn emitScopedStatement(st: EmitterState, stmt: Expr, slot: string): string {
-    if stmt.kind == "name_declaration" && st.functionDepth > 0 {
+    if stmt.kind == "name_declaration" && declaresLocal(stmt) {
         var slotName = slot
         if slotName == "" {
             slotName = nextTmpName(st)
@@ -651,11 +607,8 @@ fn extractConditionThunks(st: EmitterState, expr: Expr): string {
 // `break` or `return`, so the label cannot share the body's block.
 fn emitLoop(st: EmitterState, header: string, body: Expr, loopId: int) {
     emit(st, "$header do do ")
-    val prevInFunction = st.inFunction
-    st.inFunction = true
     emitExpr(st, body)
     emit(st, " end ::__continue_$loopId:: end;")
-    st.inFunction = prevInFunction
 }
 
 pub fn emitWhile(st: EmitterState, expr: Expr): string {
@@ -1017,12 +970,9 @@ pub fn emitHandle(st: EmitterState, expr: Expr): string {
             emit(st, "local $argName=args[$ai];")
             ai = ai + 1
         }
-        val prevInFunction = st.inFunction
-        st.inFunction = true
         val caseBody = hcase.body
         val caseResult = emitExpr(st, caseBody)
         emit(st, "return $caseResult")
-        st.inFunction = prevInFunction
         emit(st, " end")
         if ci < caseCount {
             emit(st, ",")

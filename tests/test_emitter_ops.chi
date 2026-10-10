@@ -91,7 +91,6 @@ test("emitInfixOp - multiplication passes through") {
 
 test("emitPrefixOp - negation with !") {
     val st = freshState()
-    st.inFunction = true
     embedLua("test_prefix1 = {kind='prefix_op', op='!', prefixExpr={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}}")
     val e: any = luaExpr("test_prefix1")
     val result = emitPrefixOp(st, e)
@@ -101,7 +100,6 @@ test("emitPrefixOp - negation with !") {
 
 test("emitPrefixOp - minus operator") {
     val st = freshState()
-    st.inFunction = true
     embedLua("test_prefix2 = {kind='prefix_op', op='-', prefixExpr={kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='int'}}}}}")
     val e: any = luaExpr("test_prefix2")
     val result = emitPrefixOp(st, e)

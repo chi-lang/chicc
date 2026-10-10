@@ -32,8 +32,7 @@ test("emitExpr dispatches variable_access") {
     val pkg = newPackage("m", "p")
     val prog = newProgram(pkg, [], [], [], unit)
     val st = newState(prog)
-    val expr = variableAccessExpr(localTarget("x"), unit)
-    // At top level, local var becomes __P_.x
+    val expr = variableAccessExpr(packageTarget("m", "p", "x"), unit)
     val result = emitExpr(st, expr)
     assertEqual(result, "__P_.x")
 }
@@ -164,7 +163,6 @@ test("emitExpr dispatches field_access") {
     val pkg = newPackage("m", "p")
     val prog = newProgram(pkg, [], [], [], unit)
     val st = newState(prog)
-    st.inFunction = true
     embedLua("__fa_expr = {kind='field_access', receiver={kind='variable_access', target={tag='local', name='obj'}}, fieldName='x', dotTarget={tag='field'}}")
     val expr: any = luaExpr("__fa_expr")
     val result = emitExpr(st, expr)

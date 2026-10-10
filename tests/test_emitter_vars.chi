@@ -15,20 +15,11 @@ emitExpr = { s, e -> emitAtom(s, e) }
 
 // --- emitVariableAccess tests ---
 
-test("emitVariableAccess - local symbol inside function") {
+test("emitVariableAccess - local symbol") {
     val st = freshState()
-    st.inFunction = true
     val expr = variableAccessExpr(localTarget("x"), unit)
     val result = emitVariableAccess(st, expr)
     assertEqual(result, "x")
-    assertEqual(st.sb.toString(), "")
-}
-
-test("emitVariableAccess - local symbol at top level") {
-    val st = freshState()
-    val expr = variableAccessExpr(localTarget("x"), unit)
-    val result = emitVariableAccess(st, expr)
-    assertEqual(result, "__P_.x")
     assertEqual(st.sb.toString(), "")
 }
 
@@ -48,10 +39,8 @@ test("emitVariableAccess - package symbol different module") {
 
 // --- emitNameDeclaration tests ---
 
-test("emitNameDeclaration - inside function") {
+test("emitNameDeclaration - local symbol") {
     val st = freshState()
-    st.inFunction = true
-    st.functionDepth = 1
     val valExpr = atomExpr("42", tInt, unit)
     val expr = declarationExpr(false, localTarget("x"), false, unit, valExpr, unit)
     val result = emitNameDeclaration(st, expr)
@@ -59,7 +48,7 @@ test("emitNameDeclaration - inside function") {
     assertEqual(st.sb.toString(), "local x=(42);")
 }
 
-test("emitNameDeclaration - at top level") {
+test("emitNameDeclaration - package symbol") {
     val st = freshState()
     val valExpr = atomExpr("42", tInt, unit)
     val expr = declarationExpr(false, packageTarget("mymod", "mypkg", "x"), false, unit, valExpr, unit)
@@ -70,9 +59,8 @@ test("emitNameDeclaration - at top level") {
 
 // --- emitAssignment tests ---
 
-test("emitAssignment - local symbol inside function") {
+test("emitAssignment - local symbol") {
     val st = freshState()
-    st.inFunction = true
     val valExpr = atomExpr("10", tInt, unit)
     val expr = assignmentExpr(localTarget("y"), valExpr, unit)
     val result = emitAssignment(st, expr)
@@ -80,10 +68,10 @@ test("emitAssignment - local symbol inside function") {
     assertEqual(st.sb.toString(), "y=(10);")
 }
 
-test("emitAssignment - local symbol at top level") {
+test("emitAssignment - package symbol same module/package") {
     val st = freshState()
     val valExpr = atomExpr("10", tInt, unit)
-    val expr = assignmentExpr(localTarget("y"), valExpr, unit)
+    val expr = assignmentExpr(packageTarget("mymod", "mypkg", "y"), valExpr, unit)
     val result = emitAssignment(st, expr)
     assertEqual(result, "__P_.y")
     assertEqual(st.sb.toString(), "__P_.y=(10);")

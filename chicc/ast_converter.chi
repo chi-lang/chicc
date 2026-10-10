@@ -874,7 +874,7 @@ fn convertWeaveImpl(node: any, pkg: any, tables: any): Expr {
     val tempDecl = declarationExpr(false, tempTarget, false, unit, inputValue as Expr, valNode.paSection())
 
     // Create read variable for the temp var
-    val readVar: any = variableAccessExpr(localTarget(tempVarName), valNode.paSection())
+    val readVar: any = variableAccessExpr(tempTarget, valNode.paSection())
 
     // Set weave input and convert template
     val prevWeaveInput = weaveInput

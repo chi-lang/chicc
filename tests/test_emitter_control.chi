@@ -106,7 +106,6 @@ test("mapInfixOperation - * passes through") {
 
 test("emitIfElse - simple if-then-else with blocks") {
     val st = freshState()
-    st.inFunction = true
     embedLua("test_if1 = {kind='if_else', condition={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}, thenBranch={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}, elseBranch={kind='block', blockBody={{kind='atom', atomValue='2', exprType={tag='primitive',ids={{name='int'}}}}}}}")
     val e: any = luaExpr("test_if1")
     val result = emitIfElse(st, e)
@@ -116,7 +115,6 @@ test("emitIfElse - simple if-then-else with blocks") {
 
 test("emitIfElse - if without else") {
     val st = freshState()
-    st.inFunction = true
     embedLua("test_if2 = {kind='if_else', condition={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}, thenBranch={kind='block', blockBody={{kind='atom', atomValue='42', exprType={tag='primitive',ids={{name='int'}}}}}}, elseBranch=nil}")
     val e: any = luaExpr("test_if2")
     val result = emitIfElse(st, e)
@@ -126,7 +124,6 @@ test("emitIfElse - if without else") {
 
 test("emitIfElse - then branch ends with return skips assignment") {
     val st = freshState()
-    st.inFunction = true
     embedLua("test_if3 = {kind='if_else', condition={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}, thenBranch={kind='block', blockBody={{kind='return', returnValue={kind='atom', atomValue='7', exprType={tag='primitive',ids={{name='int'}}}}}}}, elseBranch={kind='block', blockBody={{kind='atom', atomValue='0', exprType={tag='primitive',ids={{name='int'}}}}}}}")
     val e: any = luaExpr("test_if3")
     val result = emitIfElse(st, e)
@@ -136,7 +133,6 @@ test("emitIfElse - then branch ends with return skips assignment") {
 
 test("emitIfElse - else branch ends with break skips assignment") {
     val st = freshState()
-    st.inFunction = true
     embedLua("test_if4 = {kind='if_else', condition={kind='atom', atomValue='false', exprType={tag='primitive',ids={{name='bool'}}}}, thenBranch={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}, elseBranch={kind='block', blockBody={{kind='break'}}}}")
     val e: any = luaExpr("test_if4")
     val result = emitIfElse(st, e)
@@ -148,7 +144,6 @@ test("emitIfElse - else branch ends with break skips assignment") {
 
 test("emitWhile - simple while loop with atom condition") {
     val st = freshState()
-    st.inFunction = true
     embedLua("test_wh1 = {kind='while_loop', loopCondition={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}, loopBody={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
     val e: any = luaExpr("test_wh1")
     val result = emitWhile(st, e)
@@ -166,7 +161,6 @@ test("emitWhile - simple while loop with atom condition") {
 
 test("emitWhile - increments and restores loop id") {
     val st = freshState()
-    st.inFunction = true
     st.nextLoopId = 5
     st.currentLoopId = 2
     embedLua("test_wh2 = {kind='while_loop', loopCondition={kind='atom', atomValue='true', exprType={tag='primitive',ids={{name='bool'}}}}, loopBody={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
@@ -180,7 +174,6 @@ test("emitWhile - increments and restores loop id") {
 
 test("emitForLoop - array iteration with single var") {
     val st = freshState()
-    st.inFunction = true
     embedLua("test_fl1 = {kind='for_loop', forVars={'item'}, iterable={kind='atom', atomValue='myArr', exprType={tag='array', ids={{name='array'}}, elementType={tag='primitive',ids={{name='int'}}}}}, forState=nil, forInit=nil, forBody={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
     val e: any = luaExpr("test_fl1")
     val result = emitForLoop(st, e)
@@ -194,7 +187,6 @@ test("emitForLoop - array iteration with single var") {
 
 test("emitForLoop - array iteration with two vars") {
     val st = freshState()
-    st.inFunction = true
     embedLua("test_fl2 = {kind='for_loop', forVars={'idx','val'}, iterable={kind='atom', atomValue='myArr', exprType={tag='array', ids={{name='array'}}, elementType={tag='primitive',ids={{name='int'}}}}}, forState=nil, forInit=nil, forBody={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
     val e: any = luaExpr("test_fl2")
     val result = emitForLoop(st, e)
@@ -208,7 +200,6 @@ test("emitForLoop - array iteration with two vars") {
 
 test("emitForLoop - record iteration") {
     val st = freshState()
-    st.inFunction = true
     embedLua("test_fl3 = {kind='for_loop', forVars={'k','v'}, iterable={kind='atom', atomValue='myRec', exprType={tag='record', ids={}, fields={}}}, forState=nil, forInit=nil, forBody={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
     val e: any = luaExpr("test_fl3")
     val result = emitForLoop(st, e)
@@ -220,7 +211,6 @@ test("emitForLoop - record iteration") {
 
 test("emitForLoop - generator (function) iteration") {
     val st = freshState()
-    st.inFunction = true
     embedLua("test_fl4 = {kind='for_loop', forVars={'x'}, iterable={kind='atom', atomValue='myGen', exprType={tag='fn', types={}, typeParams={}, defaults=0}}, forState=nil, forInit=nil, forBody={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
     val e: any = luaExpr("test_fl4")
     val result = emitForLoop(st, e)
@@ -232,7 +222,6 @@ test("emitForLoop - generator (function) iteration") {
 
 test("emitForLoop - generator with state and init") {
     val st = freshState()
-    st.inFunction = true
     embedLua("test_fl5 = {kind='for_loop', forVars={'x'}, iterable={kind='atom', atomValue='myGen', exprType={tag='fn', types={}, typeParams={}, defaults=0}}, forState={kind='atom', atomValue='st0', exprType={tag='primitive',ids={{name='int'}}}}, forInit={kind='atom', atomValue='0', exprType={tag='primitive',ids={{name='int'}}}}, forBody={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
     val e: any = luaExpr("test_fl5")
     val result = emitForLoop(st, e)
@@ -244,7 +233,6 @@ test("emitForLoop - generator with state and init") {
 
 test("emitForLoop - continue label uses current loop id") {
     val st = freshState()
-    st.inFunction = true
     st.nextLoopId = 7
     embedLua("test_fl6 = {kind='for_loop', forVars={'x'}, iterable={kind='atom', atomValue='arr', exprType={tag='array', ids={{name='array'}}, elementType={tag='primitive',ids={{name='int'}}}}}, forState=nil, forInit=nil, forBody={kind='block', blockBody={{kind='atom', atomValue='1', exprType={tag='primitive',ids={{name='int'}}}}}}}")
     val e: any = luaExpr("test_fl6")
