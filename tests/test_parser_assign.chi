@@ -11,7 +11,7 @@ import std/lang { luaExpr, embedLua }
 // compiles with the prebuilt chicc.lua, which would pass even if the sources
 // regressed.
 
-// All compilation messages, formatted and joined; "compiled" if none.
+// All compilation messages, formatted and joined; "compiled" if it compiled.
 fn compileErrors(src: string): string {
     val result = compileToLua(src, newLuaCompilationEnv())
     if result.luaCode != unit { return "compiled" }
