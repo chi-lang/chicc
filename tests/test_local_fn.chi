@@ -24,7 +24,7 @@ val note = "var trace = \"\"\nfn note(x: any) {\n    trace = \"\$trace\$x,\"\n}\
 // each recursive fn has a name no package defines: a call that misses the
 // local fails instead of finding a namesake.
 
-test("a fn declared in a fn calls itself") {
+test("fn: a fn declared in a fn calls itself") {
     val src = "package t/s66a\nfn outer(): int {\n    fn fact66a(n: int): int { if n <= 1 { 1 } else { n * fact66a(n - 1) } }\n    fact66a(5)\n}\nval r = outer()\n"
     val pkg = runModule(src)
     assertTrue(pkg != unit)
@@ -52,7 +52,7 @@ test("top level: a fn declared in a for body calls itself") {
     assertEqual(pkg.trace, "24,120,")
 }
 
-test("a lambda bound with val reads the outer binding of its own name") {
+test("fn: a lambda bound with val reads the outer binding of its own name") {
     val src = "package t/s66e\nfn f(): int {\n    val g66e: (int) -> int = { n -> n + 1 }\n    if true {\n        val g66e: (int) -> int = { n -> g66e(n) * 10 }\n        return g66e(1)\n    }\n    0\n}\nval r = f()\n"
     val pkg = runModule(src)
     assertTrue(pkg != unit)

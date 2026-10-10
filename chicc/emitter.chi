@@ -292,12 +292,10 @@ pub fn emitNameDeclaration(st: EmitterState, expr: Expr): string {
     val isLocal = declaresLocal(expr)
     val exprValue = expr.value
     val valueKind = if exprValue != unit { (exprValue as Expr).kind } else { "" }
-    if valueKind == "fn" && !isLocal {
-        return emitFn(st, exprValue as Expr, expr.declName, true)
-    }
-    // `local function` puts the name in scope in the body, `local f=` does not
-    if expr.isNamedFn {
-        return emitFn(st, exprValue as Expr, expr.declName, false)
+    // A local named fn emits as `local function`, which puts its name in scope
+    // in its body; `local f=` would not
+    if valueKind == "fn" && (!isLocal || expr.isNamedFn) {
+        return emitFn(st, exprValue as Expr, expr.declName, !isLocal)
     }
     val value = emitExpr(st, exprValue as Expr)
     val name = targetName(st, expr.target as Target)
@@ -381,8 +379,9 @@ fn containsRawLuaCall(e: Expr, withLuaExpr: bool): bool {
 fn scopableStatement(expr: Expr): bool {
     val kind = expr.kind
     if kind == "return" || kind == "break" || kind == "continue" { return false }
-    // A named fn emits as `local function`, which declares nothing but its name
-    if kind == "name_declaration" && expr.isNamedFn { return false }
+    // A scope would pass a local named fn through a slot, emitting it anonymous
+    // and blind to its own name; its `local function` needs no scope anyway
+    if kind == "name_declaration" && expr.isNamedFn && declaresLocal(expr) { return false }
     containsRawLuaCall(expr, false) == false
 }
 
