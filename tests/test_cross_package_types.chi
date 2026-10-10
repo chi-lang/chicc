@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, summary, withinLimits }
 import chicc/compiler { compileToLua, newLuaCompilationEnv }
-import std/lang { loadLuaCode }
+import std/lang { loadLuaCode, luaExpr }
 
 // Instantiated generic named records in package metadata (issue #52): an
 // importing package sees the type arguments, plain and recursive.
@@ -40,6 +40,25 @@ test("imported Box[int] and Box[string] keep their own arguments") {
         loadPackage("package t52/pc\ntype Box[T] = { v: T }\npub fn mkI(): Box[int] { { v: 1 } }\npub fn mkS(): Box[string] { { v: \"a\" } }")
         assertEqual(messageCodes("package t52/pd\nimport t52/pc { mkI, mkS }\nval a: int = mkI().v\nval b: string = mkS().v"), "")
         assertEqual(messageCodes("package t52/pe\nimport t52/pc { mkS }\nval c: int = mkS().v"), "TYPE_MISMATCH")
+    }
+}
+
+// `data` types in package metadata (issue #63): an importing package
+// constructs variants and tells them apart.
+
+test("imported data constructors and type resolve") {
+    withinLimits(30) {
+        loadPackage("package t63/va\ndata pub Shape = pub Circle(radius: float) | pub Empty")
+        assertEqual(messageCodes("package t63/vb\nimport t63/va { Circle, Empty, Shape }\nval a: Shape = Circle(1.0)\nval b: Shape = Empty\nval c: Shape = Empty()"), "")
+    }
+}
+
+test("is tells imported variants apart") {
+    withinLimits(30) {
+        loadPackage("package t63/vc\ndata pub Shape = pub Circle(radius: float) | pub Square(side: float)")
+        loadPackage("package t63/vd\nimport t63/vc { Circle, Square }\nval s = Square(1.0)\npub val isCircle = s is Circle\npub val isSquare = s is Square")
+        assertEqual(luaExpr("package.loaded['t63/vd'].isCircle") as bool, false)
+        assertEqual(luaExpr("package.loaded['t63/vd'].isSquare") as bool, true)
     }
 }
 
