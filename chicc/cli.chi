@@ -6,7 +6,8 @@ package chicc/cli
 import std/lang { luaExpr, embedLua }
 import std/os { getEnv }
 import std/io.file { readString, open, close, write }
-import chicc/compiler { newLuaCompilationEnv, newReplCompilationEnv, compileToLua, compileReplLine, commitReplLine, saveReplMetadata, restoreReplMetadata, formatMessage }
+import chicc/compiler { newLuaCompilationEnv, newReplCompilationEnv, compileToLua, compileReplLine, commitReplLine, saveReplMetadata, restoreReplMetadata, formatMessage, ReplNamedFn }
+import chicc/types { Type, sumListTypes }
 
 // ============================================================================
 // Diagnostics output
@@ -255,10 +256,220 @@ fn parseFileArgs(command: string, args: array[string]): FileArgs | unit {
 // REPL mode
 // ============================================================================
 
-// Pretty-printer for REPL values (Lua-side)
-embedLua("local __RDQ = string.char(34); local __RBS = string.char(92); local __RNL = string.char(10); local __RCR = string.char(13); local __RTAB = string.char(9); function __chi_repl_fmt_type(t) if not t then return '?' end; local tag = t.tag; if tag == 'primitive' then if t.ids and t.ids[1] then return t.ids[1].name or '?' end; return '?' elseif tag == 'fn' then local types = t.types; if not types or #types == 0 then return 'function' end; local n = #types; local params = {}; for i = 1, n - 1 do params[#params+1] = __chi_repl_fmt_type(types[i]) end; return '(' .. table.concat(params, ', ') .. ') -> ' .. __chi_repl_fmt_type(types[n]) elseif tag == 'record' then if t.ids and #t.ids > 0 and t.ids[1] and t.ids[1].name then return t.ids[1].name end; if not t.fields or #t.fields == 0 then return '{}' end; local parts = {}; for _, f in ipairs(t.fields) do parts[#parts+1] = f.name .. ': ' .. __chi_repl_fmt_type(f.fieldType) end; return '{ ' .. table.concat(parts, ', ') .. ' }' elseif tag == 'sum' then return __chi_repl_fmt_type(t.lhs) .. ' | ' .. __chi_repl_fmt_type(t.rhs) elseif tag == 'array' then return 'array[' .. __chi_repl_fmt_type(t.elementType) .. ']' elseif tag == 'var' then return t.name or '?' elseif tag == 'poly' then return __chi_repl_fmt_type(t.body) elseif tag == 'recursive' then return __chi_repl_fmt_type(t.innerType) else return tag or '?' end end")
+// ----------------------------------------------------------------------------
+// Printing values
+// ----------------------------------------------------------------------------
 
-embedLua("function __chi_repl_format(val, seen) if val == nil then return nil end; local t = type(val); if t == 'number' then if val ~= val then return 'NaN' end; if val == 1/0 then return 'Infinity' end; if val == -1/0 then return '-Infinity' end; if val % 1 == 0 and val >= -2^53 and val <= 2^53 then return string.format('%d', val) end; return tostring(val) elseif t == 'string' then return __RDQ .. val:gsub(__RBS, __RBS..__RBS):gsub(__RDQ, __RBS..__RDQ):gsub(__RNL, __RBS..'n'):gsub(__RCR, __RBS..'r'):gsub(__RTAB, __RBS..'t') .. __RDQ elseif t == 'boolean' then return tostring(val) elseif t == 'function' then local pkg = package.loaded['user/default']; if pkg then for name, v in pairs(pkg) do if v == val and type(name) == 'string' and name:sub(1,1) ~= '_' then local info = pkg._package and pkg._package[name]; if info and info.type then local ok, decoded = pcall(function() return require('chicc/type_writer').decodeType(info.type) end); if ok and decoded and decoded.tag == 'fn' then local types = decoded.types; if types and #types > 0 then local n = #types; local params = {}; for i = 1, n - 1 do params[#params+1] = __chi_repl_fmt_type(types[i]) end; local ret = __chi_repl_fmt_type(types[n]); return '<function ' .. name .. '(' .. table.concat(params, ', ') .. '): ' .. ret .. '>' end end end; return '<function ' .. name .. '>' end end end; return '<function>' elseif t == 'table' then if seen[val] then return '<circular>' end; seen[val] = true; if rawget(val, '_tag') ~= nil then local tag = val._tag; local fields = {}; for k, v in pairs(val) do if k ~= '_tag' then fields[#fields+1] = {k, __chi_repl_format(v, seen)} end end; seen[val] = nil; if #fields == 0 then return tag end; table.sort(fields, function(a,b) return a[1] < b[1] end); local parts = {}; for _, f in ipairs(fields) do parts[#parts+1] = f[1] .. ': ' .. f[2] end; return tag .. '(' .. table.concat(parts, ', ') .. ')' end; local n = #val; local isArray = n > 0; if isArray then local cnt = 0; for _ in pairs(val) do cnt = cnt + 1 end; isArray = cnt == n end; if isArray then local parts = {}; for i = 1, n do parts[i] = __chi_repl_format(val[i], seen) end; seen[val] = nil; return '[' .. table.concat(parts, ', ') .. ']' end; local fields = {}; for k, v in pairs(val) do if type(k) == 'string' and k:sub(1,1) ~= '_' then fields[#fields+1] = {k, __chi_repl_format(v, seen)} end end; table.sort(fields, function(a,b) return a[1] < b[1] end); seen[val] = nil; if #fields == 0 then return '{}' end; local parts = {}; for _, f in ipairs(fields) do parts[#parts+1] = f[1] .. ': ' .. f[2] end; return '{ ' .. table.concat(parts, ', ') .. ' }' else return tostring(val) end end")
+// Function values declared with `fn`, by identity, to their signature with
+// parameter names.
+embedLua("local replFnSignatures = setmetatable({}, { __mode = 'k' })")
+
+// A type as the REPL prints it: Chi syntax, named records by their name.
+fn replTypeText(t: Type): string {
+    val tag = t.tag
+    if tag == "primitive" {
+        t.ids[1].name
+    } else if tag == "fn" {
+        val params = t.types.map { p -> replTypeText(p) }
+        val ret = params.pop()
+        "(${params.joinToStringWithSeparator(", ")}) -> $ret"
+    } else if tag == "record" {
+        if t.ids.size() > 0 {
+            t.ids[1].name
+        } else if t.fields.isEmpty() {
+            "{}"
+        } else {
+            "{ ${t.fields.map { f -> "${f.name}: ${replTypeText(f.fieldType)}" }.joinToStringWithSeparator(", ")} }"
+        }
+    } else if tag == "sum" {
+        "${replTypeText(t.lhs as Type)} | ${replTypeText(t.rhs as Type)}"
+    } else if tag == "array" {
+        "array[${replTypeText(t.elementType as Type)}]"
+    } else if tag == "var" {
+        t.name
+    } else if tag == "poly" {
+        replTypeText(t.body as Type)
+    } else if tag == "recursive" {
+        replTypeText(t.innerType as Type)
+    } else {
+        tag
+    }
+}
+
+// Remembers the signatures of the functions a line declared with `fn`, once
+// the line has run and the functions exist.
+fn registerReplFns(fns: array[ReplNamedFn]) {
+    for f in fns {
+        var fnType = f.fnType
+        while fnType.tag == "poly" {
+            fnType = fnType.body as Type
+        }
+        val types = fnType.types
+        val params: array[string] = []
+        for i, name in f.paramNames {
+            params.push("$name: ${replTypeText(types[i])}")
+        }
+        val signature = "${f.name}(${params.joinToStringWithSeparator(", ")}): ${replTypeText(types[types.size()])}"
+        val name = f.name
+        embedLua("local fn = package.loaded['user/default'][name]; if fn then replFnSignatures[fn] = signature end")
+    }
+}
+
+fn luaTypeOf(v: any): string {
+    luaExpr("type(v)") as string
+}
+
+// The variant whose constructor built `v`, from its metatable.
+fn replVariantOf(v: any): string | unit {
+    luaExpr("(getmetatable(v) or {}).variantName") as string | unit
+}
+
+fn replIsArray(v: any): bool {
+    luaExpr("getmetatable(v) == array_meta_table or (function() local n = #v; if n == 0 then return false end; local c = 0; for _ in pairs(v) do c = c + 1 end; return c == n end)()") as bool
+}
+
+// Field names of a record value, sorted: Lua tables keep no field order.
+fn replFieldNames(v: any): array[string] {
+    luaExpr("(function() local ks = {}; for k in pairs(v) do if type(k) == 'string' and k:sub(1, 1) ~= '_' then ks[#ks + 1] = k end end; table.sort(ks); return ks end)()") as array[string]
+}
+
+// LuaJIT has one number type: only the static type tells 4.0 from 4.
+fn replNumber(v: any, isFloat: bool): string {
+    luaExpr("(v ~= v and 'NaN') or (v == 1/0 and 'Infinity') or (v == -1/0 and '-Infinity') or ((v % 1 == 0 and v >= -2^53 and v <= 2^53) and string.format(isFloat and '%d.0' or '%d', v)) or tostring(v)") as string
+}
+
+embedLua("local __RDQ = string.char(34); local __RBS = string.char(92); local __RNL = string.char(10); local __RCR = string.char(13); local __RTAB = string.char(9)")
+
+fn replQuote(s: string): string {
+    luaExpr("__RDQ .. s:gsub(__RBS, __RBS..__RBS):gsub(__RDQ, __RBS..__RDQ):gsub(__RNL, __RBS..'n'):gsub(__RCR, __RBS..'r'):gsub(__RTAB, __RBS..'t') .. __RDQ") as string
+}
+
+fn replPrimitiveName(t: Type): string {
+    if t.tag == "primitive" { t.ids[1].name } else { "" }
+}
+
+// Whether `v` can be a value of the sum member `t`.
+fn replFits(v: any, t: Type): bool {
+    val kind = luaTypeOf(v)
+    val tag = t.tag
+    if tag == "poly" {
+        replFits(v, t.body as Type)
+    } else if tag == "recursive" {
+        replFits(v, t.innerType as Type)
+    } else if tag == "var" {
+        true
+    } else if tag == "primitive" {
+        val name = replPrimitiveName(t)
+        when {
+            name == "any" -> true
+            name == "int" -> v is int
+            name == "float" -> kind == "number"
+            name == "bool" -> kind == "boolean"
+            name == "string" -> kind == "string"
+            name == "unit" -> kind == "nil"
+            else -> false
+        }
+    } else if tag == "fn" {
+        kind == "function"
+    } else if tag == "array" {
+        kind == "table" && replIsArray(v)
+    } else if tag == "record" {
+        kind == "table" && replVariantOf(v) == (if t.name != "" { t.name } else { unit })
+    } else {
+        false
+    }
+}
+
+// The type that describes `v`: `t` without poly and recursive wrappers and
+// narrowed to the fitting sum member. Unit when the static type does not
+// say (`any`, a type variable, no member fits).
+fn replTypeOf(v: any, t: Type | unit): Type | unit {
+    if t == unit {
+        return unit
+    }
+    val ty = t as Type
+    val tag = ty.tag
+    if tag == "poly" {
+        replTypeOf(v, ty.body)
+    } else if tag == "recursive" {
+        replTypeOf(v, ty.innerType)
+    } else if tag == "var" || replPrimitiveName(ty) == "any" {
+        unit
+    } else if tag == "sum" {
+        val members = ty.sumListTypes()
+        val index = members.indexOf { m -> replFits(v, m as Type) }
+        if index == unit { unit } else { replTypeOf(v, members[index as int] as Type) }
+    } else {
+        ty
+    }
+}
+
+// How the REPL prints a value. `t` is its static type; where that does not
+// say what the value is, the runtime value decides. `seen` holds the tables
+// being printed, to cut cycles.
+fn replShow(v: any, t: Type | unit, seen: any): string {
+    val ty = replTypeOf(v, t)
+    val tag = if ty != unit { (ty as Type).tag } else { "" }
+    val kind = luaTypeOf(v)
+    if kind == "number" {
+        replNumber(v, ty != unit && replPrimitiveName(ty as Type) == "float")
+    } else if kind == "string" {
+        replQuote(v as string)
+    } else if kind == "function" {
+        val signature: any = luaExpr("replFnSignatures[v]")
+        if signature != unit {
+            "<function $signature>"
+        } else if tag == "fn" {
+            "<function ${replTypeText(ty as Type)}>"
+        } else {
+            "<function>"
+        }
+    } else if kind == "nil" {
+        "unit"
+    } else if kind != "table" {
+        luaExpr("tostring(v)") as string
+    } else if luaExpr("seen[v]") as bool {
+        "<circular>"
+    } else {
+        embedLua("seen[v] = true")
+        val variant = replVariantOf(v)
+        var result = ""
+        if tag == "array" || (tag != "record" && variant == unit && replIsArray(v)) {
+            val elementType = if tag == "array" { (ty as Type).elementType } else { unit }
+            val items: array[string] = []
+            val n = luaExpr("#v") as int
+            var i = 1
+            while i <= n {
+                items.push(replShow(luaExpr("v[i]"), elementType, seen))
+                i = i + 1
+            }
+            result = "[${items.joinToStringWithSeparator(", ")}]"
+        } else {
+            // Declared fields in declaration order, then any others the value has.
+            val declared: array[{ name: string, fieldType: Type }] = if tag == "record" { (ty as Type).fields } else { [] }
+            val parts: array[string] = []
+            for f in declared {
+                val name = f.name
+                parts.push("$name: ${replShow(luaExpr("v[name]"), f.fieldType, seen)}")
+            }
+            for name in replFieldNames(v) {
+                if declared.all { f -> f.name != name } {
+                    parts.push("$name: ${replShow(luaExpr("v[name]"), unit, seen)}")
+                }
+            }
+            val fields = parts.joinToStringWithSeparator(", ")
+            result = if variant != unit {
+                if parts.isEmpty() { variant as string } else { "$variant($fields)" }
+            } else if parts.isEmpty() {
+                "{}"
+            } else {
+                "{ $fields }"
+            }
+        }
+        embedLua("seen[v] = nil")
+        result
+    }
+}
 
 pub fn runRepl(): int {
     if loadStdlib() == false {
@@ -300,9 +511,10 @@ pub fn runRepl(): int {
                         eprintln("Runtime error: $errStr")
                     } else {
                         commitReplLine(ns, result)
-                        val sp = luaExpr("result.shouldPrint") as bool
-                        if sp {
-                            embedLua("if __repl_val ~= nil then local __rf = __chi_repl_format(__repl_val, {}); if __rf then print(__rf) end end")
+                        registerReplFns(result.namedFns)
+                        val value: any = luaExpr("__repl_val")
+                        if result.shouldPrint && value != unit {
+                            println(replShow(value, result.valueType, luaExpr("{}")))
                         }
                     }
                 }

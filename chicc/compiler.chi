@@ -818,10 +818,18 @@ fn replPrelude(session: ReplSession): array[ParseImport] {
     imports
 }
 
+// A function a REPL line declares with `fn`. Function types carry no
+// parameter names, so the printer gets them from here.
+type ReplNamedFn = { name: string, paramNames: array[string], fnType: Type }
+
 type ReplLine = {
     messages: array[any],
     luaCode: string | unit,
     shouldPrint: bool,
+    // Static type of the printed value: the runtime value alone cannot tell
+    // 4.0 from 4, has no record field order and no function signature.
+    valueType: Type | unit,
+    namedFns: array[ReplNamedFn],
     definedNames: array[string],
     imports: array[ParseImport]
 }
@@ -849,19 +857,31 @@ pub fn compileReplLine(source: string, session: ReplSession): ReplLine {
     lineNs.getPreludeImports = { -> replPrelude(session) }
     val result = compile(source, lineNs)
     if hasErrors(result) {
-        return { messages: result.messages, luaCode: unit, shouldPrint: false, definedNames: [], imports: [] }
+        return { messages: result.messages, luaCode: unit, shouldPrint: false, valueType: unit, namedFns: [], definedNames: [], imports: [] }
     }
     val prog = result.program as Program
     val luaCode = emitProgram(prog, false)
     val exprCount = prog.expressions.size()
     var shouldPrint = false
+    var valueType: Type | unit = unit
     if exprCount > 0 {
-        val lastKind = prog.expressions[exprCount].kind
+        val last = prog.expressions[exprCount]
+        val lastKind = last.kind
         shouldPrint = lastKind != "name_declaration" && lastKind != "assignment" && lastKind != "effect_definition" && lastKind != "field_assignment" && lastKind != "indexed_assignment"
+        if shouldPrint {
+            valueType = last.exprType
+        }
+    }
+    val namedFns: array[ReplNamedFn] = []
+    for e in prog.expressions {
+        if e.kind == "name_declaration" && e.isNamedFn {
+            val fnExpr = e.value as Expr
+            namedFns.push({ name: e.declName, paramNames: fnExpr.parameters.map { p -> p.name }, fnType: fnExpr.exprType as Type })
+        }
     }
     // compile() does not tell the line's own imports from the prelude.
     val lineImports = parseSource(source).parsedProgram.imports as array[ParseImport]
-    { messages: result.messages, luaCode: luaCode, shouldPrint: shouldPrint, definedNames: replDefinedNames(prog), imports: lineImports }
+    { messages: result.messages, luaCode: luaCode, shouldPrint: shouldPrint, valueType: valueType, namedFns: namedFns, definedNames: replDefinedNames(prog), imports: lineImports }
 }
 
 // Records the bindings of a line that compiled and ran: its imports take
