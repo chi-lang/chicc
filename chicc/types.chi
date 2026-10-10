@@ -303,24 +303,14 @@ pub fn typeToString(t: Type): string {
     if tag == "primitive" {
         t.ids[1].name
     } else if tag == "record" {
-        var fields = ""
-        for f in t.fields {
-            val field = "${f.name}: ${typeToString(f.fieldType)}"
-            fields = if fields == "" { field } else { "$fields, $field" }
-        }
-        if fields == "" { "{}" } else { "{ $fields }" }
+        val fields = t.fields.map { f -> "${f.name}: ${typeToString(f.fieldType)}" }
+        if fields.isEmpty() { "{}" } else { "{ ${fields.joinToStringWithSeparator(", ")} }" }
     } else if tag == "array" {
         "array[${typeToString(t.elementType as Type)}]"
     } else if tag == "fn" {
-        val count = t.types.size()
-        var params = ""
-        var i = 1
-        while i < count {
-            val param = typeToString(t.types[i])
-            params = if i == 1 { param } else { "$params, $param" }
-            i = i + 1
-        }
-        "($params) -> ${typeToString(t.types[count])}"
+        val params = t.types.map { p -> typeToString(p) }
+        val returnType = params.pop()
+        "(${params.joinToStringWithSeparator(", ")}) -> $returnType"
     } else if tag == "sum" {
         "${typeToString(t.lhs as Type)} | ${typeToString(t.rhs as Type)}"
     } else if tag == "var" {

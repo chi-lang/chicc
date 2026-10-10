@@ -206,8 +206,9 @@ pub fn tokenKindName(kind: int): string {
     else { "unknown token" }
 }
 
-// Display of a token found in source: names and numbers quoted with their
-// text, every other token by its kind name.
+// A token found in source, for diagnostics. Only names and numbers show
+// their text: a newline's text is a raw line break, and end of file and the
+// end of a `$name` interpolation have empty text.
 pub fn describeToken(tok: Token): string {
     val kind = tok.kind
     if kind == TK_ID || kind == TK_INT || kind == TK_FLOAT { "'${tok.value}'" }
