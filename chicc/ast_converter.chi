@@ -3,7 +3,7 @@ import std/lang { luaExpr, embedLua }
 import std/lang.map { emptyMap }
 import std/math { finf }
 import chicc/source { Section }
-import chicc/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, newTypeId, variantNameOf }
+import chicc/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, newTypeId, variantNameOf, sumListTypes }
 import chicc/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, packageTarget, setExprType, atomExpr, interpolatedStringExpr, createRecordExpr, createVariantExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, assignmentExpr, declarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam }
 import chicc/parse_ast { ParseAst }
 import chicc/symbols { FnSymbolTable, Symbol, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newSymbol, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, lookupLoadedPublicSymbol, CompileTables, TypeTable, resolveType }
@@ -582,25 +582,22 @@ convertFuncWithName = convertFuncWithNameImpl
 
 // --- FnCall conversion ---
 
-// Does the sum/record `t` include a field-less variant named `name`?
-fn includesNullaryVariant(t: Type, name: string): bool {
-    if t.tag == "sum" {
-        includesNullaryVariant(t.lhs as Type, name) || includesNullaryVariant(t.rhs as Type, name)
-    } else {
-        variantNameOf(t) == name && t.fields.size() == 0
+// The package-level symbol `name` resolves to; unit when a function-scope
+// local shadows it.
+fn packageSymbol(name: string, tables: any): Symbol | unit {
+    val fst: any = currentFnSymbolTable
+    if fst != unit && fstGet(fst as FnSymbolTable, name) != unit {
+        return unit
     }
+    ctGetLocalSymbol(tables as CompileTables, name)
 }
 
 // Is `name` a package-level nullary variant value (see lowerVariantTypes)?
 fn isNullaryVariant(name: string, tables: any): bool {
-    val fst: any = currentFnSymbolTable
-    if fst != unit && fstGet(fst as FnSymbolTable, name) != unit {
-        return false
-    }
-    val sym: any = ctGetLocalSymbol(tables as CompileTables, name)
+    val sym = packageSymbol(name, tables)
     if sym == unit { return false }
-    val symType: any = sym.symbolType
-    symType != unit && includesNullaryVariant(symType as Type, name)
+    val symType: any = (sym as Symbol).symbolType
+    symType != unit && (symType as Type).sumListTypes().any { t -> variantNameOf(t as Type) == name && (t as Type).fields.size() == 0 }
 }
 
 fn convertFnCallImpl(node: any, pkg: any, tables: any): Expr {
@@ -630,9 +627,7 @@ fn convertFnCallImpl(node: any, pkg: any, tables: any): Expr {
         val calleeName = calleeNode.paVariableName()
         // Skip default-arg fill if callee is a local variable in function scope
         // (local variables are closures/lambdas and don't have default-arg info)
-        val fst: any = currentFnSymbolTable
-        val isLocalVar: bool = if fst != unit { fstGet(fst as FnSymbolTable, calleeName) != unit } else { false }
-        val sym: any = if !isLocalVar { ctGetLocalSymbol(tables as CompileTables, calleeName) } else { unit }
+        val sym: any = packageSymbol(calleeName, tables)
         if sym != unit {
             val symType = luaExpr("sym.symbolType") as any
             if symType != unit {
@@ -988,8 +983,8 @@ convertHandle = convertHandleImpl
 // type aliases and before code, so casts/annotations resolve regardless of
 // source order. Returns the constructor declarations to prepend to the program.
 // Contract: registers each variant's constructor types + the data type into
-// the type table, registers a constructor function symbol per variant, and
-// returns the constructor function declarations (to prepend to the program).
+// the type table, registers a symbol per variant, and returns the variant
+// declarations (to prepend to the program).
 // Rejects generic variants by throwing a structured error (caught by the
 // pcall around it in compiler.chi).
 //
@@ -1093,7 +1088,6 @@ pub fn lowerVariantTypes(parseProg: any, pkg: any, tables: any): array[Expr] {
 
         // Loop 2: build a constructor function per variant: a named fn whose
         // type is (fieldTypes...) -> dataType and whose body is a tagged record.
-        // A variant without fields is instead a value of the data type.
         ci = 1
         while ci <= ctorCount {
             val ctor = ctors[ci]

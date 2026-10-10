@@ -187,7 +187,7 @@ test("error: generic variant data Box[T] is rejected") {
 // `N()` stays accepted and yields the same variant.
 // ---------------------------------------------------------------------
 
-// Compiles and runs `src`, asserting it compiles clean; returns the package.
+// Returns the package table produced by running `src`.
 fn runVariantProgram(src: string): any {
     val result: any = compileToLua(src, newLuaCompilationEnv())
     val messages = result.messages as array[any]
