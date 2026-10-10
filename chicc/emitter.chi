@@ -131,28 +131,27 @@ fn mayMutate(e: Expr): bool {
 // to a temporary first when a later operand may mutate what it reads.
 fn emitOperands(st: EmitterState, operands: array[Expr]): array[string] {
     val count = operands.size()
+    // Operands before the last one that may mutate need a settled value.
+    var lastMutating = 0
+    var j = count
+    while j > 1 {
+        if mayMutate(operands[j]) {
+            lastMutating = j
+            break
+        }
+        j = j - 1
+    }
     val values: array[string] = []
     var i = 1
     while i <= count {
         val operand = operands[i]
         var value = emitExpr(st, operand)
-        if i < count {
+        if i < lastMutating {
             val settled = operand.kind == "atom" || value == "nil" || isTemporary(value)
             if settled == false {
-                var later = false
-                var j = i + 1
-                while j <= count {
-                    if mayMutate(operands[j]) {
-                        later = true
-                        j = count
-                    }
-                    j = j + 1
-                }
-                if later {
-                    val tmp = nextTmpName(st)
-                    emit(st, "local $tmp=$value;")
-                    value = tmp
-                }
+                val tmp = nextTmpName(st)
+                emit(st, "local $tmp=$value;")
+                value = tmp
             }
         }
         values.push(value)
