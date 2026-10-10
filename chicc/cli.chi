@@ -6,7 +6,7 @@ package chicc/cli
 import std/lang { luaExpr, embedLua }
 import std/os { getEnv }
 import std/io.file { readString, open, close, write }
-import chicc/compiler { newLuaCompilationEnv, newReplCompilationEnv, compileToLua, compileReplLine, formatMessage }
+import chicc/compiler { newLuaCompilationEnv, newReplCompilationEnv, compileToLua, compileReplLine, commitReplLine, formatMessage }
 
 // ============================================================================
 // Diagnostics output
@@ -265,7 +265,6 @@ pub fn runRepl(): int {
         return 1
     }
     val ns = newReplCompilationEnv()
-    var accImports: string = ""
 
     embedLua("io.write('> '); io.flush()")
     var line: any = luaExpr("io.read('*l')")
@@ -273,8 +272,7 @@ pub fn runRepl(): int {
         val lineStr = line as string
         val isEmpty = luaExpr("lineStr:find('%S') == nil") as bool
         if isEmpty == false {
-            val source: string = luaExpr("accImports .. lineStr") as string
-            val result = compileReplLine(source, ns)
+            val result = compileReplLine(lineStr, ns)
             val luaCode: any = luaExpr("result.luaCode")
             val messages: any = luaExpr("result.messages")
             val msgCount = luaExpr("#messages") as int
@@ -299,15 +297,12 @@ pub fn runRepl(): int {
                         val errStr = luaExpr("tostring(__repl_val)") as string
                         eprintln("Runtime error: $errStr")
                     } else {
+                        commitReplLine(ns, result)
                         val sp = luaExpr("result.shouldPrint") as bool
                         if sp {
                             embedLua("if __repl_val ~= nil then local __rf = __chi_repl_format(__repl_val, {}); if __rf then print(__rf) end end")
                         }
                     }
-                }
-                val isImport = luaExpr("lineStr:match('^%s*import%s') ~= nil") as bool
-                if isImport {
-                    accImports = "${accImports}${lineStr}\n"
                 }
             }
         }

@@ -1,7 +1,7 @@
 // chicc/chicc/type_writer.chi
 package chicc/type_writer
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, TypeId, RecordField, newTypeId, primitiveType, functionType, recordType, sumType, sumCreate, arrayType, variableType, recursiveType, polyType, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, tAny, tUnit, tBool, tInt, tFloat, tString }
+import chicc/types { Type, TypeId, RecordField, newTypeId, primitiveType, functionType, recordType, sumType, sumCreate, arrayType, variableType, recursiveType, polyType, anyTypeId, unitTypeId, boolTypeId, intTypeId, floatTypeId, stringTypeId, tAny, tUnit, tBool, tInt, tFloat, tString, variantNameOf }
 import chicc/util { StringBuilder, newStringBuilder, append, toString }
 
 embedLua("local __defining_type_id = nil")
@@ -139,6 +139,13 @@ fn writeLuaTypeImpl(sb: StringBuilder, t: Type) {
             sb.append(",typeParams=")
             val tps = t.typeParams
             writeStringList(sb, tps)
+            // `is` tells variants apart by name, also after a decode.
+            val vname = variantNameOf(t)
+            if vname != unit {
+                sb.append(",name=\"")
+                sb.append(escapeLua(vname as string))
+                sb.append("\"")
+            }
             sb.append("}")
         }
     } else if tag == "sum" {
@@ -331,7 +338,12 @@ fn decodeTableImpl(tbl: any): Type {
         val ids = decodeLuaTypeIds(tbl, "ids")
         val fields = decodeLuaFields(tbl)
         val tps = decodeLuaStringList(tbl, "typeParams")
-        recordType(ids, fields, tps)
+        val rec = recordType(ids, fields, tps)
+        val vname = luaExpr("tbl.name") as string | unit
+        if vname != unit {
+            rec.name = vname as string
+        }
+        rec
     } else if tag == "sum" {
         // Decode with empty ids, then use sumCreate to restore optionTypeId
         // when unit is present. This enables UFCS lookup into std/lang.option

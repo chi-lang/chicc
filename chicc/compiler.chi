@@ -8,10 +8,12 @@ import chicc/source { Section }
 import chicc/ast { Expr, Import, ImportEntry, TypeAlias, Program, newPackage, newProgram, newImport, newImportEntry, newTypeAlias }
 import chicc/types { Type, TypeId }
 import chicc/messages { Message, invalidModuleName, invalidPackageName, cannotAccessInternalName, unrecognizedName, internalError }
-import chicc/symbols { newCompileTables, ctDefineTypeAlias }
+import chicc/symbols { CompileTables, newCompileTables, ctDefineTypeAlias, ttGet }
 import chicc/checks { checkNames, importConflictCheck, visibilityCheck, fnCallCheck, immutabilityCheck, returnTypeCheck }
 import chicc/inference_context { icInit, icDefineLocalSymbol }
 import chicc/emitter { emitProgram }
+import chicc/parse_ast { ParseImport, ParseVariantTypeDefinition, VariantConstructor }
+import std/lang.map { emptyMap, remove, values }
 
 // ============================================================================
 // CompilationResult
@@ -425,6 +427,22 @@ fn thrownMessage(err: any): Message {
     if isMsg { err as Message } else { internalError("$err") }
 }
 
+// The type aliases lowerVariantTypes registered for each `data` type and its
+// constructors, so they are emitted to `_types` like source type aliases.
+fn variantTypeAliases(parsedProgram: any, tables: CompileTables): array[any] {
+    val aliases: array[any] = []
+    for vdef in parsedProgram.variantTypes as array[ParseVariantTypeDefinition] {
+        val typeName = vdef.typeName
+        aliases.push(ttGet(tables.localTypeTable, typeName))
+        for ctor in vdef.constructors as array[VariantConstructor] {
+            if ctor.name != typeName {
+                aliases.push(ttGet(tables.localTypeTable, ctor.name))
+            }
+        }
+    }
+    aliases
+}
+
 // ============================================================================
 // parseSource — tokenize + parse with error handling
 // ============================================================================
@@ -581,6 +599,9 @@ pub fn compile(source: string, ns: any): CompilationResult {
     val varOk = luaExpr("__chicc_var_ok") as bool
     if varOk {
         variantCtorDecls = luaExpr("__chicc_var_result") as any
+        for alias in variantTypeAliases(parsedProgram, tables) {
+            (definedTypeAliases as array[any]).push(alias)
+        }
     } else {
         resultMessages.push(thrownMessage(luaExpr("__chicc_var_result") as any))
     }
@@ -733,33 +754,125 @@ pub fn compileToLua(source: string, ns: any): any {
 // REPL compilation support
 // ============================================================================
 
-// REPL compilation env factory: extends prelude with self-import + auto-imports
-// REPL prelude function: returns auto-imports + self-import, filtering conflicts
-embedLua("__chicc_replPrelude = function() local userPkg = package.loaded['user/default']; local userNames = {}; if userPkg and userPkg._package then for name, info in pairs(userPkg._package) do if type(info) == 'table' then userNames[name] = true end end end; local function mkE(n) return {name=n, alias=nil, section=nil} end; local function filterNames(names) local entries = {}; for _, n in ipairs(names) do if not userNames[n] then entries[#entries+1] = mkE(n) end end; return entries end; local imports = {}; local base = {}; for _, n in ipairs({'println','print','eval'}) do if not userNames[n] then base[#base+1] = mkE(n) end end; if #base > 0 then imports[#imports+1] = {moduleName='std', packageName='lang', packageAlias=nil, entries=base, section=nil} end; local selfE = {}; for name in pairs(userNames) do selfE[#selfE+1] = mkE(name) end; if #selfE > 0 then imports[#imports+1] = {moduleName='user', packageName='default', packageAlias=nil, entries=selfE, section=nil} end; local autoImps = {{'std','lang.array',{'size','push','pop','map','fold','reduce','sort','sortWith','reverse','any','all','count','indexOf','forEach','first','last','isEmpty','sum','joinToStringWithSeparator','intersperse'}},{'std','lang.string',{'len','find','substring','toLower','toUpper','trim','replace','replaceAll','split','contains','startsWith','endsWith','toInt','codePoints'}},{'std','lang.option',{'valueOr','ifPresent','orElse'}},{'std','math',{'abs','min','max','pow','sqrt','floor','ceil','sin','cos','tan','pi'}},{'std','io',{'readLine'}}}; for _, ai in ipairs(autoImps) do local entries = filterNames(ai[3]); if #entries > 0 then imports[#imports+1] = {moduleName=ai[1], packageName=ai[2], packageAlias=nil, entries=entries, section=nil} end end; return imports end")
+// Imports in the raw shape compile() reads from getPreludeImports.
+fn rawImport(mod: string, pkg: string, pkgAlias: string | unit, entries: array[any]): any {
+    { moduleName: mod, packageName: pkg, packageAlias: pkgAlias, entries: entries, section: unit }
+}
+
+fn rawImportEntry(name: string, alias: string | unit): any {
+    { name: name, alias: alias, section: unit }
+}
+
+type ReplAutoImport = { moduleName: string, packageName: string, names: array[string] }
+
+// The normal prelude plus the modules the REPL spec auto-imports.
+val replAutoImports: array[ReplAutoImport] = [
+    { moduleName: "std", packageName: "lang", names: ["println", "print", "eval"] },
+    { moduleName: "std", packageName: "lang.array", names: ["size", "push", "pop", "map", "fold", "reduce", "sort", "sortWith", "reverse", "any", "all", "count", "indexOf", "forEach", "first", "last", "isEmpty", "sum", "joinToStringWithSeparator", "intersperse"] },
+    { moduleName: "std", packageName: "lang.string", names: ["len", "find", "substring", "toLower", "toUpper", "trim", "replace", "replaceAll", "split", "contains", "startsWith", "endsWith", "toInt", "codePoints"] },
+    { moduleName: "std", packageName: "lang.option", names: ["Option", "valueOr", "ifPresent", "orElse"] },
+    { moduleName: "std", packageName: "math", names: ["abs", "min", "max", "pow", "sqrt", "floor", "ceil", "sin", "cos", "tan", "pi"] },
+    { moduleName: "std", packageName: "io", names: ["readLine"] }
+]
+
+// Names earlier REPL lines defined in user/default: values (`_package`) and
+// types (`_types`).
+fn replUserNames(): array[string] {
+    luaExpr("(function() local names, seen = {}, {}; local p = package.loaded['user/default']; if p == nil then return names end; for _, t in ipairs({ p._package or {}, p._types or {} }) do for n in pairs(t) do if not seen[n] then seen[n] = true; names[#names + 1] = n end end end; return names end)()") as array[string]
+}
+
+// The imports in effect for the next REPL line. newCompileTables lets a later
+// import of a name win, so the auto-imports go first. A user name and an
+// explicit import never bind the same name (see commitReplLine).
+fn replPrelude(session: any): array[any] {
+    val explicit: any = session.replImports
+    val imports: array[any] = []
+    for auto in replAutoImports {
+        imports.push(rawImport(auto.moduleName, auto.packageName, unit, auto.names.map { n -> rawImportEntry(n, unit) }))
+    }
+    val own: array[any] = []
+    for name in replUserNames() {
+        if explicit.has(name) == false {
+            own.push(rawImportEntry(name, unit))
+        }
+    }
+    if own.size() > 0 {
+        imports.push(rawImport("user", "default", unit, own))
+    }
+    for imp in explicit.values() as array[any] {
+        imports.push(imp)
+    }
+    imports
+}
 
 pub fn newReplCompilationEnv(): any {
     val ns: any = luaExpr("__chicc_mkEnv()")
-    embedLua("ns.getPreludeImports = __chicc_replPrelude")
+    // Explicit imports of the session by the name they bind.
+    ns.replImports = emptyMap[string, any]()
     ns
 }
 
-pub fn compileReplLine(source: string, ns: any): any {
-    // Create fresh env each time to avoid stale symbol caches
-    val freshNs: any = luaExpr("__chicc_mkEnv()")
-    embedLua("freshNs.getPreludeImports = __chicc_replPrelude")
-    val result = compile(source, freshNs)
-    val hasErr = hasErrors(result)
-    if hasErr {
-        luaExpr("{ messages = result.messages, luaCode = nil, shouldPrint = false }") as any
-    } else {
-        val luaCode = emitProgram(result.program as Program, false)
-        val exprCount = luaExpr("#result.program.expressions") as int
-        var shouldPrint = false
-        if exprCount > 0 {
-            val lastKind = luaExpr("result.program.expressions[exprCount].kind") as string
-            shouldPrint = luaExpr("lastKind ~= 'name_declaration' and lastKind ~= 'assignment' and lastKind ~= 'effect_definition' and lastKind ~= 'field_assignment' and lastKind ~= 'indexed_assignment'") as bool
+type ReplLine = {
+    messages: array[any],
+    luaCode: string | unit,
+    shouldPrint: bool,
+    definedNames: array[string],
+    imports: array[ParseImport]
+}
+
+// Top-level names a REPL line defines.
+fn replDefinedNames(prog: Program): array[string] {
+    val names: array[string] = []
+    for alias in prog.typeAliases {
+        names.push(alias.typeId.name)
+    }
+    for e in prog.expressions {
+        if e.kind == "name_declaration" {
+            names.push(e.declName)
+        } else if e.kind == "effect_definition" {
+            names.push(e.effectName)
         }
-        luaExpr("{ messages = result.messages, luaCode = luaCode, shouldPrint = shouldPrint }") as any
+    }
+    names
+}
+
+pub fn compileReplLine(source: string, ns: any): ReplLine {
+    // Each line changes user/default, so a fresh env per line drops symbol
+    // caches built from its earlier contents. Session state stays in `ns`.
+    val lineNs: any = luaExpr("__chicc_mkEnv()")
+    lineNs.getPreludeImports = { -> replPrelude(ns) }
+    val result = compile(source, lineNs)
+    if hasErrors(result) {
+        return { messages: result.messages, luaCode: unit, shouldPrint: false, definedNames: [], imports: [] }
+    }
+    val prog = result.program as Program
+    val luaCode = emitProgram(prog, false)
+    val exprCount = prog.expressions.size()
+    var shouldPrint = false
+    if exprCount > 0 {
+        val lastKind = prog.expressions[exprCount].kind
+        shouldPrint = lastKind != "name_declaration" && lastKind != "assignment" && lastKind != "effect_definition" && lastKind != "field_assignment" && lastKind != "indexed_assignment"
+    }
+    // compile() does not tell the line's own imports from the prelude.
+    val lineImports = parseSource(source).parsedProgram.imports as array[ParseImport]
+    { messages: result.messages, luaCode: luaCode, shouldPrint: shouldPrint, definedNames: replDefinedNames(prog), imports: lineImports }
+}
+
+// Records the bindings of a line that compiled and ran: its imports take
+// their names, then its definitions take theirs back from earlier imports.
+pub fn commitReplLine(ns: any, line: ReplLine) {
+    val explicit: any = ns.replImports
+    for imp in line.imports {
+        if imp.packageAlias != "" {
+            explicit.put(imp.packageAlias, rawImport(imp.moduleName, imp.packageName, imp.packageAlias, []))
+        }
+        for entry in imp.entries {
+            val bound = if entry.alias != "" { entry.alias } else { entry.name }
+            explicit.put(bound, rawImport(imp.moduleName, imp.packageName, unit, [rawImportEntry(entry.name, entry.alias)]))
+        }
+    }
+    for name in line.definedNames {
+        explicit.remove(name)
     }
 }
 
