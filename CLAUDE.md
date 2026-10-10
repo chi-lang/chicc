@@ -24,3 +24,17 @@ Specification is the 'WHAT' and 'WHY'. It also describes how the feature works. 
 
 After you finish change implementation run `make verify` to verify the self-hosted compiler fixed point before finishing.
 (The .cache folder is automatically cleaned by the build target.)
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in GitHub Issues (`chi-lang/chicc`) via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default canonical labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `CONTEXT.md` + `docs/adr/`. See `docs/agents/domain.md`.
