@@ -263,16 +263,19 @@ fn copyHistoryWith(history: array[any], constraint: any): array[any] {
     newHistory
 }
 
-// Whether `history` holds a constraint between these same two types
-fn historyContains(history: array[any], expected: Type, actual: Type): bool {
-    val hLen = history.size()
-    var hi = 1
-    while hi <= hLen {
-        val h = history[hi] as Constraint
-        val hExpected = h.expected as Type
-        val hActual = h.actual as Type
-        if hExpected.typeEquals(expected) && hActual.typeEquals(actual) { return true }
-        hi = hi + 1
+// Pairs of types the solver has unfolded to unify, newest first. A pair
+// met again holds coinductively: by the time the run ends it is either
+// proven or the run has failed. Shared by the whole run, so sibling
+// constraints do not unfold the same pair again. Never mutated: a sum
+// probe extends the list it was given and its additions vanish with it.
+type Assumed = { expected: Type, actual: Type, rest: Assumed | unit }
+
+fn isAssumed(assumed: Assumed | unit, expected: Type, actual: Type): bool {
+    var node = assumed
+    while node != unit {
+        val a = node as Assumed
+        if a.expected.typeEquals(expected) && a.actual.typeEquals(actual) { return true }
+        node = a.rest
     }
     false
 }
@@ -284,7 +287,8 @@ fn historyContains(history: array[any], expected: Type, actual: Type): bool {
 // On failure, bindings made before the failing constraint remain in `uf`
 // (today's post-throw state, preserved deliberately — see
 // docs/excavation/tryunify/01-architecture.md, "State ownership").
-fn unifyCore(constraints: array[any], uf: any): Message | unit {
+fn unifyCore(constraints: array[any], uf: any, outerAssumed: Assumed | unit): Message | unit {
+    var assumed = outerAssumed
     val queue: array[any] = []
     val initialCount = constraints.size()
     var i = 1
@@ -320,10 +324,10 @@ fn unifyCore(constraints: array[any], uf: any): Message | unit {
                 return typeMismatch(typeDescr(expected), typeDescr(actual), cp)
             }
         } else if expected.tag == "recursive" || actual.tag == "recursive" {
-            // A pair already being unified higher up this constraint's
-            // derivation holds coinductively; unfolding it again would
-            // loop forever on two distinct recursive types.
-            if historyContains(history, expected, actual) == false {
+            // Unfolding an assumed pair again would loop forever on two
+            // distinct recursive types.
+            if isAssumed(assumed, expected, actual) == false {
+                assumed = { expected: expected, actual: actual, rest: assumed }
                 val newExpected = if expected.tag == "recursive" { expected.unfoldRecursive() } else { expected }
                 val newActual = if actual.tag == "recursive" { actual.unfoldRecursive() } else { actual }
                 val newHistory = copyHistoryWith(history, constraint)
@@ -417,7 +421,7 @@ fn unifyCore(constraints: array[any], uf: any): Message | unit {
             rhsConstraints.push(rhsConstraint)
 
             val probeUf = ufNew()
-            val probeFailure = unifyCore(rhsConstraints, probeUf)
+            val probeFailure = unifyCore(rhsConstraints, probeUf, assumed)
             if probeFailure == unit {
                 // Merge the probe's solutions into our union-find
                 val bindings = ufAllBindings(probeUf)
@@ -443,7 +447,7 @@ fn unifyCore(constraints: array[any], uf: any): Message | unit {
             lhsConstraints.push(lhsConstraint)
 
             val probeUf = ufNew()
-            val probeFailure = unifyCore(lhsConstraints, probeUf)
+            val probeFailure = unifyCore(lhsConstraints, probeUf, assumed)
             if probeFailure == unit {
                 // Merge the probe's solutions into our union-find
                 val bindings = ufAllBindings(probeUf)
@@ -479,7 +483,7 @@ fn unifyCore(constraints: array[any], uf: any): Message | unit {
 // A failed probe leaks no bindings — the fresh union-find is discarded.
 pub fn tryUnify(constraints: array[any]): array[Binding] | unit {
     val uf = ufNew()
-    val failure = unifyCore(constraints, uf)
+    val failure = unifyCore(constraints, uf, unit)
     // unit from the core means SUCCESS — return the bindings then.
     if failure == unit {
         ufAllBindings(uf)
@@ -492,7 +496,7 @@ pub fn tryUnify(constraints: array[any]): array[Binding] | unit {
 // runs the core and raises the returned Message verbatim, preserving the
 // legacy contract (compiler.chi pcall harnesses, tests asserting err.code).
 pub fn unifyWithUf(constraints: array[any], uf: any) {
-    val failure = unifyCore(constraints, uf)
+    val failure = unifyCore(constraints, uf, unit)
     if failure != unit {
         throwMessage(failure as Message)
     }

@@ -339,6 +339,31 @@ test("unify: recursive aliases terminate when no sum branch cuts the recursion s
     }
 }
 
+// { a: () -> x, b: () -> x, c: () -> x }
+fn fanOut(x: Type): Type {
+    recordType([], [{ name: "a", fieldType: functionType([x], [], 0) }, { name: "b", fieldType: functionType([x], [], 0) }, { name: "c", fieldType: functionType([x], [], 0) }], [])
+}
+
+// Counts the unfoldRecursive calls made while `body` runs.
+fn countUnfolds(body: () -> unit): int {
+    embedLua("local types = package.loaded['chicc/types']; local original = types.unfoldRecursive; local count = 0; types.unfoldRecursive = function(t) count = count + 1; return original(t) end; local ok, err = pcall(body); types.unfoldRecursive = original; if not ok then error(err, 0) end; __unfoldCount = count")
+    luaExpr("__unfoldCount") as int
+}
+
+test("unify: a pair met in sibling branches is unfolded once") {
+    // S1 = fanOut(S1) against S2 = fanOut^3(S2): both sides of the first
+    // pair, then S1 once per level. Every field of every level meets the
+    // same pairs, so without sharing that would be 2 + 3 + 3^2 unfolds.
+    withinLimits(10) {
+        val s1 = recursiveAlias("t::u::S1") { self -> fanOut(self) }
+        val s2 = recursiveAlias("t::u::S2") { self -> fanOut(fanOut(fanOut(self))) }
+        var code = "not run"
+        val unfolds = countUnfolds { code = unifyCode(s2, s1) }
+        assertEqual(code, "")
+        assertEqual(unfolds, 4)
+    }
+}
+
 // --- unify: not a function ---
 
 test("unify: function expected but non-function actual throws notAFunction") {

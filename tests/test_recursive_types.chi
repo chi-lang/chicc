@@ -1,6 +1,6 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary, withinLimits }
 import chicc/compiler { compileToLua, newLuaCompilationEnv }
-import std/lang { luaExpr, embedLua }
+import std/lang { loadLuaCode }
 
 // Recursive type aliases end to end (issue #48): instances of a generic
 // recursive alias differ by their type arguments, and unifying two
@@ -59,12 +59,12 @@ test("recursive aliases unify when the recursive sum branch comes first") {
 
 test("a generic recursive alias compiles and runs") {
     withinLimits(30) {
-        val src = "type Tree[T] = { v: T, kids: array[Tree[T]] }\nfn sum(t: Tree[int]): int { t.v }\nval t: Tree[int] = { v: 1, kids: [] }\nprintln(sum(t))"
+        val src = "type Tree[T] = { v: T, kids: array[Tree[T]] }\nfn sum(t: Tree[int]): int { t.v }\nval t: Tree[int] = { v: 1, kids: [] }\nval r = sum(t)"
         val result: any = compileToLua(src, newLuaCompilationEnv())
         assertEqual((result.messages as array[any]).size(), 0)
-        val luaCode = result.luaCode as string
-        embedLua("local buf = {}; local write = io.write; io.write = function(...) for _, a in ipairs({...}) do buf[#buf + 1] = tostring(a) end end; local ok, err = pcall(function() return assert(load(luaCode))() end); io.write = write; __treeOut = ok and table.concat(buf) or ('error: ' .. tostring(err))")
-        assertEqual(luaExpr("__treeOut") as string, "1\n")
+        val run = loadLuaCode(result.luaCode as string) as () -> any
+        val pkg: any = run()
+        assertEqual(pkg.r as int, 1)
     }
 }
 
