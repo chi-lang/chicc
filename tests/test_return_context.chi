@@ -1,0 +1,70 @@
+import chicc/test_util { test, assertEqual, summary, withinLimits }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { loadLuaCode }
+
+// A `return` belongs to the nearest enclosing lambda or fn (issue #38): the
+// initializer of a function-typed `val` opens a new return context only when
+// it is itself a lambda.
+
+// Compiles `src`, expecting exactly one message with this code and text.
+fn assertOnlyMessage(src: string, code: string, text: string) {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    assertEqual(messages.size(), 1)
+    assertEqual(messages[1].code as string, code)
+    assertEqual(messages[1].text as string, text)
+}
+
+// Compiles and runs `src`; returns its package table. Each source declares
+// its own package so that members left by one test are not seen by the next.
+fn compileAndRun(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    assertEqual(messages.map { m -> m.code as string }.joinToStringWithSeparator(","), "")
+    if result.luaCode == unit { return unit }
+    val run = loadLuaCode(result.luaCode as string) as () -> any
+    run()
+}
+
+val pickDecl = "fn pick(b: bool): (int) -> int { { x: int -> x } }\n"
+
+test("an early return in the if initializer of an annotated fn-typed val leaves the enclosing fn") {
+    withinLimits(30) {
+        val src = "package t38/a\n${pickDecl}fn outer(c: bool): string {\n    val g: (int) -> int = if c { return \"early\" } else { pick(false) }\n    \"late\"\n}\nval r1 = outer(true)\nval r2 = outer(false)\n"
+        val pkg = compileAndRun(src)
+        assertEqual(pkg.r1 as string, "early")
+        assertEqual(pkg.r2 as string, "late")
+    }
+}
+
+test("an early return in a call argument of an inferred fn-typed val leaves the enclosing fn") {
+    withinLimits(30) {
+        val src = "package t38/b\n${pickDecl}fn outer(c: bool): string {\n    val g = pick(if c { return \"early\" } else { false })\n    \"late\"\n}\nval r1 = outer(true)\nval r2 = outer(false)\n"
+        val pkg = compileAndRun(src)
+        assertEqual(pkg.r1 as string, "early")
+        assertEqual(pkg.r2 as string, "late")
+    }
+}
+
+test("an early return in a fn-typed val initializer is checked against the enclosing fn") {
+    withinLimits(30) {
+        val src = "package t38/c\n${pickDecl}fn outer(c: bool): string {\n    val g: (int) -> int = if c { return 1 } else { pick(false) }\n    \"late\"\n}\n"
+        assertOnlyMessage(src, "TYPE_MISMATCH", "Expected type is 'string' but got 'int'")
+    }
+}
+
+test("a return in a lambda assigned to a val is checked against the declared sum return type") {
+    withinLimits(30) {
+        val src = "package t38/d\nfn outer(c: bool): int | unit {\n    val h: (bool) -> int | unit = { b: bool -> if b { return 2 } else { unit } }\n    h(c)\n}\nval r = outer(true)\n"
+        assertEqual(compileAndRun(src).r as int, 2)
+    }
+}
+
+test("a return in a lambda assigned to a val is checked against the lambda, not the enclosing fn") {
+    withinLimits(30) {
+        val src = "package t38/e\nfn outer(c: bool): int {\n    val h: (int) -> int = { x: int -> if c { return \"s\" } else { x } }\n    h(1)\n}\n"
+        assertOnlyMessage(src, "TYPE_MISMATCH", "Expected type is 'int' but got 'string'")
+    }
+}
+
+summary()

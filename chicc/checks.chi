@@ -548,15 +548,21 @@ fn rtWalkExprImpl(expr: any, messages: any) {
     val kind = luaExpr("expr.kind") as string
 
     if kind == "name_declaration" {
-        // Check if the value has a function type — sets expected return type
+        val value = expr.value
+        if value == unit { return unit }
+        // Only a lambda opens a new return context; any other initializer
+        // returns from the enclosing function.
+        if (value.kind as string) != "fn" {
+            rtWalkExpr(value, messages)
+            return unit
+        }
         // Prefer the declared expectedType (preserves sum types like int | unit)
         // over the inferred exprType (which may resolve to just unit after unification)
-        val value = luaExpr("expr.value") as any
         val declaredType = luaExpr("expr.expectedType") as any
         val exprType = if declaredType != unit {
             declaredType
         } else {
-            luaExpr("expr.value and expr.value.exprType or expr.exprType") as any
+            value.exprType
         }
         val prevExpectedReturnType = rtExpectedReturnType
         if exprType != unit {
@@ -571,15 +577,13 @@ fn rtWalkExprImpl(expr: any, messages: any) {
             }
         }
         // Walk children of the value
-        if value != unit {
-            val valueChildren = value.exprChildren()
-            val childCount = luaExpr("#valueChildren") as int
-            var i = 1
-            while i <= childCount {
-                val child = luaExpr("valueChildren[i]") as any
-                rtWalkExpr(child, messages)
-                i = i + 1
-            }
+        val valueChildren = value.exprChildren()
+        val childCount = luaExpr("#valueChildren") as int
+        var i = 1
+        while i <= childCount {
+            val child = luaExpr("valueChildren[i]") as any
+            rtWalkExpr(child, messages)
+            i = i + 1
         }
         rtExpectedReturnType = prevExpectedReturnType
     } else if kind == "fn" {
