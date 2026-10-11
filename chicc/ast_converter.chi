@@ -56,8 +56,12 @@ fn floatLiteral(v: float): string {
 
 // --- Symbol management ---
 
-// Resolves `name` like getSymbol, skipping the fn-local scopes.
-fn getPackageSymbol(name: string, tables: any): Target {
+fn isFnLocal(name: string): bool {
+    val fst: any = currentFnSymbolTable
+    fst != unit && fstGet(fst as FnSymbolTable, name) != unit
+}
+
+fn getSymbolSkippingLocals(name: string, tables: any): Target {
     val ctSym: any = ctGetLocalSymbol(tables as CompileTables, name)
     if ctSym != unit {
         val symMod = luaExpr("ctSym.moduleName") as string
@@ -78,14 +82,7 @@ fn getPackageSymbol(name: string, tables: any): Target {
 }
 
 pub fn getSymbol(name: string, tables: any): Target {
-    val fst: any = currentFnSymbolTable
-    if fst != unit {
-        val fnSym: any = fstGet(fst as FnSymbolTable, name)
-        if fnSym != unit {
-            return localTarget(name)
-        }
-    }
-    getPackageSymbol(name, tables)
+    if isFnLocal(name) { localTarget(name) } else { getSymbolSkippingLocals(name, tables) }
 }
 
 // Whether the local binding getSymbol resolves `name` to here is mutable;
@@ -602,10 +599,7 @@ convertFuncWithName = convertFuncWithNameImpl
 // The package-level symbol `name` resolves to; unit when a function-scope
 // local shadows it.
 fn packageSymbol(name: string, tables: any): Symbol | unit {
-    val fst: any = currentFnSymbolTable
-    if fst != unit && fstGet(fst as FnSymbolTable, name) != unit {
-        return unit
-    }
+    if isFnLocal(name) { return unit }
     ctGetLocalSymbol(tables as CompileTables, name)
 }
 
@@ -847,10 +841,7 @@ fn convertFieldAccessImpl(node: any, pkg: any, tables: any): Expr {
     val memberName = node.paMemberName()
     val memberSec = node.paMemberSection()
 
-    // A local or parameter of the receiver's name hides a package alias
-    val fst: any = currentFnSymbolTable
-    val isLocal = fst != unit && fstGet(fst as FnSymbolTable, receiverName) != unit
-    val aliasedPkg: any = if isLocal { unit } else { ctGetAliasedPackage(tables as CompileTables, receiverName) }
+    val aliasedPkg: any = if isFnLocal(receiverName) { unit } else { ctGetAliasedPackage(tables as CompileTables, receiverName) }
     if aliasedPkg != unit {
         val aliasMod = luaExpr("aliasedPkg.moduleName") as string
         val aliasPkg = luaExpr("aliasedPkg.packageName") as string
@@ -932,7 +923,7 @@ fn convertHandleImpl(node: any, pkg: any, tables: any): Expr {
         // Effects are declared at package level, so locals never hide them
         var eMod = ""
         var ePkg = ""
-        val effTarget: any = getPackageSymbol(effName, tables)
+        val effTarget: any = getSymbolSkippingLocals(effName, tables)
         val effTargetTag = luaExpr("effTarget.tag") as string
         if effTargetTag == "package" {
             eMod = luaExpr("effTarget.moduleName") as string

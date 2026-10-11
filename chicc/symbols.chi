@@ -183,8 +183,8 @@ pub fn newCompileTables(pkg: any, ns: any, imports: any): CompileTables {
                 entryName
             }
             importedSymbols.put(importedName, { moduleName: impModuleName, packageName: impPackageName, originalName: entryName })
-            // Also register imported type aliases in the local type table,
-            // under the name they are imported as
+            // Also register imported type aliases in the local type table;
+            // an aliased import hides the original name
             val typeAlias = luaExpr("ns and ns.getTypeAlias and ns.getTypeAlias(impModuleName, impPackageName, entryName) or nil") as any
             if typeAlias != unit {
                 ttAddByName(localTT, importedName, typeAlias)

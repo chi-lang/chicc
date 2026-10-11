@@ -7,10 +7,13 @@ import std/lang { loadLuaCode }
 // found at package level even when a local hides it, and an aliased type
 // import makes only the alias visible.
 
-fn messageCodes(src: string): string {
-    val result: any = compileToLua(src, newLuaCompilationEnv())
+fn codesOf(result: any): string {
     val messages = result.messages as array[any]
     messages.map { m -> m.code as string }.joinToStringWithSeparator(",")
+}
+
+fn messageCodes(src: string): string {
+    codesOf(compileToLua(src, newLuaCompilationEnv()))
 }
 
 // Compiles `src`, expecting no messages, runs it and returns its `r`.
@@ -18,8 +21,7 @@ fn messageCodes(src: string): string {
 // not seen by the next.
 fn runR(src: string): any {
     val result: any = compileToLua(src, newLuaCompilationEnv())
-    val messages = result.messages as array[any]
-    assertEqual(messages.map { m -> m.code as string }.joinToStringWithSeparator(","), "")
+    assertEqual(codesOf(result), "")
     if result.luaCode == unit { return unit }
     val run = loadLuaCode(result.luaCode as string) as () -> any
     val pkg: any = run()
