@@ -142,23 +142,6 @@ static int load_compiler(lua_State *L) {
     lua_pushnil(L);
     lua_setglobal(L, "arg");
 
-    /* Set up _G metatable for cross-package name resolution in embedLua/luaExpr.
-     * Must be BEFORE loading chicc.lua so it's active during module loading. */
-    if (luaL_dostring(L,
-            "setmetatable(_G, { __index = function(t, k)\n"
-            "  for pkgName, pkgTable in pairs(package.loaded) do\n"
-            "    if type(pkgName) == 'string' and pkgName:match('^chicc/') and type(pkgTable) == 'table' then\n"
-            "      local v = rawget(pkgTable, k)\n"
-            "      if v ~= nil then return v end\n"
-            "    end\n"
-            "  end\n"
-            "  return nil\n"
-            "end })\n") != 0) {
-        fprintf(stderr, "Fatal: setting _G metatable: %s\n",
-                lua_tostring(L, -1));
-        return -1;
-    }
-
     /* Load chicc — loads per-package modules and sets global exports */
     if (load_embedded(L, luaJIT_BC_chicc, luaJIT_BC_chicc_SIZE,
                       "chicc") != 0)
@@ -173,14 +156,14 @@ static int load_compiler(lua_State *L) {
     /* Set chi_compile for eval()/compileLua() in Chi programs.
      * Returns luaCode on success, nil + formatted messages on failure. */
     if (luaL_dostring(L,
+            "local _COMPILER = package.loaded['chicc/compiler']\n"
             "chi_compile = function(source)\n"
-            "  local ns = newLuaCompilationEnv()\n"
-            "  local result = compileToLua(source, ns)\n"
+            "  local ns = _COMPILER.newLuaCompilationEnv()\n"
+            "  local result = _COMPILER.compileToLua(source, ns)\n"
             "  if result and result.luaCode then return result.luaCode end\n"
-            "  local fmt = package.loaded['chicc/compiler'].formatMessage\n"
             "  local parts = {}\n"
             "  for i, m in ipairs(result and result.messages or {}) do\n"
-            "    parts[i] = fmt(m)\n"
+            "    parts[i] = _COMPILER.formatMessage(m)\n"
             "  end\n"
             "  if #parts == 0 then return nil, 'unknown compilation error' end\n"
             "  return nil, table.concat(parts, '; ')\n"
