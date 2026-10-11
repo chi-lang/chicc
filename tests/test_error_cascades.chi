@@ -1,0 +1,70 @@
+import chicc/test_util { test, assertEqual, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv, formatMessage }
+
+// A rejected `data` declaration or an unresolved import is reported once, at
+// its source; later uses of the names it would have introduced add no
+// UNRECOGNIZED_NAME messages, while genuinely unknown names still do (#65).
+//
+// Programs are compiled by the chicc modules under test, not eval(): eval()
+// compiles with the prebuilt chicc.lua.
+
+// All compilation messages, formatted and joined; "compiled" if it compiled.
+fn compileErrors(src: string): string {
+    val result = compileToLua(src, newLuaCompilationEnv())
+    if result.luaCode != unit { return "compiled" }
+    var out = ""
+    for m in result.messages as array[any] {
+        out = if out == "" { formatMessage(m) } else { "$out | ${formatMessage(m)}" }
+    }
+    out
+}
+
+val genericOpt = "[UNSUPPORTED_FEATURE] generic data types are not supported yet (data Opt)"
+val missingPkg = "[PACKAGE_NOT_FOUND] Package 'no/such' was not found (line 1, col 1)"
+
+test("constructors of a rejected generic data are not reported again") {
+    assertEqual(compileErrors("data Opt[T] = S(v: T) | N\nS(1)\nN\n"), genericOpt)
+}
+
+test("a valid data after a rejected one stays usable") {
+    assertEqual(compileErrors("data Opt[T] = S(v: T) | N\ndata Shape = Circle(radius: float)\nCircle(1.0)\n"), genericOpt)
+}
+
+test("an unknown name after a rejected data is still reported") {
+    assertEqual(compileErrors("data Opt[T] = S(v: T) | N\nfoo\n"),
+        "$genericOpt | [UNRECOGNIZED_NAME] Name 'foo' was not recognized (line 2, col 1)")
+}
+
+test("constructors of a rejected recursive data are not reported again") {
+    assertEqual(compileErrors("data L = C(h: int, t: L) | E\nE\nC(1, E)\n"),
+        "[UNSUPPORTED_FEATURE] recursive data types are not supported yet (data L)")
+}
+
+test("a missing package is reported once, at the import") {
+    assertEqual(compileErrors("import no/such { foo }\nfoo()\nfoo()\nfoo\n"), missingPkg)
+}
+
+test("a missing package is reported once for all its entries") {
+    assertEqual(compileErrors("import no/such { foo, bar }\nfoo()\nbar()\n"), missingPkg)
+}
+
+test("an aliased entry of a missing package is not reported again") {
+    assertEqual(compileErrors("import no/such { foo as bar }\nbar()\n"), missingPkg)
+}
+
+test("a name missing from an existing package is reported once, at the import") {
+    assertEqual(compileErrors("import std/math { nosuch }\nnosuch()\nnosuch\n"),
+        "[UNRECOGNIZED_NAME] Name 'nosuch' was not recognized (line 1, col 19)")
+}
+
+test("an aliased name missing from an existing package is reported once") {
+    assertEqual(compileErrors("import std/math { nosuch as other }\nother()\n"),
+        "[UNRECOGNIZED_NAME] Name 'nosuch' was not recognized (line 1, col 19)")
+}
+
+test("an unknown name after an unresolved import is still reported") {
+    assertEqual(compileErrors("import no/such { foo }\nzzz\n"),
+        "$missingPkg | [UNRECOGNIZED_NAME] Name 'zzz' was not recognized (line 2, col 1)")
+}
+
+summary()
