@@ -7,15 +7,24 @@ type Target = {
     tag: string,
     name: string,
     moduleName: string,
-    packageName: string
+    packageName: string,
+    isMutable: bool
+}
+
+pub fn localTargetWithMutability(name: string, isMut: bool): Target {
+    { tag: "local", name: name, moduleName: "", packageName: "", isMutable: isMut }
 }
 
 pub fn localTarget(name: string): Target {
-    { tag: "local", name: name, moduleName: "", packageName: "" }
+    localTargetWithMutability(name, false)
+}
+
+pub fn packageTargetWithMutability(mod: string, pkg: string, name: string, isMut: bool): Target {
+    { tag: "package", name: name, moduleName: mod, packageName: pkg, isMutable: isMut }
 }
 
 pub fn packageTarget(mod: string, pkg: string, name: string): Target {
-    { tag: "package", name: name, moduleName: mod, packageName: pkg }
+    packageTargetWithMutability(mod, pkg, name, false)
 }
 
 type DotTarget = {

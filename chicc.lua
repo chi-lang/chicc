@@ -1369,86 +1369,92 @@ do function __P_.paHandleBody(p) return p.handleBody end; end;
 do function __P_.paOpTemplate(p) return p.opTemplate end; end;
 do function __P_.paArrayValues(p) return p.arrayValues end; end;
 function __P_.paRecordFields(p) return p.recordFields end;return __P_
- end;local _chi_info=debug.getinfo(_chi_run,'S');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;if string.sub(_chi_source,1,1)=='@' then _chi_source=string.sub(_chi_source,2) end;_chi_line_map[2]=21;_chi_line_map[3]=22;_chi_line_map[4]=21;_chi_line_map[5]=27;_chi_line_map[6]=28;_chi_line_map[7]=29;_chi_line_map[8]=30;_chi_line_map[9]=27;_chi_line_map[10]=33;_chi_line_map[11]=34;_chi_line_map[12]=35;_chi_line_map[13]=36;_chi_line_map[14]=37;_chi_line_map[15]=38;_chi_line_map[16]=33;_chi_line_map[17]=41;_chi_line_map[18]=42;_chi_line_map[19]=43;_chi_line_map[20]=44;_chi_line_map[21]=45;_chi_line_map[22]=46;_chi_line_map[23]=41;_chi_line_map[24]=49;_chi_line_map[25]=50;_chi_line_map[26]=51;_chi_line_map[27]=52;_chi_line_map[28]=49;_chi_line_map[29]=55;_chi_line_map[30]=56;_chi_line_map[31]=57;_chi_line_map[32]=58;_chi_line_map[33]=59;_chi_line_map[34]=55;_chi_line_map[35]=62;_chi_line_map[36]=63;_chi_line_map[37]=64;_chi_line_map[38]=65;_chi_line_map[39]=66;_chi_line_map[40]=62;_chi_line_map[41]=70;_chi_line_map[42]=71;_chi_line_map[43]=72;_chi_line_map[44]=73;_chi_line_map[45]=74;_chi_line_map[46]=75;_chi_line_map[47]=76;_chi_line_map[48]=77;_chi_line_map[49]=78;_chi_line_map[50]=79;_chi_line_map[51]=80;_chi_line_map[52]=81;_chi_line_map[53]=87;_chi_line_map[54]=88;_chi_line_map[55]=87;_chi_line_map[56]=93;_chi_line_map[57]=94;_chi_line_map[58]=93;_chi_line_map[59]=99;_chi_line_map[60]=100;_chi_line_map[61]=99;_chi_line_map[62]=105;_chi_line_map[63]=106;_chi_line_map[64]=105;_chi_line_map[65]=111;_chi_line_map[66]=112;_chi_line_map[67]=111;_chi_line_map[68]=117;_chi_line_map[69]=118;_chi_line_map[70]=117;_chi_line_map[71]=123;_chi_line_map[72]=124;_chi_line_map[73]=123;_chi_line_map[74]=129;_chi_line_map[75]=130;_chi_line_map[76]=129;_chi_line_map[77]=135;_chi_line_map[78]=136;_chi_line_map[79]=135;_chi_line_map[80]=147;_chi_line_map[81]=148;_chi_line_map[82]=147;_chi_line_map[83]=160;_chi_line_map[84]=161;_chi_line_map[85]=160;_chi_line_map[86]=166;_chi_line_map[87]=167;_chi_line_map[88]=166;_chi_line_map[89]=172;_chi_line_map[90]=173;_chi_line_map[91]=172;_chi_line_map[92]=178;_chi_line_map[93]=179;_chi_line_map[94]=178;_chi_line_map[95]=238;_chi_line_map[96]=239;_chi_line_map[97]=238;_chi_line_map[98]=258;_chi_line_map[99]=259;_chi_line_map[100]=258;_chi_line_map[101]=262;_chi_line_map[102]=263;_chi_line_map[103]=264;_chi_line_map[104]=265;_chi_line_map[105]=262;_chi_line_map[106]=268;_chi_line_map[107]=269;_chi_line_map[108]=270;_chi_line_map[109]=271;_chi_line_map[110]=268;_chi_line_map[111]=274;_chi_line_map[112]=275;_chi_line_map[113]=276;_chi_line_map[114]=277;_chi_line_map[115]=274;_chi_line_map[116]=280;_chi_line_map[117]=281;_chi_line_map[118]=282;_chi_line_map[119]=283;_chi_line_map[120]=280;_chi_line_map[121]=286;_chi_line_map[122]=287;_chi_line_map[123]=288;_chi_line_map[124]=289;_chi_line_map[125]=286;_chi_line_map[126]=292;_chi_line_map[127]=293;_chi_line_map[128]=294;_chi_line_map[129]=295;_chi_line_map[130]=292;_chi_line_map[131]=298;_chi_line_map[132]=299;_chi_line_map[133]=300;_chi_line_map[134]=301;_chi_line_map[135]=298;_chi_line_map[136]=304;_chi_line_map[137]=305;_chi_line_map[138]=306;_chi_line_map[139]=307;_chi_line_map[140]=308;_chi_line_map[141]=304;_chi_line_map[142]=311;_chi_line_map[143]=312;_chi_line_map[144]=313;_chi_line_map[145]=314;_chi_line_map[146]=315;_chi_line_map[147]=316;_chi_line_map[148]=317;_chi_line_map[149]=318;_chi_line_map[150]=319;_chi_line_map[151]=311;_chi_line_map[152]=322;_chi_line_map[153]=323;_chi_line_map[154]=324;_chi_line_map[155]=325;_chi_line_map[156]=326;_chi_line_map[157]=327;_chi_line_map[158]=322;_chi_line_map[159]=330;_chi_line_map[160]=331;_chi_line_map[161]=332;_chi_line_map[162]=333;_chi_line_map[163]=330;_chi_line_map[164]=336;_chi_line_map[165]=337;_chi_line_map[166]=338;_chi_line_map[167]=339;_chi_line_map[168]=340;_chi_line_map[169]=336;_chi_line_map[170]=343;_chi_line_map[171]=344;_chi_line_map[172]=345;_chi_line_map[173]=346;_chi_line_map[174]=347;_chi_line_map[175]=343;_chi_line_map[176]=350;_chi_line_map[177]=351;_chi_line_map[178]=352;_chi_line_map[179]=353;_chi_line_map[180]=354;_chi_line_map[181]=355;_chi_line_map[182]=350;_chi_line_map[183]=358;_chi_line_map[184]=359;_chi_line_map[185]=360;_chi_line_map[186]=361;_chi_line_map[187]=362;_chi_line_map[188]=363;_chi_line_map[189]=364;_chi_line_map[190]=365;_chi_line_map[191]=366;_chi_line_map[192]=358;_chi_line_map[193]=369;_chi_line_map[194]=370;_chi_line_map[195]=371;_chi_line_map[196]=372;_chi_line_map[197]=369;_chi_line_map[198]=375;_chi_line_map[199]=376;_chi_line_map[200]=377;_chi_line_map[201]=378;_chi_line_map[202]=375;_chi_line_map[203]=381;_chi_line_map[204]=382;_chi_line_map[205]=383;_chi_line_map[206]=384;_chi_line_map[207]=385;_chi_line_map[208]=386;_chi_line_map[209]=381;_chi_line_map[210]=389;_chi_line_map[211]=390;_chi_line_map[212]=391;_chi_line_map[213]=392;_chi_line_map[214]=393;_chi_line_map[215]=389;_chi_line_map[216]=396;_chi_line_map[217]=397;_chi_line_map[218]=398;_chi_line_map[219]=399;_chi_line_map[220]=400;_chi_line_map[221]=401;_chi_line_map[222]=402;_chi_line_map[223]=403;_chi_line_map[224]=396;_chi_line_map[225]=406;_chi_line_map[226]=407;_chi_line_map[227]=408;_chi_line_map[228]=409;_chi_line_map[229]=410;_chi_line_map[230]=406;_chi_line_map[231]=413;_chi_line_map[232]=414;_chi_line_map[233]=415;_chi_line_map[234]=416;_chi_line_map[235]=413;_chi_line_map[236]=419;_chi_line_map[237]=420;_chi_line_map[238]=419;_chi_line_map[239]=423;_chi_line_map[240]=424;_chi_line_map[241]=423;_chi_line_map[242]=427;_chi_line_map[243]=428;_chi_line_map[244]=429;_chi_line_map[245]=430;_chi_line_map[246]=427;_chi_line_map[247]=433;_chi_line_map[248]=434;_chi_line_map[249]=435;_chi_line_map[250]=436;_chi_line_map[251]=437;_chi_line_map[252]=438;_chi_line_map[253]=433;_chi_line_map[254]=441;_chi_line_map[255]=442;_chi_line_map[256]=443;_chi_line_map[257]=444;_chi_line_map[258]=445;_chi_line_map[259]=441;_chi_line_map[260]=448;_chi_line_map[261]=449;_chi_line_map[262]=450;_chi_line_map[263]=451;_chi_line_map[264]=452;_chi_line_map[265]=448;_chi_line_map[266]=455;_chi_line_map[267]=456;_chi_line_map[268]=457;_chi_line_map[269]=458;_chi_line_map[270]=459;_chi_line_map[271]=460;_chi_line_map[272]=461;_chi_line_map[273]=455;_chi_line_map[274]=464;_chi_line_map[275]=465;_chi_line_map[276]=466;_chi_line_map[277]=467;_chi_line_map[278]=468;_chi_line_map[279]=469;_chi_line_map[280]=470;_chi_line_map[281]=471;_chi_line_map[282]=464;_chi_line_map[283]=474;_chi_line_map[284]=475;_chi_line_map[285]=476;_chi_line_map[286]=477;_chi_line_map[287]=478;_chi_line_map[288]=479;_chi_line_map[289]=480;_chi_line_map[290]=481;_chi_line_map[291]=474;_chi_line_map[292]=484;_chi_line_map[293]=485;_chi_line_map[294]=486;_chi_line_map[295]=487;_chi_line_map[296]=488;_chi_line_map[297]=484;_chi_line_map[298]=491;_chi_line_map[299]=492;_chi_line_map[300]=493;_chi_line_map[301]=494;_chi_line_map[302]=495;_chi_line_map[303]=491;_chi_line_map[304]=498;_chi_line_map[305]=499;_chi_line_map[306]=498;_chi_line_map[307]=502;_chi_line_map[308]=503;_chi_line_map[309]=504;_chi_line_map[310]=505;_chi_line_map[311]=502;_chi_line_map[312]=508;_chi_line_map[313]=509;_chi_line_map[314]=510;_chi_line_map[315]=511;_chi_line_map[316]=508;_chi_line_map[317]=516;_chi_line_map[318]=517;_chi_line_map[319]=518;_chi_line_map[320]=519;_chi_line_map[321]=520;_chi_line_map[322]=521;_chi_line_map[323]=522;_chi_line_map[324]=523;_chi_line_map[325]=524;_chi_line_map[326]=525;_chi_line_map[327]=526;_chi_line_map[328]=527;_chi_line_map[329]=528;_chi_line_map[330]=529;_chi_line_map[331]=530;_chi_line_map[332]=531;_chi_line_map[333]=532;_chi_line_map[334]=533;_chi_line_map[335]=534;_chi_line_map[336]=535;_chi_line_map[337]=536;_chi_line_map[338]=537;_chi_line_map[339]=538;_chi_line_map[340]=539;_chi_line_map[341]=540;_chi_line_map[342]=541;_chi_line_map[343]=542;_chi_line_map[344]=543;_chi_line_map[345]=544;_chi_line_map[346]=545;_chi_line_map[347]=546;_chi_line_map[348]=547;_chi_line_map[349]=548;_chi_line_map[350]=549;_chi_line_map[351]=550;_chi_line_map[352]=551;_chi_line_map[353]=552;_chi_line_map[354]=553;_chi_line_map[355]=554;_chi_line_map[356]=555;_chi_line_map[357]=556;_chi_line_map[358]=557;_chi_line_map[359]=558;_chi_line_map[360]=559;_chi_line_map[361]=560;_chi_line_map[362]=561;_chi_line_map[363]=562;_chi_line_map[364]=563;_chi_line_map[365]=564;_chi_line_map[366]=565;_chi_line_map[367]=566;local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..':'.._chi_generated..':'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..':'.._chi_source_line..':'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;return _chi_result end;m6();function m7() local _chi_line_map={};local function _chi_run()local __P_ = package.loaded['chicc/ast'] or {_package={},_types={}};package.loaded['chicc/ast'] = __P_;local __S_ = __P_._package;local __T_ = __P_._types;__S_.localTarget={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="typeref",ids={{"chicc","ast","Target"}}}},typeParams={},defaults=0}'};__S_.packageTarget={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"},{tag="typeref",ids={{"chicc","ast","Target"}}}},typeParams={},defaults=0}'};__S_.fieldDotTarget={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="typeref",ids={{"chicc","ast","DotTarget"}}}},typeParams={},defaults=0}'};__S_.localFnDotTarget={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="typeref",ids={{"chicc","ast","DotTarget"}}}},typeParams={},defaults=0}'};__S_.localBindingDotTarget={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="typeref",ids={{"chicc","ast","DotTarget"}}}},typeParams={},defaults=0}'};__S_.packageFnDotTarget={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"},{tag="typeref",ids={{"chicc","ast","DotTarget"}}}},typeParams={},defaults=0}'};__S_.newFnParam={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","FnParam"}}}},typeParams={},defaults=0}'};__S_.emptyExpr={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.atomExpr={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.interpolatedStringExpr={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.createRecordExpr={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="typeref",ids={{"chicc","ast","ExprField"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.createVariantExpr={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="typeref",ids={{"chicc","ast","ExprField"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="string"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.createArrayExpr={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.variableAccessExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Target"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.fieldAccessExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.fieldAssignmentExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.variableAssignmentExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Target"}}},{tag="bool"},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.declarationExpr={public=true,mutable=false,type='{tag="fn",types={{tag="bool"},{tag="typeref",ids={{"chicc","ast","Target"}}},{tag="bool"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.fnExpr={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="typeref",ids={{"chicc","ast","FnParam"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.blockExpr={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.fnCallExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.ifElseExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.infixOpExpr={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.prefixOpExpr={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.castExpr_={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.whileLoopExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.forLoopExpr={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.breakExpr={public=true,mutable=false,type='{tag="fn",types={{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.continueExpr={public=true,mutable=false,type='{tag="fn",types={{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.indexOpExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.indexedAssignmentExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.isExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.effectDefinitionExpr={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"},{tag="array",elem={tag="typeref",ids={{"chicc","ast","FnParam"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.handleExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","HandleCase"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.returnExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.newHandleCase={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","HandleCase"}}}},typeParams={},defaults=0}'};__S_.newExprField={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","ast","ExprField"}}}},typeParams={},defaults=0}'};__S_.exprKind={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprExprType={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprUsed={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.exprSection={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprAtomValue={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprParts={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.exprRecordFields={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","ExprField"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.exprVariantName={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprArrayValues={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.exprTarget={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Target"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprReceiver={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprFieldName={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprMemberSection={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprDotTarget={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","DotTarget"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprValue={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprIsPublic={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.exprDeclName={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprIsMutable={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.exprExpectedType={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprParameters={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","FnParam"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.exprBody={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprFunction={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprCallParams={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.exprCondition={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprThenBranch={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprElseBranch={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprOp={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprLeft={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprRight={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprPrefixExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprCastExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprTargetType={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprCheckedType={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprLoopCondition={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprLoopBody={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprForVars={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.exprIterable={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprForState={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprForInit={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprForBody={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprIndexVariable={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprIndexExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprIndexValue={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprEffectModuleName={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprEffectPackageName={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprEffectName={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprEffectParams={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","FnParam"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.exprHandleBody={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprHandleCases={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","HandleCase"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.exprReturnValue={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprBlockBody={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.setExprType={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}},{tag="unit"}},typeParams={},defaults=0}'};__S_.setExprUsed={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"},{tag="unit"}},typeParams={},defaults=0}'};__S_.setExprDotTarget={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","DotTarget"}}},rhs={tag="unit"},typeParams={}},{tag="unit"}},typeParams={},defaults=0}'};__S_.setExprTarget={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Target"}}},rhs={tag="unit"},typeParams={}},{tag="unit"}},typeParams={},defaults=0}'};__S_.pushChild={public=false,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}},{tag="unit"}},typeParams={},defaults=0}'};__S_.exprChildren={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.isTerminator={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="bool"}},typeParams={},defaults=0}'};__S_.newPackage={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="typeref",ids={{"chicc","ast","Package"}}}},typeParams={},defaults=0}'};__S_.newTypeAlias={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","TypeId"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","ast","TypeAlias"}}}},typeParams={},defaults=0}'};__S_.newImportEntry={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="sum",ids={},lhs={tag="string"},rhs={tag="unit"},typeParams={}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","ImportEntry"}}}},typeParams={},defaults=0}'};__S_.newImport={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="sum",ids={},lhs={tag="string"},rhs={tag="unit"},typeParams={}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","ImportEntry"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Import"}}}},typeParams={},defaults=0}'};__S_.newProgram={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Package"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Import"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","TypeAlias"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Program"}}}},typeParams={},defaults=0}'};__T_.Target='{tag="record",ids={{"chicc","ast","Target"}},fields={{"tag",{tag="string"}},{"name",{tag="string"}},{"moduleName",{tag="string"}},{"packageName",{tag="string"}}},typeParams={}}';__T_.DotTarget='{tag="record",ids={{"chicc","ast","DotTarget"}},fields={{"tag",{tag="string"}},{"moduleName",{tag="string"}},{"packageName",{tag="string"}},{"name",{tag="string"}}},typeParams={}}';__T_.FnParam='{tag="record",ids={{"chicc","ast","FnParam"}},fields={{"name",{tag="string"}},{"paramType",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},{"section",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}}},typeParams={}}';__T_.Expr='{tag="rec",var={tag="var",name="chicc::ast::Expr",level=-1},type={tag="record",ids={{"chicc","ast","Expr"}},fields={{"kind",{tag="string"}},{"exprType",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},{"used",{tag="bool"}},{"section",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}},{"atomValue",{tag="string"}},{"parts",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"recordFields",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"arrayValues",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"target",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Target"}}},rhs={tag="unit"},typeParams={}}},{"receiver",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"fieldName",{tag="string"}},{"memberSection",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}},{"dotTarget",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","DotTarget"}}},rhs={tag="unit"},typeParams={}}},{"value",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"isPublic",{tag="bool"}},{"declName",{tag="string"}},{"isMutable",{tag="bool"}},{"isNamedFn",{tag="bool"}},{"expectedType",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},{"parameters",{tag="array",elem={tag="typeref",ids={{"chicc","ast","FnParam"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"defaultValues",{tag="any"}},{"body",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"callee",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"callParams",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"condition",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"thenBranch",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"elseBranch",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"op",{tag="string"}},{"left",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"right",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"prefixExpr",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"castExpr",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"targetType",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},{"checkedType",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},{"loopCondition",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"loopBody",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"forVars",{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},{"iterable",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"forState",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"forInit",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"forBody",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"indexVariable",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"indexExpr",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"indexValue",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"effectModuleName",{tag="string"}},{"effectPackageName",{tag="string"}},{"effectName",{tag="string"}},{"effectParams",{tag="array",elem={tag="typeref",ids={{"chicc","ast","FnParam"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"handleBody",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"handleCases",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"returnValue",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"blockBody",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"variantName",{tag="string"}}},typeParams={}}}';__T_.HandleCase='{tag="record",ids={{"chicc","ast","HandleCase"}},fields={{"moduleName",{tag="string"}},{"packageName",{tag="string"}},{"effectName",{tag="string"}},{"argumentNames",{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},{"body",{tag="typeref",ids={{"chicc","ast","Expr"}}}},{"section",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}}},typeParams={}}';__T_.ExprField='{tag="record",ids={{"chicc","ast","ExprField"}},fields={{"name",{tag="string"}},{"value",{tag="typeref",ids={{"chicc","ast","Expr"}}}}},typeParams={}}';__T_.Package='{tag="record",ids={{"chicc","ast","Package"}},fields={{"moduleName",{tag="string"}},{"packageName",{tag="string"}}},typeParams={}}';__T_.TypeAlias='{tag="record",ids={{"chicc","ast","TypeAlias"}},fields={{"typeId",{tag="typeref",ids={{"chicc","types","TypeId"}}}},{"aliasType",{tag="typeref",ids={{"chicc","types","Type"}}}}},typeParams={}}';__T_.ImportEntry='{tag="record",ids={{"chicc","ast","ImportEntry"}},fields={{"name",{tag="string"}},{"alias",{tag="sum",ids={},lhs={tag="string"},rhs={tag="unit"},typeParams={}}},{"section",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}}},typeParams={}}';__T_.Import='{tag="record",ids={{"chicc","ast","Import"}},fields={{"moduleName",{tag="string"}},{"packageName",{tag="string"}},{"packageAlias",{tag="sum",ids={},lhs={tag="string"},rhs={tag="unit"},typeParams={}}},{"entries",{tag="array",elem={tag="typeref",ids={{"chicc","ast","ImportEntry"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"section",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}}},typeParams={}}';__T_.Program='{tag="record",ids={{"chicc","ast","Program"}},fields={{"packageDef",{tag="typeref",ids={{"chicc","ast","Package"}}}},{"imports",{tag="array",elem={tag="typeref",ids={{"chicc","ast","Import"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"typeAliases",{tag="array",elem={tag="typeref",ids={{"chicc","ast","TypeAlias"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"expressions",{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"section",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}}},typeParams={}}';local __std__lang_array = require("std/lang.array");local __std__lang_map = require("std/lang.map");local __std__lang = require("std/lang");
+ end;local _chi_info=debug.getinfo(_chi_run,'S');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;if string.sub(_chi_source,1,1)=='@' then _chi_source=string.sub(_chi_source,2) end;_chi_line_map[2]=21;_chi_line_map[3]=22;_chi_line_map[4]=21;_chi_line_map[5]=27;_chi_line_map[6]=28;_chi_line_map[7]=29;_chi_line_map[8]=30;_chi_line_map[9]=27;_chi_line_map[10]=33;_chi_line_map[11]=34;_chi_line_map[12]=35;_chi_line_map[13]=36;_chi_line_map[14]=37;_chi_line_map[15]=38;_chi_line_map[16]=33;_chi_line_map[17]=41;_chi_line_map[18]=42;_chi_line_map[19]=43;_chi_line_map[20]=44;_chi_line_map[21]=45;_chi_line_map[22]=46;_chi_line_map[23]=41;_chi_line_map[24]=49;_chi_line_map[25]=50;_chi_line_map[26]=51;_chi_line_map[27]=52;_chi_line_map[28]=49;_chi_line_map[29]=55;_chi_line_map[30]=56;_chi_line_map[31]=57;_chi_line_map[32]=58;_chi_line_map[33]=59;_chi_line_map[34]=55;_chi_line_map[35]=62;_chi_line_map[36]=63;_chi_line_map[37]=64;_chi_line_map[38]=65;_chi_line_map[39]=66;_chi_line_map[40]=62;_chi_line_map[41]=70;_chi_line_map[42]=71;_chi_line_map[43]=72;_chi_line_map[44]=73;_chi_line_map[45]=74;_chi_line_map[46]=75;_chi_line_map[47]=76;_chi_line_map[48]=77;_chi_line_map[49]=78;_chi_line_map[50]=79;_chi_line_map[51]=80;_chi_line_map[52]=81;_chi_line_map[53]=87;_chi_line_map[54]=88;_chi_line_map[55]=87;_chi_line_map[56]=93;_chi_line_map[57]=94;_chi_line_map[58]=93;_chi_line_map[59]=99;_chi_line_map[60]=100;_chi_line_map[61]=99;_chi_line_map[62]=105;_chi_line_map[63]=106;_chi_line_map[64]=105;_chi_line_map[65]=111;_chi_line_map[66]=112;_chi_line_map[67]=111;_chi_line_map[68]=117;_chi_line_map[69]=118;_chi_line_map[70]=117;_chi_line_map[71]=123;_chi_line_map[72]=124;_chi_line_map[73]=123;_chi_line_map[74]=129;_chi_line_map[75]=130;_chi_line_map[76]=129;_chi_line_map[77]=135;_chi_line_map[78]=136;_chi_line_map[79]=135;_chi_line_map[80]=147;_chi_line_map[81]=148;_chi_line_map[82]=147;_chi_line_map[83]=160;_chi_line_map[84]=161;_chi_line_map[85]=160;_chi_line_map[86]=166;_chi_line_map[87]=167;_chi_line_map[88]=166;_chi_line_map[89]=172;_chi_line_map[90]=173;_chi_line_map[91]=172;_chi_line_map[92]=178;_chi_line_map[93]=179;_chi_line_map[94]=178;_chi_line_map[95]=238;_chi_line_map[96]=239;_chi_line_map[97]=238;_chi_line_map[98]=258;_chi_line_map[99]=259;_chi_line_map[100]=258;_chi_line_map[101]=262;_chi_line_map[102]=263;_chi_line_map[103]=264;_chi_line_map[104]=265;_chi_line_map[105]=262;_chi_line_map[106]=268;_chi_line_map[107]=269;_chi_line_map[108]=270;_chi_line_map[109]=271;_chi_line_map[110]=268;_chi_line_map[111]=274;_chi_line_map[112]=275;_chi_line_map[113]=276;_chi_line_map[114]=277;_chi_line_map[115]=274;_chi_line_map[116]=280;_chi_line_map[117]=281;_chi_line_map[118]=282;_chi_line_map[119]=283;_chi_line_map[120]=280;_chi_line_map[121]=286;_chi_line_map[122]=287;_chi_line_map[123]=288;_chi_line_map[124]=289;_chi_line_map[125]=286;_chi_line_map[126]=292;_chi_line_map[127]=293;_chi_line_map[128]=294;_chi_line_map[129]=295;_chi_line_map[130]=292;_chi_line_map[131]=298;_chi_line_map[132]=299;_chi_line_map[133]=300;_chi_line_map[134]=301;_chi_line_map[135]=298;_chi_line_map[136]=304;_chi_line_map[137]=305;_chi_line_map[138]=306;_chi_line_map[139]=307;_chi_line_map[140]=308;_chi_line_map[141]=304;_chi_line_map[142]=311;_chi_line_map[143]=312;_chi_line_map[144]=313;_chi_line_map[145]=314;_chi_line_map[146]=315;_chi_line_map[147]=316;_chi_line_map[148]=317;_chi_line_map[149]=318;_chi_line_map[150]=319;_chi_line_map[151]=311;_chi_line_map[152]=322;_chi_line_map[153]=323;_chi_line_map[154]=324;_chi_line_map[155]=325;_chi_line_map[156]=326;_chi_line_map[157]=327;_chi_line_map[158]=322;_chi_line_map[159]=330;_chi_line_map[160]=331;_chi_line_map[161]=332;_chi_line_map[162]=333;_chi_line_map[163]=330;_chi_line_map[164]=336;_chi_line_map[165]=337;_chi_line_map[166]=338;_chi_line_map[167]=339;_chi_line_map[168]=340;_chi_line_map[169]=336;_chi_line_map[170]=343;_chi_line_map[171]=344;_chi_line_map[172]=345;_chi_line_map[173]=346;_chi_line_map[174]=347;_chi_line_map[175]=343;_chi_line_map[176]=350;_chi_line_map[177]=351;_chi_line_map[178]=352;_chi_line_map[179]=353;_chi_line_map[180]=354;_chi_line_map[181]=355;_chi_line_map[182]=350;_chi_line_map[183]=358;_chi_line_map[184]=359;_chi_line_map[185]=360;_chi_line_map[186]=361;_chi_line_map[187]=362;_chi_line_map[188]=363;_chi_line_map[189]=364;_chi_line_map[190]=365;_chi_line_map[191]=366;_chi_line_map[192]=358;_chi_line_map[193]=369;_chi_line_map[194]=370;_chi_line_map[195]=371;_chi_line_map[196]=372;_chi_line_map[197]=369;_chi_line_map[198]=375;_chi_line_map[199]=376;_chi_line_map[200]=377;_chi_line_map[201]=378;_chi_line_map[202]=375;_chi_line_map[203]=381;_chi_line_map[204]=382;_chi_line_map[205]=383;_chi_line_map[206]=384;_chi_line_map[207]=385;_chi_line_map[208]=386;_chi_line_map[209]=381;_chi_line_map[210]=389;_chi_line_map[211]=390;_chi_line_map[212]=391;_chi_line_map[213]=392;_chi_line_map[214]=393;_chi_line_map[215]=389;_chi_line_map[216]=396;_chi_line_map[217]=397;_chi_line_map[218]=398;_chi_line_map[219]=399;_chi_line_map[220]=400;_chi_line_map[221]=401;_chi_line_map[222]=402;_chi_line_map[223]=403;_chi_line_map[224]=396;_chi_line_map[225]=406;_chi_line_map[226]=407;_chi_line_map[227]=408;_chi_line_map[228]=409;_chi_line_map[229]=410;_chi_line_map[230]=406;_chi_line_map[231]=413;_chi_line_map[232]=414;_chi_line_map[233]=415;_chi_line_map[234]=416;_chi_line_map[235]=413;_chi_line_map[236]=419;_chi_line_map[237]=420;_chi_line_map[238]=419;_chi_line_map[239]=423;_chi_line_map[240]=424;_chi_line_map[241]=423;_chi_line_map[242]=427;_chi_line_map[243]=428;_chi_line_map[244]=429;_chi_line_map[245]=430;_chi_line_map[246]=427;_chi_line_map[247]=433;_chi_line_map[248]=434;_chi_line_map[249]=435;_chi_line_map[250]=436;_chi_line_map[251]=437;_chi_line_map[252]=438;_chi_line_map[253]=433;_chi_line_map[254]=441;_chi_line_map[255]=442;_chi_line_map[256]=443;_chi_line_map[257]=444;_chi_line_map[258]=445;_chi_line_map[259]=441;_chi_line_map[260]=448;_chi_line_map[261]=449;_chi_line_map[262]=450;_chi_line_map[263]=451;_chi_line_map[264]=452;_chi_line_map[265]=448;_chi_line_map[266]=455;_chi_line_map[267]=456;_chi_line_map[268]=457;_chi_line_map[269]=458;_chi_line_map[270]=459;_chi_line_map[271]=460;_chi_line_map[272]=461;_chi_line_map[273]=455;_chi_line_map[274]=464;_chi_line_map[275]=465;_chi_line_map[276]=466;_chi_line_map[277]=467;_chi_line_map[278]=468;_chi_line_map[279]=469;_chi_line_map[280]=470;_chi_line_map[281]=471;_chi_line_map[282]=464;_chi_line_map[283]=474;_chi_line_map[284]=475;_chi_line_map[285]=476;_chi_line_map[286]=477;_chi_line_map[287]=478;_chi_line_map[288]=479;_chi_line_map[289]=480;_chi_line_map[290]=481;_chi_line_map[291]=474;_chi_line_map[292]=484;_chi_line_map[293]=485;_chi_line_map[294]=486;_chi_line_map[295]=487;_chi_line_map[296]=488;_chi_line_map[297]=484;_chi_line_map[298]=491;_chi_line_map[299]=492;_chi_line_map[300]=493;_chi_line_map[301]=494;_chi_line_map[302]=495;_chi_line_map[303]=491;_chi_line_map[304]=498;_chi_line_map[305]=499;_chi_line_map[306]=498;_chi_line_map[307]=502;_chi_line_map[308]=503;_chi_line_map[309]=504;_chi_line_map[310]=505;_chi_line_map[311]=502;_chi_line_map[312]=508;_chi_line_map[313]=509;_chi_line_map[314]=510;_chi_line_map[315]=511;_chi_line_map[316]=508;_chi_line_map[317]=516;_chi_line_map[318]=517;_chi_line_map[319]=518;_chi_line_map[320]=519;_chi_line_map[321]=520;_chi_line_map[322]=521;_chi_line_map[323]=522;_chi_line_map[324]=523;_chi_line_map[325]=524;_chi_line_map[326]=525;_chi_line_map[327]=526;_chi_line_map[328]=527;_chi_line_map[329]=528;_chi_line_map[330]=529;_chi_line_map[331]=530;_chi_line_map[332]=531;_chi_line_map[333]=532;_chi_line_map[334]=533;_chi_line_map[335]=534;_chi_line_map[336]=535;_chi_line_map[337]=536;_chi_line_map[338]=537;_chi_line_map[339]=538;_chi_line_map[340]=539;_chi_line_map[341]=540;_chi_line_map[342]=541;_chi_line_map[343]=542;_chi_line_map[344]=543;_chi_line_map[345]=544;_chi_line_map[346]=545;_chi_line_map[347]=546;_chi_line_map[348]=547;_chi_line_map[349]=548;_chi_line_map[350]=549;_chi_line_map[351]=550;_chi_line_map[352]=551;_chi_line_map[353]=552;_chi_line_map[354]=553;_chi_line_map[355]=554;_chi_line_map[356]=555;_chi_line_map[357]=556;_chi_line_map[358]=557;_chi_line_map[359]=558;_chi_line_map[360]=559;_chi_line_map[361]=560;_chi_line_map[362]=561;_chi_line_map[363]=562;_chi_line_map[364]=563;_chi_line_map[365]=564;_chi_line_map[366]=565;_chi_line_map[367]=566;local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..':'.._chi_generated..':'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..':'.._chi_source_line..':'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;return _chi_result end;m6();function m7() local _chi_line_map={};local function _chi_run()local __P_ = package.loaded['chicc/ast'] or {_package={},_types={}};package.loaded['chicc/ast'] = __P_;local __S_ = __P_._package;local __T_ = __P_._types;__S_.localTargetWithMutability={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="bool"},{tag="typeref",ids={{"chicc","ast","Target"}}}},typeParams={},defaults=0}'};__S_.localTarget={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="typeref",ids={{"chicc","ast","Target"}}}},typeParams={},defaults=0}'};__S_.packageTargetWithMutability={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"},{tag="bool"},{tag="typeref",ids={{"chicc","ast","Target"}}}},typeParams={},defaults=0}'};__S_.packageTarget={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"},{tag="typeref",ids={{"chicc","ast","Target"}}}},typeParams={},defaults=0}'};__S_.fieldDotTarget={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="typeref",ids={{"chicc","ast","DotTarget"}}}},typeParams={},defaults=0}'};__S_.localFnDotTarget={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="typeref",ids={{"chicc","ast","DotTarget"}}}},typeParams={},defaults=0}'};__S_.localBindingDotTarget={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="typeref",ids={{"chicc","ast","DotTarget"}}}},typeParams={},defaults=0}'};__S_.packageFnDotTarget={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"},{tag="typeref",ids={{"chicc","ast","DotTarget"}}}},typeParams={},defaults=0}'};__S_.newFnParam={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","FnParam"}}}},typeParams={},defaults=0}'};__S_.emptyExpr={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.atomExpr={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.interpolatedStringExpr={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.createRecordExpr={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="typeref",ids={{"chicc","ast","ExprField"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.createVariantExpr={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="typeref",ids={{"chicc","ast","ExprField"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="string"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.createArrayExpr={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.variableAccessExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Target"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.fieldAccessExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.fieldAssignmentExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.variableAssignmentExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Target"}}},{tag="bool"},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.declarationExpr={public=true,mutable=false,type='{tag="fn",types={{tag="bool"},{tag="typeref",ids={{"chicc","ast","Target"}}},{tag="bool"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.fnExpr={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="typeref",ids={{"chicc","ast","FnParam"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.blockExpr={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.fnCallExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.ifElseExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.infixOpExpr={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.prefixOpExpr={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.castExpr_={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.whileLoopExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.forLoopExpr={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.breakExpr={public=true,mutable=false,type='{tag="fn",types={{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.continueExpr={public=true,mutable=false,type='{tag="fn",types={{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.indexOpExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.indexedAssignmentExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.isExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.effectDefinitionExpr={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"},{tag="array",elem={tag="typeref",ids={{"chicc","ast","FnParam"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.handleExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","HandleCase"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.returnExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.newHandleCase={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","HandleCase"}}}},typeParams={},defaults=0}'};__S_.newExprField={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="typeref",ids={{"chicc","ast","ExprField"}}}},typeParams={},defaults=0}'};__S_.exprKind={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprExprType={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprUsed={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.exprSection={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprAtomValue={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprParts={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.exprRecordFields={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","ExprField"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.exprVariantName={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprArrayValues={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.exprTarget={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Target"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprReceiver={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprFieldName={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprMemberSection={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprDotTarget={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","DotTarget"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprValue={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprIsPublic={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.exprDeclName={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprIsMutable={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.exprExpectedType={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprParameters={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","FnParam"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.exprBody={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprFunction={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprCallParams={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.exprCondition={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprThenBranch={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprElseBranch={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprOp={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprLeft={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprRight={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprPrefixExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprCastExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprTargetType={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprCheckedType={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprLoopCondition={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprLoopBody={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprForVars={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.exprIterable={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprForState={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprForInit={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprForBody={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprIndexVariable={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprIndexExpr={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprIndexValue={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprEffectModuleName={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprEffectPackageName={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprEffectName={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.exprEffectParams={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","FnParam"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.exprHandleBody={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprHandleCases={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","HandleCase"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.exprReturnValue={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.exprBlockBody={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.setExprType={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}},{tag="unit"}},typeParams={},defaults=0}'};__S_.setExprUsed={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"},{tag="unit"}},typeParams={},defaults=0}'};__S_.setExprDotTarget={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","DotTarget"}}},rhs={tag="unit"},typeParams={}},{tag="unit"}},typeParams={},defaults=0}'};__S_.setExprTarget={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Target"}}},rhs={tag="unit"},typeParams={}},{tag="unit"}},typeParams={},defaults=0}'};__S_.pushChild={public=false,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Expr"}}},rhs={tag="unit"},typeParams={}},{tag="unit"}},typeParams={},defaults=0}'};__S_.exprChildren={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.isTerminator={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="bool"}},typeParams={},defaults=0}'};__S_.newPackage={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="typeref",ids={{"chicc","ast","Package"}}}},typeParams={},defaults=0}'};__S_.newTypeAlias={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","TypeId"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","ast","TypeAlias"}}}},typeParams={},defaults=0}'};__S_.newImportEntry={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="sum",ids={},lhs={tag="string"},rhs={tag="unit"},typeParams={}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","ImportEntry"}}}},typeParams={},defaults=0}'};__S_.newImport={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="sum",ids={},lhs={tag="string"},rhs={tag="unit"},typeParams={}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","ImportEntry"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Import"}}}},typeParams={},defaults=0}'};__S_.newProgram={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Package"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Import"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","TypeAlias"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","ast","Program"}}}},typeParams={},defaults=0}'};__T_.Target='{tag="record",ids={{"chicc","ast","Target"}},fields={{"tag",{tag="string"}},{"name",{tag="string"}},{"moduleName",{tag="string"}},{"packageName",{tag="string"}},{"isMutable",{tag="bool"}}},typeParams={}}';__T_.DotTarget='{tag="record",ids={{"chicc","ast","DotTarget"}},fields={{"tag",{tag="string"}},{"moduleName",{tag="string"}},{"packageName",{tag="string"}},{"name",{tag="string"}}},typeParams={}}';__T_.FnParam='{tag="record",ids={{"chicc","ast","FnParam"}},fields={{"name",{tag="string"}},{"paramType",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},{"section",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}}},typeParams={}}';__T_.Expr='{tag="rec",var={tag="var",name="chicc::ast::Expr",level=-1},type={tag="record",ids={{"chicc","ast","Expr"}},fields={{"kind",{tag="string"}},{"exprType",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},{"used",{tag="bool"}},{"section",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}},{"atomValue",{tag="string"}},{"parts",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"recordFields",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"arrayValues",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"target",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Target"}}},rhs={tag="unit"},typeParams={}}},{"receiver",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"fieldName",{tag="string"}},{"memberSection",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}},{"dotTarget",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","DotTarget"}}},rhs={tag="unit"},typeParams={}}},{"value",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"isPublic",{tag="bool"}},{"declName",{tag="string"}},{"isMutable",{tag="bool"}},{"isNamedFn",{tag="bool"}},{"expectedType",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},{"parameters",{tag="array",elem={tag="typeref",ids={{"chicc","ast","FnParam"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"defaultValues",{tag="any"}},{"body",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"callee",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"callParams",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"condition",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"thenBranch",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"elseBranch",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"op",{tag="string"}},{"left",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"right",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"prefixExpr",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"castExpr",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"targetType",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},{"checkedType",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},{"loopCondition",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"loopBody",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"forVars",{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},{"iterable",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"forState",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"forInit",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"forBody",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"indexVariable",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"indexExpr",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"indexValue",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"effectModuleName",{tag="string"}},{"effectPackageName",{tag="string"}},{"effectName",{tag="string"}},{"effectParams",{tag="array",elem={tag="typeref",ids={{"chicc","ast","FnParam"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"handleBody",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"handleCases",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"returnValue",{tag="sum",ids={},lhs={tag="var",name="chicc::ast::Expr",level=-1},rhs={tag="unit"},typeParams={}}},{"blockBody",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"variantName",{tag="string"}}},typeParams={}}}';__T_.HandleCase='{tag="record",ids={{"chicc","ast","HandleCase"}},fields={{"moduleName",{tag="string"}},{"packageName",{tag="string"}},{"effectName",{tag="string"}},{"argumentNames",{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},{"body",{tag="typeref",ids={{"chicc","ast","Expr"}}}},{"section",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}}},typeParams={}}';__T_.ExprField='{tag="record",ids={{"chicc","ast","ExprField"}},fields={{"name",{tag="string"}},{"value",{tag="typeref",ids={{"chicc","ast","Expr"}}}}},typeParams={}}';__T_.Package='{tag="record",ids={{"chicc","ast","Package"}},fields={{"moduleName",{tag="string"}},{"packageName",{tag="string"}}},typeParams={}}';__T_.TypeAlias='{tag="record",ids={{"chicc","ast","TypeAlias"}},fields={{"typeId",{tag="typeref",ids={{"chicc","types","TypeId"}}}},{"aliasType",{tag="typeref",ids={{"chicc","types","Type"}}}}},typeParams={}}';__T_.ImportEntry='{tag="record",ids={{"chicc","ast","ImportEntry"}},fields={{"name",{tag="string"}},{"alias",{tag="sum",ids={},lhs={tag="string"},rhs={tag="unit"},typeParams={}}},{"section",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}}},typeParams={}}';__T_.Import='{tag="record",ids={{"chicc","ast","Import"}},fields={{"moduleName",{tag="string"}},{"packageName",{tag="string"}},{"packageAlias",{tag="sum",ids={},lhs={tag="string"},rhs={tag="unit"},typeParams={}}},{"entries",{tag="array",elem={tag="typeref",ids={{"chicc","ast","ImportEntry"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"section",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}}},typeParams={}}';__T_.Program='{tag="record",ids={{"chicc","ast","Program"}},fields={{"packageDef",{tag="typeref",ids={{"chicc","ast","Package"}}}},{"imports",{tag="array",elem={tag="typeref",ids={{"chicc","ast","Import"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"typeAliases",{tag="array",elem={tag="typeref",ids={{"chicc","ast","TypeAlias"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"expressions",{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"section",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","source","Section"}}},rhs={tag="unit"},typeParams={}}}},typeParams={}}';local __std__lang_array = require("std/lang.array");local __std__lang_map = require("std/lang.map");local __std__lang = require("std/lang");
+do function __P_.localTargetWithMutability(name,isMut)
+local _chi_tmp0 = 'local';local _chi_tmp1 = '';local _chi_tmp2 = '';local _chi_tmp3={tag=(_chi_tmp0),name=name,moduleName=(_chi_tmp1),packageName=(_chi_tmp2),isMutable=isMut};setmetatable(_chi_tmp3, record_meta_table);return _chi_tmp3 end;
+ end;
 do function __P_.localTarget(name)
-local _chi_tmp0 = 'local';local _chi_tmp1 = '';local _chi_tmp2 = '';local _chi_tmp3={tag=(_chi_tmp0),name=name,moduleName=(_chi_tmp1),packageName=(_chi_tmp2)};setmetatable(_chi_tmp3, record_meta_table);return _chi_tmp3 end;
+local _chi_tmp4=__P_.localTargetWithMutability(name,(false));return _chi_tmp4 end;
+ end;
+do function __P_.packageTargetWithMutability(mod,pkg,name,isMut)
+local _chi_tmp5 = 'package';local _chi_tmp6={tag=(_chi_tmp5),name=name,moduleName=mod,packageName=pkg,isMutable=isMut};setmetatable(_chi_tmp6, record_meta_table);return _chi_tmp6 end;
  end;
 do function __P_.packageTarget(mod,pkg,name)
-local _chi_tmp4 = 'package';local _chi_tmp5={tag=(_chi_tmp4),name=name,moduleName=mod,packageName=pkg};setmetatable(_chi_tmp5, record_meta_table);return _chi_tmp5 end;
+local _chi_tmp7=__P_.packageTargetWithMutability(mod,pkg,name,(false));return _chi_tmp7 end;
  end;
 do function __P_.fieldDotTarget(name)
-local _chi_tmp6 = 'field';local _chi_tmp7 = '';local _chi_tmp8 = '';local _chi_tmp9={tag=(_chi_tmp6),moduleName=(_chi_tmp7),packageName=(_chi_tmp8),name=name};setmetatable(_chi_tmp9, record_meta_table);return _chi_tmp9 end;
+local _chi_tmp8 = 'field';local _chi_tmp9 = '';local _chi_tmp10 = '';local _chi_tmp11={tag=(_chi_tmp8),moduleName=(_chi_tmp9),packageName=(_chi_tmp10),name=name};setmetatable(_chi_tmp11, record_meta_table);return _chi_tmp11 end;
  end;
 do function __P_.localFnDotTarget(name)
-local _chi_tmp10 = 'local_fn';local _chi_tmp11 = '';local _chi_tmp12 = '';local _chi_tmp13={tag=(_chi_tmp10),moduleName=(_chi_tmp11),packageName=(_chi_tmp12),name=name};setmetatable(_chi_tmp13, record_meta_table);return _chi_tmp13 end;
+local _chi_tmp12 = 'local_fn';local _chi_tmp13 = '';local _chi_tmp14 = '';local _chi_tmp15={tag=(_chi_tmp12),moduleName=(_chi_tmp13),packageName=(_chi_tmp14),name=name};setmetatable(_chi_tmp15, record_meta_table);return _chi_tmp15 end;
  end;
 do function __P_.localBindingDotTarget(name)
-local _chi_tmp14 = 'local_binding';local _chi_tmp15 = '';local _chi_tmp16 = '';local _chi_tmp17={tag=(_chi_tmp14),moduleName=(_chi_tmp15),packageName=(_chi_tmp16),name=name};setmetatable(_chi_tmp17, record_meta_table);return _chi_tmp17 end;
+local _chi_tmp16 = 'local_binding';local _chi_tmp17 = '';local _chi_tmp18 = '';local _chi_tmp19={tag=(_chi_tmp16),moduleName=(_chi_tmp17),packageName=(_chi_tmp18),name=name};setmetatable(_chi_tmp19, record_meta_table);return _chi_tmp19 end;
  end;
 do function __P_.packageFnDotTarget(mod,pkg,name)
-local _chi_tmp18 = 'package_fn';local _chi_tmp19={tag=(_chi_tmp18),moduleName=mod,packageName=pkg,name=name};setmetatable(_chi_tmp19, record_meta_table);return _chi_tmp19 end;
+local _chi_tmp20 = 'package_fn';local _chi_tmp21={tag=(_chi_tmp20),moduleName=mod,packageName=pkg,name=name};setmetatable(_chi_tmp21, record_meta_table);return _chi_tmp21 end;
  end;
 do function __P_.newFnParam(name,paramType,section)
-local _chi_tmp20={name=name,paramType=paramType,section=section};setmetatable(_chi_tmp20, record_meta_table);return _chi_tmp20 end;
+local _chi_tmp22={name=name,paramType=paramType,section=section};setmetatable(_chi_tmp22, record_meta_table);return _chi_tmp22 end;
  end;
 do function __P_.emptyExpr(kind,section)
-local _chi_tmp21 = '';local _chi_tmp22={};setmetatable(_chi_tmp22, array_meta_table);local _chi_tmp23={};setmetatable(_chi_tmp23, array_meta_table);local _chi_tmp24={};setmetatable(_chi_tmp24, array_meta_table);local _chi_tmp25 = '';local _chi_tmp26 = '';local _chi_tmp27={};setmetatable(_chi_tmp27, array_meta_table);local _chi_tmp28={};setmetatable(_chi_tmp28, array_meta_table);local _chi_tmp29 = '';local _chi_tmp30={};setmetatable(_chi_tmp30, array_meta_table);local _chi_tmp31 = '';local _chi_tmp32 = '';local _chi_tmp33 = '';local _chi_tmp34={};setmetatable(_chi_tmp34, array_meta_table);local _chi_tmp35={};setmetatable(_chi_tmp35, array_meta_table);local _chi_tmp36={};setmetatable(_chi_tmp36, array_meta_table);local _chi_tmp37 = '';local _chi_tmp38={kind=kind,exprType=(nil),used=(false),section=section,atomValue=(_chi_tmp21),parts=_chi_tmp22,recordFields=_chi_tmp23,arrayValues=_chi_tmp24,target=(nil),receiver=(nil),fieldName=(_chi_tmp25),memberSection=(nil),dotTarget=(nil),value=(nil),isPublic=(false),declName=(_chi_tmp26),isMutable=(false),isNamedFn=(false),expectedType=(nil),parameters=_chi_tmp27,defaultValues=(nil),body=(nil),callee=(nil),callParams=_chi_tmp28,condition=(nil),thenBranch=(nil),elseBranch=(nil),op=(_chi_tmp29),left=(nil),right=(nil),prefixExpr=(nil),castExpr=(nil),targetType=(nil),checkedType=(nil),loopCondition=(nil),loopBody=(nil),forVars=_chi_tmp30,iterable=(nil),forState=(nil),forInit=(nil),forBody=(nil),indexVariable=(nil),indexExpr=(nil),indexValue=(nil),effectModuleName=(_chi_tmp31),effectPackageName=(_chi_tmp32),effectName=(_chi_tmp33),effectParams=_chi_tmp34,handleBody=(nil),handleCases=_chi_tmp35,returnValue=(nil),blockBody=_chi_tmp36,variantName=(_chi_tmp37)};setmetatable(_chi_tmp38, record_meta_table);return _chi_tmp38 end;
+local _chi_tmp23 = '';local _chi_tmp24={};setmetatable(_chi_tmp24, array_meta_table);local _chi_tmp25={};setmetatable(_chi_tmp25, array_meta_table);local _chi_tmp26={};setmetatable(_chi_tmp26, array_meta_table);local _chi_tmp27 = '';local _chi_tmp28 = '';local _chi_tmp29={};setmetatable(_chi_tmp29, array_meta_table);local _chi_tmp30={};setmetatable(_chi_tmp30, array_meta_table);local _chi_tmp31 = '';local _chi_tmp32={};setmetatable(_chi_tmp32, array_meta_table);local _chi_tmp33 = '';local _chi_tmp34 = '';local _chi_tmp35 = '';local _chi_tmp36={};setmetatable(_chi_tmp36, array_meta_table);local _chi_tmp37={};setmetatable(_chi_tmp37, array_meta_table);local _chi_tmp38={};setmetatable(_chi_tmp38, array_meta_table);local _chi_tmp39 = '';local _chi_tmp40={kind=kind,exprType=(nil),used=(false),section=section,atomValue=(_chi_tmp23),parts=_chi_tmp24,recordFields=_chi_tmp25,arrayValues=_chi_tmp26,target=(nil),receiver=(nil),fieldName=(_chi_tmp27),memberSection=(nil),dotTarget=(nil),value=(nil),isPublic=(false),declName=(_chi_tmp28),isMutable=(false),isNamedFn=(false),expectedType=(nil),parameters=_chi_tmp29,defaultValues=(nil),body=(nil),callee=(nil),callParams=_chi_tmp30,condition=(nil),thenBranch=(nil),elseBranch=(nil),op=(_chi_tmp31),left=(nil),right=(nil),prefixExpr=(nil),castExpr=(nil),targetType=(nil),checkedType=(nil),loopCondition=(nil),loopBody=(nil),forVars=_chi_tmp32,iterable=(nil),forState=(nil),forInit=(nil),forBody=(nil),indexVariable=(nil),indexExpr=(nil),indexValue=(nil),effectModuleName=(_chi_tmp33),effectPackageName=(_chi_tmp34),effectName=(_chi_tmp35),effectParams=_chi_tmp36,handleBody=(nil),handleCases=_chi_tmp37,returnValue=(nil),blockBody=_chi_tmp38,variantName=(_chi_tmp39)};setmetatable(_chi_tmp40, record_meta_table);return _chi_tmp40 end;
  end;
 do function __P_.atomExpr(value,typ,section)
-local _chi_tmp39;do local _chi_tmp40 = 'atom';local _chi_tmp41=__P_.emptyExpr((_chi_tmp40),section);_chi_tmp39=_chi_tmp41 end;local e=_chi_tmp39;
+local _chi_tmp41;do local _chi_tmp42 = 'atom';local _chi_tmp43=__P_.emptyExpr((_chi_tmp42),section);_chi_tmp41=_chi_tmp43 end;local e=_chi_tmp41;
 do e.atomValue=value; end;
 do e.exprType=typ; end;
 return e end;
  end;
 do function __P_.interpolatedStringExpr(parts,section)
-local _chi_tmp42;do local _chi_tmp43 = 'interpolated_string';local _chi_tmp44=__P_.emptyExpr((_chi_tmp43),section);_chi_tmp42=_chi_tmp44 end;local e=_chi_tmp42;
+local _chi_tmp44;do local _chi_tmp45 = 'interpolated_string';local _chi_tmp46=__P_.emptyExpr((_chi_tmp45),section);_chi_tmp44=_chi_tmp46 end;local e=_chi_tmp44;
 do e.parts=parts; end;
 return e end;
  end;
 do function __P_.createRecordExpr(fields,section)
-local _chi_tmp45;do local _chi_tmp46 = 'create_record';local _chi_tmp47=__P_.emptyExpr((_chi_tmp46),section);_chi_tmp45=_chi_tmp47 end;local e=_chi_tmp45;
+local _chi_tmp47;do local _chi_tmp48 = 'create_record';local _chi_tmp49=__P_.emptyExpr((_chi_tmp48),section);_chi_tmp47=_chi_tmp49 end;local e=_chi_tmp47;
 do e.recordFields=fields; end;
 return e end;
  end;
 do function __P_.createVariantExpr(fields,variantName,section)
-local _chi_tmp48;do local _chi_tmp49 = 'create_record';local _chi_tmp50=__P_.emptyExpr((_chi_tmp49),section);_chi_tmp48=_chi_tmp50 end;local e=_chi_tmp48;
+local _chi_tmp50;do local _chi_tmp51 = 'create_record';local _chi_tmp52=__P_.emptyExpr((_chi_tmp51),section);_chi_tmp50=_chi_tmp52 end;local e=_chi_tmp50;
 do e.recordFields=fields; end;
 do e.variantName=variantName; end;
 return e end;
  end;
 do function __P_.createArrayExpr(values,section)
-local _chi_tmp51;do local _chi_tmp52 = 'create_array';local _chi_tmp53=__P_.emptyExpr((_chi_tmp52),section);_chi_tmp51=_chi_tmp53 end;local e=_chi_tmp51;
+local _chi_tmp53;do local _chi_tmp54 = 'create_array';local _chi_tmp55=__P_.emptyExpr((_chi_tmp54),section);_chi_tmp53=_chi_tmp55 end;local e=_chi_tmp53;
 do e.arrayValues=values; end;
 return e end;
  end;
 do function __P_.variableAccessExpr(tgt,section)
-local _chi_tmp54;do local _chi_tmp55 = 'variable_access';local _chi_tmp56=__P_.emptyExpr((_chi_tmp55),section);_chi_tmp54=_chi_tmp56 end;local e=_chi_tmp54;
+local _chi_tmp56;do local _chi_tmp57 = 'variable_access';local _chi_tmp58=__P_.emptyExpr((_chi_tmp57),section);_chi_tmp56=_chi_tmp58 end;local e=_chi_tmp56;
 do e.target=tgt; end;
 return e end;
  end;
 do function __P_.fieldAccessExpr(recv,name,memberSec,section)
-local _chi_tmp57;do local _chi_tmp58 = 'field_access';local _chi_tmp59=__P_.emptyExpr((_chi_tmp58),section);_chi_tmp57=_chi_tmp59 end;local e=_chi_tmp57;
+local _chi_tmp59;do local _chi_tmp60 = 'field_access';local _chi_tmp61=__P_.emptyExpr((_chi_tmp60),section);_chi_tmp59=_chi_tmp61 end;local e=_chi_tmp59;
 do e.receiver=recv; end;
 do e.fieldName=name; end;
 do e.memberSection=memberSec; end;
 return e end;
  end;
 do function __P_.fieldAssignmentExpr(recv,name,val_,section)
-local _chi_tmp60;do local _chi_tmp61 = 'field_assignment';local _chi_tmp62=__P_.emptyExpr((_chi_tmp61),section);_chi_tmp60=_chi_tmp62 end;local e=_chi_tmp60;
+local _chi_tmp62;do local _chi_tmp63 = 'field_assignment';local _chi_tmp64=__P_.emptyExpr((_chi_tmp63),section);_chi_tmp62=_chi_tmp64 end;local e=_chi_tmp62;
 do e.receiver=recv; end;
 do e.fieldName=name; end;
 do e.value=val_; end;
 return e end;
  end;
 do function __P_.variableAssignmentExpr(tgt,isMut,val_,section)
-local _chi_tmp63;do local _chi_tmp64 = 'assignment';local _chi_tmp65=__P_.emptyExpr((_chi_tmp64),section);_chi_tmp63=_chi_tmp65 end;local e=_chi_tmp63;
+local _chi_tmp65;do local _chi_tmp66 = 'assignment';local _chi_tmp67=__P_.emptyExpr((_chi_tmp66),section);_chi_tmp65=_chi_tmp67 end;local e=_chi_tmp65;
 do e.target=tgt; end;
 do e.isMutable=isMut; end;
 do e.value=val_; end;
 return e end;
  end;
 do function __P_.declarationExpr(isPub,tgt,isMut,expType,val_,section)
-local _chi_tmp66;do local _chi_tmp67 = 'name_declaration';local _chi_tmp68=__P_.emptyExpr((_chi_tmp67),section);_chi_tmp66=_chi_tmp68 end;local e=_chi_tmp66;
+local _chi_tmp68;do local _chi_tmp69 = 'name_declaration';local _chi_tmp70=__P_.emptyExpr((_chi_tmp69),section);_chi_tmp68=_chi_tmp70 end;local e=_chi_tmp68;
 do e.isPublic=isPub; end;
 do e.target=tgt; end;
 do e.declName=tgt.name; end;
@@ -1458,57 +1464,57 @@ do e.value=val_; end;
 return e end;
  end;
 do function __P_.fnExpr(params,defaults,fnBody,section)
-local _chi_tmp69;do local _chi_tmp70 = 'fn';local _chi_tmp71=__P_.emptyExpr((_chi_tmp70),section);_chi_tmp69=_chi_tmp71 end;local e=_chi_tmp69;
+local _chi_tmp71;do local _chi_tmp72 = 'fn';local _chi_tmp73=__P_.emptyExpr((_chi_tmp72),section);_chi_tmp71=_chi_tmp73 end;local e=_chi_tmp71;
 do e.parameters=params; end;
 do e.defaultValues=defaults; end;
 do e.body=fnBody; end;
 return e end;
  end;
 do function __P_.blockExpr(bodyExprs,section)
-local _chi_tmp72;do local _chi_tmp73 = 'block';local _chi_tmp74=__P_.emptyExpr((_chi_tmp73),section);_chi_tmp72=_chi_tmp74 end;local e=_chi_tmp72;
+local _chi_tmp74;do local _chi_tmp75 = 'block';local _chi_tmp76=__P_.emptyExpr((_chi_tmp75),section);_chi_tmp74=_chi_tmp76 end;local e=_chi_tmp74;
 do e.blockBody=bodyExprs; end;
 return e end;
  end;
 do function __P_.fnCallExpr(func,params,section)
-local _chi_tmp75;do local _chi_tmp76 = 'fn_call';local _chi_tmp77=__P_.emptyExpr((_chi_tmp76),section);_chi_tmp75=_chi_tmp77 end;local e=_chi_tmp75;
+local _chi_tmp77;do local _chi_tmp78 = 'fn_call';local _chi_tmp79=__P_.emptyExpr((_chi_tmp78),section);_chi_tmp77=_chi_tmp79 end;local e=_chi_tmp77;
 do e.callee=func; end;
 do e.callParams=params; end;
 return e end;
  end;
 do function __P_.ifElseExpr(cond,thenB,elseB,section)
-local _chi_tmp78;do local _chi_tmp79 = 'if_else';local _chi_tmp80=__P_.emptyExpr((_chi_tmp79),section);_chi_tmp78=_chi_tmp80 end;local e=_chi_tmp78;
+local _chi_tmp80;do local _chi_tmp81 = 'if_else';local _chi_tmp82=__P_.emptyExpr((_chi_tmp81),section);_chi_tmp80=_chi_tmp82 end;local e=_chi_tmp80;
 do e.condition=cond; end;
 do e.thenBranch=thenB; end;
 do e.elseBranch=elseB; end;
 return e end;
  end;
 do function __P_.infixOpExpr(operator,l,r,section)
-local _chi_tmp81;do local _chi_tmp82 = 'infix_op';local _chi_tmp83=__P_.emptyExpr((_chi_tmp82),section);_chi_tmp81=_chi_tmp83 end;local e=_chi_tmp81;
+local _chi_tmp83;do local _chi_tmp84 = 'infix_op';local _chi_tmp85=__P_.emptyExpr((_chi_tmp84),section);_chi_tmp83=_chi_tmp85 end;local e=_chi_tmp83;
 do e.op=operator; end;
 do e.left=l; end;
 do e.right=r; end;
 return e end;
  end;
 do function __P_.prefixOpExpr(operator,expr,section)
-local _chi_tmp84;do local _chi_tmp85 = 'prefix_op';local _chi_tmp86=__P_.emptyExpr((_chi_tmp85),section);_chi_tmp84=_chi_tmp86 end;local e=_chi_tmp84;
+local _chi_tmp86;do local _chi_tmp87 = 'prefix_op';local _chi_tmp88=__P_.emptyExpr((_chi_tmp87),section);_chi_tmp86=_chi_tmp88 end;local e=_chi_tmp86;
 do e.op=operator; end;
 do e.prefixExpr=expr; end;
 return e end;
  end;
 do function __P_.castExpr_(expr,tgt,section)
-local _chi_tmp87;do local _chi_tmp88 = 'cast';local _chi_tmp89=__P_.emptyExpr((_chi_tmp88),section);_chi_tmp87=_chi_tmp89 end;local e=_chi_tmp87;
+local _chi_tmp89;do local _chi_tmp90 = 'cast';local _chi_tmp91=__P_.emptyExpr((_chi_tmp90),section);_chi_tmp89=_chi_tmp91 end;local e=_chi_tmp89;
 do e.castExpr=expr; end;
 do e.targetType=tgt; end;
 return e end;
  end;
 do function __P_.whileLoopExpr(cond,loopBody,section)
-local _chi_tmp90;do local _chi_tmp91 = 'while_loop';local _chi_tmp92=__P_.emptyExpr((_chi_tmp91),section);_chi_tmp90=_chi_tmp92 end;local e=_chi_tmp90;
+local _chi_tmp92;do local _chi_tmp93 = 'while_loop';local _chi_tmp94=__P_.emptyExpr((_chi_tmp93),section);_chi_tmp92=_chi_tmp94 end;local e=_chi_tmp92;
 do e.loopCondition=cond; end;
 do e.loopBody=loopBody; end;
 return e end;
  end;
 do function __P_.forLoopExpr(vars,iter,state,init,forBody,section)
-local _chi_tmp93;do local _chi_tmp94 = 'for_loop';local _chi_tmp95=__P_.emptyExpr((_chi_tmp94),section);_chi_tmp93=_chi_tmp95 end;local e=_chi_tmp93;
+local _chi_tmp95;do local _chi_tmp96 = 'for_loop';local _chi_tmp97=__P_.emptyExpr((_chi_tmp96),section);_chi_tmp95=_chi_tmp97 end;local e=_chi_tmp95;
 do e.forVars=vars; end;
 do e.iterable=iter; end;
 do e.forState=state; end;
@@ -1517,32 +1523,32 @@ do e.forBody=forBody; end;
 return e end;
  end;
 do function __P_.breakExpr(section)
-local _chi_tmp96 = 'break';local _chi_tmp97=__P_.emptyExpr((_chi_tmp96),section);return _chi_tmp97 end;
+local _chi_tmp98 = 'break';local _chi_tmp99=__P_.emptyExpr((_chi_tmp98),section);return _chi_tmp99 end;
  end;
 do function __P_.continueExpr(section)
-local _chi_tmp98 = 'continue';local _chi_tmp99=__P_.emptyExpr((_chi_tmp98),section);return _chi_tmp99 end;
+local _chi_tmp100 = 'continue';local _chi_tmp101=__P_.emptyExpr((_chi_tmp100),section);return _chi_tmp101 end;
  end;
 do function __P_.indexOpExpr(variable,idx,section)
-local _chi_tmp100;do local _chi_tmp101 = 'index_op';local _chi_tmp102=__P_.emptyExpr((_chi_tmp101),section);_chi_tmp100=_chi_tmp102 end;local e=_chi_tmp100;
+local _chi_tmp102;do local _chi_tmp103 = 'index_op';local _chi_tmp104=__P_.emptyExpr((_chi_tmp103),section);_chi_tmp102=_chi_tmp104 end;local e=_chi_tmp102;
 do e.indexVariable=variable; end;
 do e.indexExpr=idx; end;
 return e end;
  end;
 do function __P_.indexedAssignmentExpr(variable,idx,val_,section)
-local _chi_tmp103;do local _chi_tmp104 = 'indexed_assignment';local _chi_tmp105=__P_.emptyExpr((_chi_tmp104),section);_chi_tmp103=_chi_tmp105 end;local e=_chi_tmp103;
+local _chi_tmp105;do local _chi_tmp106 = 'indexed_assignment';local _chi_tmp107=__P_.emptyExpr((_chi_tmp106),section);_chi_tmp105=_chi_tmp107 end;local e=_chi_tmp105;
 do e.indexVariable=variable; end;
 do e.indexExpr=idx; end;
 do e.indexValue=val_; end;
 return e end;
  end;
 do function __P_.isExpr(expr,checked,section)
-local _chi_tmp106;do local _chi_tmp107 = 'is';local _chi_tmp108=__P_.emptyExpr((_chi_tmp107),section);_chi_tmp106=_chi_tmp108 end;local e=_chi_tmp106;
+local _chi_tmp108;do local _chi_tmp109 = 'is';local _chi_tmp110=__P_.emptyExpr((_chi_tmp109),section);_chi_tmp108=_chi_tmp110 end;local e=_chi_tmp108;
 do e.castExpr=expr; end;
 do e.checkedType=checked; end;
 return e end;
  end;
 do function __P_.effectDefinitionExpr(mod,pkg,name,params,section)
-local _chi_tmp109;do local _chi_tmp110 = 'effect_definition';local _chi_tmp111=__P_.emptyExpr((_chi_tmp110),section);_chi_tmp109=_chi_tmp111 end;local e=_chi_tmp109;
+local _chi_tmp111;do local _chi_tmp112 = 'effect_definition';local _chi_tmp113=__P_.emptyExpr((_chi_tmp112),section);_chi_tmp111=_chi_tmp113 end;local e=_chi_tmp111;
 do e.effectModuleName=mod; end;
 do e.effectPackageName=pkg; end;
 do e.effectName=name; end;
@@ -1550,21 +1556,21 @@ do e.effectParams=params; end;
 return e end;
  end;
 do function __P_.handleExpr(hBody,cases,section)
-local _chi_tmp112;do local _chi_tmp113 = 'handle';local _chi_tmp114=__P_.emptyExpr((_chi_tmp113),section);_chi_tmp112=_chi_tmp114 end;local e=_chi_tmp112;
+local _chi_tmp114;do local _chi_tmp115 = 'handle';local _chi_tmp116=__P_.emptyExpr((_chi_tmp115),section);_chi_tmp114=_chi_tmp116 end;local e=_chi_tmp114;
 do e.handleBody=hBody; end;
 do e.handleCases=cases; end;
 return e end;
  end;
 do function __P_.returnExpr(val_,section)
-local _chi_tmp115;do local _chi_tmp116 = 'return';local _chi_tmp117=__P_.emptyExpr((_chi_tmp116),section);_chi_tmp115=_chi_tmp117 end;local e=_chi_tmp115;
+local _chi_tmp117;do local _chi_tmp118 = 'return';local _chi_tmp119=__P_.emptyExpr((_chi_tmp118),section);_chi_tmp117=_chi_tmp119 end;local e=_chi_tmp117;
 do e.returnValue=val_; end;
 return e end;
  end;
 do function __P_.newHandleCase(mod,pkg,name,argNames,caseBody,section)
-local _chi_tmp118={moduleName=mod,packageName=pkg,effectName=name,argumentNames=argNames,body=caseBody,section=section};setmetatable(_chi_tmp118, record_meta_table);return _chi_tmp118 end;
+local _chi_tmp120={moduleName=mod,packageName=pkg,effectName=name,argumentNames=argNames,body=caseBody,section=section};setmetatable(_chi_tmp120, record_meta_table);return _chi_tmp120 end;
  end;
 do function __P_.newExprField(name,value)
-local _chi_tmp119={name=name,value=value};setmetatable(_chi_tmp119, record_meta_table);return _chi_tmp119 end;
+local _chi_tmp121={name=name,value=value};setmetatable(_chi_tmp121, record_meta_table);return _chi_tmp121 end;
  end;
 do function __P_.exprKind(e) return e.kind end; end;
 do function __P_.exprExprType(e) return e.exprType end; end;
@@ -1617,101 +1623,101 @@ do function __P_.exprHandleBody(e) return e.handleBody end; end;
 do function __P_.exprHandleCases(e) return e.handleCases end; end;
 do function __P_.exprReturnValue(e) return e.returnValue end; end;
 do function __P_.exprBlockBody(e) return e.blockBody end; end;
-do function __P_.setExprType(e,t) e.exprType=t;local _chi_tmp120=t;return; end; end;
-do function __P_.setExprUsed(e,u) e.used=u;local _chi_tmp121=u;return; end; end;
-do function __P_.setExprDotTarget(e,dt) e.dotTarget=dt;local _chi_tmp122=dt;return; end; end;
-do function __P_.setExprTarget(e,tgt) e.target=tgt;local _chi_tmp123=tgt;return; end; end;
+do function __P_.setExprType(e,t) e.exprType=t;local _chi_tmp122=t;return; end; end;
+do function __P_.setExprUsed(e,u) e.used=u;local _chi_tmp123=u;return; end; end;
+do function __P_.setExprDotTarget(e,dt) e.dotTarget=dt;local _chi_tmp124=dt;return; end; end;
+do function __P_.setExprTarget(e,tgt) e.target=tgt;local _chi_tmp125=tgt;return; end; end;
 do function __P_.pushChild(children,child)
-local _chi_tmp124;if (child ~= (nil)) then local _chi_tmp125=__std__lang_array.push(children,child);_chi_tmp124=_chi_tmp125 end;local _chi_tmp126=_chi_tmp124;return; end;
+local _chi_tmp126;if (child ~= (nil)) then local _chi_tmp127=__std__lang_array.push(children,child);_chi_tmp126=_chi_tmp127 end;local _chi_tmp128=_chi_tmp126;return; end;
  end;
 do function __P_.exprChildren(expr)
-local _chi_tmp127;do _chi_tmp127=expr end;local e=_chi_tmp127;
-do _chi_tmp127=e.kind end;local k=_chi_tmp127;
-do local _chi_tmp128={};setmetatable(_chi_tmp128, array_meta_table);_chi_tmp127=_chi_tmp128 end;local r=_chi_tmp127;
-do local _chi_tmp129;local _chi_tmp130 = 'block';if (k == (_chi_tmp130)) then
-for _,c in ipairs(e.blockBody) do do local _chi_tmp131=__std__lang_array.push(r,c); end ::__continue_0:: end;_chi_tmp129=nil
- else local _chi_tmp132;local _chi_tmp133 = 'interpolated_string';if (k == (_chi_tmp133)) then
-for _,c in ipairs(e.parts) do do local _chi_tmp134=__std__lang_array.push(r,c); end ::__continue_1:: end;_chi_tmp132=nil
- else local _chi_tmp135;local _chi_tmp136 = 'create_array';if (k == (_chi_tmp136)) then
-for _,c in ipairs(e.arrayValues) do do local _chi_tmp137=__std__lang_array.push(r,c); end ::__continue_2:: end;_chi_tmp135=nil
- else local _chi_tmp138;local _chi_tmp139 = 'create_record';if (k == (_chi_tmp139)) then
-for _,f in ipairs(e.recordFields) do do local _chi_tmp140=__std__lang_array.push(r,f.value); end ::__continue_3:: end;_chi_tmp138=nil
- else local _chi_tmp141;local _chi_tmp142 = 'fn_call';if (k == (_chi_tmp142)) then
-do local _chi_tmp143=__P_.pushChild(r,e.callee); end;
-for _,c in ipairs(e.callParams) do do local _chi_tmp144=__std__lang_array.push(r,c); end ::__continue_4:: end;_chi_tmp141=nil
- else local _chi_tmp145;local _chi_tmp146 = 'fn';if (k == (_chi_tmp146)) then
-local _chi_tmp147;do _chi_tmp147=e.defaultValues end;local defaults=_chi_tmp147;
-do local _chi_tmp148;if (defaults ~= (nil)) then
-for _,p in ipairs(e.parameters) do do local _chi_tmp149=r;local _chi_tmp150=__std__lang_map.get(defaults,p.name);local _chi_tmp151=__P_.pushChild(_chi_tmp149,_chi_tmp150); end ::__continue_5:: end;_chi_tmp148=nil
+local _chi_tmp129;do _chi_tmp129=expr end;local e=_chi_tmp129;
+do _chi_tmp129=e.kind end;local k=_chi_tmp129;
+do local _chi_tmp130={};setmetatable(_chi_tmp130, array_meta_table);_chi_tmp129=_chi_tmp130 end;local r=_chi_tmp129;
+do local _chi_tmp131;local _chi_tmp132 = 'block';if (k == (_chi_tmp132)) then
+for _,c in ipairs(e.blockBody) do do local _chi_tmp133=__std__lang_array.push(r,c); end ::__continue_0:: end;_chi_tmp131=nil
+ else local _chi_tmp134;local _chi_tmp135 = 'interpolated_string';if (k == (_chi_tmp135)) then
+for _,c in ipairs(e.parts) do do local _chi_tmp136=__std__lang_array.push(r,c); end ::__continue_1:: end;_chi_tmp134=nil
+ else local _chi_tmp137;local _chi_tmp138 = 'create_array';if (k == (_chi_tmp138)) then
+for _,c in ipairs(e.arrayValues) do do local _chi_tmp139=__std__lang_array.push(r,c); end ::__continue_2:: end;_chi_tmp137=nil
+ else local _chi_tmp140;local _chi_tmp141 = 'create_record';if (k == (_chi_tmp141)) then
+for _,f in ipairs(e.recordFields) do do local _chi_tmp142=__std__lang_array.push(r,f.value); end ::__continue_3:: end;_chi_tmp140=nil
+ else local _chi_tmp143;local _chi_tmp144 = 'fn_call';if (k == (_chi_tmp144)) then
+do local _chi_tmp145=__P_.pushChild(r,e.callee); end;
+for _,c in ipairs(e.callParams) do do local _chi_tmp146=__std__lang_array.push(r,c); end ::__continue_4:: end;_chi_tmp143=nil
+ else local _chi_tmp147;local _chi_tmp148 = 'fn';if (k == (_chi_tmp148)) then
+local _chi_tmp149;do _chi_tmp149=e.defaultValues end;local defaults=_chi_tmp149;
+do local _chi_tmp150;if (defaults ~= (nil)) then
+for _,p in ipairs(e.parameters) do do local _chi_tmp151=r;local _chi_tmp152=__std__lang_map.get(defaults,p.name);local _chi_tmp153=__P_.pushChild(_chi_tmp151,_chi_tmp152); end ::__continue_5:: end;_chi_tmp150=nil
  end; end;
-local _chi_tmp152=__P_.pushChild(r,e.body);_chi_tmp145=_chi_tmp152
- else local _chi_tmp153;local _chi_tmp154 = 'field_access';if (k == (_chi_tmp154)) then
-local _chi_tmp155=__P_.pushChild(r,e.receiver);_chi_tmp153=_chi_tmp155
- else local _chi_tmp156;local _chi_tmp157 = 'field_assignment';if (k == (_chi_tmp157)) then
-do local _chi_tmp158=__P_.pushChild(r,e.receiver); end;
-local _chi_tmp159=__P_.pushChild(r,e.value);_chi_tmp156=_chi_tmp159
- else local _chi_tmp160;local _chi_tmp161 = 'assignment';local _chi_tmp163=(k == (_chi_tmp161));if not _chi_tmp163 then local _chi_tmp162 = 'name_declaration';_chi_tmp163=(k == (_chi_tmp162)) end;if _chi_tmp163 then
-local _chi_tmp164=__P_.pushChild(r,e.value);_chi_tmp160=_chi_tmp164
- else local _chi_tmp165;local _chi_tmp166 = 'if_else';if (k == (_chi_tmp166)) then
-do local _chi_tmp167=__P_.pushChild(r,e.condition); end;
-do local _chi_tmp168=__P_.pushChild(r,e.thenBranch); end;
-local _chi_tmp169=__P_.pushChild(r,e.elseBranch);_chi_tmp165=_chi_tmp169
- else local _chi_tmp170;local _chi_tmp171 = 'infix_op';if (k == (_chi_tmp171)) then
-do local _chi_tmp172=__P_.pushChild(r,e.left); end;
-local _chi_tmp173=__P_.pushChild(r,e.right);_chi_tmp170=_chi_tmp173
- else local _chi_tmp174;local _chi_tmp175 = 'prefix_op';if (k == (_chi_tmp175)) then
-local _chi_tmp176=__P_.pushChild(r,e.prefixExpr);_chi_tmp174=_chi_tmp176
- else local _chi_tmp177;local _chi_tmp178 = 'cast';local _chi_tmp180=(k == (_chi_tmp178));if not _chi_tmp180 then local _chi_tmp179 = 'is';_chi_tmp180=(k == (_chi_tmp179)) end;if _chi_tmp180 then
-local _chi_tmp181=__P_.pushChild(r,e.castExpr);_chi_tmp177=_chi_tmp181
- else local _chi_tmp182;local _chi_tmp183 = 'while_loop';if (k == (_chi_tmp183)) then
-do local _chi_tmp184=__P_.pushChild(r,e.loopCondition); end;
-local _chi_tmp185=__P_.pushChild(r,e.loopBody);_chi_tmp182=_chi_tmp185
- else local _chi_tmp186;local _chi_tmp187 = 'for_loop';if (k == (_chi_tmp187)) then
-do local _chi_tmp188=__P_.pushChild(r,e.iterable); end;
-do local _chi_tmp189=__P_.pushChild(r,e.forState); end;
-do local _chi_tmp190=__P_.pushChild(r,e.forInit); end;
-local _chi_tmp191=__P_.pushChild(r,e.forBody);_chi_tmp186=_chi_tmp191
- else local _chi_tmp192;local _chi_tmp193 = 'index_op';if (k == (_chi_tmp193)) then
-do local _chi_tmp194=__P_.pushChild(r,e.indexVariable); end;
-local _chi_tmp195=__P_.pushChild(r,e.indexExpr);_chi_tmp192=_chi_tmp195
- else local _chi_tmp196;local _chi_tmp197 = 'indexed_assignment';if (k == (_chi_tmp197)) then
-do local _chi_tmp198=__P_.pushChild(r,e.indexVariable); end;
-do local _chi_tmp199=__P_.pushChild(r,e.indexExpr); end;
-local _chi_tmp200=__P_.pushChild(r,e.indexValue);_chi_tmp196=_chi_tmp200
- else local _chi_tmp201;local _chi_tmp202 = 'handle';if (k == (_chi_tmp202)) then
-do local _chi_tmp203=__P_.pushChild(r,e.handleBody); end;
-for _,c in ipairs(e.handleCases) do do local _chi_tmp204=__std__lang_array.push(r,c.body); end ::__continue_6:: end;_chi_tmp201=nil
- else local _chi_tmp205;local _chi_tmp206 = 'return';if (k == (_chi_tmp206)) then
-local _chi_tmp207=__P_.pushChild(r,e.returnValue);_chi_tmp205=_chi_tmp207
- end;_chi_tmp201=_chi_tmp205 end;_chi_tmp196=_chi_tmp201 end;_chi_tmp192=_chi_tmp196 end;_chi_tmp186=_chi_tmp192 end;_chi_tmp182=_chi_tmp186 end;_chi_tmp177=_chi_tmp182 end;_chi_tmp174=_chi_tmp177 end;_chi_tmp170=_chi_tmp174 end;_chi_tmp165=_chi_tmp170 end;_chi_tmp160=_chi_tmp165 end;_chi_tmp156=_chi_tmp160 end;_chi_tmp153=_chi_tmp156 end;_chi_tmp145=_chi_tmp153 end;_chi_tmp141=_chi_tmp145 end;_chi_tmp138=_chi_tmp141 end;_chi_tmp135=_chi_tmp138 end;_chi_tmp132=_chi_tmp135 end;_chi_tmp129=_chi_tmp132 end; end;
+local _chi_tmp154=__P_.pushChild(r,e.body);_chi_tmp147=_chi_tmp154
+ else local _chi_tmp155;local _chi_tmp156 = 'field_access';if (k == (_chi_tmp156)) then
+local _chi_tmp157=__P_.pushChild(r,e.receiver);_chi_tmp155=_chi_tmp157
+ else local _chi_tmp158;local _chi_tmp159 = 'field_assignment';if (k == (_chi_tmp159)) then
+do local _chi_tmp160=__P_.pushChild(r,e.receiver); end;
+local _chi_tmp161=__P_.pushChild(r,e.value);_chi_tmp158=_chi_tmp161
+ else local _chi_tmp162;local _chi_tmp163 = 'assignment';local _chi_tmp165=(k == (_chi_tmp163));if not _chi_tmp165 then local _chi_tmp164 = 'name_declaration';_chi_tmp165=(k == (_chi_tmp164)) end;if _chi_tmp165 then
+local _chi_tmp166=__P_.pushChild(r,e.value);_chi_tmp162=_chi_tmp166
+ else local _chi_tmp167;local _chi_tmp168 = 'if_else';if (k == (_chi_tmp168)) then
+do local _chi_tmp169=__P_.pushChild(r,e.condition); end;
+do local _chi_tmp170=__P_.pushChild(r,e.thenBranch); end;
+local _chi_tmp171=__P_.pushChild(r,e.elseBranch);_chi_tmp167=_chi_tmp171
+ else local _chi_tmp172;local _chi_tmp173 = 'infix_op';if (k == (_chi_tmp173)) then
+do local _chi_tmp174=__P_.pushChild(r,e.left); end;
+local _chi_tmp175=__P_.pushChild(r,e.right);_chi_tmp172=_chi_tmp175
+ else local _chi_tmp176;local _chi_tmp177 = 'prefix_op';if (k == (_chi_tmp177)) then
+local _chi_tmp178=__P_.pushChild(r,e.prefixExpr);_chi_tmp176=_chi_tmp178
+ else local _chi_tmp179;local _chi_tmp180 = 'cast';local _chi_tmp182=(k == (_chi_tmp180));if not _chi_tmp182 then local _chi_tmp181 = 'is';_chi_tmp182=(k == (_chi_tmp181)) end;if _chi_tmp182 then
+local _chi_tmp183=__P_.pushChild(r,e.castExpr);_chi_tmp179=_chi_tmp183
+ else local _chi_tmp184;local _chi_tmp185 = 'while_loop';if (k == (_chi_tmp185)) then
+do local _chi_tmp186=__P_.pushChild(r,e.loopCondition); end;
+local _chi_tmp187=__P_.pushChild(r,e.loopBody);_chi_tmp184=_chi_tmp187
+ else local _chi_tmp188;local _chi_tmp189 = 'for_loop';if (k == (_chi_tmp189)) then
+do local _chi_tmp190=__P_.pushChild(r,e.iterable); end;
+do local _chi_tmp191=__P_.pushChild(r,e.forState); end;
+do local _chi_tmp192=__P_.pushChild(r,e.forInit); end;
+local _chi_tmp193=__P_.pushChild(r,e.forBody);_chi_tmp188=_chi_tmp193
+ else local _chi_tmp194;local _chi_tmp195 = 'index_op';if (k == (_chi_tmp195)) then
+do local _chi_tmp196=__P_.pushChild(r,e.indexVariable); end;
+local _chi_tmp197=__P_.pushChild(r,e.indexExpr);_chi_tmp194=_chi_tmp197
+ else local _chi_tmp198;local _chi_tmp199 = 'indexed_assignment';if (k == (_chi_tmp199)) then
+do local _chi_tmp200=__P_.pushChild(r,e.indexVariable); end;
+do local _chi_tmp201=__P_.pushChild(r,e.indexExpr); end;
+local _chi_tmp202=__P_.pushChild(r,e.indexValue);_chi_tmp198=_chi_tmp202
+ else local _chi_tmp203;local _chi_tmp204 = 'handle';if (k == (_chi_tmp204)) then
+do local _chi_tmp205=__P_.pushChild(r,e.handleBody); end;
+for _,c in ipairs(e.handleCases) do do local _chi_tmp206=__std__lang_array.push(r,c.body); end ::__continue_6:: end;_chi_tmp203=nil
+ else local _chi_tmp207;local _chi_tmp208 = 'return';if (k == (_chi_tmp208)) then
+local _chi_tmp209=__P_.pushChild(r,e.returnValue);_chi_tmp207=_chi_tmp209
+ end;_chi_tmp203=_chi_tmp207 end;_chi_tmp198=_chi_tmp203 end;_chi_tmp194=_chi_tmp198 end;_chi_tmp188=_chi_tmp194 end;_chi_tmp184=_chi_tmp188 end;_chi_tmp179=_chi_tmp184 end;_chi_tmp176=_chi_tmp179 end;_chi_tmp172=_chi_tmp176 end;_chi_tmp167=_chi_tmp172 end;_chi_tmp162=_chi_tmp167 end;_chi_tmp158=_chi_tmp162 end;_chi_tmp155=_chi_tmp158 end;_chi_tmp147=_chi_tmp155 end;_chi_tmp143=_chi_tmp147 end;_chi_tmp140=_chi_tmp143 end;_chi_tmp137=_chi_tmp140 end;_chi_tmp134=_chi_tmp137 end;_chi_tmp131=_chi_tmp134 end; end;
 return r end;
  end;
 do function __P_.isTerminator(expr)
-local _chi_tmp208;do local _chi_tmp209=expr.kind;_chi_tmp208=_chi_tmp209 end;local k=_chi_tmp208;
-local _chi_tmp210;local _chi_tmp211 = 'break';if (k == (_chi_tmp211)) then _chi_tmp210=(true) else local _chi_tmp212;local _chi_tmp213 = 'continue';if (k == (_chi_tmp213)) then
-_chi_tmp212=(true)
- else local _chi_tmp214;local _chi_tmp215 = 'return';if (k == (_chi_tmp215)) then
+local _chi_tmp210;do local _chi_tmp211=expr.kind;_chi_tmp210=_chi_tmp211 end;local k=_chi_tmp210;
+local _chi_tmp212;local _chi_tmp213 = 'break';if (k == (_chi_tmp213)) then _chi_tmp212=(true) else local _chi_tmp214;local _chi_tmp215 = 'continue';if (k == (_chi_tmp215)) then
 _chi_tmp214=(true)
+ else local _chi_tmp216;local _chi_tmp217 = 'return';if (k == (_chi_tmp217)) then
+_chi_tmp216=(true)
  else
-_chi_tmp214=(false)
- end;_chi_tmp212=_chi_tmp214 end;_chi_tmp210=_chi_tmp212 end;return _chi_tmp210 end;
+_chi_tmp216=(false)
+ end;_chi_tmp214=_chi_tmp216 end;_chi_tmp212=_chi_tmp214 end;return _chi_tmp212 end;
  end;
 do function __P_.newPackage(mod,pkg)
-local _chi_tmp216={moduleName=mod,packageName=pkg};setmetatable(_chi_tmp216, record_meta_table);return _chi_tmp216 end;
+local _chi_tmp218={moduleName=mod,packageName=pkg};setmetatable(_chi_tmp218, record_meta_table);return _chi_tmp218 end;
  end;
 do function __P_.newTypeAlias(id,t)
-local _chi_tmp217={typeId=id,aliasType=t};setmetatable(_chi_tmp217, record_meta_table);return _chi_tmp217 end;
+local _chi_tmp219={typeId=id,aliasType=t};setmetatable(_chi_tmp219, record_meta_table);return _chi_tmp219 end;
  end;
 do function __P_.newImportEntry(name,alias,section)
-local _chi_tmp218={name=name,alias=alias,section=section};setmetatable(_chi_tmp218, record_meta_table);return _chi_tmp218 end;
+local _chi_tmp220={name=name,alias=alias,section=section};setmetatable(_chi_tmp220, record_meta_table);return _chi_tmp220 end;
  end;
 do function __P_.newImport(mod,pkg,pkgAlias,entries,section)
-local _chi_tmp219={moduleName=mod,packageName=pkg,packageAlias=pkgAlias,entries=entries,section=section};setmetatable(_chi_tmp219, record_meta_table);return _chi_tmp219 end;
+local _chi_tmp221={moduleName=mod,packageName=pkg,packageAlias=pkgAlias,entries=entries,section=section};setmetatable(_chi_tmp221, record_meta_table);return _chi_tmp221 end;
  end;
 function __P_.newProgram(pkgDef,imports,aliases,exprs,section)
-local _chi_tmp220={packageDef=pkgDef,imports=imports,typeAliases=aliases,expressions=exprs,section=section};setmetatable(_chi_tmp220, record_meta_table);return _chi_tmp220 end;
+local _chi_tmp222={packageDef=pkgDef,imports=imports,typeAliases=aliases,expressions=exprs,section=section};setmetatable(_chi_tmp222, record_meta_table);return _chi_tmp222 end;
 return __P_
- end;local _chi_info=debug.getinfo(_chi_run,'S');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;if string.sub(_chi_source,1,1)=='@' then _chi_source=string.sub(_chi_source,2) end;_chi_line_map[2]=13;_chi_line_map[3]=14;_chi_line_map[4]=13;_chi_line_map[5]=17;_chi_line_map[6]=18;_chi_line_map[7]=17;_chi_line_map[8]=28;_chi_line_map[9]=29;_chi_line_map[10]=28;_chi_line_map[11]=33;_chi_line_map[12]=34;_chi_line_map[13]=33;_chi_line_map[14]=38;_chi_line_map[15]=39;_chi_line_map[16]=38;_chi_line_map[17]=42;_chi_line_map[18]=43;_chi_line_map[19]=42;_chi_line_map[20]=48;_chi_line_map[21]=49;_chi_line_map[22]=48;_chi_line_map[23]=124;_chi_line_map[24]=125;_chi_line_map[25]=124;_chi_line_map[26]=141;_chi_line_map[27]=142;_chi_line_map[28]=143;_chi_line_map[29]=144;_chi_line_map[30]=145;_chi_line_map[31]=141;_chi_line_map[32]=148;_chi_line_map[33]=149;_chi_line_map[34]=150;_chi_line_map[35]=151;_chi_line_map[36]=148;_chi_line_map[37]=154;_chi_line_map[38]=155;_chi_line_map[39]=156;_chi_line_map[40]=157;_chi_line_map[41]=154;_chi_line_map[42]=164;_chi_line_map[43]=165;_chi_line_map[44]=166;_chi_line_map[45]=167;_chi_line_map[46]=168;_chi_line_map[47]=164;_chi_line_map[48]=171;_chi_line_map[49]=172;_chi_line_map[50]=173;_chi_line_map[51]=174;_chi_line_map[52]=171;_chi_line_map[53]=177;_chi_line_map[54]=178;_chi_line_map[55]=179;_chi_line_map[56]=180;_chi_line_map[57]=177;_chi_line_map[58]=183;_chi_line_map[59]=184;_chi_line_map[60]=185;_chi_line_map[61]=186;_chi_line_map[62]=187;_chi_line_map[63]=188;_chi_line_map[64]=183;_chi_line_map[65]=191;_chi_line_map[66]=192;_chi_line_map[67]=193;_chi_line_map[68]=194;_chi_line_map[69]=195;_chi_line_map[70]=196;_chi_line_map[71]=191;_chi_line_map[72]=201;_chi_line_map[73]=202;_chi_line_map[74]=203;_chi_line_map[75]=204;_chi_line_map[76]=205;_chi_line_map[77]=206;_chi_line_map[78]=201;_chi_line_map[79]=210;_chi_line_map[80]=211;_chi_line_map[81]=212;_chi_line_map[82]=213;_chi_line_map[83]=214;_chi_line_map[84]=215;_chi_line_map[85]=216;_chi_line_map[86]=217;_chi_line_map[87]=218;_chi_line_map[88]=210;_chi_line_map[89]=221;_chi_line_map[90]=222;_chi_line_map[91]=223;_chi_line_map[92]=224;_chi_line_map[93]=225;_chi_line_map[94]=226;_chi_line_map[95]=221;_chi_line_map[96]=229;_chi_line_map[97]=230;_chi_line_map[98]=231;_chi_line_map[99]=232;_chi_line_map[100]=229;_chi_line_map[101]=235;_chi_line_map[102]=236;_chi_line_map[103]=237;_chi_line_map[104]=238;_chi_line_map[105]=239;_chi_line_map[106]=235;_chi_line_map[107]=242;_chi_line_map[108]=243;_chi_line_map[109]=244;_chi_line_map[110]=245;_chi_line_map[111]=246;_chi_line_map[112]=247;_chi_line_map[113]=242;_chi_line_map[114]=250;_chi_line_map[115]=251;_chi_line_map[116]=252;_chi_line_map[117]=253;_chi_line_map[118]=254;_chi_line_map[119]=255;_chi_line_map[120]=250;_chi_line_map[121]=258;_chi_line_map[122]=259;_chi_line_map[123]=260;_chi_line_map[124]=261;_chi_line_map[125]=262;_chi_line_map[126]=258;_chi_line_map[127]=265;_chi_line_map[128]=266;_chi_line_map[129]=267;_chi_line_map[130]=268;_chi_line_map[131]=269;_chi_line_map[132]=265;_chi_line_map[133]=272;_chi_line_map[134]=273;_chi_line_map[135]=274;_chi_line_map[136]=275;_chi_line_map[137]=276;_chi_line_map[138]=272;_chi_line_map[139]=279;_chi_line_map[140]=280;_chi_line_map[141]=281;_chi_line_map[142]=282;_chi_line_map[143]=283;_chi_line_map[144]=284;_chi_line_map[145]=285;_chi_line_map[146]=286;_chi_line_map[147]=279;_chi_line_map[148]=289;_chi_line_map[149]=290;_chi_line_map[150]=289;_chi_line_map[151]=293;_chi_line_map[152]=294;_chi_line_map[153]=293;_chi_line_map[154]=297;_chi_line_map[155]=298;_chi_line_map[156]=299;_chi_line_map[157]=300;_chi_line_map[158]=301;_chi_line_map[159]=297;_chi_line_map[160]=304;_chi_line_map[161]=305;_chi_line_map[162]=306;_chi_line_map[163]=307;_chi_line_map[164]=308;_chi_line_map[165]=309;_chi_line_map[166]=304;_chi_line_map[167]=312;_chi_line_map[168]=313;_chi_line_map[169]=314;_chi_line_map[170]=315;_chi_line_map[171]=316;_chi_line_map[172]=312;_chi_line_map[173]=319;_chi_line_map[174]=320;_chi_line_map[175]=321;_chi_line_map[176]=322;_chi_line_map[177]=323;_chi_line_map[178]=324;_chi_line_map[179]=325;_chi_line_map[180]=319;_chi_line_map[181]=328;_chi_line_map[182]=329;_chi_line_map[183]=330;_chi_line_map[184]=331;_chi_line_map[185]=332;_chi_line_map[186]=328;_chi_line_map[187]=335;_chi_line_map[188]=336;_chi_line_map[189]=337;_chi_line_map[190]=338;_chi_line_map[191]=335;_chi_line_map[192]=341;_chi_line_map[193]=342;_chi_line_map[194]=341;_chi_line_map[195]=345;_chi_line_map[196]=346;_chi_line_map[197]=345;_chi_line_map[198]=349;_chi_line_map[199]=350;_chi_line_map[200]=351;_chi_line_map[201]=352;_chi_line_map[202]=353;_chi_line_map[203]=354;_chi_line_map[204]=355;_chi_line_map[205]=356;_chi_line_map[206]=357;_chi_line_map[207]=358;_chi_line_map[208]=359;_chi_line_map[209]=360;_chi_line_map[210]=361;_chi_line_map[211]=362;_chi_line_map[212]=363;_chi_line_map[213]=364;_chi_line_map[214]=365;_chi_line_map[215]=366;_chi_line_map[216]=367;_chi_line_map[217]=368;_chi_line_map[218]=369;_chi_line_map[219]=370;_chi_line_map[220]=371;_chi_line_map[221]=372;_chi_line_map[222]=373;_chi_line_map[223]=374;_chi_line_map[224]=375;_chi_line_map[225]=376;_chi_line_map[226]=377;_chi_line_map[227]=378;_chi_line_map[228]=379;_chi_line_map[229]=380;_chi_line_map[230]=381;_chi_line_map[231]=382;_chi_line_map[232]=383;_chi_line_map[233]=384;_chi_line_map[234]=385;_chi_line_map[235]=386;_chi_line_map[236]=387;_chi_line_map[237]=388;_chi_line_map[238]=389;_chi_line_map[239]=390;_chi_line_map[240]=391;_chi_line_map[241]=392;_chi_line_map[242]=393;_chi_line_map[243]=394;_chi_line_map[244]=395;_chi_line_map[245]=396;_chi_line_map[246]=397;_chi_line_map[247]=398;_chi_line_map[248]=399;_chi_line_map[249]=401;_chi_line_map[250]=402;_chi_line_map[251]=403;_chi_line_map[252]=404;_chi_line_map[253]=406;_chi_line_map[254]=407;_chi_line_map[255]=406;_chi_line_map[256]=414;_chi_line_map[257]=415;_chi_line_map[258]=416;_chi_line_map[259]=417;_chi_line_map[260]=418;_chi_line_map[261]=419;_chi_line_map[262]=418;_chi_line_map[263]=421;_chi_line_map[264]=418;_chi_line_map[265]=423;_chi_line_map[266]=418;_chi_line_map[267]=425;_chi_line_map[268]=418;_chi_line_map[269]=427;_chi_line_map[270]=428;_chi_line_map[271]=418;_chi_line_map[272]=432;_chi_line_map[273]=433;_chi_line_map[274]=434;_chi_line_map[275]=433;_chi_line_map[276]=436;_chi_line_map[277]=418;_chi_line_map[278]=438;_chi_line_map[279]=418;_chi_line_map[280]=440;_chi_line_map[281]=441;_chi_line_map[282]=418;_chi_line_map[283]=443;_chi_line_map[284]=418;_chi_line_map[285]=445;_chi_line_map[286]=446;_chi_line_map[287]=447;_chi_line_map[288]=418;_chi_line_map[289]=449;_chi_line_map[290]=450;_chi_line_map[291]=418;_chi_line_map[292]=452;_chi_line_map[293]=418;_chi_line_map[294]=454;_chi_line_map[295]=418;_chi_line_map[296]=456;_chi_line_map[297]=457;_chi_line_map[298]=418;_chi_line_map[299]=459;_chi_line_map[300]=460;_chi_line_map[301]=461;_chi_line_map[302]=462;_chi_line_map[303]=418;_chi_line_map[304]=464;_chi_line_map[305]=465;_chi_line_map[306]=418;_chi_line_map[307]=467;_chi_line_map[308]=468;_chi_line_map[309]=469;_chi_line_map[310]=418;_chi_line_map[311]=471;_chi_line_map[312]=472;_chi_line_map[313]=418;_chi_line_map[314]=474;_chi_line_map[315]=418;_chi_line_map[316]=476;_chi_line_map[317]=414;_chi_line_map[318]=479;_chi_line_map[319]=480;_chi_line_map[320]=481;_chi_line_map[321]=482;_chi_line_map[322]=481;_chi_line_map[323]=483;_chi_line_map[324]=481;_chi_line_map[325]=484;_chi_line_map[326]=481;_chi_line_map[327]=479;_chi_line_map[328]=502;_chi_line_map[329]=503;_chi_line_map[330]=502;_chi_line_map[331]=506;_chi_line_map[332]=507;_chi_line_map[333]=506;_chi_line_map[334]=510;_chi_line_map[335]=511;_chi_line_map[336]=510;_chi_line_map[337]=514;_chi_line_map[338]=515;_chi_line_map[339]=514;_chi_line_map[340]=518;_chi_line_map[341]=519;_chi_line_map[342]=518;local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..':'.._chi_generated..':'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..':'.._chi_source_line..':'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;return _chi_result end;m7();function m8() local _chi_line_map={};local function _chi_run()local __P_ = package.loaded['chicc/unification'] or {_package={},_types={}};package.loaded['chicc/unification'] = __P_;local __S_ = __P_._package;local __T_ = __P_._types;__S_.newConstraint={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}},{tag="typeref",ids={{"chicc","unification","Constraint"}}}},typeParams={},defaults=0}'};__S_.constraintWithReplacedVariable={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","unification","Constraint"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","unification","Constraint"}}}},typeParams={},defaults=0}'};__S_.typeDescr={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.sectionToCodePoint={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"}},typeParams={},defaults=0}'};__S_.idsIntersect={public=false,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="typeref",ids={{"chicc","types","TypeId"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="array",elem={tag="typeref",ids={{"chicc","types","TypeId"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.throwMessage={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","messages","Message"}}},{tag="unit"}},typeParams={},defaults=0}'};__S_.ufNew={public=true,mutable=false,type='{tag="fn",types={{tag="any"}},typeParams={},defaults=0}'};__S_.varKey={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.ufBind={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="unit"}},typeParams={},defaults=0}'};__S_.ufFind={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.ufResolve={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.ufAllBindings={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="array",elem={tag="typeref",ids={{"chicc","unification","Binding"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.lowerVariable={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="int"},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.ufLowerAbove={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="int"},{tag="bool"}},typeParams={},defaults=0}'};__S_.ufBindVariable={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="unit"}},typeParams={},defaults=0}'};__S_.ufResolveConstraint={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="typeref",ids={{"chicc","unification","Constraint"}}},{tag="typeref",ids={{"chicc","unification","Constraint"}}}},typeParams={},defaults=0}'};__S_.copyHistoryWith={public=false,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}},{tag="any"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.isAssumed={public=false,mutable=false,type='{tag="fn",types={{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","unification","Assumed"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.unifyCore={public=false,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}},{tag="any"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","unification","Assumed"}}},rhs={tag="unit"},typeParams={}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","messages","Message"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.tryUnify={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="array",elem={tag="typeref",ids={{"chicc","unification","Binding"}}},typeParams={},ids={{"std","lang.array","array"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.unifyWithUf={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.unify={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}},{tag="array",elem={tag="typeref",ids={{"chicc","unification","Binding"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__T_.Constraint='{tag="record",ids={{"chicc","unification","Constraint"}},fields={{"expected",{tag="any"}},{"actual",{tag="any"}},{"section",{tag="any"}},{"history",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}}},typeParams={}}';__T_.Binding='{tag="record",ids={{"chicc","unification","Binding"}},fields={{"variable",{tag="typeref",ids={{"chicc","types","Type"}}}},{"replacement",{tag="typeref",ids={{"chicc","types","Type"}}}}},typeParams={}}';__T_.Assumed='{tag="rec",var={tag="var",name="chicc::unification::Assumed",level=-1},type={tag="record",ids={{"chicc","unification","Assumed"}},fields={{"expected",{tag="typeref",ids={{"chicc","types","Type"}}}},{"actual",{tag="typeref",ids={{"chicc","types","Type"}}}},{"rest",{tag="sum",ids={},lhs={tag="var",name="chicc::unification::Assumed",level=-1},rhs={tag="unit"},typeParams={}}}},typeParams={}}}';local __std__lang = require("std/lang");local __chicc__types = require("chicc/types");local __chicc__source = require("chicc/source");local __std__lang_array = require("std/lang.array");local __std__lang_map = require("std/lang.map");local __chicc__messages = require("chicc/messages");
+ end;local _chi_info=debug.getinfo(_chi_run,'S');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;if string.sub(_chi_source,1,1)=='@' then _chi_source=string.sub(_chi_source,2) end;_chi_line_map[2]=14;_chi_line_map[3]=15;_chi_line_map[4]=14;_chi_line_map[5]=18;_chi_line_map[6]=19;_chi_line_map[7]=18;_chi_line_map[8]=22;_chi_line_map[9]=23;_chi_line_map[10]=22;_chi_line_map[11]=26;_chi_line_map[12]=27;_chi_line_map[13]=26;_chi_line_map[14]=37;_chi_line_map[15]=38;_chi_line_map[16]=37;_chi_line_map[17]=42;_chi_line_map[18]=43;_chi_line_map[19]=42;_chi_line_map[20]=47;_chi_line_map[21]=48;_chi_line_map[22]=47;_chi_line_map[23]=51;_chi_line_map[24]=52;_chi_line_map[25]=51;_chi_line_map[26]=57;_chi_line_map[27]=58;_chi_line_map[28]=57;_chi_line_map[29]=133;_chi_line_map[30]=134;_chi_line_map[31]=133;_chi_line_map[32]=150;_chi_line_map[33]=151;_chi_line_map[34]=152;_chi_line_map[35]=153;_chi_line_map[36]=154;_chi_line_map[37]=150;_chi_line_map[38]=157;_chi_line_map[39]=158;_chi_line_map[40]=159;_chi_line_map[41]=160;_chi_line_map[42]=157;_chi_line_map[43]=163;_chi_line_map[44]=164;_chi_line_map[45]=165;_chi_line_map[46]=166;_chi_line_map[47]=163;_chi_line_map[48]=173;_chi_line_map[49]=174;_chi_line_map[50]=175;_chi_line_map[51]=176;_chi_line_map[52]=177;_chi_line_map[53]=173;_chi_line_map[54]=180;_chi_line_map[55]=181;_chi_line_map[56]=182;_chi_line_map[57]=183;_chi_line_map[58]=180;_chi_line_map[59]=186;_chi_line_map[60]=187;_chi_line_map[61]=188;_chi_line_map[62]=189;_chi_line_map[63]=186;_chi_line_map[64]=192;_chi_line_map[65]=193;_chi_line_map[66]=194;_chi_line_map[67]=195;_chi_line_map[68]=196;_chi_line_map[69]=197;_chi_line_map[70]=192;_chi_line_map[71]=200;_chi_line_map[72]=201;_chi_line_map[73]=202;_chi_line_map[74]=203;_chi_line_map[75]=204;_chi_line_map[76]=205;_chi_line_map[77]=200;_chi_line_map[78]=210;_chi_line_map[79]=211;_chi_line_map[80]=212;_chi_line_map[81]=213;_chi_line_map[82]=214;_chi_line_map[83]=215;_chi_line_map[84]=210;_chi_line_map[85]=219;_chi_line_map[86]=220;_chi_line_map[87]=221;_chi_line_map[88]=222;_chi_line_map[89]=223;_chi_line_map[90]=224;_chi_line_map[91]=225;_chi_line_map[92]=226;_chi_line_map[93]=227;_chi_line_map[94]=219;_chi_line_map[95]=230;_chi_line_map[96]=231;_chi_line_map[97]=232;_chi_line_map[98]=233;_chi_line_map[99]=234;_chi_line_map[100]=235;_chi_line_map[101]=230;_chi_line_map[102]=238;_chi_line_map[103]=239;_chi_line_map[104]=240;_chi_line_map[105]=241;_chi_line_map[106]=238;_chi_line_map[107]=244;_chi_line_map[108]=245;_chi_line_map[109]=246;_chi_line_map[110]=247;_chi_line_map[111]=248;_chi_line_map[112]=244;_chi_line_map[113]=251;_chi_line_map[114]=252;_chi_line_map[115]=253;_chi_line_map[116]=254;_chi_line_map[117]=255;_chi_line_map[118]=256;_chi_line_map[119]=251;_chi_line_map[120]=259;_chi_line_map[121]=260;_chi_line_map[122]=261;_chi_line_map[123]=262;_chi_line_map[124]=263;_chi_line_map[125]=264;_chi_line_map[126]=259;_chi_line_map[127]=267;_chi_line_map[128]=268;_chi_line_map[129]=269;_chi_line_map[130]=270;_chi_line_map[131]=271;_chi_line_map[132]=267;_chi_line_map[133]=274;_chi_line_map[134]=275;_chi_line_map[135]=276;_chi_line_map[136]=277;_chi_line_map[137]=278;_chi_line_map[138]=274;_chi_line_map[139]=281;_chi_line_map[140]=282;_chi_line_map[141]=283;_chi_line_map[142]=284;_chi_line_map[143]=285;_chi_line_map[144]=281;_chi_line_map[145]=288;_chi_line_map[146]=289;_chi_line_map[147]=290;_chi_line_map[148]=291;_chi_line_map[149]=292;_chi_line_map[150]=293;_chi_line_map[151]=294;_chi_line_map[152]=295;_chi_line_map[153]=288;_chi_line_map[154]=298;_chi_line_map[155]=299;_chi_line_map[156]=298;_chi_line_map[157]=302;_chi_line_map[158]=303;_chi_line_map[159]=302;_chi_line_map[160]=306;_chi_line_map[161]=307;_chi_line_map[162]=308;_chi_line_map[163]=309;_chi_line_map[164]=310;_chi_line_map[165]=306;_chi_line_map[166]=313;_chi_line_map[167]=314;_chi_line_map[168]=315;_chi_line_map[169]=316;_chi_line_map[170]=317;_chi_line_map[171]=318;_chi_line_map[172]=313;_chi_line_map[173]=321;_chi_line_map[174]=322;_chi_line_map[175]=323;_chi_line_map[176]=324;_chi_line_map[177]=325;_chi_line_map[178]=321;_chi_line_map[179]=328;_chi_line_map[180]=329;_chi_line_map[181]=330;_chi_line_map[182]=331;_chi_line_map[183]=332;_chi_line_map[184]=333;_chi_line_map[185]=334;_chi_line_map[186]=328;_chi_line_map[187]=337;_chi_line_map[188]=338;_chi_line_map[189]=339;_chi_line_map[190]=340;_chi_line_map[191]=341;_chi_line_map[192]=337;_chi_line_map[193]=344;_chi_line_map[194]=345;_chi_line_map[195]=346;_chi_line_map[196]=347;_chi_line_map[197]=344;_chi_line_map[198]=350;_chi_line_map[199]=351;_chi_line_map[200]=350;_chi_line_map[201]=354;_chi_line_map[202]=355;_chi_line_map[203]=354;_chi_line_map[204]=358;_chi_line_map[205]=359;_chi_line_map[206]=360;_chi_line_map[207]=361;_chi_line_map[208]=362;_chi_line_map[209]=363;_chi_line_map[210]=364;_chi_line_map[211]=365;_chi_line_map[212]=366;_chi_line_map[213]=367;_chi_line_map[214]=368;_chi_line_map[215]=369;_chi_line_map[216]=370;_chi_line_map[217]=371;_chi_line_map[218]=372;_chi_line_map[219]=373;_chi_line_map[220]=374;_chi_line_map[221]=375;_chi_line_map[222]=376;_chi_line_map[223]=377;_chi_line_map[224]=378;_chi_line_map[225]=379;_chi_line_map[226]=380;_chi_line_map[227]=381;_chi_line_map[228]=382;_chi_line_map[229]=383;_chi_line_map[230]=384;_chi_line_map[231]=385;_chi_line_map[232]=386;_chi_line_map[233]=387;_chi_line_map[234]=388;_chi_line_map[235]=389;_chi_line_map[236]=390;_chi_line_map[237]=391;_chi_line_map[238]=392;_chi_line_map[239]=393;_chi_line_map[240]=394;_chi_line_map[241]=395;_chi_line_map[242]=396;_chi_line_map[243]=397;_chi_line_map[244]=398;_chi_line_map[245]=399;_chi_line_map[246]=400;_chi_line_map[247]=401;_chi_line_map[248]=402;_chi_line_map[249]=403;_chi_line_map[250]=404;_chi_line_map[251]=405;_chi_line_map[252]=406;_chi_line_map[253]=407;_chi_line_map[254]=408;_chi_line_map[255]=410;_chi_line_map[256]=411;_chi_line_map[257]=412;_chi_line_map[258]=413;_chi_line_map[259]=415;_chi_line_map[260]=416;_chi_line_map[261]=415;_chi_line_map[262]=423;_chi_line_map[263]=424;_chi_line_map[264]=425;_chi_line_map[265]=426;_chi_line_map[266]=427;_chi_line_map[267]=428;_chi_line_map[268]=427;_chi_line_map[269]=430;_chi_line_map[270]=427;_chi_line_map[271]=432;_chi_line_map[272]=427;_chi_line_map[273]=434;_chi_line_map[274]=427;_chi_line_map[275]=436;_chi_line_map[276]=437;_chi_line_map[277]=427;_chi_line_map[278]=441;_chi_line_map[279]=442;_chi_line_map[280]=443;_chi_line_map[281]=442;_chi_line_map[282]=445;_chi_line_map[283]=427;_chi_line_map[284]=447;_chi_line_map[285]=427;_chi_line_map[286]=449;_chi_line_map[287]=450;_chi_line_map[288]=427;_chi_line_map[289]=452;_chi_line_map[290]=427;_chi_line_map[291]=454;_chi_line_map[292]=455;_chi_line_map[293]=456;_chi_line_map[294]=427;_chi_line_map[295]=458;_chi_line_map[296]=459;_chi_line_map[297]=427;_chi_line_map[298]=461;_chi_line_map[299]=427;_chi_line_map[300]=463;_chi_line_map[301]=427;_chi_line_map[302]=465;_chi_line_map[303]=466;_chi_line_map[304]=427;_chi_line_map[305]=468;_chi_line_map[306]=469;_chi_line_map[307]=470;_chi_line_map[308]=471;_chi_line_map[309]=427;_chi_line_map[310]=473;_chi_line_map[311]=474;_chi_line_map[312]=427;_chi_line_map[313]=476;_chi_line_map[314]=477;_chi_line_map[315]=478;_chi_line_map[316]=427;_chi_line_map[317]=480;_chi_line_map[318]=481;_chi_line_map[319]=427;_chi_line_map[320]=483;_chi_line_map[321]=427;_chi_line_map[322]=485;_chi_line_map[323]=423;_chi_line_map[324]=488;_chi_line_map[325]=489;_chi_line_map[326]=490;_chi_line_map[327]=491;_chi_line_map[328]=490;_chi_line_map[329]=492;_chi_line_map[330]=490;_chi_line_map[331]=493;_chi_line_map[332]=490;_chi_line_map[333]=488;_chi_line_map[334]=511;_chi_line_map[335]=512;_chi_line_map[336]=511;_chi_line_map[337]=515;_chi_line_map[338]=516;_chi_line_map[339]=515;_chi_line_map[340]=519;_chi_line_map[341]=520;_chi_line_map[342]=519;_chi_line_map[343]=523;_chi_line_map[344]=524;_chi_line_map[345]=523;_chi_line_map[346]=527;_chi_line_map[347]=528;_chi_line_map[348]=527;local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..':'.._chi_generated..':'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..':'.._chi_source_line..':'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;return _chi_result end;m7();function m8() local _chi_line_map={};local function _chi_run()local __P_ = package.loaded['chicc/unification'] or {_package={},_types={}};package.loaded['chicc/unification'] = __P_;local __S_ = __P_._package;local __T_ = __P_._types;__S_.newConstraint={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}},{tag="typeref",ids={{"chicc","unification","Constraint"}}}},typeParams={},defaults=0}'};__S_.constraintWithReplacedVariable={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","unification","Constraint"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","unification","Constraint"}}}},typeParams={},defaults=0}'};__S_.typeDescr={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.sectionToCodePoint={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"}},typeParams={},defaults=0}'};__S_.idsIntersect={public=false,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="typeref",ids={{"chicc","types","TypeId"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="array",elem={tag="typeref",ids={{"chicc","types","TypeId"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.throwMessage={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","messages","Message"}}},{tag="unit"}},typeParams={},defaults=0}'};__S_.ufNew={public=true,mutable=false,type='{tag="fn",types={{tag="any"}},typeParams={},defaults=0}'};__S_.varKey={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.ufBind={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="unit"}},typeParams={},defaults=0}'};__S_.ufFind={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.ufResolve={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.ufAllBindings={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="array",elem={tag="typeref",ids={{"chicc","unification","Binding"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.lowerVariable={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="int"},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.ufLowerAbove={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="int"},{tag="bool"}},typeParams={},defaults=0}'};__S_.ufBindVariable={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="unit"}},typeParams={},defaults=0}'};__S_.ufResolveConstraint={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="typeref",ids={{"chicc","unification","Constraint"}}},{tag="typeref",ids={{"chicc","unification","Constraint"}}}},typeParams={},defaults=0}'};__S_.copyHistoryWith={public=false,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}},{tag="any"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.isAssumed={public=false,mutable=false,type='{tag="fn",types={{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","unification","Assumed"}}},rhs={tag="unit"},typeParams={}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.unifyCore={public=false,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}},{tag="any"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","unification","Assumed"}}},rhs={tag="unit"},typeParams={}},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","messages","Message"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.tryUnify={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}},{tag="sum",ids={},lhs={tag="array",elem={tag="typeref",ids={{"chicc","unification","Binding"}}},typeParams={},ids={{"std","lang.array","array"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.unifyWithUf={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.unify={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}},{tag="array",elem={tag="typeref",ids={{"chicc","unification","Binding"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__T_.Constraint='{tag="record",ids={{"chicc","unification","Constraint"}},fields={{"expected",{tag="any"}},{"actual",{tag="any"}},{"section",{tag="any"}},{"history",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}}},typeParams={}}';__T_.Binding='{tag="record",ids={{"chicc","unification","Binding"}},fields={{"variable",{tag="typeref",ids={{"chicc","types","Type"}}}},{"replacement",{tag="typeref",ids={{"chicc","types","Type"}}}}},typeParams={}}';__T_.Assumed='{tag="rec",var={tag="var",name="chicc::unification::Assumed",level=-1},type={tag="record",ids={{"chicc","unification","Assumed"}},fields={{"expected",{tag="typeref",ids={{"chicc","types","Type"}}}},{"actual",{tag="typeref",ids={{"chicc","types","Type"}}}},{"rest",{tag="sum",ids={},lhs={tag="var",name="chicc::unification::Assumed",level=-1},rhs={tag="unit"},typeParams={}}}},typeParams={}}}';local __std__lang = require("std/lang");local __chicc__types = require("chicc/types");local __chicc__source = require("chicc/source");local __std__lang_array = require("std/lang.array");local __std__lang_map = require("std/lang.map");local __chicc__messages = require("chicc/messages");
 do function __P_.newConstraint(expected,actual,section,history)
 local _chi_tmp0={expected=expected,actual=actual,section=section,history=history};setmetatable(_chi_tmp0, record_meta_table);return _chi_tmp0 end;
  end;
@@ -4660,7 +4666,7 @@ do local _chi_tmp282={ typeId = typeId, aliasType = finalType };_chi_tmp272=_chi
 do local _chi_tmp283=__std__lang_map.put(typeTable.aliases,aliasName,finalAlias); end;
 return finalType end;
 return __P_
- end;local _chi_info=debug.getinfo(_chi_run,'S');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;if string.sub(_chi_source,1,1)=='@' then _chi_source=string.sub(_chi_source,2) end;_chi_line_map[2]=20;_chi_line_map[3]=21;_chi_line_map[4]=20;_chi_line_map[5]=28;_chi_line_map[6]=29;_chi_line_map[7]=28;_chi_line_map[8]=36;_chi_line_map[9]=37;_chi_line_map[10]=38;_chi_line_map[11]=36;_chi_line_map[12]=41;_chi_line_map[13]=42;_chi_line_map[14]=43;_chi_line_map[15]=44;_chi_line_map[16]=41;_chi_line_map[17]=47;_chi_line_map[18]=48;_chi_line_map[19]=49;_chi_line_map[20]=47;_chi_line_map[21]=52;_chi_line_map[22]=53;_chi_line_map[23]=54;_chi_line_map[24]=55;_chi_line_map[25]=52;_chi_line_map[26]=58;_chi_line_map[27]=59;_chi_line_map[28]=60;_chi_line_map[29]=58;_chi_line_map[30]=63;_chi_line_map[31]=64;_chi_line_map[32]=65;_chi_line_map[33]=66;_chi_line_map[34]=63;_chi_line_map[35]=73;_chi_line_map[36]=74;_chi_line_map[37]=75;_chi_line_map[38]=73;_chi_line_map[39]=78;_chi_line_map[40]=79;_chi_line_map[41]=80;_chi_line_map[42]=81;_chi_line_map[43]=78;_chi_line_map[44]=84;_chi_line_map[45]=85;_chi_line_map[46]=84;_chi_line_map[47]=88;_chi_line_map[48]=89;_chi_line_map[49]=90;_chi_line_map[50]=91;_chi_line_map[51]=92;_chi_line_map[52]=91;_chi_line_map[53]=94;_chi_line_map[54]=95;_chi_line_map[55]=96;_chi_line_map[56]=95;_chi_line_map[57]=98;_chi_line_map[58]=95;_chi_line_map[59]=91;_chi_line_map[60]=88;_chi_line_map[61]=103;_chi_line_map[62]=104;_chi_line_map[63]=105;_chi_line_map[64]=103;_chi_line_map[65]=114;_chi_line_map[66]=115;_chi_line_map[67]=116;_chi_line_map[68]=114;_chi_line_map[69]=119;_chi_line_map[70]=120;_chi_line_map[71]=121;_chi_line_map[72]=122;_chi_line_map[73]=119;_chi_line_map[74]=125;_chi_line_map[75]=126;_chi_line_map[76]=127;_chi_line_map[77]=125;_chi_line_map[78]=130;_chi_line_map[79]=131;_chi_line_map[80]=132;_chi_line_map[81]=133;_chi_line_map[82]=134;_chi_line_map[83]=133;_chi_line_map[84]=136;_chi_line_map[85]=137;_chi_line_map[86]=138;_chi_line_map[87]=137;_chi_line_map[88]=140;_chi_line_map[89]=141;_chi_line_map[90]=137;_chi_line_map[91]=133;_chi_line_map[92]=130;_chi_line_map[93]=158;_chi_line_map[94]=159;_chi_line_map[95]=160;_chi_line_map[96]=161;_chi_line_map[97]=162;_chi_line_map[98]=165;_chi_line_map[99]=166;_chi_line_map[100]=167;_chi_line_map[101]=168;_chi_line_map[102]=169;_chi_line_map[103]=170;_chi_line_map[104]=171;_chi_line_map[105]=173;_chi_line_map[106]=174;_chi_line_map[107]=173;_chi_line_map[108]=177;_chi_line_map[109]=178;_chi_line_map[110]=179;_chi_line_map[111]=180;_chi_line_map[112]=181;_chi_line_map[113]=182;_chi_line_map[114]=183;_chi_line_map[115]=184;_chi_line_map[116]=185;_chi_line_map[117]=184;_chi_line_map[118]=187;_chi_line_map[119]=184;_chi_line_map[120]=189;_chi_line_map[121]=192;_chi_line_map[122]=193;_chi_line_map[123]=194;_chi_line_map[124]=193;_chi_line_map[125]=196;_chi_line_map[126]=180;_chi_line_map[127]=198;_chi_line_map[128]=167;_chi_line_map[129]=201;_chi_line_map[130]=158;_chi_line_map[131]=206;_chi_line_map[132]=208;_chi_line_map[133]=209;_chi_line_map[134]=210;_chi_line_map[135]=209;_chi_line_map[136]=213;_chi_line_map[137]=214;_chi_line_map[138]=215;_chi_line_map[139]=216;_chi_line_map[140]=217;_chi_line_map[141]=218;_chi_line_map[142]=219;_chi_line_map[143]=221;_chi_line_map[144]=222;_chi_line_map[145]=215;_chi_line_map[146]=225;_chi_line_map[147]=226;_chi_line_map[148]=227;_chi_line_map[149]=228;_chi_line_map[150]=229;_chi_line_map[151]=230;_chi_line_map[152]=215;_chi_line_map[153]=209;_chi_line_map[154]=206;_chi_line_map[155]=235;_chi_line_map[156]=236;_chi_line_map[157]=235;_chi_line_map[158]=239;_chi_line_map[159]=240;_chi_line_map[160]=239;_chi_line_map[161]=246;_chi_line_map[162]=247;_chi_line_map[163]=248;_chi_line_map[164]=249;_chi_line_map[165]=250;_chi_line_map[166]=251;_chi_line_map[167]=246;_chi_line_map[168]=254;_chi_line_map[169]=255;_chi_line_map[170]=256;_chi_line_map[171]=254;_chi_line_map[172]=259;_chi_line_map[173]=260;_chi_line_map[174]=261;_chi_line_map[175]=262;_chi_line_map[176]=259;_chi_line_map[177]=284;_chi_line_map[178]=285;_chi_line_map[179]=284;_chi_line_map[180]=292;_chi_line_map[181]=293;_chi_line_map[182]=292;_chi_line_map[183]=296;_chi_line_map[184]=297;_chi_line_map[185]=296;_chi_line_map[186]=302;_chi_line_map[187]=303;_chi_line_map[188]=304;_chi_line_map[189]=305;_chi_line_map[190]=306;_chi_line_map[191]=307;_chi_line_map[192]=306;_chi_line_map[193]=309;_chi_line_map[194]=305;_chi_line_map[195]=311;_chi_line_map[196]=302;_chi_line_map[197]=314;_chi_line_map[198]=315;_chi_line_map[199]=317;_chi_line_map[200]=318;_chi_line_map[201]=317;_chi_line_map[202]=320;_chi_line_map[203]=321;_chi_line_map[204]=322;_chi_line_map[205]=321;_chi_line_map[206]=324;_chi_line_map[207]=321;_chi_line_map[208]=326;_chi_line_map[209]=321;_chi_line_map[210]=328;_chi_line_map[211]=321;_chi_line_map[212]=330;_chi_line_map[213]=321;_chi_line_map[214]=332;_chi_line_map[215]=321;_chi_line_map[216]=334;_chi_line_map[217]=321;_chi_line_map[218]=336;_chi_line_map[219]=337;_chi_line_map[220]=338;_chi_line_map[221]=339;_chi_line_map[222]=337;_chi_line_map[223]=341;_chi_line_map[224]=342;_chi_line_map[225]=337;_chi_line_map[226]=321;_chi_line_map[227]=317;_chi_line_map[228]=346;_chi_line_map[229]=347;_chi_line_map[230]=348;_chi_line_map[231]=350;_chi_line_map[232]=351;_chi_line_map[233]=352;_chi_line_map[234]=353;_chi_line_map[235]=350;_chi_line_map[236]=356;_chi_line_map[237]=357;_chi_line_map[238]=358;_chi_line_map[239]=359;_chi_line_map[240]=361;_chi_line_map[241]=362;_chi_line_map[242]=363;_chi_line_map[243]=364;_chi_line_map[244]=365;_chi_line_map[245]=366;_chi_line_map[246]=367;_chi_line_map[247]=368;_chi_line_map[248]=369;_chi_line_map[249]=370;_chi_line_map[250]=371;_chi_line_map[251]=372;_chi_line_map[252]=373;_chi_line_map[253]=374;_chi_line_map[254]=368;_chi_line_map[255]=376;_chi_line_map[256]=377;_chi_line_map[257]=376;_chi_line_map[258]=379;_chi_line_map[259]=376;_chi_line_map[260]=358;_chi_line_map[261]=383;_chi_line_map[262]=384;_chi_line_map[263]=358;_chi_line_map[264]=350;_chi_line_map[265]=317;_chi_line_map[266]=388;_chi_line_map[267]=389;_chi_line_map[268]=390;_chi_line_map[269]=391;_chi_line_map[270]=392;_chi_line_map[271]=393;_chi_line_map[272]=394;_chi_line_map[273]=395;_chi_line_map[274]=396;_chi_line_map[275]=397;_chi_line_map[276]=398;_chi_line_map[277]=394;_chi_line_map[278]=400;_chi_line_map[279]=401;_chi_line_map[280]=317;_chi_line_map[281]=403;_chi_line_map[282]=404;_chi_line_map[283]=405;_chi_line_map[284]=406;_chi_line_map[285]=407;_chi_line_map[286]=317;_chi_line_map[287]=409;_chi_line_map[288]=410;_chi_line_map[289]=411;_chi_line_map[290]=412;_chi_line_map[291]=413;_chi_line_map[292]=414;_chi_line_map[293]=415;_chi_line_map[294]=416;_chi_line_map[295]=417;_chi_line_map[296]=418;_chi_line_map[297]=419;_chi_line_map[298]=420;_chi_line_map[299]=413;_chi_line_map[300]=422;_chi_line_map[301]=317;_chi_line_map[302]=424;_chi_line_map[303]=425;_chi_line_map[304]=317;_chi_line_map[305]=314;_chi_line_map[306]=429;_chi_line_map[307]=431;_chi_line_map[308]=432;_chi_line_map[309]=431;_chi_line_map[310]=435;_chi_line_map[311]=436;_chi_line_map[312]=439;_chi_line_map[313]=440;_chi_line_map[314]=441;_chi_line_map[315]=444;_chi_line_map[316]=447;_chi_line_map[317]=448;_chi_line_map[318]=449;_chi_line_map[319]=448;_chi_line_map[320]=451;_chi_line_map[321]=448;_chi_line_map[322]=455;_chi_line_map[323]=456;_chi_line_map[324]=458;_chi_line_map[325]=429;local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..':'.._chi_generated..':'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..':'.._chi_source_line..':'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;return _chi_result end;m12();function m13() local _chi_line_map={};local function _chi_run()local __P_ = package.loaded['chicc/emitter'] or {_package={},_types={}};package.loaded['chicc/emitter'] = __P_;local __S_ = __P_._package;local __T_ = __P_._types;__S_.newState={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Program"}}},{tag="typeref",ids={{"chicc","emitter","EmitterState"}}}},typeParams={},defaults=0}'};__S_.trimBuilderSuffix={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="unit"}},typeParams={},defaults=0}'};__S_.emit={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="string"},{tag="unit"}},typeParams={},defaults=0}'};__S_.emitCapturedSegments={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="array",elem={tag="record",ids={},fields={{"sourceLine",{tag="int"}},{"code",{tag="string"}}},typeParams={}},typeParams={},ids={{"std","lang.array","array"}}},{tag="unit"}},typeParams={},defaults=0}'};__S_.nextTmpName={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.nameSet={public=false,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}},{tag="record",ids={{"std","lang.map","Map"}},fields={{"class",{tag="string"}},{"map",{tag="any"}}},typeParams={"K","V"}}},typeParams={},defaults=0}'};__S_.luaKeywords={public=false,mutable=false,type='{tag="record",ids={{"std","lang.map","Map"}},fields={{"class",{tag="string"}},{"map",{tag="any"}}},typeParams={"K","V"}}'};__S_.luaBuiltins={public=false,mutable=false,type='{tag="record",ids={{"std","lang.map","Map"}},fields={{"class",{tag="string"}},{"map",{tag="any"}}},typeParams={"K","V"}}'};__S_.luaName={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.fieldKey={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.fieldSuffix={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.topLevelName={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.modName={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.pkgName={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.packagePath={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.localPackagePath={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.localQualifiedName={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.normaliseEffectName={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.emitExpr={public=true,mutable=true,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.escapeLuaString={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.isTemporary={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="bool"}},typeParams={},defaults=0}'};__S_.mayMutate={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.emitOperands={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.emitAtom={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitInterpolatedString={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.targetName={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Target"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.declaresLocal={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.emitVariableAccess={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitFn={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"},{tag="bool"},{tag="string"}},typeParams={},defaults=0}'};__S_.emitNameDeclaration={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitAssignment={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.isRawLuaCall={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"},{tag="bool"}},typeParams={},defaults=0}'};__S_.containsRawLuaCall={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"},{tag="bool"}},typeParams={},defaults=0}'};__S_.scopableStatement={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.emitScopedStatement={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.isExprTerminator={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.isBlockTerminator={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.emitBlock={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitFnCall={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitBreak={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitContinue={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitReturn={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.mapInfixOperation={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"},{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.emitIfElse={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.extractConditionThunks={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitLoop={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="string"},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="int"},{tag="unit"}},typeParams={},defaults=0}'};__S_.emitWhile={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitForLoop={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitShortCircuit={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitInfixOp={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitPrefixOp={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitCast={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitCreateArray={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitCreateRecord={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitIndexOperator={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitIndexAssignment={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitFieldAccess={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitFieldAssignment={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitIs={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitEffectDefinition={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitHandle={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitPackageInfo={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.collectRequires={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.topLevelWrappable={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.emitProgram={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Program"}}},{tag="bool"},{tag="string"}},typeParams={},defaults=0}'};__T_.EmitterState='{tag="record",ids={{"chicc","emitter","EmitterState"}},fields={{"sb",{tag="typeref",ids={{"chicc","util","StringBuilder"}}}},{"generatedLine",{tag="int"}},{"generatedLineSource",{tag="int"}},{"statementSourceLine",{tag="int"}},{"lineMap",{tag="array",elem={tag="record",ids={},fields={{"generatedLine",{tag="int"}},{"sourceLine",{tag="int"}}},typeParams={}},typeParams={},ids={{"std","lang.array","array"}}}},{"trackSourceLines",{tag="bool"}},{"captureOutput",{tag="bool"}},{"captureSegments",{tag="array",elem={tag="record",ids={},fields={{"sourceLine",{tag="int"}},{"code",{tag="string"}}},typeParams={}},typeParams={},ids={{"std","lang.array","array"}}}},{"nextTmpId",{tag="int"}},{"nextLoopId",{tag="int"}},{"currentLoopId",{tag="int"}},{"discardReturnValues",{tag="bool"}},{"program",{tag="typeref",ids={{"chicc","ast","Program"}}}}},typeParams={}}';local __chicc__util = require("chicc/util");local __std__lang_array = require("std/lang.array");local __std__lang_string = require("std/lang.string");local __std__lang_map = require("std/lang.map");local __chicc__ast = require("chicc/ast");local __std__lang = require("std/lang");local __chicc__types = require("chicc/types");
+ end;local _chi_info=debug.getinfo(_chi_run,'S');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;if string.sub(_chi_source,1,1)=='@' then _chi_source=string.sub(_chi_source,2) end;_chi_line_map[2]=20;_chi_line_map[3]=21;_chi_line_map[4]=20;_chi_line_map[5]=28;_chi_line_map[6]=29;_chi_line_map[7]=28;_chi_line_map[8]=36;_chi_line_map[9]=37;_chi_line_map[10]=38;_chi_line_map[11]=36;_chi_line_map[12]=41;_chi_line_map[13]=42;_chi_line_map[14]=43;_chi_line_map[15]=44;_chi_line_map[16]=41;_chi_line_map[17]=47;_chi_line_map[18]=48;_chi_line_map[19]=49;_chi_line_map[20]=47;_chi_line_map[21]=52;_chi_line_map[22]=53;_chi_line_map[23]=54;_chi_line_map[24]=55;_chi_line_map[25]=52;_chi_line_map[26]=58;_chi_line_map[27]=59;_chi_line_map[28]=60;_chi_line_map[29]=58;_chi_line_map[30]=63;_chi_line_map[31]=64;_chi_line_map[32]=65;_chi_line_map[33]=66;_chi_line_map[34]=63;_chi_line_map[35]=73;_chi_line_map[36]=74;_chi_line_map[37]=75;_chi_line_map[38]=73;_chi_line_map[39]=78;_chi_line_map[40]=79;_chi_line_map[41]=80;_chi_line_map[42]=81;_chi_line_map[43]=78;_chi_line_map[44]=84;_chi_line_map[45]=85;_chi_line_map[46]=84;_chi_line_map[47]=88;_chi_line_map[48]=89;_chi_line_map[49]=90;_chi_line_map[50]=91;_chi_line_map[51]=92;_chi_line_map[52]=91;_chi_line_map[53]=94;_chi_line_map[54]=95;_chi_line_map[55]=96;_chi_line_map[56]=95;_chi_line_map[57]=98;_chi_line_map[58]=95;_chi_line_map[59]=91;_chi_line_map[60]=88;_chi_line_map[61]=103;_chi_line_map[62]=104;_chi_line_map[63]=105;_chi_line_map[64]=103;_chi_line_map[65]=114;_chi_line_map[66]=115;_chi_line_map[67]=116;_chi_line_map[68]=114;_chi_line_map[69]=119;_chi_line_map[70]=120;_chi_line_map[71]=121;_chi_line_map[72]=122;_chi_line_map[73]=119;_chi_line_map[74]=125;_chi_line_map[75]=126;_chi_line_map[76]=127;_chi_line_map[77]=125;_chi_line_map[78]=130;_chi_line_map[79]=131;_chi_line_map[80]=132;_chi_line_map[81]=133;_chi_line_map[82]=134;_chi_line_map[83]=133;_chi_line_map[84]=136;_chi_line_map[85]=137;_chi_line_map[86]=138;_chi_line_map[87]=137;_chi_line_map[88]=140;_chi_line_map[89]=141;_chi_line_map[90]=137;_chi_line_map[91]=133;_chi_line_map[92]=130;_chi_line_map[93]=158;_chi_line_map[94]=159;_chi_line_map[95]=160;_chi_line_map[96]=161;_chi_line_map[97]=162;_chi_line_map[98]=165;_chi_line_map[99]=166;_chi_line_map[100]=167;_chi_line_map[101]=168;_chi_line_map[102]=169;_chi_line_map[103]=170;_chi_line_map[104]=171;_chi_line_map[105]=173;_chi_line_map[106]=174;_chi_line_map[107]=173;_chi_line_map[108]=177;_chi_line_map[109]=178;_chi_line_map[110]=179;_chi_line_map[111]=180;_chi_line_map[112]=181;_chi_line_map[113]=182;_chi_line_map[114]=183;_chi_line_map[115]=184;_chi_line_map[116]=185;_chi_line_map[117]=184;_chi_line_map[118]=187;_chi_line_map[119]=184;_chi_line_map[120]=189;_chi_line_map[121]=192;_chi_line_map[122]=193;_chi_line_map[123]=194;_chi_line_map[124]=193;_chi_line_map[125]=196;_chi_line_map[126]=180;_chi_line_map[127]=198;_chi_line_map[128]=167;_chi_line_map[129]=201;_chi_line_map[130]=158;_chi_line_map[131]=206;_chi_line_map[132]=208;_chi_line_map[133]=209;_chi_line_map[134]=210;_chi_line_map[135]=209;_chi_line_map[136]=213;_chi_line_map[137]=214;_chi_line_map[138]=215;_chi_line_map[139]=216;_chi_line_map[140]=217;_chi_line_map[141]=218;_chi_line_map[142]=219;_chi_line_map[143]=221;_chi_line_map[144]=222;_chi_line_map[145]=215;_chi_line_map[146]=225;_chi_line_map[147]=226;_chi_line_map[148]=227;_chi_line_map[149]=228;_chi_line_map[150]=229;_chi_line_map[151]=230;_chi_line_map[152]=215;_chi_line_map[153]=209;_chi_line_map[154]=206;_chi_line_map[155]=235;_chi_line_map[156]=236;_chi_line_map[157]=235;_chi_line_map[158]=239;_chi_line_map[159]=240;_chi_line_map[160]=239;_chi_line_map[161]=246;_chi_line_map[162]=247;_chi_line_map[163]=248;_chi_line_map[164]=249;_chi_line_map[165]=250;_chi_line_map[166]=251;_chi_line_map[167]=246;_chi_line_map[168]=254;_chi_line_map[169]=255;_chi_line_map[170]=256;_chi_line_map[171]=254;_chi_line_map[172]=259;_chi_line_map[173]=260;_chi_line_map[174]=261;_chi_line_map[175]=262;_chi_line_map[176]=259;_chi_line_map[177]=284;_chi_line_map[178]=285;_chi_line_map[179]=284;_chi_line_map[180]=292;_chi_line_map[181]=293;_chi_line_map[182]=292;_chi_line_map[183]=296;_chi_line_map[184]=297;_chi_line_map[185]=296;_chi_line_map[186]=302;_chi_line_map[187]=303;_chi_line_map[188]=304;_chi_line_map[189]=305;_chi_line_map[190]=306;_chi_line_map[191]=307;_chi_line_map[192]=306;_chi_line_map[193]=309;_chi_line_map[194]=305;_chi_line_map[195]=311;_chi_line_map[196]=302;_chi_line_map[197]=314;_chi_line_map[198]=315;_chi_line_map[199]=317;_chi_line_map[200]=318;_chi_line_map[201]=317;_chi_line_map[202]=320;_chi_line_map[203]=321;_chi_line_map[204]=322;_chi_line_map[205]=321;_chi_line_map[206]=324;_chi_line_map[207]=321;_chi_line_map[208]=326;_chi_line_map[209]=321;_chi_line_map[210]=328;_chi_line_map[211]=321;_chi_line_map[212]=330;_chi_line_map[213]=321;_chi_line_map[214]=332;_chi_line_map[215]=321;_chi_line_map[216]=334;_chi_line_map[217]=321;_chi_line_map[218]=336;_chi_line_map[219]=337;_chi_line_map[220]=338;_chi_line_map[221]=339;_chi_line_map[222]=337;_chi_line_map[223]=341;_chi_line_map[224]=342;_chi_line_map[225]=337;_chi_line_map[226]=321;_chi_line_map[227]=317;_chi_line_map[228]=346;_chi_line_map[229]=347;_chi_line_map[230]=348;_chi_line_map[231]=350;_chi_line_map[232]=351;_chi_line_map[233]=352;_chi_line_map[234]=353;_chi_line_map[235]=350;_chi_line_map[236]=356;_chi_line_map[237]=357;_chi_line_map[238]=358;_chi_line_map[239]=359;_chi_line_map[240]=361;_chi_line_map[241]=362;_chi_line_map[242]=363;_chi_line_map[243]=364;_chi_line_map[244]=365;_chi_line_map[245]=366;_chi_line_map[246]=367;_chi_line_map[247]=368;_chi_line_map[248]=369;_chi_line_map[249]=370;_chi_line_map[250]=371;_chi_line_map[251]=372;_chi_line_map[252]=373;_chi_line_map[253]=374;_chi_line_map[254]=368;_chi_line_map[255]=376;_chi_line_map[256]=377;_chi_line_map[257]=376;_chi_line_map[258]=379;_chi_line_map[259]=376;_chi_line_map[260]=358;_chi_line_map[261]=383;_chi_line_map[262]=384;_chi_line_map[263]=358;_chi_line_map[264]=350;_chi_line_map[265]=317;_chi_line_map[266]=388;_chi_line_map[267]=389;_chi_line_map[268]=390;_chi_line_map[269]=391;_chi_line_map[270]=392;_chi_line_map[271]=393;_chi_line_map[272]=394;_chi_line_map[273]=395;_chi_line_map[274]=396;_chi_line_map[275]=397;_chi_line_map[276]=398;_chi_line_map[277]=394;_chi_line_map[278]=400;_chi_line_map[279]=401;_chi_line_map[280]=317;_chi_line_map[281]=403;_chi_line_map[282]=404;_chi_line_map[283]=405;_chi_line_map[284]=406;_chi_line_map[285]=407;_chi_line_map[286]=317;_chi_line_map[287]=409;_chi_line_map[288]=410;_chi_line_map[289]=411;_chi_line_map[290]=412;_chi_line_map[291]=413;_chi_line_map[292]=414;_chi_line_map[293]=415;_chi_line_map[294]=416;_chi_line_map[295]=417;_chi_line_map[296]=418;_chi_line_map[297]=419;_chi_line_map[298]=420;_chi_line_map[299]=413;_chi_line_map[300]=422;_chi_line_map[301]=317;_chi_line_map[302]=424;_chi_line_map[303]=425;_chi_line_map[304]=317;_chi_line_map[305]=314;_chi_line_map[306]=429;_chi_line_map[307]=431;_chi_line_map[308]=432;_chi_line_map[309]=431;_chi_line_map[310]=435;_chi_line_map[311]=436;_chi_line_map[312]=439;_chi_line_map[313]=440;_chi_line_map[314]=441;_chi_line_map[315]=444;_chi_line_map[316]=447;_chi_line_map[317]=448;_chi_line_map[318]=449;_chi_line_map[319]=448;_chi_line_map[320]=451;_chi_line_map[321]=448;_chi_line_map[322]=455;_chi_line_map[323]=456;_chi_line_map[324]=458;_chi_line_map[325]=429;local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..':'.._chi_generated..':'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..':'.._chi_source_line..':'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;return _chi_result end;m12();function m13() local _chi_line_map={};local function _chi_run()local __P_ = package.loaded['chicc/emitter'] or {_package={},_types={}};package.loaded['chicc/emitter'] = __P_;local __S_ = __P_._package;local __T_ = __P_._types;__S_.newState={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Program"}}},{tag="typeref",ids={{"chicc","emitter","EmitterState"}}}},typeParams={},defaults=0}'};__S_.trimBuilderSuffix={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="unit"}},typeParams={},defaults=0}'};__S_.emit={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="string"},{tag="unit"}},typeParams={},defaults=0}'};__S_.emitCapturedSegments={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="array",elem={tag="record",ids={},fields={{"sourceLine",{tag="int"}},{"code",{tag="string"}}},typeParams={}},typeParams={},ids={{"std","lang.array","array"}}},{tag="unit"}},typeParams={},defaults=0}'};__S_.nextTmpName={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.nameSet={public=false,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}},{tag="record",ids={{"std","lang.map","Map"}},fields={{"class",{tag="string"}},{"map",{tag="any"}}},typeParams={"K","V"}}},typeParams={},defaults=0}'};__S_.luaKeywords={public=false,mutable=false,type='{tag="record",ids={{"std","lang.map","Map"}},fields={{"class",{tag="string"}},{"map",{tag="any"}}},typeParams={"K","V"}}'};__S_.luaBuiltins={public=false,mutable=false,type='{tag="record",ids={{"std","lang.map","Map"}},fields={{"class",{tag="string"}},{"map",{tag="any"}}},typeParams={"K","V"}}'};__S_.luaName={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.fieldKey={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.fieldSuffix={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.topLevelName={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.modName={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.pkgName={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.packagePath={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.localPackagePath={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.localQualifiedName={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.normaliseEffectName={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.emitExpr={public=true,mutable=true,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.escapeLuaString={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.isTemporary={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="bool"}},typeParams={},defaults=0}'};__S_.mayMutate={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.emitOperands={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.emitAtom={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitInterpolatedString={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.targetName={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Target"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.declaresLocal={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.emitVariableAccess={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitFn={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"},{tag="bool"},{tag="string"}},typeParams={},defaults=0}'};__S_.emitNameDeclaration={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitAssignment={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.isRawLuaCall={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"},{tag="bool"}},typeParams={},defaults=0}'};__S_.containsRawLuaCall={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"},{tag="bool"}},typeParams={},defaults=0}'};__S_.scopableStatement={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.emitScopedStatement={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.isExprTerminator={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.isBlockTerminator={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.emitBlock={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitFnCall={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitBreak={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitContinue={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitReturn={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.mapInfixOperation={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="string"},{tag="string"},{tag="string"},{tag="string"}},typeParams={},defaults=0}'};__S_.emitIfElse={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.extractConditionThunks={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitLoop={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="string"},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="int"},{tag="unit"}},typeParams={},defaults=0}'};__S_.emitWhile={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitForLoop={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitShortCircuit={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitInfixOp={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitPrefixOp={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitCast={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitCreateArray={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitCreateRecord={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitIndexOperator={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitIndexAssignment={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitFieldAccess={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitFieldAssignment={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitIsAgainstType={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="any"},{tag="string"}},typeParams={},defaults=0}'};__S_.emitIs={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitEffectDefinition={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitHandle={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.emitPackageInfo={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.collectRequires={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","emitter","EmitterState"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.topLevelWrappable={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Expr"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.emitProgram={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Program"}}},{tag="bool"},{tag="string"}},typeParams={},defaults=0}'};__T_.EmitterState='{tag="record",ids={{"chicc","emitter","EmitterState"}},fields={{"sb",{tag="typeref",ids={{"chicc","util","StringBuilder"}}}},{"generatedLine",{tag="int"}},{"generatedLineSource",{tag="int"}},{"statementSourceLine",{tag="int"}},{"lineMap",{tag="array",elem={tag="record",ids={},fields={{"generatedLine",{tag="int"}},{"sourceLine",{tag="int"}}},typeParams={}},typeParams={},ids={{"std","lang.array","array"}}}},{"trackSourceLines",{tag="bool"}},{"captureOutput",{tag="bool"}},{"captureSegments",{tag="array",elem={tag="record",ids={},fields={{"sourceLine",{tag="int"}},{"code",{tag="string"}}},typeParams={}},typeParams={},ids={{"std","lang.array","array"}}}},{"nextTmpId",{tag="int"}},{"nextLoopId",{tag="int"}},{"currentLoopId",{tag="int"}},{"discardReturnValues",{tag="bool"}},{"program",{tag="typeref",ids={{"chicc","ast","Program"}}}}},typeParams={}}';local __chicc__util = require("chicc/util");local __std__lang_array = require("std/lang.array");local __std__lang_string = require("std/lang.string");local __std__lang_map = require("std/lang.map");local __chicc__ast = require("chicc/ast");local __std__lang = require("std/lang");local __chicc__types = require("chicc/types");
 do function __P_.newState(prog)
 local _chi_tmp0=__chicc__util.newStringBuilder();local _chi_tmp1={};setmetatable(_chi_tmp1, array_meta_table);local _chi_tmp2={};setmetatable(_chi_tmp2, array_meta_table);local _chi_tmp3={sb=_chi_tmp0,generatedLine=(1),generatedLineSource=(0),statementSourceLine=(0),lineMap=_chi_tmp1,trackSourceLines=(false),captureOutput=(false),captureSegments=_chi_tmp2,nextTmpId=(0),nextLoopId=(0),currentLoopId=(0),discardReturnValues=(false),program=prog};setmetatable(_chi_tmp3, record_meta_table);return _chi_tmp3 end;
  end;
@@ -5463,329 +5469,340 @@ do local _chi_tmp975=__P_.emit(st,valueVar); end;
 do local _chi_tmp976 = ';';local _chi_tmp977=__P_.emit(st,(_chi_tmp976)); end;
 return valueVar end;
  end;
+do function __P_.emitIsAgainstType(value,valueType,checkedType)
+local _chi_tmp978;do local _chi_tmp979;if (checkedType ~= (nil)) then local _chi_tmp980=checkedType.tag;_chi_tmp979=_chi_tmp980 else local _chi_tmp981 = 'unknown';_chi_tmp979=(_chi_tmp981) end;_chi_tmp978=_chi_tmp979 end;local checkedTag=_chi_tmp978;
+do local _chi_tmp982;local _chi_tmp983 = 'sum';if (checkedTag == (_chi_tmp983)) then
+local _chi_tmp984;do local _chi_tmp985=checkedType.lhs;_chi_tmp984=_chi_tmp985 end;local lhs=_chi_tmp984;
+do local _chi_tmp986=checkedType.rhs;_chi_tmp984=_chi_tmp986 end;local rhs=_chi_tmp984;
+do local _chi_tmp987=__P_.emitIsAgainstType(value,valueType,lhs);_chi_tmp984=_chi_tmp987 end;local leftCheck=_chi_tmp984;
+do local _chi_tmp988=__P_.emitIsAgainstType(value,valueType,rhs);_chi_tmp984=_chi_tmp988 end;local rightCheck=_chi_tmp984;
+local _chi_tmp989 = '(';local _chi_tmp990 = ' or ';local _chi_tmp991 = ')';local _chi_tmp992=chi_tostring((_chi_tmp989)) .. chi_tostring(leftCheck) .. chi_tostring((_chi_tmp990)) .. chi_tostring(rightCheck) .. chi_tostring((_chi_tmp991));return _chi_tmp992;
+ end; end;
+do local _chi_tmp993;if (checkedType ~= (nil)) then local _chi_tmp994=(checkedType.tag == 'record' and checkedType.name) or '';_chi_tmp993=_chi_tmp994 else local _chi_tmp995 = '';_chi_tmp993=(_chi_tmp995) end;_chi_tmp978=_chi_tmp993 end;local checkedVariantName=_chi_tmp978;
+do local _chi_tmp996;local _chi_tmp997 = '';if (checkedVariantName ~= (_chi_tmp997)) then
+local _chi_tmp998 = 'chi_is_variant(';local _chi_tmp999 = ', "';local _chi_tmp1000 = '")';local _chi_tmp1001=chi_tostring((_chi_tmp998)) .. chi_tostring(value) .. chi_tostring((_chi_tmp999)) .. chi_tostring(checkedVariantName) .. chi_tostring((_chi_tmp1000));return _chi_tmp1001;
+ end; end;
+do local _chi_tmp1002;if (valueType ~= (nil)) then local _chi_tmp1003=valueType.tag;_chi_tmp1002=_chi_tmp1003 else local _chi_tmp1004 = 'unknown';_chi_tmp1002=(_chi_tmp1004) end;_chi_tmp978=_chi_tmp1002 end;local valueTag=_chi_tmp978;
+do local _chi_tmp1005;if (valueType ~= (nil)) then local _chi_tmp1006=valueType.ids and valueType.ids[1] and valueType.ids[1].name or 'unknown';_chi_tmp1005=_chi_tmp1006 else local _chi_tmp1007 = 'unknown';_chi_tmp1005=(_chi_tmp1007) end;_chi_tmp978=_chi_tmp1005 end;local valueTypeName=_chi_tmp978;
+do local _chi_tmp1008;if (checkedType ~= (nil)) then local _chi_tmp1009=checkedType.ids and checkedType.ids[1] and checkedType.ids[1].name or 'unknown';_chi_tmp1008=_chi_tmp1009 else local _chi_tmp1010 = 'unknown';_chi_tmp1008=(_chi_tmp1010) end;_chi_tmp978=_chi_tmp1008 end;local checkedTypeName=_chi_tmp978;
+do local _chi_tmp1011;if (valueTag == checkedTag) then
+local _chi_tmp1012;local _chi_tmp1013 = 'primitive';if (valueTag == (_chi_tmp1013)) then
+local _chi_tmp1014;if (valueTypeName == checkedTypeName) then local _chi_tmp1015 = 'true';return (_chi_tmp1015); end;_chi_tmp1012=_chi_tmp1014
+ else
+local _chi_tmp1016 = 'true';return (_chi_tmp1016);
+ end;_chi_tmp1011=_chi_tmp1012
+ end; end;
+local _chi_tmp1017;local _chi_tmp1018 = 'primitive';if (checkedTag == (_chi_tmp1018)) then
+local _chi_tmp1019;local _chi_tmp1020 = 'unit';if (checkedTypeName == (_chi_tmp1020)) then
+local _chi_tmp1021 = 'type(';local _chi_tmp1022 = ') == "nil"';local _chi_tmp1023=chi_tostring((_chi_tmp1021)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1022));return _chi_tmp1023;
+ else local _chi_tmp1024;local _chi_tmp1025 = 'float';if (checkedTypeName == (_chi_tmp1025)) then
+local _chi_tmp1026 = 'chi_is_float(';local _chi_tmp1027 = ')';local _chi_tmp1028=chi_tostring((_chi_tmp1026)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1027));return _chi_tmp1028;
+ else local _chi_tmp1029;local _chi_tmp1030 = 'int';if (checkedTypeName == (_chi_tmp1030)) then
+local _chi_tmp1031 = 'chi_is_int(';local _chi_tmp1032 = ')';local _chi_tmp1033=chi_tostring((_chi_tmp1031)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1032));return _chi_tmp1033;
+ else local _chi_tmp1034;local _chi_tmp1035 = 'bool';if (checkedTypeName == (_chi_tmp1035)) then
+local _chi_tmp1036 = 'type(';local _chi_tmp1037 = ') == "boolean"';local _chi_tmp1038=chi_tostring((_chi_tmp1036)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1037));return _chi_tmp1038;
+ else local _chi_tmp1039;local _chi_tmp1040 = 'string';if (checkedTypeName == (_chi_tmp1040)) then
+local _chi_tmp1041 = 'type(';local _chi_tmp1042 = ') == "string"';local _chi_tmp1043=chi_tostring((_chi_tmp1041)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1042));return _chi_tmp1043;
+ else
+local _chi_tmp1044 = 'false';return (_chi_tmp1044);
+ end;_chi_tmp1034=_chi_tmp1039 end;_chi_tmp1029=_chi_tmp1034 end;_chi_tmp1024=_chi_tmp1029 end;_chi_tmp1019=_chi_tmp1024 end;_chi_tmp1017=_chi_tmp1019
+ else local _chi_tmp1045;local _chi_tmp1046 = 'array';if (checkedTag == (_chi_tmp1046)) then
+local _chi_tmp1047 = 'chi_is_array(';local _chi_tmp1048 = ')';local _chi_tmp1049=chi_tostring((_chi_tmp1047)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1048));return _chi_tmp1049;
+ else local _chi_tmp1050;local _chi_tmp1051 = 'record';if (checkedTag == (_chi_tmp1051)) then
+local _chi_tmp1052 = 'chi_is_record(';local _chi_tmp1053 = ')';local _chi_tmp1054=chi_tostring((_chi_tmp1052)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1053));return _chi_tmp1054;
+ else local _chi_tmp1055;local _chi_tmp1056 = 'fn';if (checkedTag == (_chi_tmp1056)) then
+local _chi_tmp1057 = 'type(';local _chi_tmp1058 = ') == "function"';local _chi_tmp1059=chi_tostring((_chi_tmp1057)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1058));return _chi_tmp1059;
+ else
+local _chi_tmp1060 = 'false';return (_chi_tmp1060);
+ end;_chi_tmp1050=_chi_tmp1055 end;_chi_tmp1045=_chi_tmp1050 end;_chi_tmp1017=_chi_tmp1045 end;return _chi_tmp1017 end;
+ end;
 do function __P_.emitIs(st,expr)
-local _chi_tmp978;do _chi_tmp978=expr.castExpr end;local castVal=_chi_tmp978;
-do _chi_tmp978=castVal.exprType end;local castET=_chi_tmp978;
-do local _chi_tmp979;if (castET ~= (nil)) then local _chi_tmp980=castET.tag;_chi_tmp979=_chi_tmp980 else local _chi_tmp981 = 'unknown';_chi_tmp979=(_chi_tmp981) end;_chi_tmp978=_chi_tmp979 end;local valueTag=_chi_tmp978;
-do _chi_tmp978=expr.checkedType end;local checkedT=_chi_tmp978;
-do local _chi_tmp982;if (checkedT ~= (nil)) then local _chi_tmp983=checkedT.tag;_chi_tmp982=_chi_tmp983 else local _chi_tmp984 = 'unknown';_chi_tmp982=(_chi_tmp984) end;_chi_tmp978=_chi_tmp982 end;local checkedTag=_chi_tmp978;
-do local _chi_tmp985;if (castET ~= (nil)) then local _chi_tmp986=castET.ids and castET.ids[1] and castET.ids[1].name or 'unknown';_chi_tmp985=_chi_tmp986 else local _chi_tmp987 = 'unknown';_chi_tmp985=(_chi_tmp987) end;_chi_tmp978=_chi_tmp985 end;local valueTypeName=_chi_tmp978;
-do local _chi_tmp988;if (checkedT ~= (nil)) then local _chi_tmp989=checkedT.ids and checkedT.ids[1] and checkedT.ids[1].name or 'unknown';_chi_tmp988=_chi_tmp989 else local _chi_tmp990 = 'unknown';_chi_tmp988=(_chi_tmp990) end;_chi_tmp978=_chi_tmp988 end;local checkedTypeName=_chi_tmp978;
-do local _chi_tmp991;if (checkedT ~= (nil)) then local _chi_tmp992=(checkedT.tag == 'record' and checkedT.name) or '';_chi_tmp991=_chi_tmp992 else local _chi_tmp993 = '';_chi_tmp991=(_chi_tmp993) end;_chi_tmp978=_chi_tmp991 end;local checkedVariantName=_chi_tmp978;
-do local _chi_tmp994;local _chi_tmp995 = '';if (checkedVariantName ~= (_chi_tmp995)) then
-local _chi_tmp996;do local _chi_tmp997=__P_.emitExpr(st,castVal);_chi_tmp996=_chi_tmp997 end;local variantValue=_chi_tmp996;
-local _chi_tmp998 = 'chi_is_variant(';local _chi_tmp999 = ', "';local _chi_tmp1000 = '")';local _chi_tmp1001=chi_tostring((_chi_tmp998)) .. chi_tostring(variantValue) .. chi_tostring((_chi_tmp999)) .. chi_tostring(checkedVariantName) .. chi_tostring((_chi_tmp1000));return _chi_tmp1001;
+local _chi_tmp1061;do _chi_tmp1061=expr.castExpr end;local castVal=_chi_tmp1061;
+do _chi_tmp1061=castVal.exprType end;local valueType=_chi_tmp1061;
+do _chi_tmp1061=expr.checkedType end;local checkedType=_chi_tmp1061;
+do local _chi_tmp1062=__P_.emitExpr(st,castVal);_chi_tmp1061=_chi_tmp1062 end;local value=_chi_tmp1061;
+do local _chi_tmp1063;if (checkedType ~= (nil)) then local _chi_tmp1064=checkedType.tag;_chi_tmp1063=_chi_tmp1064 else local _chi_tmp1065 = 'unknown';_chi_tmp1063=(_chi_tmp1065) end;_chi_tmp1061=_chi_tmp1063 end;local checkedTag=_chi_tmp1061;
+do local _chi_tmp1066;local _chi_tmp1067 = 'sum';if (checkedTag == (_chi_tmp1067)) then
+local _chi_tmp1068;do local _chi_tmp1069=__P_.nextTmpName(st);_chi_tmp1068=_chi_tmp1069 end;local valueName=_chi_tmp1068;
+do local _chi_tmp1070=__P_.emitIsAgainstType(valueName,valueType,checkedType);_chi_tmp1068=_chi_tmp1070 end;local check=_chi_tmp1068;
+local _chi_tmp1071 = '(function(';local _chi_tmp1072 = ') return ';local _chi_tmp1073 = ' end)(';local _chi_tmp1074 = ')';local _chi_tmp1075=chi_tostring((_chi_tmp1071)) .. chi_tostring(valueName) .. chi_tostring((_chi_tmp1072)) .. chi_tostring(check) .. chi_tostring((_chi_tmp1073)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1074));return _chi_tmp1075;
  end; end;
-do local _chi_tmp1002;if (valueTag == checkedTag) then
-local _chi_tmp1003;local _chi_tmp1004 = 'primitive';if (valueTag == (_chi_tmp1004)) then
-local _chi_tmp1005;if (valueTypeName == checkedTypeName) then
-local _chi_tmp1006 = 'true';return (_chi_tmp1006);
- end;_chi_tmp1003=_chi_tmp1005
- else
-local _chi_tmp1007 = 'true';return (_chi_tmp1007);
- end;_chi_tmp1002=_chi_tmp1003
- end; end;
-do local _chi_tmp1008=__P_.emitExpr(st,castVal);_chi_tmp978=_chi_tmp1008 end;local value=_chi_tmp978;
-local _chi_tmp1009;local _chi_tmp1010 = 'primitive';if (checkedTag == (_chi_tmp1010)) then
-local _chi_tmp1011;local _chi_tmp1012 = 'unit';if (checkedTypeName == (_chi_tmp1012)) then
-local _chi_tmp1013 = 'type(';local _chi_tmp1014 = ') == "nil"';local _chi_tmp1015=chi_tostring((_chi_tmp1013)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1014));return _chi_tmp1015;
- else local _chi_tmp1016;local _chi_tmp1017 = 'float';if (checkedTypeName == (_chi_tmp1017)) then
-local _chi_tmp1018 = 'chi_is_float(';local _chi_tmp1019 = ')';local _chi_tmp1020=chi_tostring((_chi_tmp1018)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1019));return _chi_tmp1020;
- else local _chi_tmp1021;local _chi_tmp1022 = 'int';if (checkedTypeName == (_chi_tmp1022)) then
-local _chi_tmp1023 = 'chi_is_int(';local _chi_tmp1024 = ')';local _chi_tmp1025=chi_tostring((_chi_tmp1023)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1024));return _chi_tmp1025;
- else local _chi_tmp1026;local _chi_tmp1027 = 'bool';if (checkedTypeName == (_chi_tmp1027)) then
-local _chi_tmp1028 = 'type(';local _chi_tmp1029 = ') == "boolean"';local _chi_tmp1030=chi_tostring((_chi_tmp1028)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1029));return _chi_tmp1030;
- else local _chi_tmp1031;local _chi_tmp1032 = 'string';if (checkedTypeName == (_chi_tmp1032)) then
-local _chi_tmp1033 = 'type(';local _chi_tmp1034 = ') == "string"';local _chi_tmp1035=chi_tostring((_chi_tmp1033)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1034));return _chi_tmp1035;
- else
-local _chi_tmp1036 = 'false';return (_chi_tmp1036);
- end;_chi_tmp1026=_chi_tmp1031 end;_chi_tmp1021=_chi_tmp1026 end;_chi_tmp1016=_chi_tmp1021 end;_chi_tmp1011=_chi_tmp1016 end;_chi_tmp1009=_chi_tmp1011
- else local _chi_tmp1037;local _chi_tmp1038 = 'array';if (checkedTag == (_chi_tmp1038)) then
-local _chi_tmp1039 = 'chi_is_array(';local _chi_tmp1040 = ')';local _chi_tmp1041=chi_tostring((_chi_tmp1039)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1040));return _chi_tmp1041;
- else local _chi_tmp1042;local _chi_tmp1043 = 'record';if (checkedTag == (_chi_tmp1043)) then
-local _chi_tmp1044 = 'chi_is_record(';local _chi_tmp1045 = ')';local _chi_tmp1046=chi_tostring((_chi_tmp1044)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1045));return _chi_tmp1046;
- else local _chi_tmp1047;local _chi_tmp1048 = 'fn';if (checkedTag == (_chi_tmp1048)) then
-local _chi_tmp1049 = 'type(';local _chi_tmp1050 = ') == "function"';local _chi_tmp1051=chi_tostring((_chi_tmp1049)) .. chi_tostring(value) .. chi_tostring((_chi_tmp1050));return _chi_tmp1051;
- else local _chi_tmp1052;local _chi_tmp1053 = 'variable';if (checkedTag == (_chi_tmp1053)) then
-local _chi_tmp1054 = 'false';return (_chi_tmp1054);
- else
-local _chi_tmp1055 = 'false';return (_chi_tmp1055);
- end;_chi_tmp1047=_chi_tmp1052 end;_chi_tmp1042=_chi_tmp1047 end;_chi_tmp1037=_chi_tmp1042 end;_chi_tmp1009=_chi_tmp1037 end;return _chi_tmp1009 end;
+local _chi_tmp1076=__P_.emitIsAgainstType(value,valueType,checkedType);return _chi_tmp1076 end;
  end;
 do function __P_.emitEffectDefinition(st,expr)
-local _chi_tmp1056;do _chi_tmp1056=expr.effectName end;local name=_chi_tmp1056;
-do local _chi_tmp1057=__P_.topLevelName(name);_chi_tmp1056=_chi_tmp1057 end;local varName=_chi_tmp1056;
-do _chi_tmp1056=expr.effectModuleName end;local eMod=_chi_tmp1056;
-do _chi_tmp1056=expr.effectPackageName end;local ePkg=_chi_tmp1056;
-do local _chi_tmp1058=__P_.localQualifiedName(eMod,ePkg,name);local _chi_tmp1059=__P_.normaliseEffectName(_chi_tmp1058);_chi_tmp1056=_chi_tmp1059 end;local yieldKey=_chi_tmp1056;
-do local _chi_tmp1060 = 'function ';local _chi_tmp1061 = '(...) return coroutine.yield("';local _chi_tmp1062 = '", {...}) end;';local _chi_tmp1063=chi_tostring((_chi_tmp1060)) .. chi_tostring(varName) .. chi_tostring((_chi_tmp1061)) .. chi_tostring(yieldKey) .. chi_tostring((_chi_tmp1062));local _chi_tmp1064=__P_.emit(st,_chi_tmp1063); end;
-local _chi_tmp1065 = 'nil';return (_chi_tmp1065) end;
+local _chi_tmp1077;do _chi_tmp1077=expr.effectName end;local name=_chi_tmp1077;
+do local _chi_tmp1078=__P_.topLevelName(name);_chi_tmp1077=_chi_tmp1078 end;local varName=_chi_tmp1077;
+do _chi_tmp1077=expr.effectModuleName end;local eMod=_chi_tmp1077;
+do _chi_tmp1077=expr.effectPackageName end;local ePkg=_chi_tmp1077;
+do local _chi_tmp1079=__P_.localQualifiedName(eMod,ePkg,name);local _chi_tmp1080=__P_.normaliseEffectName(_chi_tmp1079);_chi_tmp1077=_chi_tmp1080 end;local yieldKey=_chi_tmp1077;
+do local _chi_tmp1081 = 'function ';local _chi_tmp1082 = '(...) return coroutine.yield("';local _chi_tmp1083 = '", {...}) end;';local _chi_tmp1084=chi_tostring((_chi_tmp1081)) .. chi_tostring(varName) .. chi_tostring((_chi_tmp1082)) .. chi_tostring(yieldKey) .. chi_tostring((_chi_tmp1083));local _chi_tmp1085=__P_.emit(st,_chi_tmp1084); end;
+local _chi_tmp1086 = 'nil';return (_chi_tmp1086) end;
  end;
 do function __P_.emitHandle(st,expr)
-local _chi_tmp1066;do _chi_tmp1066=st.statementSourceLine end;local parentSourceLine=_chi_tmp1066;
-do local _chi_tmp1067=__P_.nextTmpName(st);_chi_tmp1066=_chi_tmp1067 end;local tmpName=_chi_tmp1066;
-do local _chi_tmp1068 = 'local ';local _chi_tmp1069 = '_handlers={';local _chi_tmp1070=chi_tostring((_chi_tmp1068)) .. chi_tostring(tmpName) .. chi_tostring((_chi_tmp1069));local _chi_tmp1071=__P_.emit(st,_chi_tmp1070); end;
-do _chi_tmp1066=expr.handleCases end;local cases=_chi_tmp1066;
-do local _chi_tmp1072=#cases;_chi_tmp1066=_chi_tmp1072 end;local caseCount=_chi_tmp1066;
-do _chi_tmp1066=(1) end;local ci=_chi_tmp1066;
-do local function _chi_tmp1073() return ci end;local function _chi_tmp1074() return caseCount end;while (_chi_tmp1073() <= _chi_tmp1074()) do do
-local _chi_tmp1075;do local _chi_tmp1076=cases[ci];_chi_tmp1075=_chi_tmp1076 end;local hcase=_chi_tmp1075;
-do local _chi_tmp1077;if (st.trackSourceLines and (hcase.section ~= (nil))) then
-st.statementSourceLine=hcase.section.startLine;_chi_tmp1077=hcase.section.startLine
+local _chi_tmp1087;do _chi_tmp1087=st.statementSourceLine end;local parentSourceLine=_chi_tmp1087;
+do local _chi_tmp1088=__P_.nextTmpName(st);_chi_tmp1087=_chi_tmp1088 end;local tmpName=_chi_tmp1087;
+do local _chi_tmp1089 = 'local ';local _chi_tmp1090 = '_handlers={';local _chi_tmp1091=chi_tostring((_chi_tmp1089)) .. chi_tostring(tmpName) .. chi_tostring((_chi_tmp1090));local _chi_tmp1092=__P_.emit(st,_chi_tmp1091); end;
+do _chi_tmp1087=expr.handleCases end;local cases=_chi_tmp1087;
+do local _chi_tmp1093=#cases;_chi_tmp1087=_chi_tmp1093 end;local caseCount=_chi_tmp1087;
+do _chi_tmp1087=(1) end;local ci=_chi_tmp1087;
+do local function _chi_tmp1094() return ci end;local function _chi_tmp1095() return caseCount end;while (_chi_tmp1094() <= _chi_tmp1095()) do do
+local _chi_tmp1096;do local _chi_tmp1097=cases[ci];_chi_tmp1096=_chi_tmp1097 end;local hcase=_chi_tmp1096;
+do local _chi_tmp1098;if (st.trackSourceLines and (hcase.section ~= (nil))) then
+st.statementSourceLine=hcase.section.startLine;_chi_tmp1098=hcase.section.startLine
  end; end;
-do _chi_tmp1075=hcase.moduleName end;local cMod=_chi_tmp1075;
-do _chi_tmp1075=hcase.packageName end;local cPkg=_chi_tmp1075;
-do _chi_tmp1075=hcase.effectName end;local cName=_chi_tmp1075;
-do local _chi_tmp1078=__P_.localQualifiedName(cMod,cPkg,cName);local _chi_tmp1079=__P_.normaliseEffectName(_chi_tmp1078);_chi_tmp1075=_chi_tmp1079 end;local handlerKey=_chi_tmp1075;
-do local _chi_tmp1080 = '=function(args) ';local _chi_tmp1081=chi_tostring(handlerKey) .. chi_tostring((_chi_tmp1080));local _chi_tmp1082=__P_.emit(st,_chi_tmp1081); end;
-do local _chi_tmp1083 = 'local function resume(x) return x end;';local _chi_tmp1084=__P_.emit(st,(_chi_tmp1083)); end;
-do _chi_tmp1075=hcase.argumentNames end;local argNames=_chi_tmp1075;
-do local _chi_tmp1085=#argNames;_chi_tmp1075=_chi_tmp1085 end;local argCount=_chi_tmp1075;
-do _chi_tmp1075=(1) end;local ai=_chi_tmp1075;
-do local function _chi_tmp1086() return ai end;local function _chi_tmp1087() return argCount end;while (_chi_tmp1086() <= _chi_tmp1087()) do do
-local _chi_tmp1088;do local _chi_tmp1089=argNames[ai];local _chi_tmp1090=__P_.luaName(_chi_tmp1089);_chi_tmp1088=_chi_tmp1090 end;local argName=_chi_tmp1088;
-do local _chi_tmp1091 = 'local ';local _chi_tmp1092 = '=args[';local _chi_tmp1093 = '];';local _chi_tmp1094=chi_tostring((_chi_tmp1091)) .. chi_tostring(argName) .. chi_tostring((_chi_tmp1092)) .. chi_tostring(ai) .. chi_tostring((_chi_tmp1093));local _chi_tmp1095=__P_.emit(st,_chi_tmp1094); end;
+do _chi_tmp1096=hcase.moduleName end;local cMod=_chi_tmp1096;
+do _chi_tmp1096=hcase.packageName end;local cPkg=_chi_tmp1096;
+do _chi_tmp1096=hcase.effectName end;local cName=_chi_tmp1096;
+do local _chi_tmp1099=__P_.localQualifiedName(cMod,cPkg,cName);local _chi_tmp1100=__P_.normaliseEffectName(_chi_tmp1099);_chi_tmp1096=_chi_tmp1100 end;local handlerKey=_chi_tmp1096;
+do local _chi_tmp1101 = '=function(args) ';local _chi_tmp1102=chi_tostring(handlerKey) .. chi_tostring((_chi_tmp1101));local _chi_tmp1103=__P_.emit(st,_chi_tmp1102); end;
+do local _chi_tmp1104 = 'local function resume(x) return x end;';local _chi_tmp1105=__P_.emit(st,(_chi_tmp1104)); end;
+do _chi_tmp1096=hcase.argumentNames end;local argNames=_chi_tmp1096;
+do local _chi_tmp1106=#argNames;_chi_tmp1096=_chi_tmp1106 end;local argCount=_chi_tmp1096;
+do _chi_tmp1096=(1) end;local ai=_chi_tmp1096;
+do local function _chi_tmp1107() return ai end;local function _chi_tmp1108() return argCount end;while (_chi_tmp1107() <= _chi_tmp1108()) do do
+local _chi_tmp1109;do local _chi_tmp1110=argNames[ai];local _chi_tmp1111=__P_.luaName(_chi_tmp1110);_chi_tmp1109=_chi_tmp1111 end;local argName=_chi_tmp1109;
+do local _chi_tmp1112 = 'local ';local _chi_tmp1113 = '=args[';local _chi_tmp1114 = '];';local _chi_tmp1115=chi_tostring((_chi_tmp1112)) .. chi_tostring(argName) .. chi_tostring((_chi_tmp1113)) .. chi_tostring(ai) .. chi_tostring((_chi_tmp1114));local _chi_tmp1116=__P_.emit(st,_chi_tmp1115); end;
 ai=(ai + (1)); end ::__continue_19:: end;
  end;
-do _chi_tmp1075=hcase.body end;local caseBody=_chi_tmp1075;
-do local _chi_tmp1096=__P_.emitExpr(st,caseBody);_chi_tmp1075=_chi_tmp1096 end;local caseResult=_chi_tmp1075;
-do local _chi_tmp1097 = 'return ';local _chi_tmp1098=chi_tostring((_chi_tmp1097)) .. chi_tostring(caseResult);local _chi_tmp1099=__P_.emit(st,_chi_tmp1098); end;
-do local _chi_tmp1100 = ' end';local _chi_tmp1101=__P_.emit(st,(_chi_tmp1100)); end;
+do _chi_tmp1096=hcase.body end;local caseBody=_chi_tmp1096;
+do local _chi_tmp1117=__P_.emitExpr(st,caseBody);_chi_tmp1096=_chi_tmp1117 end;local caseResult=_chi_tmp1096;
+do local _chi_tmp1118 = 'return ';local _chi_tmp1119=chi_tostring((_chi_tmp1118)) .. chi_tostring(caseResult);local _chi_tmp1120=__P_.emit(st,_chi_tmp1119); end;
+do local _chi_tmp1121 = ' end';local _chi_tmp1122=__P_.emit(st,(_chi_tmp1121)); end;
 do st.statementSourceLine=parentSourceLine; end;
-do local _chi_tmp1102;if (ci < caseCount) then
-local _chi_tmp1103 = ',';local _chi_tmp1104=__P_.emit(st,(_chi_tmp1103));_chi_tmp1102=_chi_tmp1104
+do local _chi_tmp1123;if (ci < caseCount) then
+local _chi_tmp1124 = ',';local _chi_tmp1125=__P_.emit(st,(_chi_tmp1124));_chi_tmp1123=_chi_tmp1125
  end; end;
 ci=(ci + (1)); end ::__continue_18:: end;
  end;
-do local _chi_tmp1105 = '};';local _chi_tmp1106=__P_.emit(st,(_chi_tmp1105)); end;
-do local _chi_tmp1107 = 'local ';local _chi_tmp1108 = '_body=coroutine.create(function() ';local _chi_tmp1109=chi_tostring((_chi_tmp1107)) .. chi_tostring(tmpName) .. chi_tostring((_chi_tmp1108));local _chi_tmp1110=__P_.emit(st,_chi_tmp1109); end;
-do _chi_tmp1066=expr.handleBody end;local handleBody=_chi_tmp1066;
-do local _chi_tmp1111=__P_.emitExpr(st,handleBody);_chi_tmp1066=_chi_tmp1111 end;local bodyResult=_chi_tmp1066;
-do local _chi_tmp1112 = 'return ';local _chi_tmp1113 = ';';local _chi_tmp1114=chi_tostring((_chi_tmp1112)) .. chi_tostring(bodyResult) .. chi_tostring((_chi_tmp1113));local _chi_tmp1115=__P_.emit(st,_chi_tmp1114); end;
-do local _chi_tmp1116 = ' end);';local _chi_tmp1117=__P_.emit(st,(_chi_tmp1116)); end;
+do local _chi_tmp1126 = '};';local _chi_tmp1127=__P_.emit(st,(_chi_tmp1126)); end;
+do local _chi_tmp1128 = 'local ';local _chi_tmp1129 = '_body=coroutine.create(function() ';local _chi_tmp1130=chi_tostring((_chi_tmp1128)) .. chi_tostring(tmpName) .. chi_tostring((_chi_tmp1129));local _chi_tmp1131=__P_.emit(st,_chi_tmp1130); end;
+do _chi_tmp1087=expr.handleBody end;local handleBody=_chi_tmp1087;
+do local _chi_tmp1132=__P_.emitExpr(st,handleBody);_chi_tmp1087=_chi_tmp1132 end;local bodyResult=_chi_tmp1087;
+do local _chi_tmp1133 = 'return ';local _chi_tmp1134 = ';';local _chi_tmp1135=chi_tostring((_chi_tmp1133)) .. chi_tostring(bodyResult) .. chi_tostring((_chi_tmp1134));local _chi_tmp1136=__P_.emit(st,_chi_tmp1135); end;
+do local _chi_tmp1137 = ' end);';local _chi_tmp1138=__P_.emit(st,(_chi_tmp1137)); end;
 do st.statementSourceLine=parentSourceLine; end;
-do local _chi_tmp1118 = 'local ';local _chi_tmp1119 = '=chi_handle_effect(';local _chi_tmp1120 = '_body,nil,';local _chi_tmp1121 = '_handlers);';local _chi_tmp1122=chi_tostring((_chi_tmp1118)) .. chi_tostring(tmpName) .. chi_tostring((_chi_tmp1119)) .. chi_tostring(tmpName) .. chi_tostring((_chi_tmp1120)) .. chi_tostring(tmpName) .. chi_tostring((_chi_tmp1121));local _chi_tmp1123=__P_.emit(st,_chi_tmp1122); end;
+do local _chi_tmp1139 = 'local ';local _chi_tmp1140 = '=chi_handle_effect(';local _chi_tmp1141 = '_body,nil,';local _chi_tmp1142 = '_handlers);';local _chi_tmp1143=chi_tostring((_chi_tmp1139)) .. chi_tostring(tmpName) .. chi_tostring((_chi_tmp1140)) .. chi_tostring(tmpName) .. chi_tostring((_chi_tmp1141)) .. chi_tostring(tmpName) .. chi_tostring((_chi_tmp1142));local _chi_tmp1144=__P_.emit(st,_chi_tmp1143); end;
 return tmpName end;
  end;
 do function __P_.emitPackageInfo(st)
-local _chi_tmp1124;do local _chi_tmp1125 = '__S_';_chi_tmp1124=(_chi_tmp1125) end;local descPath=_chi_tmp1124;
-do _chi_tmp1124=st.program.expressions end;local progExprs=_chi_tmp1124;
-do local _chi_tmp1126=#progExprs;_chi_tmp1124=_chi_tmp1126 end;local exprCount=_chi_tmp1124;
-do _chi_tmp1124=(1) end;local i=_chi_tmp1124;
-do local function _chi_tmp1127() return i end;local function _chi_tmp1128() return exprCount end;while (_chi_tmp1127() <= _chi_tmp1128()) do do
-local _chi_tmp1129;do local _chi_tmp1130=progExprs[i];_chi_tmp1129=_chi_tmp1130 end;local e=_chi_tmp1129;
-do _chi_tmp1129=e.kind end;local kind=_chi_tmp1129;
-do local _chi_tmp1131;local _chi_tmp1132 = 'name_declaration';if (kind == (_chi_tmp1132)) then
-local _chi_tmp1133;do local _chi_tmp1134=__P_.luaName(e.declName);_chi_tmp1133=_chi_tmp1134 end;local dName=_chi_tmp1133;
-do _chi_tmp1133=e.isPublic end;local isPub=_chi_tmp1133;
-do _chi_tmp1133=e.isMutable end;local isMut=_chi_tmp1133;
-do local _chi_tmp1135 = '.';local _chi_tmp1136 = '={';local _chi_tmp1137=chi_tostring(descPath) .. chi_tostring((_chi_tmp1135)) .. chi_tostring(dName) .. chi_tostring((_chi_tmp1136));local _chi_tmp1138=__P_.emit(st,_chi_tmp1137); end;
-do local _chi_tmp1139 = 'public=';local _chi_tmp1140 = ',';local _chi_tmp1141=chi_tostring((_chi_tmp1139)) .. chi_tostring(isPub) .. chi_tostring((_chi_tmp1140));local _chi_tmp1142=__P_.emit(st,_chi_tmp1141); end;
-do local _chi_tmp1143 = 'mutable=';local _chi_tmp1144 = ',';local _chi_tmp1145=chi_tostring((_chi_tmp1143)) .. chi_tostring(isMut) .. chi_tostring((_chi_tmp1144));local _chi_tmp1146=__P_.emit(st,_chi_tmp1145); end;
-do _chi_tmp1133=e.exprType end;local eType=_chi_tmp1133;
-do local _chi_tmp1147;if (eType ~= (nil)) then
-local _chi_tmp1148;do local _chi_tmp1149=require('chicc/type_writer').encodeType(eType);_chi_tmp1148=_chi_tmp1149 end;local encodedType=_chi_tmp1148;
-local _chi_tmp1150 = 'type=\'';local _chi_tmp1151 = '\'';local _chi_tmp1152=chi_tostring((_chi_tmp1150)) .. chi_tostring(encodedType) .. chi_tostring((_chi_tmp1151));local _chi_tmp1153=__P_.emit(st,_chi_tmp1152);_chi_tmp1147=_chi_tmp1153
+local _chi_tmp1145;do local _chi_tmp1146 = '__S_';_chi_tmp1145=(_chi_tmp1146) end;local descPath=_chi_tmp1145;
+do _chi_tmp1145=st.program.expressions end;local progExprs=_chi_tmp1145;
+do local _chi_tmp1147=#progExprs;_chi_tmp1145=_chi_tmp1147 end;local exprCount=_chi_tmp1145;
+do _chi_tmp1145=(1) end;local i=_chi_tmp1145;
+do local function _chi_tmp1148() return i end;local function _chi_tmp1149() return exprCount end;while (_chi_tmp1148() <= _chi_tmp1149()) do do
+local _chi_tmp1150;do local _chi_tmp1151=progExprs[i];_chi_tmp1150=_chi_tmp1151 end;local e=_chi_tmp1150;
+do _chi_tmp1150=e.kind end;local kind=_chi_tmp1150;
+do local _chi_tmp1152;local _chi_tmp1153 = 'name_declaration';if (kind == (_chi_tmp1153)) then
+local _chi_tmp1154;do local _chi_tmp1155=__P_.luaName(e.declName);_chi_tmp1154=_chi_tmp1155 end;local dName=_chi_tmp1154;
+do _chi_tmp1154=e.isPublic end;local isPub=_chi_tmp1154;
+do _chi_tmp1154=e.isMutable end;local isMut=_chi_tmp1154;
+do local _chi_tmp1156 = '.';local _chi_tmp1157 = '={';local _chi_tmp1158=chi_tostring(descPath) .. chi_tostring((_chi_tmp1156)) .. chi_tostring(dName) .. chi_tostring((_chi_tmp1157));local _chi_tmp1159=__P_.emit(st,_chi_tmp1158); end;
+do local _chi_tmp1160 = 'public=';local _chi_tmp1161 = ',';local _chi_tmp1162=chi_tostring((_chi_tmp1160)) .. chi_tostring(isPub) .. chi_tostring((_chi_tmp1161));local _chi_tmp1163=__P_.emit(st,_chi_tmp1162); end;
+do local _chi_tmp1164 = 'mutable=';local _chi_tmp1165 = ',';local _chi_tmp1166=chi_tostring((_chi_tmp1164)) .. chi_tostring(isMut) .. chi_tostring((_chi_tmp1165));local _chi_tmp1167=__P_.emit(st,_chi_tmp1166); end;
+do _chi_tmp1154=e.exprType end;local eType=_chi_tmp1154;
+do local _chi_tmp1168;if (eType ~= (nil)) then
+local _chi_tmp1169;do local _chi_tmp1170=require('chicc/type_writer').encodeType(eType);_chi_tmp1169=_chi_tmp1170 end;local encodedType=_chi_tmp1169;
+local _chi_tmp1171 = 'type=\'';local _chi_tmp1172 = '\'';local _chi_tmp1173=chi_tostring((_chi_tmp1171)) .. chi_tostring(encodedType) .. chi_tostring((_chi_tmp1172));local _chi_tmp1174=__P_.emit(st,_chi_tmp1173);_chi_tmp1168=_chi_tmp1174
  end; end;
-local _chi_tmp1154 = '};';local _chi_tmp1155=__P_.emit(st,(_chi_tmp1154));_chi_tmp1131=_chi_tmp1155
- else local _chi_tmp1156;local _chi_tmp1157 = 'effect_definition';if (kind == (_chi_tmp1157)) then
-local _chi_tmp1158;do local _chi_tmp1159=__P_.luaName(e.effectName);_chi_tmp1158=_chi_tmp1159 end;local eName=_chi_tmp1158;
-do _chi_tmp1158=e.isPublic end;local isPub=_chi_tmp1158;
-do local _chi_tmp1160 = '.';local _chi_tmp1161 = '={';local _chi_tmp1162=chi_tostring(descPath) .. chi_tostring((_chi_tmp1160)) .. chi_tostring(eName) .. chi_tostring((_chi_tmp1161));local _chi_tmp1163=__P_.emit(st,_chi_tmp1162); end;
-do local _chi_tmp1164 = 'public=';local _chi_tmp1165 = ',';local _chi_tmp1166=chi_tostring((_chi_tmp1164)) .. chi_tostring(isPub) .. chi_tostring((_chi_tmp1165));local _chi_tmp1167=__P_.emit(st,_chi_tmp1166); end;
-do local _chi_tmp1168 = 'mutable=false,';local _chi_tmp1169=__P_.emit(st,(_chi_tmp1168)); end;
-do _chi_tmp1158=e.exprType end;local eType=_chi_tmp1158;
-do local _chi_tmp1170;if (eType ~= (nil)) then
-local _chi_tmp1171;do local _chi_tmp1172=require('chicc/type_writer').encodeType(eType);_chi_tmp1171=_chi_tmp1172 end;local encodedType=_chi_tmp1171;
-local _chi_tmp1173 = 'type=\'';local _chi_tmp1174 = '\'';local _chi_tmp1175=chi_tostring((_chi_tmp1173)) .. chi_tostring(encodedType) .. chi_tostring((_chi_tmp1174));local _chi_tmp1176=__P_.emit(st,_chi_tmp1175);_chi_tmp1170=_chi_tmp1176
+local _chi_tmp1175 = '};';local _chi_tmp1176=__P_.emit(st,(_chi_tmp1175));_chi_tmp1152=_chi_tmp1176
+ else local _chi_tmp1177;local _chi_tmp1178 = 'effect_definition';if (kind == (_chi_tmp1178)) then
+local _chi_tmp1179;do local _chi_tmp1180=__P_.luaName(e.effectName);_chi_tmp1179=_chi_tmp1180 end;local eName=_chi_tmp1179;
+do _chi_tmp1179=e.isPublic end;local isPub=_chi_tmp1179;
+do local _chi_tmp1181 = '.';local _chi_tmp1182 = '={';local _chi_tmp1183=chi_tostring(descPath) .. chi_tostring((_chi_tmp1181)) .. chi_tostring(eName) .. chi_tostring((_chi_tmp1182));local _chi_tmp1184=__P_.emit(st,_chi_tmp1183); end;
+do local _chi_tmp1185 = 'public=';local _chi_tmp1186 = ',';local _chi_tmp1187=chi_tostring((_chi_tmp1185)) .. chi_tostring(isPub) .. chi_tostring((_chi_tmp1186));local _chi_tmp1188=__P_.emit(st,_chi_tmp1187); end;
+do local _chi_tmp1189 = 'mutable=false,';local _chi_tmp1190=__P_.emit(st,(_chi_tmp1189)); end;
+do _chi_tmp1179=e.exprType end;local eType=_chi_tmp1179;
+do local _chi_tmp1191;if (eType ~= (nil)) then
+local _chi_tmp1192;do local _chi_tmp1193=require('chicc/type_writer').encodeType(eType);_chi_tmp1192=_chi_tmp1193 end;local encodedType=_chi_tmp1192;
+local _chi_tmp1194 = 'type=\'';local _chi_tmp1195 = '\'';local _chi_tmp1196=chi_tostring((_chi_tmp1194)) .. chi_tostring(encodedType) .. chi_tostring((_chi_tmp1195));local _chi_tmp1197=__P_.emit(st,_chi_tmp1196);_chi_tmp1191=_chi_tmp1197
  end; end;
-local _chi_tmp1177 = '};';local _chi_tmp1178=__P_.emit(st,(_chi_tmp1177));_chi_tmp1156=_chi_tmp1178
- end;_chi_tmp1131=_chi_tmp1156 end; end;
+local _chi_tmp1198 = '};';local _chi_tmp1199=__P_.emit(st,(_chi_tmp1198));_chi_tmp1177=_chi_tmp1199
+ end;_chi_tmp1152=_chi_tmp1177 end; end;
 i=(i + (1)); end ::__continue_20:: end;
  end;
-local _chi_tmp1179 = '';return (_chi_tmp1179) end;
+local _chi_tmp1200 = '';return (_chi_tmp1200) end;
  end;
 do function __P_.collectRequires(st)
-local _chi_tmp1180;do local _chi_tmp1181=st.program.packageDef.moduleName;_chi_tmp1180=_chi_tmp1181 end;local progMod=_chi_tmp1180;
-do local _chi_tmp1182=st.program.packageDef.packageName;_chi_tmp1180=_chi_tmp1182 end;local progPkg=_chi_tmp1180;
-do local _chi_tmp1183=__std__lang_map.emptyMap();_chi_tmp1180=_chi_tmp1183 end;local seen=_chi_tmp1180;
-do local _chi_tmp1184={};setmetatable(_chi_tmp1184, array_meta_table);_chi_tmp1180=_chi_tmp1184 end;local reqList=_chi_tmp1180;
-do local function _chi_tmp1185(node) local _chi_tmp1186=nil;return; end;_chi_tmp1180=_chi_tmp1185 end;local walk=_chi_tmp1180;
-do local function _chi_tmp1187(node)
-local _chi_tmp1188;if (node ~= (nil)) then
-do local _chi_tmp1189;local _chi_tmp1190=node.kind == 'variable_access' and node.target ~= nil and node.target.tag == 'package';if _chi_tmp1190 then
-local _chi_tmp1191;do local _chi_tmp1192=node.target.moduleName;_chi_tmp1191=_chi_tmp1192 end;local tm=_chi_tmp1191;
-do local _chi_tmp1193=node.target.packageName;_chi_tmp1191=_chi_tmp1193 end;local tp=_chi_tmp1191;
-local _chi_tmp1194;if ((tm ~= progMod) or (tp ~= progPkg)) then
-local _chi_tmp1195;do local _chi_tmp1196 = '/';local _chi_tmp1197=chi_tostring(tm) .. chi_tostring((_chi_tmp1196)) .. chi_tostring(tp);_chi_tmp1195=_chi_tmp1197 end;local key=_chi_tmp1195;
-local _chi_tmp1198;local _chi_tmp1199=__std__lang_map.has(seen,key);if (_chi_tmp1199 == (false)) then
-do local _chi_tmp1200=__std__lang_map.put(seen,key,(true)); end;
-local _chi_tmp1201={mod=tm,pkg=tp};setmetatable(_chi_tmp1201, record_meta_table);local _chi_tmp1202=__std__lang_array.push(reqList,_chi_tmp1201);_chi_tmp1198=_chi_tmp1202
- end;_chi_tmp1194=_chi_tmp1198
- end;_chi_tmp1189=_chi_tmp1194
+local _chi_tmp1201;do local _chi_tmp1202=st.program.packageDef.moduleName;_chi_tmp1201=_chi_tmp1202 end;local progMod=_chi_tmp1201;
+do local _chi_tmp1203=st.program.packageDef.packageName;_chi_tmp1201=_chi_tmp1203 end;local progPkg=_chi_tmp1201;
+do local _chi_tmp1204=__std__lang_map.emptyMap();_chi_tmp1201=_chi_tmp1204 end;local seen=_chi_tmp1201;
+do local _chi_tmp1205={};setmetatable(_chi_tmp1205, array_meta_table);_chi_tmp1201=_chi_tmp1205 end;local reqList=_chi_tmp1201;
+do local function _chi_tmp1206(node) local _chi_tmp1207=nil;return; end;_chi_tmp1201=_chi_tmp1206 end;local walk=_chi_tmp1201;
+do local function _chi_tmp1208(node)
+local _chi_tmp1209;if (node ~= (nil)) then
+do local _chi_tmp1210;local _chi_tmp1211=node.kind == 'variable_access' and node.target ~= nil and node.target.tag == 'package';if _chi_tmp1211 then
+local _chi_tmp1212;do local _chi_tmp1213=node.target.moduleName;_chi_tmp1212=_chi_tmp1213 end;local tm=_chi_tmp1212;
+do local _chi_tmp1214=node.target.packageName;_chi_tmp1212=_chi_tmp1214 end;local tp=_chi_tmp1212;
+local _chi_tmp1215;if ((tm ~= progMod) or (tp ~= progPkg)) then
+local _chi_tmp1216;do local _chi_tmp1217 = '/';local _chi_tmp1218=chi_tostring(tm) .. chi_tostring((_chi_tmp1217)) .. chi_tostring(tp);_chi_tmp1216=_chi_tmp1218 end;local key=_chi_tmp1216;
+local _chi_tmp1219;local _chi_tmp1220=__std__lang_map.has(seen,key);if (_chi_tmp1220 == (false)) then
+do local _chi_tmp1221=__std__lang_map.put(seen,key,(true)); end;
+local _chi_tmp1222={mod=tm,pkg=tp};setmetatable(_chi_tmp1222, record_meta_table);local _chi_tmp1223=__std__lang_array.push(reqList,_chi_tmp1222);_chi_tmp1219=_chi_tmp1223
+ end;_chi_tmp1215=_chi_tmp1219
+ end;_chi_tmp1210=_chi_tmp1215
  end; end;
-local _chi_tmp1203;do local _chi_tmp1204=__chicc__ast.exprChildren(node);_chi_tmp1203=_chi_tmp1204 end;local children=_chi_tmp1203;
-do local _chi_tmp1205=__std__lang_array.size(children);_chi_tmp1203=_chi_tmp1205 end;local cc=_chi_tmp1203;
-do _chi_tmp1203=(1) end;local ci=_chi_tmp1203;
-local function _chi_tmp1206() return ci end;local function _chi_tmp1207() return cc end;while (_chi_tmp1206() <= _chi_tmp1207()) do do
-do local _chi_tmp1208=children[ci];local _chi_tmp1209=walk(_chi_tmp1208); end;
+local _chi_tmp1224;do local _chi_tmp1225=__chicc__ast.exprChildren(node);_chi_tmp1224=_chi_tmp1225 end;local children=_chi_tmp1224;
+do local _chi_tmp1226=__std__lang_array.size(children);_chi_tmp1224=_chi_tmp1226 end;local cc=_chi_tmp1224;
+do _chi_tmp1224=(1) end;local ci=_chi_tmp1224;
+local function _chi_tmp1227() return ci end;local function _chi_tmp1228() return cc end;while (_chi_tmp1227() <= _chi_tmp1228()) do do
+do local _chi_tmp1229=children[ci];local _chi_tmp1230=walk(_chi_tmp1229); end;
 ci=(ci + (1)); end ::__continue_21:: end;
-_chi_tmp1188=nil
- end;local _chi_tmp1210=_chi_tmp1188;return; end;
-walk=_chi_tmp1187; end;
-do local _chi_tmp1211=st.program.expressions;_chi_tmp1180=_chi_tmp1211 end;local exprs=_chi_tmp1180;
-do local _chi_tmp1212=#exprs;_chi_tmp1180=_chi_tmp1212 end;local ec=_chi_tmp1180;
-do _chi_tmp1180=(1) end;local i=_chi_tmp1180;
-do local function _chi_tmp1213() return i end;local function _chi_tmp1214() return ec end;while (_chi_tmp1213() <= _chi_tmp1214()) do do
-do local _chi_tmp1215=exprs[i];local _chi_tmp1216=walk(_chi_tmp1215); end;
+_chi_tmp1209=nil
+ end;local _chi_tmp1231=_chi_tmp1209;return; end;
+walk=_chi_tmp1208; end;
+do local _chi_tmp1232=st.program.expressions;_chi_tmp1201=_chi_tmp1232 end;local exprs=_chi_tmp1201;
+do local _chi_tmp1233=#exprs;_chi_tmp1201=_chi_tmp1233 end;local ec=_chi_tmp1201;
+do _chi_tmp1201=(1) end;local i=_chi_tmp1201;
+do local function _chi_tmp1234() return i end;local function _chi_tmp1235() return ec end;while (_chi_tmp1234() <= _chi_tmp1235()) do do
+do local _chi_tmp1236=exprs[i];local _chi_tmp1237=walk(_chi_tmp1236); end;
 i=(i + (1)); end ::__continue_22:: end;
  end;
-do local _chi_tmp1217=__std__lang_array.size(reqList);_chi_tmp1180=_chi_tmp1217 end;local rc=_chi_tmp1180;
-do _chi_tmp1180=(1) end;local ri=_chi_tmp1180;
-do local function _chi_tmp1218() return ri end;local function _chi_tmp1219() return rc end;while (_chi_tmp1218() <= _chi_tmp1219()) do do
-local _chi_tmp1220;do local _chi_tmp1221=reqList[ri];_chi_tmp1220=_chi_tmp1221 end;local req=_chi_tmp1220;
-do local _chi_tmp1222=__P_.localPackagePath(req.mod,req.pkg);_chi_tmp1220=_chi_tmp1222 end;local lp=_chi_tmp1220;
-do local _chi_tmp1223 = 'local ';local _chi_tmp1224 = ' = require("';local _chi_tmp1225 = '/';local _chi_tmp1226 = '");';local _chi_tmp1227=chi_tostring((_chi_tmp1223)) .. chi_tostring(lp) .. chi_tostring((_chi_tmp1224)) .. chi_tostring(req.mod) .. chi_tostring((_chi_tmp1225)) .. chi_tostring(req.pkg) .. chi_tostring((_chi_tmp1226));local _chi_tmp1228=__P_.emit(st,_chi_tmp1227); end;
+do local _chi_tmp1238=__std__lang_array.size(reqList);_chi_tmp1201=_chi_tmp1238 end;local rc=_chi_tmp1201;
+do _chi_tmp1201=(1) end;local ri=_chi_tmp1201;
+do local function _chi_tmp1239() return ri end;local function _chi_tmp1240() return rc end;while (_chi_tmp1239() <= _chi_tmp1240()) do do
+local _chi_tmp1241;do local _chi_tmp1242=reqList[ri];_chi_tmp1241=_chi_tmp1242 end;local req=_chi_tmp1241;
+do local _chi_tmp1243=__P_.localPackagePath(req.mod,req.pkg);_chi_tmp1241=_chi_tmp1243 end;local lp=_chi_tmp1241;
+do local _chi_tmp1244 = 'local ';local _chi_tmp1245 = ' = require("';local _chi_tmp1246 = '/';local _chi_tmp1247 = '");';local _chi_tmp1248=chi_tostring((_chi_tmp1244)) .. chi_tostring(lp) .. chi_tostring((_chi_tmp1245)) .. chi_tostring(req.mod) .. chi_tostring((_chi_tmp1246)) .. chi_tostring(req.pkg) .. chi_tostring((_chi_tmp1247));local _chi_tmp1249=__P_.emit(st,_chi_tmp1248); end;
 ri=(ri + (1)); end ::__continue_23:: end;
  end;
-local _chi_tmp1229 = '';return (_chi_tmp1229) end;
+local _chi_tmp1250 = '';return (_chi_tmp1250) end;
  end;
-do local function _chi_tmp1230(st,expr)
-local _chi_tmp1231;do _chi_tmp1231=expr.kind end;local kind=_chi_tmp1231;
-do local _chi_tmp1232;local _chi_tmp1233 = 'atom';if (kind == (_chi_tmp1233)) then local _chi_tmp1234=__P_.emitAtom(st,expr);_chi_tmp1232=_chi_tmp1234 else local _chi_tmp1235;local _chi_tmp1236 = 'interpolated_string';if (kind == (_chi_tmp1236)) then
-local _chi_tmp1237=__P_.emitInterpolatedString(st,expr);_chi_tmp1235=_chi_tmp1237
- else local _chi_tmp1238;local _chi_tmp1239 = 'variable_access';if (kind == (_chi_tmp1239)) then
-local _chi_tmp1240=__P_.emitVariableAccess(st,expr);_chi_tmp1238=_chi_tmp1240
- else local _chi_tmp1241;local _chi_tmp1242 = 'name_declaration';if (kind == (_chi_tmp1242)) then
-local _chi_tmp1243=__P_.emitNameDeclaration(st,expr);_chi_tmp1241=_chi_tmp1243
- else local _chi_tmp1244;local _chi_tmp1245 = 'assignment';if (kind == (_chi_tmp1245)) then
-local _chi_tmp1246=__P_.emitAssignment(st,expr);_chi_tmp1244=_chi_tmp1246
- else local _chi_tmp1247;local _chi_tmp1248 = 'block';if (kind == (_chi_tmp1248)) then
-local _chi_tmp1249=__P_.emitBlock(st,expr);_chi_tmp1247=_chi_tmp1249
- else local _chi_tmp1250;local _chi_tmp1251 = 'fn';if (kind == (_chi_tmp1251)) then
-local _chi_tmp1252 = '';local _chi_tmp1253=__P_.emitFn(st,expr,(_chi_tmp1252),(false));_chi_tmp1250=_chi_tmp1253
- else local _chi_tmp1254;local _chi_tmp1255 = 'fn_call';if (kind == (_chi_tmp1255)) then
-local _chi_tmp1256=__P_.emitFnCall(st,expr);_chi_tmp1254=_chi_tmp1256
- else local _chi_tmp1257;local _chi_tmp1258 = 'if_else';if (kind == (_chi_tmp1258)) then
-local _chi_tmp1259=__P_.emitIfElse(st,expr);_chi_tmp1257=_chi_tmp1259
- else local _chi_tmp1260;local _chi_tmp1261 = 'while_loop';if (kind == (_chi_tmp1261)) then
-local _chi_tmp1262=__P_.emitWhile(st,expr);_chi_tmp1260=_chi_tmp1262
- else local _chi_tmp1263;local _chi_tmp1264 = 'for_loop';if (kind == (_chi_tmp1264)) then
-local _chi_tmp1265=__P_.emitForLoop(st,expr);_chi_tmp1263=_chi_tmp1265
- else local _chi_tmp1266;local _chi_tmp1267 = 'break';if (kind == (_chi_tmp1267)) then
-local _chi_tmp1268=__P_.emitBreak(st,expr);_chi_tmp1266=_chi_tmp1268
- else local _chi_tmp1269;local _chi_tmp1270 = 'continue';if (kind == (_chi_tmp1270)) then
-local _chi_tmp1271=__P_.emitContinue(st,expr);_chi_tmp1269=_chi_tmp1271
- else local _chi_tmp1272;local _chi_tmp1273 = 'return';if (kind == (_chi_tmp1273)) then
-local _chi_tmp1274=__P_.emitReturn(st,expr);_chi_tmp1272=_chi_tmp1274
- else local _chi_tmp1275;local _chi_tmp1276 = 'infix_op';if (kind == (_chi_tmp1276)) then
-local _chi_tmp1277=__P_.emitInfixOp(st,expr);_chi_tmp1275=_chi_tmp1277
- else local _chi_tmp1278;local _chi_tmp1279 = 'prefix_op';if (kind == (_chi_tmp1279)) then
-local _chi_tmp1280=__P_.emitPrefixOp(st,expr);_chi_tmp1278=_chi_tmp1280
- else local _chi_tmp1281;local _chi_tmp1282 = 'cast';if (kind == (_chi_tmp1282)) then
-local _chi_tmp1283=__P_.emitCast(st,expr);_chi_tmp1281=_chi_tmp1283
- else local _chi_tmp1284;local _chi_tmp1285 = 'is';if (kind == (_chi_tmp1285)) then
-local _chi_tmp1286=__P_.emitIs(st,expr);_chi_tmp1284=_chi_tmp1286
- else local _chi_tmp1287;local _chi_tmp1288 = 'create_array';if (kind == (_chi_tmp1288)) then
-local _chi_tmp1289=__P_.emitCreateArray(st,expr);_chi_tmp1287=_chi_tmp1289
- else local _chi_tmp1290;local _chi_tmp1291 = 'create_record';if (kind == (_chi_tmp1291)) then
-local _chi_tmp1292=__P_.emitCreateRecord(st,expr);_chi_tmp1290=_chi_tmp1292
- else local _chi_tmp1293;local _chi_tmp1294 = 'index_op';if (kind == (_chi_tmp1294)) then
-local _chi_tmp1295=__P_.emitIndexOperator(st,expr);_chi_tmp1293=_chi_tmp1295
- else local _chi_tmp1296;local _chi_tmp1297 = 'indexed_assignment';if (kind == (_chi_tmp1297)) then
-local _chi_tmp1298=__P_.emitIndexAssignment(st,expr);_chi_tmp1296=_chi_tmp1298
- else local _chi_tmp1299;local _chi_tmp1300 = 'field_access';if (kind == (_chi_tmp1300)) then
-local _chi_tmp1301=__P_.emitFieldAccess(st,expr);_chi_tmp1299=_chi_tmp1301
- else local _chi_tmp1302;local _chi_tmp1303 = 'field_assignment';if (kind == (_chi_tmp1303)) then
-local _chi_tmp1304=__P_.emitFieldAssignment(st,expr);_chi_tmp1302=_chi_tmp1304
- else local _chi_tmp1305;local _chi_tmp1306 = 'handle';if (kind == (_chi_tmp1306)) then
-local _chi_tmp1307=__P_.emitHandle(st,expr);_chi_tmp1305=_chi_tmp1307
- else local _chi_tmp1308;local _chi_tmp1309 = 'effect_definition';if (kind == (_chi_tmp1309)) then
-local _chi_tmp1310=__P_.emitEffectDefinition(st,expr);_chi_tmp1308=_chi_tmp1310
+do local function _chi_tmp1251(st,expr)
+local _chi_tmp1252;do _chi_tmp1252=expr.kind end;local kind=_chi_tmp1252;
+do local _chi_tmp1253;local _chi_tmp1254 = 'atom';if (kind == (_chi_tmp1254)) then local _chi_tmp1255=__P_.emitAtom(st,expr);_chi_tmp1253=_chi_tmp1255 else local _chi_tmp1256;local _chi_tmp1257 = 'interpolated_string';if (kind == (_chi_tmp1257)) then
+local _chi_tmp1258=__P_.emitInterpolatedString(st,expr);_chi_tmp1256=_chi_tmp1258
+ else local _chi_tmp1259;local _chi_tmp1260 = 'variable_access';if (kind == (_chi_tmp1260)) then
+local _chi_tmp1261=__P_.emitVariableAccess(st,expr);_chi_tmp1259=_chi_tmp1261
+ else local _chi_tmp1262;local _chi_tmp1263 = 'name_declaration';if (kind == (_chi_tmp1263)) then
+local _chi_tmp1264=__P_.emitNameDeclaration(st,expr);_chi_tmp1262=_chi_tmp1264
+ else local _chi_tmp1265;local _chi_tmp1266 = 'assignment';if (kind == (_chi_tmp1266)) then
+local _chi_tmp1267=__P_.emitAssignment(st,expr);_chi_tmp1265=_chi_tmp1267
+ else local _chi_tmp1268;local _chi_tmp1269 = 'block';if (kind == (_chi_tmp1269)) then
+local _chi_tmp1270=__P_.emitBlock(st,expr);_chi_tmp1268=_chi_tmp1270
+ else local _chi_tmp1271;local _chi_tmp1272 = 'fn';if (kind == (_chi_tmp1272)) then
+local _chi_tmp1273 = '';local _chi_tmp1274=__P_.emitFn(st,expr,(_chi_tmp1273),(false));_chi_tmp1271=_chi_tmp1274
+ else local _chi_tmp1275;local _chi_tmp1276 = 'fn_call';if (kind == (_chi_tmp1276)) then
+local _chi_tmp1277=__P_.emitFnCall(st,expr);_chi_tmp1275=_chi_tmp1277
+ else local _chi_tmp1278;local _chi_tmp1279 = 'if_else';if (kind == (_chi_tmp1279)) then
+local _chi_tmp1280=__P_.emitIfElse(st,expr);_chi_tmp1278=_chi_tmp1280
+ else local _chi_tmp1281;local _chi_tmp1282 = 'while_loop';if (kind == (_chi_tmp1282)) then
+local _chi_tmp1283=__P_.emitWhile(st,expr);_chi_tmp1281=_chi_tmp1283
+ else local _chi_tmp1284;local _chi_tmp1285 = 'for_loop';if (kind == (_chi_tmp1285)) then
+local _chi_tmp1286=__P_.emitForLoop(st,expr);_chi_tmp1284=_chi_tmp1286
+ else local _chi_tmp1287;local _chi_tmp1288 = 'break';if (kind == (_chi_tmp1288)) then
+local _chi_tmp1289=__P_.emitBreak(st,expr);_chi_tmp1287=_chi_tmp1289
+ else local _chi_tmp1290;local _chi_tmp1291 = 'continue';if (kind == (_chi_tmp1291)) then
+local _chi_tmp1292=__P_.emitContinue(st,expr);_chi_tmp1290=_chi_tmp1292
+ else local _chi_tmp1293;local _chi_tmp1294 = 'return';if (kind == (_chi_tmp1294)) then
+local _chi_tmp1295=__P_.emitReturn(st,expr);_chi_tmp1293=_chi_tmp1295
+ else local _chi_tmp1296;local _chi_tmp1297 = 'infix_op';if (kind == (_chi_tmp1297)) then
+local _chi_tmp1298=__P_.emitInfixOp(st,expr);_chi_tmp1296=_chi_tmp1298
+ else local _chi_tmp1299;local _chi_tmp1300 = 'prefix_op';if (kind == (_chi_tmp1300)) then
+local _chi_tmp1301=__P_.emitPrefixOp(st,expr);_chi_tmp1299=_chi_tmp1301
+ else local _chi_tmp1302;local _chi_tmp1303 = 'cast';if (kind == (_chi_tmp1303)) then
+local _chi_tmp1304=__P_.emitCast(st,expr);_chi_tmp1302=_chi_tmp1304
+ else local _chi_tmp1305;local _chi_tmp1306 = 'is';if (kind == (_chi_tmp1306)) then
+local _chi_tmp1307=__P_.emitIs(st,expr);_chi_tmp1305=_chi_tmp1307
+ else local _chi_tmp1308;local _chi_tmp1309 = 'create_array';if (kind == (_chi_tmp1309)) then
+local _chi_tmp1310=__P_.emitCreateArray(st,expr);_chi_tmp1308=_chi_tmp1310
+ else local _chi_tmp1311;local _chi_tmp1312 = 'create_record';if (kind == (_chi_tmp1312)) then
+local _chi_tmp1313=__P_.emitCreateRecord(st,expr);_chi_tmp1311=_chi_tmp1313
+ else local _chi_tmp1314;local _chi_tmp1315 = 'index_op';if (kind == (_chi_tmp1315)) then
+local _chi_tmp1316=__P_.emitIndexOperator(st,expr);_chi_tmp1314=_chi_tmp1316
+ else local _chi_tmp1317;local _chi_tmp1318 = 'indexed_assignment';if (kind == (_chi_tmp1318)) then
+local _chi_tmp1319=__P_.emitIndexAssignment(st,expr);_chi_tmp1317=_chi_tmp1319
+ else local _chi_tmp1320;local _chi_tmp1321 = 'field_access';if (kind == (_chi_tmp1321)) then
+local _chi_tmp1322=__P_.emitFieldAccess(st,expr);_chi_tmp1320=_chi_tmp1322
+ else local _chi_tmp1323;local _chi_tmp1324 = 'field_assignment';if (kind == (_chi_tmp1324)) then
+local _chi_tmp1325=__P_.emitFieldAssignment(st,expr);_chi_tmp1323=_chi_tmp1325
+ else local _chi_tmp1326;local _chi_tmp1327 = 'handle';if (kind == (_chi_tmp1327)) then
+local _chi_tmp1328=__P_.emitHandle(st,expr);_chi_tmp1326=_chi_tmp1328
+ else local _chi_tmp1329;local _chi_tmp1330 = 'effect_definition';if (kind == (_chi_tmp1330)) then
+local _chi_tmp1331=__P_.emitEffectDefinition(st,expr);_chi_tmp1329=_chi_tmp1331
  else
-do local _chi_tmp1311 = 'WARNING: unsupported expression kind: ';local _chi_tmp1312=chi_tostring((_chi_tmp1311)) .. chi_tostring(kind);local _chi_tmp1313=__std__lang.println(_chi_tmp1312); end;
-local _chi_tmp1314 = 'nil';_chi_tmp1308=(_chi_tmp1314)
- end;_chi_tmp1305=_chi_tmp1308 end;_chi_tmp1302=_chi_tmp1305 end;_chi_tmp1299=_chi_tmp1302 end;_chi_tmp1296=_chi_tmp1299 end;_chi_tmp1293=_chi_tmp1296 end;_chi_tmp1290=_chi_tmp1293 end;_chi_tmp1287=_chi_tmp1290 end;_chi_tmp1284=_chi_tmp1287 end;_chi_tmp1281=_chi_tmp1284 end;_chi_tmp1278=_chi_tmp1281 end;_chi_tmp1275=_chi_tmp1278 end;_chi_tmp1272=_chi_tmp1275 end;_chi_tmp1269=_chi_tmp1272 end;_chi_tmp1266=_chi_tmp1269 end;_chi_tmp1263=_chi_tmp1266 end;_chi_tmp1260=_chi_tmp1263 end;_chi_tmp1257=_chi_tmp1260 end;_chi_tmp1254=_chi_tmp1257 end;_chi_tmp1250=_chi_tmp1254 end;_chi_tmp1247=_chi_tmp1250 end;_chi_tmp1244=_chi_tmp1247 end;_chi_tmp1241=_chi_tmp1244 end;_chi_tmp1238=_chi_tmp1241 end;_chi_tmp1235=_chi_tmp1238 end;_chi_tmp1232=_chi_tmp1235 end;_chi_tmp1231=_chi_tmp1232 end;local result=_chi_tmp1231;
+do local _chi_tmp1332 = 'WARNING: unsupported expression kind: ';local _chi_tmp1333=chi_tostring((_chi_tmp1332)) .. chi_tostring(kind);local _chi_tmp1334=__std__lang.println(_chi_tmp1333); end;
+local _chi_tmp1335 = 'nil';_chi_tmp1329=(_chi_tmp1335)
+ end;_chi_tmp1326=_chi_tmp1329 end;_chi_tmp1323=_chi_tmp1326 end;_chi_tmp1320=_chi_tmp1323 end;_chi_tmp1317=_chi_tmp1320 end;_chi_tmp1314=_chi_tmp1317 end;_chi_tmp1311=_chi_tmp1314 end;_chi_tmp1308=_chi_tmp1311 end;_chi_tmp1305=_chi_tmp1308 end;_chi_tmp1302=_chi_tmp1305 end;_chi_tmp1299=_chi_tmp1302 end;_chi_tmp1296=_chi_tmp1299 end;_chi_tmp1293=_chi_tmp1296 end;_chi_tmp1290=_chi_tmp1293 end;_chi_tmp1287=_chi_tmp1290 end;_chi_tmp1284=_chi_tmp1287 end;_chi_tmp1281=_chi_tmp1284 end;_chi_tmp1278=_chi_tmp1281 end;_chi_tmp1275=_chi_tmp1278 end;_chi_tmp1271=_chi_tmp1275 end;_chi_tmp1268=_chi_tmp1271 end;_chi_tmp1265=_chi_tmp1268 end;_chi_tmp1262=_chi_tmp1265 end;_chi_tmp1259=_chi_tmp1262 end;_chi_tmp1256=_chi_tmp1259 end;_chi_tmp1253=_chi_tmp1256 end;_chi_tmp1252=_chi_tmp1253 end;local result=_chi_tmp1252;
 return result end;
-__P_.emitExpr=_chi_tmp1230; end;
+__P_.emitExpr=_chi_tmp1251; end;
 do function __P_.topLevelWrappable(expr)
-local _chi_tmp1315;do _chi_tmp1315=expr.kind end;local kind=_chi_tmp1315;
-do local _chi_tmp1316 = 'name_declaration';local _chi_tmp1318=(kind == (_chi_tmp1316));if not _chi_tmp1318 then local _chi_tmp1317 = 'assignment';_chi_tmp1318=(kind == (_chi_tmp1317)) end;local _chi_tmp1320=_chi_tmp1318;if not _chi_tmp1320 then local _chi_tmp1319 = 'fn_call';_chi_tmp1320=(kind == (_chi_tmp1319)) end;_chi_tmp1315=_chi_tmp1320 end;local wrappableKind=_chi_tmp1315;
-local _chi_tmp1322=wrappableKind;if _chi_tmp1322 then local _chi_tmp1321=__P_.containsRawLuaCall(expr,(true));_chi_tmp1322=(_chi_tmp1321 == (false)) end;return _chi_tmp1322 end;
+local _chi_tmp1336;do _chi_tmp1336=expr.kind end;local kind=_chi_tmp1336;
+do local _chi_tmp1337 = 'name_declaration';local _chi_tmp1339=(kind == (_chi_tmp1337));if not _chi_tmp1339 then local _chi_tmp1338 = 'assignment';_chi_tmp1339=(kind == (_chi_tmp1338)) end;local _chi_tmp1341=_chi_tmp1339;if not _chi_tmp1341 then local _chi_tmp1340 = 'fn_call';_chi_tmp1341=(kind == (_chi_tmp1340)) end;_chi_tmp1336=_chi_tmp1341 end;local wrappableKind=_chi_tmp1336;
+local _chi_tmp1343=wrappableKind;if _chi_tmp1343 then local _chi_tmp1342=__P_.containsRawLuaCall(expr,(true));_chi_tmp1343=(_chi_tmp1342 == (false)) end;return _chi_tmp1343 end;
  end;
 function __P_.emitProgram(prog,emitModule)
-local _chi_tmp1323;do local _chi_tmp1324=__P_.newState(prog);_chi_tmp1323=_chi_tmp1324 end;local st=_chi_tmp1323;
+local _chi_tmp1344;do local _chi_tmp1345=__P_.newState(prog);_chi_tmp1344=_chi_tmp1345 end;local st=_chi_tmp1344;
 do st.trackSourceLines=emitModule; end;
-do _chi_tmp1323=prog.packageDef.moduleName end;local progMod=_chi_tmp1323;
-do _chi_tmp1323=prog.packageDef.packageName end;local progPkg=_chi_tmp1323;
-do local _chi_tmp1325 = '/';local _chi_tmp1326=chi_tostring(progMod) .. chi_tostring((_chi_tmp1325)) .. chi_tostring(progPkg);_chi_tmp1323=_chi_tmp1326 end;local packageQualifier=_chi_tmp1323;
-do local _chi_tmp1327;if emitModule then
-local _chi_tmp1328 = 'local _chi_line_map={};local function _chi_run()';local _chi_tmp1329=__P_.emit(st,(_chi_tmp1328));_chi_tmp1327=_chi_tmp1329
+do _chi_tmp1344=prog.packageDef.moduleName end;local progMod=_chi_tmp1344;
+do _chi_tmp1344=prog.packageDef.packageName end;local progPkg=_chi_tmp1344;
+do local _chi_tmp1346 = '/';local _chi_tmp1347=chi_tostring(progMod) .. chi_tostring((_chi_tmp1346)) .. chi_tostring(progPkg);_chi_tmp1344=_chi_tmp1347 end;local packageQualifier=_chi_tmp1344;
+do local _chi_tmp1348;if emitModule then
+local _chi_tmp1349 = 'local _chi_line_map={};local function _chi_run()';local _chi_tmp1350=__P_.emit(st,(_chi_tmp1349));_chi_tmp1348=_chi_tmp1350
  end; end;
-do local _chi_tmp1330 = 'local __P_ = package.loaded[\'';local _chi_tmp1331 = '\'] or {_package={},_types={}};';local _chi_tmp1332=chi_tostring((_chi_tmp1330)) .. chi_tostring(packageQualifier) .. chi_tostring((_chi_tmp1331));local _chi_tmp1333=__P_.emit(st,_chi_tmp1332); end;
-do local _chi_tmp1334 = 'package.loaded[\'';local _chi_tmp1335 = '\'] = __P_;';local _chi_tmp1336=chi_tostring((_chi_tmp1334)) .. chi_tostring(packageQualifier) .. chi_tostring((_chi_tmp1335));local _chi_tmp1337=__P_.emit(st,_chi_tmp1336); end;
-do local _chi_tmp1338 = 'local __S_ = __P_._package;';local _chi_tmp1339=__P_.emit(st,(_chi_tmp1338)); end;
-do local _chi_tmp1340 = 'local __T_ = __P_._types;';local _chi_tmp1341=__P_.emit(st,(_chi_tmp1340)); end;
-do local _chi_tmp1342=__P_.emitPackageInfo(st); end;
-do _chi_tmp1323=prog.typeAliases end;local aliases=_chi_tmp1323;
-do local _chi_tmp1343=#aliases;_chi_tmp1323=_chi_tmp1343 end;local aliasCount=_chi_tmp1323;
-do _chi_tmp1323=(1) end;local ai=_chi_tmp1323;
-do local function _chi_tmp1344() return ai end;local function _chi_tmp1345() return aliasCount end;while (_chi_tmp1344() <= _chi_tmp1345()) do do
-local _chi_tmp1346;do local _chi_tmp1347=aliases[ai];_chi_tmp1346=_chi_tmp1347 end;local alias=_chi_tmp1346;
-do local _chi_tmp1348=alias.typeId.name;local _chi_tmp1349=__P_.luaName(_chi_tmp1348);_chi_tmp1346=_chi_tmp1349 end;local aliasName=_chi_tmp1346;
-do local _chi_tmp1350=alias.aliasType;_chi_tmp1346=_chi_tmp1350 end;local aliasType=_chi_tmp1346;
-do local _chi_tmp1351=alias.typeId;_chi_tmp1346=_chi_tmp1351 end;local aliasTypeId=_chi_tmp1346;
-do local _chi_tmp1352=require('chicc/type_writer').encodeTypeWithContext(aliasType, aliasTypeId);_chi_tmp1346=_chi_tmp1352 end;local encoded=_chi_tmp1346;
-do local _chi_tmp1353 = '__T_.';local _chi_tmp1354 = '=\'';local _chi_tmp1355 = '\';';local _chi_tmp1356=chi_tostring((_chi_tmp1353)) .. chi_tostring(aliasName) .. chi_tostring((_chi_tmp1354)) .. chi_tostring(encoded) .. chi_tostring((_chi_tmp1355));local _chi_tmp1357=__P_.emit(st,_chi_tmp1356); end;
+do local _chi_tmp1351 = 'local __P_ = package.loaded[\'';local _chi_tmp1352 = '\'] or {_package={},_types={}};';local _chi_tmp1353=chi_tostring((_chi_tmp1351)) .. chi_tostring(packageQualifier) .. chi_tostring((_chi_tmp1352));local _chi_tmp1354=__P_.emit(st,_chi_tmp1353); end;
+do local _chi_tmp1355 = 'package.loaded[\'';local _chi_tmp1356 = '\'] = __P_;';local _chi_tmp1357=chi_tostring((_chi_tmp1355)) .. chi_tostring(packageQualifier) .. chi_tostring((_chi_tmp1356));local _chi_tmp1358=__P_.emit(st,_chi_tmp1357); end;
+do local _chi_tmp1359 = 'local __S_ = __P_._package;';local _chi_tmp1360=__P_.emit(st,(_chi_tmp1359)); end;
+do local _chi_tmp1361 = 'local __T_ = __P_._types;';local _chi_tmp1362=__P_.emit(st,(_chi_tmp1361)); end;
+do local _chi_tmp1363=__P_.emitPackageInfo(st); end;
+do _chi_tmp1344=prog.typeAliases end;local aliases=_chi_tmp1344;
+do local _chi_tmp1364=#aliases;_chi_tmp1344=_chi_tmp1364 end;local aliasCount=_chi_tmp1344;
+do _chi_tmp1344=(1) end;local ai=_chi_tmp1344;
+do local function _chi_tmp1365() return ai end;local function _chi_tmp1366() return aliasCount end;while (_chi_tmp1365() <= _chi_tmp1366()) do do
+local _chi_tmp1367;do local _chi_tmp1368=aliases[ai];_chi_tmp1367=_chi_tmp1368 end;local alias=_chi_tmp1367;
+do local _chi_tmp1369=alias.typeId.name;local _chi_tmp1370=__P_.luaName(_chi_tmp1369);_chi_tmp1367=_chi_tmp1370 end;local aliasName=_chi_tmp1367;
+do local _chi_tmp1371=alias.aliasType;_chi_tmp1367=_chi_tmp1371 end;local aliasType=_chi_tmp1367;
+do local _chi_tmp1372=alias.typeId;_chi_tmp1367=_chi_tmp1372 end;local aliasTypeId=_chi_tmp1367;
+do local _chi_tmp1373=require('chicc/type_writer').encodeTypeWithContext(aliasType, aliasTypeId);_chi_tmp1367=_chi_tmp1373 end;local encoded=_chi_tmp1367;
+do local _chi_tmp1374 = '__T_.';local _chi_tmp1375 = '=\'';local _chi_tmp1376 = '\';';local _chi_tmp1377=chi_tostring((_chi_tmp1374)) .. chi_tostring(aliasName) .. chi_tostring((_chi_tmp1375)) .. chi_tostring(encoded) .. chi_tostring((_chi_tmp1376));local _chi_tmp1378=__P_.emit(st,_chi_tmp1377); end;
 ai=(ai + (1)); end ::__continue_24:: end;
  end;
-do local _chi_tmp1358=__P_.collectRequires(st); end;
-do _chi_tmp1323=prog.expressions end;local progExprs=_chi_tmp1323;
-do local _chi_tmp1359=#progExprs;_chi_tmp1323=_chi_tmp1359 end;local exprCount=_chi_tmp1323;
-do _chi_tmp1323=(1) end;local ei=_chi_tmp1323;
-do local function _chi_tmp1360() return ei end;local function _chi_tmp1361() return exprCount end;while (_chi_tmp1360() <= _chi_tmp1361()) do do
-local _chi_tmp1362;do local _chi_tmp1363=progExprs[ei];_chi_tmp1362=_chi_tmp1363 end;local expr=_chi_tmp1362;
-do _chi_tmp1362=(ei == exprCount) end;local isLast=_chi_tmp1362;
-do local _chi_tmp1364;if (emitModule and (expr.section ~= (nil))) then
-st.statementSourceLine=expr.section.startLine;_chi_tmp1364=expr.section.startLine
+do local _chi_tmp1379=__P_.collectRequires(st); end;
+do _chi_tmp1344=prog.expressions end;local progExprs=_chi_tmp1344;
+do local _chi_tmp1380=#progExprs;_chi_tmp1344=_chi_tmp1380 end;local exprCount=_chi_tmp1344;
+do _chi_tmp1344=(1) end;local ei=_chi_tmp1344;
+do local function _chi_tmp1381() return ei end;local function _chi_tmp1382() return exprCount end;while (_chi_tmp1381() <= _chi_tmp1382()) do do
+local _chi_tmp1383;do local _chi_tmp1384=progExprs[ei];_chi_tmp1383=_chi_tmp1384 end;local expr=_chi_tmp1383;
+do _chi_tmp1383=(ei == exprCount) end;local isLast=_chi_tmp1383;
+do local _chi_tmp1385;if (emitModule and (expr.section ~= (nil))) then
+st.statementSourceLine=expr.section.startLine;_chi_tmp1385=expr.section.startLine
  end; end;
-do local _chi_tmp1366=(emitModule and (isLast == (false)));if _chi_tmp1366 then local _chi_tmp1365=__P_.topLevelWrappable(expr);_chi_tmp1366=_chi_tmp1365 end;_chi_tmp1362=_chi_tmp1366 end;local wrappable=_chi_tmp1362;
-do local _chi_tmp1367;if wrappable then
-do local _chi_tmp1368 = 'do ';local _chi_tmp1369=__P_.emit(st,(_chi_tmp1368)); end;
-do local _chi_tmp1370=__P_.emitExpr(st,expr); end;
-local _chi_tmp1371 = ' end;';local _chi_tmp1372=__P_.emit(st,(_chi_tmp1371));_chi_tmp1367=_chi_tmp1372
+do local _chi_tmp1387=(emitModule and (isLast == (false)));if _chi_tmp1387 then local _chi_tmp1386=__P_.topLevelWrappable(expr);_chi_tmp1387=_chi_tmp1386 end;_chi_tmp1383=_chi_tmp1387 end;local wrappable=_chi_tmp1383;
+do local _chi_tmp1388;if wrappable then
+do local _chi_tmp1389 = 'do ';local _chi_tmp1390=__P_.emit(st,(_chi_tmp1389)); end;
+do local _chi_tmp1391=__P_.emitExpr(st,expr); end;
+local _chi_tmp1392 = ' end;';local _chi_tmp1393=__P_.emit(st,(_chi_tmp1392));_chi_tmp1388=_chi_tmp1393
  else
-local _chi_tmp1373;do local _chi_tmp1374=__P_.emitExpr(st,expr);_chi_tmp1373=_chi_tmp1374 end;local result=_chi_tmp1373;
-local _chi_tmp1375;if isLast then
-local _chi_tmp1376;if emitModule then
-local _chi_tmp1377 = 'return __P_';local _chi_tmp1378=__P_.emit(st,(_chi_tmp1377));_chi_tmp1376=_chi_tmp1378
+local _chi_tmp1394;do local _chi_tmp1395=__P_.emitExpr(st,expr);_chi_tmp1394=_chi_tmp1395 end;local result=_chi_tmp1394;
+local _chi_tmp1396;if isLast then
+local _chi_tmp1397;if emitModule then
+local _chi_tmp1398 = 'return __P_';local _chi_tmp1399=__P_.emit(st,(_chi_tmp1398));_chi_tmp1397=_chi_tmp1399
  else
-local _chi_tmp1379 = 'return ';local _chi_tmp1380=chi_tostring((_chi_tmp1379)) .. chi_tostring(result);local _chi_tmp1381=__P_.emit(st,_chi_tmp1380);_chi_tmp1376=_chi_tmp1381
- end;_chi_tmp1375=_chi_tmp1376
- end;_chi_tmp1367=_chi_tmp1375
+local _chi_tmp1400 = 'return ';local _chi_tmp1401=chi_tostring((_chi_tmp1400)) .. chi_tostring(result);local _chi_tmp1402=__P_.emit(st,_chi_tmp1401);_chi_tmp1397=_chi_tmp1402
+ end;_chi_tmp1396=_chi_tmp1397
+ end;_chi_tmp1388=_chi_tmp1396
  end; end;
 ei=(ei + (1)); end ::__continue_25:: end;
  end;
-do local _chi_tmp1382;if emitModule then
+do local _chi_tmp1403;if emitModule then
 do st.statementSourceLine=(0); end;
-do local _chi_tmp1383 = ' end;';local _chi_tmp1384=__P_.emit(st,(_chi_tmp1383)); end;
-do local _chi_tmp1385 = 'local _chi_info=debug.getinfo(_chi_run,\'S\');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;';local _chi_tmp1386=__P_.emit(st,(_chi_tmp1385)); end;
-do local _chi_tmp1387 = 'if string.sub(_chi_source,1,1)==\'@\' then _chi_source=string.sub(_chi_source,2) end;';local _chi_tmp1388=__P_.emit(st,(_chi_tmp1387)); end;
-local _chi_tmp1389;do _chi_tmp1389=(1) end;local mi=_chi_tmp1389;
-do local function _chi_tmp1390() return mi end;local function _chi_tmp1391() local _chi_tmp1392=__std__lang_array.size(st.lineMap);return _chi_tmp1392 end;while (_chi_tmp1390() <= _chi_tmp1391()) do do
-local _chi_tmp1393;do local _chi_tmp1394=st.lineMap[mi];_chi_tmp1393=_chi_tmp1394 end;local entry=_chi_tmp1393;
-do local _chi_tmp1395 = '_chi_line_map[';local _chi_tmp1396 = ']=';local _chi_tmp1397 = ';';local _chi_tmp1398=chi_tostring((_chi_tmp1395)) .. chi_tostring(entry.generatedLine) .. chi_tostring((_chi_tmp1396)) .. chi_tostring(entry.sourceLine) .. chi_tostring((_chi_tmp1397));local _chi_tmp1399=__P_.emit(st,_chi_tmp1398); end;
+do local _chi_tmp1404 = ' end;';local _chi_tmp1405=__P_.emit(st,(_chi_tmp1404)); end;
+do local _chi_tmp1406 = 'local _chi_info=debug.getinfo(_chi_run,\'S\');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;';local _chi_tmp1407=__P_.emit(st,(_chi_tmp1406)); end;
+do local _chi_tmp1408 = 'if string.sub(_chi_source,1,1)==\'@\' then _chi_source=string.sub(_chi_source,2) end;';local _chi_tmp1409=__P_.emit(st,(_chi_tmp1408)); end;
+local _chi_tmp1410;do _chi_tmp1410=(1) end;local mi=_chi_tmp1410;
+do local function _chi_tmp1411() return mi end;local function _chi_tmp1412() local _chi_tmp1413=__std__lang_array.size(st.lineMap);return _chi_tmp1413 end;while (_chi_tmp1411() <= _chi_tmp1412()) do do
+local _chi_tmp1414;do local _chi_tmp1415=st.lineMap[mi];_chi_tmp1414=_chi_tmp1415 end;local entry=_chi_tmp1414;
+do local _chi_tmp1416 = '_chi_line_map[';local _chi_tmp1417 = ']=';local _chi_tmp1418 = ';';local _chi_tmp1419=chi_tostring((_chi_tmp1416)) .. chi_tostring(entry.generatedLine) .. chi_tostring((_chi_tmp1417)) .. chi_tostring(entry.sourceLine) .. chi_tostring((_chi_tmp1418));local _chi_tmp1420=__P_.emit(st,_chi_tmp1419); end;
 mi=(mi + (1)); end ::__continue_26:: end;
  end;
-do local _chi_tmp1400 = 'local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..\':\'.._chi_generated..\':\'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..\':\'.._chi_source_line..\':\'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;';local _chi_tmp1401=__P_.emit(st,(_chi_tmp1400)); end;
-do local _chi_tmp1402 = 'local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;';local _chi_tmp1403=__P_.emit(st,(_chi_tmp1402)); end;
-local _chi_tmp1404;if (exprCount > (0)) then
-local _chi_tmp1405 = 'return _chi_result';local _chi_tmp1406=__P_.emit(st,(_chi_tmp1405));_chi_tmp1404=_chi_tmp1406
- end;_chi_tmp1382=_chi_tmp1404
+do local _chi_tmp1421 = 'local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..\':\'.._chi_generated..\':\'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..\':\'.._chi_source_line..\':\'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;';local _chi_tmp1422=__P_.emit(st,(_chi_tmp1421)); end;
+do local _chi_tmp1423 = 'local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;';local _chi_tmp1424=__P_.emit(st,(_chi_tmp1423)); end;
+local _chi_tmp1425;if (exprCount > (0)) then
+local _chi_tmp1426 = 'return _chi_result';local _chi_tmp1427=__P_.emit(st,(_chi_tmp1426));_chi_tmp1425=_chi_tmp1427
+ end;_chi_tmp1403=_chi_tmp1425
  end; end;
-local _chi_tmp1407=__chicc__util.toString(st.sb);return _chi_tmp1407 end;
+local _chi_tmp1428=__chicc__util.toString(st.sb);return _chi_tmp1428 end;
 return __P_
- end;local _chi_info=debug.getinfo(_chi_run,'S');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;if string.sub(_chi_source,1,1)=='@' then _chi_source=string.sub(_chi_source,2) end;_chi_line_map[2]=26;_chi_line_map[3]=27;_chi_line_map[4]=26;_chi_line_map[5]=30;_chi_line_map[6]=31;_chi_line_map[7]=32;_chi_line_map[8]=33;_chi_line_map[9]=34;_chi_line_map[10]=35;_chi_line_map[11]=36;_chi_line_map[12]=37;_chi_line_map[13]=38;_chi_line_map[14]=39;_chi_line_map[15]=38;_chi_line_map[16]=41;_chi_line_map[17]=38;_chi_line_map[18]=36;_chi_line_map[19]=44;_chi_line_map[20]=45;_chi_line_map[21]=46;_chi_line_map[22]=47;_chi_line_map[23]=44;_chi_line_map[24]=30;_chi_line_map[25]=52;_chi_line_map[26]=53;_chi_line_map[27]=54;_chi_line_map[28]=55;_chi_line_map[29]=56;_chi_line_map[30]=57;_chi_line_map[31]=54;_chi_line_map[32]=59;_chi_line_map[33]=60;_chi_line_map[34]=61;_chi_line_map[35]=59;_chi_line_map[36]=64;_chi_line_map[37]=65;_chi_line_map[38]=66;_chi_line_map[39]=67;_chi_line_map[40]=68;_chi_line_map[41]=69;_chi_line_map[42]=70;_chi_line_map[43]=71;_chi_line_map[44]=70;_chi_line_map[45]=65;_chi_line_map[46]=75;_chi_line_map[47]=76;_chi_line_map[48]=77;_chi_line_map[49]=78;_chi_line_map[50]=79;_chi_line_map[51]=80;_chi_line_map[52]=81;_chi_line_map[53]=82;_chi_line_map[54]=83;_chi_line_map[55]=82;_chi_line_map[56]=79;_chi_line_map[57]=86;_chi_line_map[58]=78;_chi_line_map[59]=52;_chi_line_map[60]=90;_chi_line_map[61]=91;_chi_line_map[62]=92;_chi_line_map[63]=93;_chi_line_map[64]=94;_chi_line_map[65]=95;_chi_line_map[66]=96;_chi_line_map[67]=97;_chi_line_map[68]=93;_chi_line_map[69]=99;_chi_line_map[70]=90;_chi_line_map[71]=102;_chi_line_map[72]=103;_chi_line_map[73]=104;_chi_line_map[74]=105;_chi_line_map[75]=102;_chi_line_map[76]=108;_chi_line_map[77]=109;_chi_line_map[78]=110;_chi_line_map[79]=111;_chi_line_map[80]=108;_chi_line_map[81]=114;_chi_line_map[82]=117;_chi_line_map[83]=121;_chi_line_map[84]=122;_chi_line_map[85]=123;_chi_line_map[86]=122;_chi_line_map[87]=125;_chi_line_map[88]=122;_chi_line_map[89]=121;_chi_line_map[90]=132;_chi_line_map[91]=133;_chi_line_map[92]=132;_chi_line_map[93]=136;_chi_line_map[94]=137;_chi_line_map[95]=136;_chi_line_map[96]=140;_chi_line_map[97]=141;_chi_line_map[98]=140;_chi_line_map[99]=144;_chi_line_map[100]=145;_chi_line_map[101]=144;_chi_line_map[102]=148;_chi_line_map[103]=149;_chi_line_map[104]=148;_chi_line_map[105]=152;_chi_line_map[106]=153;_chi_line_map[107]=152;_chi_line_map[108]=156;_chi_line_map[109]=157;_chi_line_map[110]=156;_chi_line_map[111]=160;_chi_line_map[112]=161;_chi_line_map[113]=160;_chi_line_map[114]=164;_chi_line_map[115]=165;_chi_line_map[116]=164;_chi_line_map[117]=169;_chi_line_map[118]=171;_chi_line_map[119]=172;_chi_line_map[120]=173;_chi_line_map[121]=174;_chi_line_map[122]=175;_chi_line_map[123]=176;_chi_line_map[124]=177;_chi_line_map[125]=178;_chi_line_map[126]=177;_chi_line_map[127]=180;_chi_line_map[128]=177;_chi_line_map[129]=182;_chi_line_map[130]=177;_chi_line_map[131]=184;_chi_line_map[132]=177;_chi_line_map[133]=186;_chi_line_map[134]=177;_chi_line_map[135]=188;_chi_line_map[136]=189;_chi_line_map[137]=192;_chi_line_map[138]=189;_chi_line_map[139]=194;_chi_line_map[140]=189;_chi_line_map[141]=177;_chi_line_map[142]=197;_chi_line_map[143]=175;_chi_line_map[144]=199;_chi_line_map[145]=171;_chi_line_map[146]=204;_chi_line_map[147]=205;_chi_line_map[148]=206;_chi_line_map[149]=207;_chi_line_map[150]=208;_chi_line_map[151]=209;_chi_line_map[152]=210;_chi_line_map[153]=211;_chi_line_map[154]=212;_chi_line_map[155]=209;_chi_line_map[156]=214;_chi_line_map[157]=204;_chi_line_map[158]=220;_chi_line_map[159]=221;_chi_line_map[160]=222;_chi_line_map[161]=223;_chi_line_map[162]=224;_chi_line_map[163]=220;_chi_line_map[164]=231;_chi_line_map[165]=232;_chi_line_map[166]=234;_chi_line_map[167]=235;_chi_line_map[168]=236;_chi_line_map[169]=237;_chi_line_map[170]=238;_chi_line_map[171]=239;_chi_line_map[172]=237;_chi_line_map[173]=241;_chi_line_map[174]=236;_chi_line_map[175]=243;_chi_line_map[176]=244;_chi_line_map[177]=245;_chi_line_map[178]=246;_chi_line_map[179]=247;_chi_line_map[180]=248;_chi_line_map[181]=249;_chi_line_map[182]=250;_chi_line_map[183]=251;_chi_line_map[184]=252;_chi_line_map[185]=253;_chi_line_map[186]=250;_chi_line_map[187]=248;_chi_line_map[188]=256;_chi_line_map[189]=257;_chi_line_map[190]=245;_chi_line_map[191]=259;_chi_line_map[192]=231;_chi_line_map[193]=262;_chi_line_map[194]=263;_chi_line_map[195]=264;_chi_line_map[196]=265;_chi_line_map[197]=266;_chi_line_map[198]=267;_chi_line_map[199]=268;_chi_line_map[200]=269;_chi_line_map[201]=265;_chi_line_map[202]=271;_chi_line_map[203]=265;_chi_line_map[204]=273;_chi_line_map[205]=274;_chi_line_map[206]=265;_chi_line_map[207]=262;_chi_line_map[208]=278;_chi_line_map[209]=279;_chi_line_map[210]=280;_chi_line_map[211]=281;_chi_line_map[212]=282;_chi_line_map[213]=283;_chi_line_map[214]=284;_chi_line_map[215]=285;_chi_line_map[216]=283;_chi_line_map[217]=288;_chi_line_map[218]=290;_chi_line_map[219]=291;_chi_line_map[220]=292;_chi_line_map[221]=293;_chi_line_map[222]=294;_chi_line_map[223]=295;_chi_line_map[224]=296;_chi_line_map[225]=297;_chi_line_map[226]=293;_chi_line_map[227]=299;_chi_line_map[228]=300;_chi_line_map[229]=278;_chi_line_map[230]=305;_chi_line_map[231]=306;_chi_line_map[232]=307;_chi_line_map[233]=308;_chi_line_map[234]=309;_chi_line_map[235]=308;_chi_line_map[236]=311;_chi_line_map[237]=308;_chi_line_map[238]=306;_chi_line_map[239]=314;_chi_line_map[240]=306;_chi_line_map[241]=305;_chi_line_map[242]=318;_chi_line_map[243]=319;_chi_line_map[244]=318;_chi_line_map[245]=322;_chi_line_map[246]=323;_chi_line_map[247]=322;_chi_line_map[248]=326;_chi_line_map[249]=327;_chi_line_map[250]=328;_chi_line_map[251]=329;_chi_line_map[252]=330;_chi_line_map[253]=329;_chi_line_map[254]=332;_chi_line_map[255]=329;_chi_line_map[256]=334;_chi_line_map[257]=335;_chi_line_map[258]=336;_chi_line_map[259]=337;_chi_line_map[260]=338;_chi_line_map[261]=339;_chi_line_map[262]=340;_chi_line_map[263]=341;_chi_line_map[264]=342;_chi_line_map[265]=338;_chi_line_map[266]=344;_chi_line_map[267]=348;_chi_line_map[268]=349;_chi_line_map[269]=350;_chi_line_map[270]=351;_chi_line_map[271]=352;_chi_line_map[272]=353;_chi_line_map[273]=354;_chi_line_map[274]=355;_chi_line_map[275]=356;_chi_line_map[276]=357;_chi_line_map[277]=353;_chi_line_map[278]=350;_chi_line_map[279]=349;_chi_line_map[280]=361;_chi_line_map[281]=362;_chi_line_map[282]=363;_chi_line_map[283]=364;_chi_line_map[284]=365;_chi_line_map[285]=366;_chi_line_map[286]=367;_chi_line_map[287]=366;_chi_line_map[288]=364;_chi_line_map[289]=370;_chi_line_map[290]=371;_chi_line_map[291]=372;_chi_line_map[292]=373;_chi_line_map[293]=374;_chi_line_map[294]=375;_chi_line_map[295]=376;_chi_line_map[296]=374;_chi_line_map[297]=378;_chi_line_map[298]=374;_chi_line_map[299]=373;_chi_line_map[300]=381;_chi_line_map[301]=382;_chi_line_map[302]=383;_chi_line_map[303]=384;_chi_line_map[304]=326;_chi_line_map[305]=387;_chi_line_map[306]=388;_chi_line_map[307]=389;_chi_line_map[308]=390;_chi_line_map[309]=393;_chi_line_map[310]=394;_chi_line_map[311]=393;_chi_line_map[312]=396;_chi_line_map[313]=397;_chi_line_map[314]=398;_chi_line_map[315]=399;_chi_line_map[316]=398;_chi_line_map[317]=401;_chi_line_map[318]=398;_chi_line_map[319]=403;_chi_line_map[320]=387;_chi_line_map[321]=406;_chi_line_map[322]=407;_chi_line_map[323]=408;_chi_line_map[324]=409;_chi_line_map[325]=410;_chi_line_map[326]=406;_chi_line_map[327]=416;_chi_line_map[328]=417;_chi_line_map[329]=418;_chi_line_map[330]=419;_chi_line_map[331]=420;_chi_line_map[332]=421;_chi_line_map[333]=422;_chi_line_map[334]=423;_chi_line_map[335]=424;_chi_line_map[336]=425;_chi_line_map[337]=416;_chi_line_map[338]=433;_chi_line_map[339]=434;_chi_line_map[340]=435;_chi_line_map[341]=436;_chi_line_map[342]=437;_chi_line_map[343]=433;_chi_line_map[344]=444;_chi_line_map[345]=445;_chi_line_map[346]=446;_chi_line_map[347]=449;_chi_line_map[348]=450;_chi_line_map[349]=444;_chi_line_map[350]=458;_chi_line_map[351]=459;_chi_line_map[352]=460;_chi_line_map[353]=461;_chi_line_map[354]=462;_chi_line_map[355]=463;_chi_line_map[356]=461;_chi_line_map[357]=465;_chi_line_map[358]=466;_chi_line_map[359]=467;_chi_line_map[360]=468;_chi_line_map[361]=469;_chi_line_map[362]=459;_chi_line_map[363]=471;_chi_line_map[364]=472;_chi_line_map[365]=473;_chi_line_map[366]=474;_chi_line_map[367]=459;_chi_line_map[368]=458;_chi_line_map[369]=478;_chi_line_map[370]=479;_chi_line_map[371]=480;_chi_line_map[372]=481;_chi_line_map[373]=480;_chi_line_map[374]=482;_chi_line_map[375]=480;_chi_line_map[376]=483;_chi_line_map[377]=480;_chi_line_map[378]=478;_chi_line_map[379]=488;_chi_line_map[380]=489;_chi_line_map[381]=488;_chi_line_map[382]=493;_chi_line_map[383]=494;_chi_line_map[384]=495;_chi_line_map[385]=496;_chi_line_map[386]=497;_chi_line_map[387]=498;_chi_line_map[388]=499;_chi_line_map[389]=500;_chi_line_map[390]=501;_chi_line_map[391]=502;_chi_line_map[392]=501;_chi_line_map[393]=504;_chi_line_map[394]=505;_chi_line_map[395]=506;_chi_line_map[396]=505;_chi_line_map[397]=508;_chi_line_map[398]=505;_chi_line_map[399]=510;_chi_line_map[400]=511;_chi_line_map[401]=510;_chi_line_map[402]=513;_chi_line_map[403]=510;_chi_line_map[404]=499;_chi_line_map[405]=516;_chi_line_map[406]=493;_chi_line_map[407]=519;_chi_line_map[408]=520;_chi_line_map[409]=521;_chi_line_map[410]=522;_chi_line_map[411]=523;_chi_line_map[412]=524;_chi_line_map[413]=525;_chi_line_map[414]=526;_chi_line_map[415]=527;_chi_line_map[416]=528;_chi_line_map[417]=529;_chi_line_map[418]=530;_chi_line_map[419]=531;_chi_line_map[420]=532;_chi_line_map[421]=533;_chi_line_map[422]=534;_chi_line_map[423]=529;_chi_line_map[424]=536;_chi_line_map[425]=537;_chi_line_map[426]=538;_chi_line_map[427]=539;_chi_line_map[428]=540;_chi_line_map[429]=541;_chi_line_map[430]=529;_chi_line_map[431]=528;_chi_line_map[432]=527;_chi_line_map[433]=523;_chi_line_map[434]=546;_chi_line_map[435]=547;_chi_line_map[436]=548;_chi_line_map[437]=549;_chi_line_map[438]=550;_chi_line_map[439]=551;_chi_line_map[440]=552;_chi_line_map[441]=553;_chi_line_map[442]=550;_chi_line_map[443]=555;_chi_line_map[444]=556;_chi_line_map[445]=557;_chi_line_map[446]=519;_chi_line_map[447]=562;_chi_line_map[448]=563;_chi_line_map[449]=564;_chi_line_map[450]=562;_chi_line_map[451]=567;_chi_line_map[452]=568;_chi_line_map[453]=569;_chi_line_map[454]=570;_chi_line_map[455]=567;_chi_line_map[456]=573;_chi_line_map[457]=574;_chi_line_map[458]=575;_chi_line_map[459]=576;_chi_line_map[460]=577;_chi_line_map[461]=578;_chi_line_map[462]=579;_chi_line_map[463]=577;_chi_line_map[464]=581;_chi_line_map[465]=577;_chi_line_map[466]=575;_chi_line_map[467]=584;_chi_line_map[468]=575;_chi_line_map[469]=586;_chi_line_map[470]=573;_chi_line_map[471]=589;_chi_line_map[472]=590;_chi_line_map[473]=591;_chi_line_map[474]=590;_chi_line_map[475]=593;_chi_line_map[476]=590;_chi_line_map[477]=595;_chi_line_map[478]=590;_chi_line_map[479]=597;_chi_line_map[480]=598;_chi_line_map[481]=597;_chi_line_map[482]=600;_chi_line_map[483]=597;_chi_line_map[484]=590;_chi_line_map[485]=603;_chi_line_map[486]=590;_chi_line_map[487]=605;_chi_line_map[488]=590;_chi_line_map[489]=589;_chi_line_map[490]=609;_chi_line_map[491]=610;_chi_line_map[492]=611;_chi_line_map[493]=612;_chi_line_map[494]=613;_chi_line_map[495]=614;_chi_line_map[496]=615;_chi_line_map[497]=616;_chi_line_map[498]=617;_chi_line_map[499]=618;_chi_line_map[500]=619;_chi_line_map[501]=620;_chi_line_map[502]=621;_chi_line_map[503]=622;_chi_line_map[504]=621;_chi_line_map[505]=624;_chi_line_map[506]=618;_chi_line_map[507]=626;_chi_line_map[508]=627;_chi_line_map[509]=628;_chi_line_map[510]=629;_chi_line_map[511]=628;_chi_line_map[512]=631;_chi_line_map[513]=618;_chi_line_map[514]=633;_chi_line_map[515]=634;_chi_line_map[516]=635;_chi_line_map[517]=636;_chi_line_map[518]=637;_chi_line_map[519]=638;_chi_line_map[520]=639;_chi_line_map[521]=640;_chi_line_map[522]=641;_chi_line_map[523]=642;_chi_line_map[524]=641;_chi_line_map[525]=644;_chi_line_map[526]=638;_chi_line_map[527]=646;_chi_line_map[528]=647;_chi_line_map[529]=648;_chi_line_map[530]=649;_chi_line_map[531]=648;_chi_line_map[532]=651;_chi_line_map[533]=638;_chi_line_map[534]=634;_chi_line_map[535]=654;_chi_line_map[536]=655;_chi_line_map[537]=656;_chi_line_map[538]=609;_chi_line_map[539]=659;_chi_line_map[540]=660;_chi_line_map[541]=661;_chi_line_map[542]=662;_chi_line_map[543]=663;_chi_line_map[544]=664;_chi_line_map[545]=665;_chi_line_map[546]=666;_chi_line_map[547]=667;_chi_line_map[548]=668;_chi_line_map[549]=669;_chi_line_map[550]=661;_chi_line_map[551]=672;_chi_line_map[552]=673;_chi_line_map[553]=674;_chi_line_map[554]=675;_chi_line_map[555]=676;_chi_line_map[556]=661;_chi_line_map[557]=659;_chi_line_map[558]=683;_chi_line_map[559]=684;_chi_line_map[560]=685;_chi_line_map[561]=686;_chi_line_map[562]=687;_chi_line_map[563]=688;_chi_line_map[564]=683;_chi_line_map[565]=691;_chi_line_map[566]=692;_chi_line_map[567]=693;_chi_line_map[568]=694;_chi_line_map[569]=695;_chi_line_map[570]=697;_chi_line_map[571]=698;_chi_line_map[572]=700;_chi_line_map[573]=702;_chi_line_map[574]=703;_chi_line_map[575]=691;_chi_line_map[576]=706;_chi_line_map[577]=707;_chi_line_map[578]=708;_chi_line_map[579]=709;_chi_line_map[580]=710;_chi_line_map[581]=712;_chi_line_map[582]=713;_chi_line_map[583]=714;_chi_line_map[584]=715;_chi_line_map[585]=717;_chi_line_map[586]=718;_chi_line_map[587]=719;_chi_line_map[588]=720;_chi_line_map[589]=721;_chi_line_map[590]=722;_chi_line_map[591]=723;_chi_line_map[592]=724;_chi_line_map[593]=725;_chi_line_map[594]=721;_chi_line_map[595]=728;_chi_line_map[596]=729;_chi_line_map[597]=730;_chi_line_map[598]=731;_chi_line_map[599]=732;_chi_line_map[600]=731;_chi_line_map[601]=734;_chi_line_map[602]=730;_chi_line_map[603]=736;_chi_line_map[604]=730;_chi_line_map[605]=738;_chi_line_map[606]=739;_chi_line_map[607]=740;_chi_line_map[608]=741;_chi_line_map[609]=742;_chi_line_map[610]=743;_chi_line_map[611]=739;_chi_line_map[612]=745;_chi_line_map[613]=739;_chi_line_map[614]=730;_chi_line_map[615]=748;_chi_line_map[616]=730;_chi_line_map[617]=751;_chi_line_map[618]=753;_chi_line_map[619]=754;_chi_line_map[620]=706;_chi_line_map[621]=762;_chi_line_map[622]=763;_chi_line_map[623]=764;_chi_line_map[624]=765;_chi_line_map[625]=766;_chi_line_map[626]=767;_chi_line_map[627]=768;_chi_line_map[628]=769;_chi_line_map[629]=770;_chi_line_map[630]=771;_chi_line_map[631]=772;_chi_line_map[632]=773;_chi_line_map[633]=774;_chi_line_map[634]=775;_chi_line_map[635]=776;_chi_line_map[636]=777;_chi_line_map[637]=778;_chi_line_map[638]=779;_chi_line_map[639]=780;_chi_line_map[640]=779;_chi_line_map[641]=782;_chi_line_map[642]=783;_chi_line_map[643]=784;_chi_line_map[644]=785;_chi_line_map[645]=786;_chi_line_map[646]=787;_chi_line_map[647]=762;_chi_line_map[648]=790;_chi_line_map[649]=791;_chi_line_map[650]=792;_chi_line_map[651]=793;_chi_line_map[652]=792;_chi_line_map[653]=795;_chi_line_map[654]=796;_chi_line_map[655]=797;_chi_line_map[656]=798;_chi_line_map[657]=799;_chi_line_map[658]=790;_chi_line_map[659]=802;_chi_line_map[660]=803;_chi_line_map[661]=804;_chi_line_map[662]=805;_chi_line_map[663]=806;_chi_line_map[664]=807;_chi_line_map[665]=808;_chi_line_map[666]=807;_chi_line_map[667]=810;_chi_line_map[668]=807;_chi_line_map[669]=812;_chi_line_map[670]=802;_chi_line_map[671]=815;_chi_line_map[672]=816;_chi_line_map[673]=817;_chi_line_map[674]=818;_chi_line_map[675]=819;_chi_line_map[676]=820;_chi_line_map[677]=821;_chi_line_map[678]=822;_chi_line_map[679]=823;_chi_line_map[680]=824;_chi_line_map[681]=825;_chi_line_map[682]=826;_chi_line_map[683]=827;_chi_line_map[684]=824;_chi_line_map[685]=829;_chi_line_map[686]=830;_chi_line_map[687]=831;_chi_line_map[688]=824;_chi_line_map[689]=823;_chi_line_map[690]=834;_chi_line_map[691]=815;_chi_line_map[692]=839;_chi_line_map[693]=840;_chi_line_map[694]=841;_chi_line_map[695]=842;_chi_line_map[696]=843;_chi_line_map[697]=844;_chi_line_map[698]=845;_chi_line_map[699]=846;_chi_line_map[700]=844;_chi_line_map[701]=848;_chi_line_map[702]=849;_chi_line_map[703]=850;_chi_line_map[704]=851;_chi_line_map[705]=852;_chi_line_map[706]=853;_chi_line_map[707]=854;_chi_line_map[708]=851;_chi_line_map[709]=856;_chi_line_map[710]=857;_chi_line_map[711]=858;_chi_line_map[712]=859;_chi_line_map[713]=839;_chi_line_map[714]=862;_chi_line_map[715]=863;_chi_line_map[716]=864;_chi_line_map[717]=865;_chi_line_map[718]=866;_chi_line_map[719]=867;_chi_line_map[720]=868;_chi_line_map[721]=869;_chi_line_map[722]=867;_chi_line_map[723]=871;_chi_line_map[724]=872;_chi_line_map[725]=873;_chi_line_map[726]=874;_chi_line_map[727]=875;_chi_line_map[728]=876;_chi_line_map[729]=877;_chi_line_map[730]=878;_chi_line_map[731]=874;_chi_line_map[732]=880;_chi_line_map[733]=881;_chi_line_map[734]=887;_chi_line_map[735]=888;_chi_line_map[736]=889;_chi_line_map[737]=888;_chi_line_map[738]=891;_chi_line_map[739]=888;_chi_line_map[740]=893;_chi_line_map[741]=862;_chi_line_map[742]=896;_chi_line_map[743]=897;_chi_line_map[744]=898;_chi_line_map[745]=899;_chi_line_map[746]=900;_chi_line_map[747]=901;_chi_line_map[748]=902;_chi_line_map[749]=903;_chi_line_map[750]=904;_chi_line_map[751]=905;_chi_line_map[752]=906;_chi_line_map[753]=907;_chi_line_map[754]=896;_chi_line_map[755]=910;_chi_line_map[756]=911;_chi_line_map[757]=912;_chi_line_map[758]=913;_chi_line_map[759]=914;_chi_line_map[760]=915;_chi_line_map[761]=916;_chi_line_map[762]=917;_chi_line_map[763]=918;_chi_line_map[764]=919;_chi_line_map[765]=920;_chi_line_map[766]=921;_chi_line_map[767]=922;_chi_line_map[768]=923;_chi_line_map[769]=924;_chi_line_map[770]=910;_chi_line_map[771]=927;_chi_line_map[772]=928;_chi_line_map[773]=929;_chi_line_map[774]=930;_chi_line_map[775]=931;_chi_line_map[776]=932;_chi_line_map[777]=933;_chi_line_map[778]=930;_chi_line_map[779]=936;_chi_line_map[780]=937;_chi_line_map[781]=938;_chi_line_map[782]=939;_chi_line_map[783]=930;_chi_line_map[784]=942;_chi_line_map[785]=943;_chi_line_map[786]=930;_chi_line_map[787]=946;_chi_line_map[788]=930;_chi_line_map[789]=948;_chi_line_map[790]=930;_chi_line_map[791]=927;_chi_line_map[792]=952;_chi_line_map[793]=953;_chi_line_map[794]=954;_chi_line_map[795]=955;_chi_line_map[796]=956;_chi_line_map[797]=957;_chi_line_map[798]=958;_chi_line_map[799]=959;_chi_line_map[800]=960;_chi_line_map[801]=961;_chi_line_map[802]=962;_chi_line_map[803]=952;_chi_line_map[804]=965;_chi_line_map[805]=968;_chi_line_map[806]=969;_chi_line_map[807]=970;_chi_line_map[808]=971;_chi_line_map[809]=972;_chi_line_map[810]=973;_chi_line_map[811]=974;_chi_line_map[812]=981;_chi_line_map[813]=982;_chi_line_map[814]=983;_chi_line_map[815]=984;_chi_line_map[816]=982;_chi_line_map[817]=988;_chi_line_map[818]=989;_chi_line_map[819]=990;_chi_line_map[820]=991;_chi_line_map[821]=990;_chi_line_map[822]=989;_chi_line_map[823]=995;_chi_line_map[824]=989;_chi_line_map[825]=988;_chi_line_map[826]=999;_chi_line_map[827]=1001;_chi_line_map[828]=1002;_chi_line_map[829]=1003;_chi_line_map[830]=1002;_chi_line_map[831]=1005;_chi_line_map[832]=1002;_chi_line_map[833]=1007;_chi_line_map[834]=1002;_chi_line_map[835]=1009;_chi_line_map[836]=1002;_chi_line_map[837]=1011;_chi_line_map[838]=1002;_chi_line_map[839]=1013;_chi_line_map[840]=1002;_chi_line_map[841]=1001;_chi_line_map[842]=1016;_chi_line_map[843]=1001;_chi_line_map[844]=1018;_chi_line_map[845]=1001;_chi_line_map[846]=1020;_chi_line_map[847]=1001;_chi_line_map[848]=1022;_chi_line_map[849]=1001;_chi_line_map[850]=1024;_chi_line_map[851]=1001;_chi_line_map[852]=965;_chi_line_map[853]=1030;_chi_line_map[854]=1031;_chi_line_map[855]=1032;_chi_line_map[856]=1033;_chi_line_map[857]=1034;_chi_line_map[858]=1035;_chi_line_map[859]=1036;_chi_line_map[860]=1037;_chi_line_map[861]=1030;_chi_line_map[862]=1040;_chi_line_map[863]=1041;_chi_line_map[864]=1042;_chi_line_map[865]=1043;_chi_line_map[866]=1044;_chi_line_map[867]=1045;_chi_line_map[868]=1046;_chi_line_map[869]=1047;_chi_line_map[870]=1048;_chi_line_map[871]=1049;_chi_line_map[872]=1050;_chi_line_map[873]=1049;_chi_line_map[874]=1052;_chi_line_map[875]=1053;_chi_line_map[876]=1054;_chi_line_map[877]=1055;_chi_line_map[878]=1056;_chi_line_map[879]=1057;_chi_line_map[880]=1058;_chi_line_map[881]=1059;_chi_line_map[882]=1060;_chi_line_map[883]=1061;_chi_line_map[884]=1062;_chi_line_map[885]=1063;_chi_line_map[886]=1064;_chi_line_map[887]=1061;_chi_line_map[888]=1066;_chi_line_map[889]=1067;_chi_line_map[890]=1068;_chi_line_map[891]=1069;_chi_line_map[892]=1070;_chi_line_map[893]=1071;_chi_line_map[894]=1072;_chi_line_map[895]=1071;_chi_line_map[896]=1074;_chi_line_map[897]=1047;_chi_line_map[898]=1076;_chi_line_map[899]=1077;_chi_line_map[900]=1078;_chi_line_map[901]=1079;_chi_line_map[902]=1080;_chi_line_map[903]=1081;_chi_line_map[904]=1082;_chi_line_map[905]=1083;_chi_line_map[906]=1084;_chi_line_map[907]=1040;_chi_line_map[908]=1089;_chi_line_map[909]=1090;_chi_line_map[910]=1091;_chi_line_map[911]=1092;_chi_line_map[912]=1093;_chi_line_map[913]=1094;_chi_line_map[914]=1095;_chi_line_map[915]=1096;_chi_line_map[916]=1097;_chi_line_map[917]=1098;_chi_line_map[918]=1099;_chi_line_map[919]=1100;_chi_line_map[920]=1101;_chi_line_map[921]=1102;_chi_line_map[922]=1103;_chi_line_map[923]=1104;_chi_line_map[924]=1105;_chi_line_map[925]=1106;_chi_line_map[926]=1107;_chi_line_map[927]=1105;_chi_line_map[928]=1109;_chi_line_map[929]=1097;_chi_line_map[930]=1111;_chi_line_map[931]=1112;_chi_line_map[932]=1113;_chi_line_map[933]=1114;_chi_line_map[934]=1115;_chi_line_map[935]=1116;_chi_line_map[936]=1117;_chi_line_map[937]=1118;_chi_line_map[938]=1119;_chi_line_map[939]=1117;_chi_line_map[940]=1121;_chi_line_map[941]=1097;_chi_line_map[942]=1123;_chi_line_map[943]=1094;_chi_line_map[944]=1125;_chi_line_map[945]=1089;_chi_line_map[946]=1134;_chi_line_map[947]=1135;_chi_line_map[948]=1136;_chi_line_map[949]=1137;_chi_line_map[950]=1138;_chi_line_map[951]=1139;_chi_line_map[952]=1140;_chi_line_map[953]=1141;_chi_line_map[954]=1142;_chi_line_map[955]=1143;_chi_line_map[956]=1144;_chi_line_map[957]=1145;_chi_line_map[958]=1146;_chi_line_map[959]=1147;_chi_line_map[960]=1148;_chi_line_map[961]=1149;_chi_line_map[962]=1147;_chi_line_map[963]=1145;_chi_line_map[964]=1142;_chi_line_map[965]=1153;_chi_line_map[966]=1154;_chi_line_map[967]=1155;_chi_line_map[968]=1156;_chi_line_map[969]=1157;_chi_line_map[970]=1158;_chi_line_map[971]=1156;_chi_line_map[972]=1141;_chi_line_map[973]=1140;_chi_line_map[974]=1162;_chi_line_map[975]=1163;_chi_line_map[976]=1164;_chi_line_map[977]=1165;_chi_line_map[978]=1166;_chi_line_map[979]=1167;_chi_line_map[980]=1165;_chi_line_map[981]=1169;_chi_line_map[982]=1170;_chi_line_map[983]=1171;_chi_line_map[984]=1172;_chi_line_map[985]=1173;_chi_line_map[986]=1174;_chi_line_map[987]=1175;_chi_line_map[988]=1171;_chi_line_map[989]=1177;_chi_line_map[990]=1134;_chi_line_map[991]=1183;_chi_line_map[992]=1184;_chi_line_map[993]=1185;_chi_line_map[994]=1186;_chi_line_map[995]=1185;_chi_line_map[996]=1187;_chi_line_map[997]=1185;_chi_line_map[998]=1188;_chi_line_map[999]=1185;_chi_line_map[1000]=1189;_chi_line_map[1001]=1185;_chi_line_map[1002]=1190;_chi_line_map[1003]=1185;_chi_line_map[1004]=1191;_chi_line_map[1005]=1185;_chi_line_map[1006]=1192;_chi_line_map[1007]=1185;_chi_line_map[1008]=1193;_chi_line_map[1009]=1185;_chi_line_map[1010]=1194;_chi_line_map[1011]=1185;_chi_line_map[1012]=1195;_chi_line_map[1013]=1185;_chi_line_map[1014]=1196;_chi_line_map[1015]=1185;_chi_line_map[1016]=1197;_chi_line_map[1017]=1185;_chi_line_map[1018]=1198;_chi_line_map[1019]=1185;_chi_line_map[1020]=1199;_chi_line_map[1021]=1185;_chi_line_map[1022]=1200;_chi_line_map[1023]=1185;_chi_line_map[1024]=1201;_chi_line_map[1025]=1185;_chi_line_map[1026]=1202;_chi_line_map[1027]=1185;_chi_line_map[1028]=1203;_chi_line_map[1029]=1185;_chi_line_map[1030]=1204;_chi_line_map[1031]=1185;_chi_line_map[1032]=1205;_chi_line_map[1033]=1185;_chi_line_map[1034]=1206;_chi_line_map[1035]=1185;_chi_line_map[1036]=1207;_chi_line_map[1037]=1185;_chi_line_map[1038]=1208;_chi_line_map[1039]=1185;_chi_line_map[1040]=1209;_chi_line_map[1041]=1185;_chi_line_map[1042]=1210;_chi_line_map[1043]=1185;_chi_line_map[1044]=1212;_chi_line_map[1045]=1213;_chi_line_map[1046]=1185;_chi_line_map[1047]=1215;_chi_line_map[1048]=1183;_chi_line_map[1049]=1225;_chi_line_map[1050]=1226;_chi_line_map[1051]=1227;_chi_line_map[1052]=1228;_chi_line_map[1053]=1225;_chi_line_map[1054]=1231;_chi_line_map[1055]=1232;_chi_line_map[1056]=1233;_chi_line_map[1057]=1234;_chi_line_map[1058]=1235;_chi_line_map[1059]=1236;_chi_line_map[1060]=1238;_chi_line_map[1061]=1239;_chi_line_map[1062]=1238;_chi_line_map[1063]=1242;_chi_line_map[1064]=1243;_chi_line_map[1065]=1244;_chi_line_map[1066]=1245;_chi_line_map[1067]=1247;_chi_line_map[1068]=1250;_chi_line_map[1069]=1251;_chi_line_map[1070]=1252;_chi_line_map[1071]=1253;_chi_line_map[1072]=1254;_chi_line_map[1073]=1255;_chi_line_map[1074]=1256;_chi_line_map[1075]=1257;_chi_line_map[1076]=1258;_chi_line_map[1077]=1259;_chi_line_map[1078]=1260;_chi_line_map[1079]=1253;_chi_line_map[1080]=1264;_chi_line_map[1081]=1267;_chi_line_map[1082]=1268;_chi_line_map[1083]=1269;_chi_line_map[1084]=1270;_chi_line_map[1085]=1271;_chi_line_map[1086]=1272;_chi_line_map[1087]=1273;_chi_line_map[1088]=1274;_chi_line_map[1089]=1273;_chi_line_map[1090]=1283;_chi_line_map[1091]=1284;_chi_line_map[1092]=1285;_chi_line_map[1093]=1286;_chi_line_map[1094]=1287;_chi_line_map[1095]=1284;_chi_line_map[1096]=1289;_chi_line_map[1097]=1290;_chi_line_map[1098]=1291;_chi_line_map[1099]=1292;_chi_line_map[1100]=1291;_chi_line_map[1101]=1294;_chi_line_map[1102]=1291;_chi_line_map[1103]=1290;_chi_line_map[1104]=1284;_chi_line_map[1105]=1298;_chi_line_map[1106]=1270;_chi_line_map[1107]=1301;_chi_line_map[1108]=1302;_chi_line_map[1109]=1303;_chi_line_map[1110]=1304;_chi_line_map[1111]=1305;_chi_line_map[1112]=1306;_chi_line_map[1113]=1307;_chi_line_map[1114]=1308;_chi_line_map[1115]=1309;_chi_line_map[1116]=1310;_chi_line_map[1117]=1307;_chi_line_map[1118]=1312;_chi_line_map[1119]=1313;_chi_line_map[1120]=1314;_chi_line_map[1121]=1315;_chi_line_map[1122]=1314;_chi_line_map[1123]=1301;_chi_line_map[1124]=1319;_chi_line_map[1125]=1231;local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..':'.._chi_generated..':'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..':'.._chi_source_line..':'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;return _chi_result end;m13();function m14() local _chi_line_map={};local function _chi_run()local __P_ = package.loaded['chicc/inference_context'] or {_package={},_types={}};package.loaded['chicc/inference_context'] = __P_;local __S_ = __P_._package;local __T_ = __P_._types;__S_.icNextVariableId={public=false,mutable=true,type='{tag="int"}'};__S_.icPkg={public=false,mutable=true,type='{tag="any"}'};__S_.icNs={public=false,mutable=true,type='{tag="any"}'};__S_.icCompileTables={public=false,mutable=true,type='{tag="any"}'};__S_.icLocalSymbols={public=false,mutable=true,type='{tag="any"}'};__S_.icPackageSymbols={public=false,mutable=true,type='{tag="any"}'};__S_.icNewLocalSymbols={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"}},typeParams={},defaults=0}'};__S_.icLocalSymbolsGet={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="string"},{tag="any"}},typeParams={},defaults=0}'};__S_.icLocalSymbolsDefine={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="string"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.icLocalSymbolsForEach={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="fn",types={{tag="string"},{tag="any"},{tag="unit"}},typeParams={},defaults=0},{tag="unit"}},typeParams={},defaults=0}'};__S_.icInit={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.icFreshVariable={public=true,mutable=false,type='{tag="fn",types={{tag="int"},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.icDefineLocalSymbol={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.icUpdateSymbolType={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.icWithNewLocalScope={public=true,mutable=false,type='{tag="fn",types={{tag="fn",types={{tag="any"}},typeParams={},defaults=0},{tag="any"}},typeParams={},defaults=0}'};__S_.icGetLocalSymbol={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"}},typeParams={},defaults=0}'};__S_.icGetTargetType={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="int"},{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.icTrialUnify={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="bool"}},typeParams={},defaults=0}'};__S_.icListLocalFunctionsForType={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.icListCurrentPackageFunctionsForType={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.icListTypesPackageFunctionsForType={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.icListAllLoadedFunctionsForType={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};local __std__lang_map = require("std/lang.map");local __std__lang = require("std/lang");local __chicc__types = require("chicc/types");local __std__lang_array = require("std/lang.array");local __chicc__unification = require("chicc/unification");local __chicc__ast = require("chicc/ast");
+ end;local _chi_info=debug.getinfo(_chi_run,'S');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;if string.sub(_chi_source,1,1)=='@' then _chi_source=string.sub(_chi_source,2) end;_chi_line_map[2]=26;_chi_line_map[3]=27;_chi_line_map[4]=26;_chi_line_map[5]=30;_chi_line_map[6]=31;_chi_line_map[7]=32;_chi_line_map[8]=33;_chi_line_map[9]=34;_chi_line_map[10]=35;_chi_line_map[11]=36;_chi_line_map[12]=37;_chi_line_map[13]=38;_chi_line_map[14]=39;_chi_line_map[15]=38;_chi_line_map[16]=41;_chi_line_map[17]=38;_chi_line_map[18]=36;_chi_line_map[19]=44;_chi_line_map[20]=45;_chi_line_map[21]=46;_chi_line_map[22]=47;_chi_line_map[23]=44;_chi_line_map[24]=30;_chi_line_map[25]=52;_chi_line_map[26]=53;_chi_line_map[27]=54;_chi_line_map[28]=55;_chi_line_map[29]=56;_chi_line_map[30]=57;_chi_line_map[31]=54;_chi_line_map[32]=59;_chi_line_map[33]=60;_chi_line_map[34]=61;_chi_line_map[35]=59;_chi_line_map[36]=64;_chi_line_map[37]=65;_chi_line_map[38]=66;_chi_line_map[39]=67;_chi_line_map[40]=68;_chi_line_map[41]=69;_chi_line_map[42]=70;_chi_line_map[43]=71;_chi_line_map[44]=70;_chi_line_map[45]=65;_chi_line_map[46]=75;_chi_line_map[47]=76;_chi_line_map[48]=77;_chi_line_map[49]=78;_chi_line_map[50]=79;_chi_line_map[51]=80;_chi_line_map[52]=81;_chi_line_map[53]=82;_chi_line_map[54]=83;_chi_line_map[55]=82;_chi_line_map[56]=79;_chi_line_map[57]=86;_chi_line_map[58]=78;_chi_line_map[59]=52;_chi_line_map[60]=90;_chi_line_map[61]=91;_chi_line_map[62]=92;_chi_line_map[63]=93;_chi_line_map[64]=94;_chi_line_map[65]=95;_chi_line_map[66]=96;_chi_line_map[67]=97;_chi_line_map[68]=93;_chi_line_map[69]=99;_chi_line_map[70]=90;_chi_line_map[71]=102;_chi_line_map[72]=103;_chi_line_map[73]=104;_chi_line_map[74]=105;_chi_line_map[75]=102;_chi_line_map[76]=108;_chi_line_map[77]=109;_chi_line_map[78]=110;_chi_line_map[79]=111;_chi_line_map[80]=108;_chi_line_map[81]=114;_chi_line_map[82]=117;_chi_line_map[83]=121;_chi_line_map[84]=122;_chi_line_map[85]=123;_chi_line_map[86]=122;_chi_line_map[87]=125;_chi_line_map[88]=122;_chi_line_map[89]=121;_chi_line_map[90]=132;_chi_line_map[91]=133;_chi_line_map[92]=132;_chi_line_map[93]=136;_chi_line_map[94]=137;_chi_line_map[95]=136;_chi_line_map[96]=140;_chi_line_map[97]=141;_chi_line_map[98]=140;_chi_line_map[99]=144;_chi_line_map[100]=145;_chi_line_map[101]=144;_chi_line_map[102]=148;_chi_line_map[103]=149;_chi_line_map[104]=148;_chi_line_map[105]=152;_chi_line_map[106]=153;_chi_line_map[107]=152;_chi_line_map[108]=156;_chi_line_map[109]=157;_chi_line_map[110]=156;_chi_line_map[111]=160;_chi_line_map[112]=161;_chi_line_map[113]=160;_chi_line_map[114]=164;_chi_line_map[115]=165;_chi_line_map[116]=164;_chi_line_map[117]=169;_chi_line_map[118]=171;_chi_line_map[119]=172;_chi_line_map[120]=173;_chi_line_map[121]=174;_chi_line_map[122]=175;_chi_line_map[123]=176;_chi_line_map[124]=177;_chi_line_map[125]=178;_chi_line_map[126]=177;_chi_line_map[127]=180;_chi_line_map[128]=177;_chi_line_map[129]=182;_chi_line_map[130]=177;_chi_line_map[131]=184;_chi_line_map[132]=177;_chi_line_map[133]=186;_chi_line_map[134]=177;_chi_line_map[135]=188;_chi_line_map[136]=189;_chi_line_map[137]=192;_chi_line_map[138]=189;_chi_line_map[139]=194;_chi_line_map[140]=189;_chi_line_map[141]=177;_chi_line_map[142]=197;_chi_line_map[143]=175;_chi_line_map[144]=199;_chi_line_map[145]=171;_chi_line_map[146]=204;_chi_line_map[147]=205;_chi_line_map[148]=206;_chi_line_map[149]=207;_chi_line_map[150]=208;_chi_line_map[151]=209;_chi_line_map[152]=210;_chi_line_map[153]=211;_chi_line_map[154]=212;_chi_line_map[155]=209;_chi_line_map[156]=214;_chi_line_map[157]=204;_chi_line_map[158]=220;_chi_line_map[159]=221;_chi_line_map[160]=222;_chi_line_map[161]=223;_chi_line_map[162]=224;_chi_line_map[163]=220;_chi_line_map[164]=231;_chi_line_map[165]=232;_chi_line_map[166]=234;_chi_line_map[167]=235;_chi_line_map[168]=236;_chi_line_map[169]=237;_chi_line_map[170]=238;_chi_line_map[171]=239;_chi_line_map[172]=237;_chi_line_map[173]=241;_chi_line_map[174]=236;_chi_line_map[175]=243;_chi_line_map[176]=244;_chi_line_map[177]=245;_chi_line_map[178]=246;_chi_line_map[179]=247;_chi_line_map[180]=248;_chi_line_map[181]=249;_chi_line_map[182]=250;_chi_line_map[183]=251;_chi_line_map[184]=252;_chi_line_map[185]=253;_chi_line_map[186]=250;_chi_line_map[187]=248;_chi_line_map[188]=256;_chi_line_map[189]=257;_chi_line_map[190]=245;_chi_line_map[191]=259;_chi_line_map[192]=231;_chi_line_map[193]=262;_chi_line_map[194]=263;_chi_line_map[195]=264;_chi_line_map[196]=265;_chi_line_map[197]=266;_chi_line_map[198]=267;_chi_line_map[199]=268;_chi_line_map[200]=269;_chi_line_map[201]=265;_chi_line_map[202]=271;_chi_line_map[203]=265;_chi_line_map[204]=273;_chi_line_map[205]=274;_chi_line_map[206]=265;_chi_line_map[207]=262;_chi_line_map[208]=278;_chi_line_map[209]=279;_chi_line_map[210]=280;_chi_line_map[211]=281;_chi_line_map[212]=282;_chi_line_map[213]=283;_chi_line_map[214]=284;_chi_line_map[215]=285;_chi_line_map[216]=283;_chi_line_map[217]=288;_chi_line_map[218]=290;_chi_line_map[219]=291;_chi_line_map[220]=292;_chi_line_map[221]=293;_chi_line_map[222]=294;_chi_line_map[223]=295;_chi_line_map[224]=296;_chi_line_map[225]=297;_chi_line_map[226]=293;_chi_line_map[227]=299;_chi_line_map[228]=300;_chi_line_map[229]=278;_chi_line_map[230]=305;_chi_line_map[231]=306;_chi_line_map[232]=307;_chi_line_map[233]=308;_chi_line_map[234]=309;_chi_line_map[235]=308;_chi_line_map[236]=311;_chi_line_map[237]=308;_chi_line_map[238]=306;_chi_line_map[239]=314;_chi_line_map[240]=306;_chi_line_map[241]=305;_chi_line_map[242]=318;_chi_line_map[243]=319;_chi_line_map[244]=318;_chi_line_map[245]=322;_chi_line_map[246]=323;_chi_line_map[247]=322;_chi_line_map[248]=326;_chi_line_map[249]=327;_chi_line_map[250]=328;_chi_line_map[251]=329;_chi_line_map[252]=330;_chi_line_map[253]=329;_chi_line_map[254]=332;_chi_line_map[255]=329;_chi_line_map[256]=334;_chi_line_map[257]=335;_chi_line_map[258]=336;_chi_line_map[259]=337;_chi_line_map[260]=338;_chi_line_map[261]=339;_chi_line_map[262]=340;_chi_line_map[263]=341;_chi_line_map[264]=342;_chi_line_map[265]=338;_chi_line_map[266]=344;_chi_line_map[267]=348;_chi_line_map[268]=349;_chi_line_map[269]=350;_chi_line_map[270]=351;_chi_line_map[271]=352;_chi_line_map[272]=353;_chi_line_map[273]=354;_chi_line_map[274]=355;_chi_line_map[275]=356;_chi_line_map[276]=357;_chi_line_map[277]=353;_chi_line_map[278]=350;_chi_line_map[279]=349;_chi_line_map[280]=361;_chi_line_map[281]=362;_chi_line_map[282]=363;_chi_line_map[283]=364;_chi_line_map[284]=365;_chi_line_map[285]=366;_chi_line_map[286]=367;_chi_line_map[287]=366;_chi_line_map[288]=364;_chi_line_map[289]=370;_chi_line_map[290]=371;_chi_line_map[291]=372;_chi_line_map[292]=373;_chi_line_map[293]=374;_chi_line_map[294]=375;_chi_line_map[295]=376;_chi_line_map[296]=374;_chi_line_map[297]=378;_chi_line_map[298]=374;_chi_line_map[299]=373;_chi_line_map[300]=381;_chi_line_map[301]=382;_chi_line_map[302]=383;_chi_line_map[303]=384;_chi_line_map[304]=326;_chi_line_map[305]=387;_chi_line_map[306]=388;_chi_line_map[307]=389;_chi_line_map[308]=390;_chi_line_map[309]=393;_chi_line_map[310]=394;_chi_line_map[311]=393;_chi_line_map[312]=396;_chi_line_map[313]=397;_chi_line_map[314]=398;_chi_line_map[315]=399;_chi_line_map[316]=398;_chi_line_map[317]=401;_chi_line_map[318]=398;_chi_line_map[319]=403;_chi_line_map[320]=387;_chi_line_map[321]=406;_chi_line_map[322]=407;_chi_line_map[323]=408;_chi_line_map[324]=409;_chi_line_map[325]=410;_chi_line_map[326]=406;_chi_line_map[327]=416;_chi_line_map[328]=417;_chi_line_map[329]=418;_chi_line_map[330]=419;_chi_line_map[331]=420;_chi_line_map[332]=421;_chi_line_map[333]=422;_chi_line_map[334]=423;_chi_line_map[335]=424;_chi_line_map[336]=425;_chi_line_map[337]=416;_chi_line_map[338]=433;_chi_line_map[339]=434;_chi_line_map[340]=435;_chi_line_map[341]=436;_chi_line_map[342]=437;_chi_line_map[343]=433;_chi_line_map[344]=444;_chi_line_map[345]=445;_chi_line_map[346]=446;_chi_line_map[347]=449;_chi_line_map[348]=450;_chi_line_map[349]=444;_chi_line_map[350]=458;_chi_line_map[351]=459;_chi_line_map[352]=460;_chi_line_map[353]=461;_chi_line_map[354]=462;_chi_line_map[355]=463;_chi_line_map[356]=461;_chi_line_map[357]=465;_chi_line_map[358]=466;_chi_line_map[359]=467;_chi_line_map[360]=468;_chi_line_map[361]=469;_chi_line_map[362]=459;_chi_line_map[363]=471;_chi_line_map[364]=472;_chi_line_map[365]=473;_chi_line_map[366]=474;_chi_line_map[367]=459;_chi_line_map[368]=458;_chi_line_map[369]=478;_chi_line_map[370]=479;_chi_line_map[371]=480;_chi_line_map[372]=481;_chi_line_map[373]=480;_chi_line_map[374]=482;_chi_line_map[375]=480;_chi_line_map[376]=483;_chi_line_map[377]=480;_chi_line_map[378]=478;_chi_line_map[379]=488;_chi_line_map[380]=489;_chi_line_map[381]=488;_chi_line_map[382]=493;_chi_line_map[383]=494;_chi_line_map[384]=495;_chi_line_map[385]=496;_chi_line_map[386]=497;_chi_line_map[387]=498;_chi_line_map[388]=499;_chi_line_map[389]=500;_chi_line_map[390]=501;_chi_line_map[391]=502;_chi_line_map[392]=501;_chi_line_map[393]=504;_chi_line_map[394]=505;_chi_line_map[395]=506;_chi_line_map[396]=505;_chi_line_map[397]=508;_chi_line_map[398]=505;_chi_line_map[399]=510;_chi_line_map[400]=511;_chi_line_map[401]=510;_chi_line_map[402]=513;_chi_line_map[403]=510;_chi_line_map[404]=499;_chi_line_map[405]=516;_chi_line_map[406]=493;_chi_line_map[407]=519;_chi_line_map[408]=520;_chi_line_map[409]=521;_chi_line_map[410]=522;_chi_line_map[411]=523;_chi_line_map[412]=524;_chi_line_map[413]=525;_chi_line_map[414]=526;_chi_line_map[415]=527;_chi_line_map[416]=528;_chi_line_map[417]=529;_chi_line_map[418]=530;_chi_line_map[419]=531;_chi_line_map[420]=532;_chi_line_map[421]=533;_chi_line_map[422]=534;_chi_line_map[423]=529;_chi_line_map[424]=536;_chi_line_map[425]=537;_chi_line_map[426]=538;_chi_line_map[427]=539;_chi_line_map[428]=540;_chi_line_map[429]=541;_chi_line_map[430]=529;_chi_line_map[431]=528;_chi_line_map[432]=527;_chi_line_map[433]=523;_chi_line_map[434]=546;_chi_line_map[435]=547;_chi_line_map[436]=548;_chi_line_map[437]=549;_chi_line_map[438]=550;_chi_line_map[439]=551;_chi_line_map[440]=552;_chi_line_map[441]=553;_chi_line_map[442]=550;_chi_line_map[443]=555;_chi_line_map[444]=556;_chi_line_map[445]=557;_chi_line_map[446]=519;_chi_line_map[447]=562;_chi_line_map[448]=563;_chi_line_map[449]=564;_chi_line_map[450]=562;_chi_line_map[451]=567;_chi_line_map[452]=568;_chi_line_map[453]=569;_chi_line_map[454]=570;_chi_line_map[455]=567;_chi_line_map[456]=573;_chi_line_map[457]=574;_chi_line_map[458]=575;_chi_line_map[459]=576;_chi_line_map[460]=577;_chi_line_map[461]=578;_chi_line_map[462]=579;_chi_line_map[463]=577;_chi_line_map[464]=581;_chi_line_map[465]=577;_chi_line_map[466]=575;_chi_line_map[467]=584;_chi_line_map[468]=575;_chi_line_map[469]=586;_chi_line_map[470]=573;_chi_line_map[471]=589;_chi_line_map[472]=590;_chi_line_map[473]=591;_chi_line_map[474]=590;_chi_line_map[475]=593;_chi_line_map[476]=590;_chi_line_map[477]=595;_chi_line_map[478]=590;_chi_line_map[479]=597;_chi_line_map[480]=598;_chi_line_map[481]=597;_chi_line_map[482]=600;_chi_line_map[483]=597;_chi_line_map[484]=590;_chi_line_map[485]=603;_chi_line_map[486]=590;_chi_line_map[487]=605;_chi_line_map[488]=590;_chi_line_map[489]=589;_chi_line_map[490]=609;_chi_line_map[491]=610;_chi_line_map[492]=611;_chi_line_map[493]=612;_chi_line_map[494]=613;_chi_line_map[495]=614;_chi_line_map[496]=615;_chi_line_map[497]=616;_chi_line_map[498]=617;_chi_line_map[499]=618;_chi_line_map[500]=619;_chi_line_map[501]=620;_chi_line_map[502]=621;_chi_line_map[503]=622;_chi_line_map[504]=621;_chi_line_map[505]=624;_chi_line_map[506]=618;_chi_line_map[507]=626;_chi_line_map[508]=627;_chi_line_map[509]=628;_chi_line_map[510]=629;_chi_line_map[511]=628;_chi_line_map[512]=631;_chi_line_map[513]=618;_chi_line_map[514]=633;_chi_line_map[515]=634;_chi_line_map[516]=635;_chi_line_map[517]=636;_chi_line_map[518]=637;_chi_line_map[519]=638;_chi_line_map[520]=639;_chi_line_map[521]=640;_chi_line_map[522]=641;_chi_line_map[523]=642;_chi_line_map[524]=641;_chi_line_map[525]=644;_chi_line_map[526]=638;_chi_line_map[527]=646;_chi_line_map[528]=647;_chi_line_map[529]=648;_chi_line_map[530]=649;_chi_line_map[531]=648;_chi_line_map[532]=651;_chi_line_map[533]=638;_chi_line_map[534]=634;_chi_line_map[535]=654;_chi_line_map[536]=655;_chi_line_map[537]=656;_chi_line_map[538]=609;_chi_line_map[539]=659;_chi_line_map[540]=660;_chi_line_map[541]=661;_chi_line_map[542]=662;_chi_line_map[543]=663;_chi_line_map[544]=664;_chi_line_map[545]=665;_chi_line_map[546]=666;_chi_line_map[547]=667;_chi_line_map[548]=668;_chi_line_map[549]=669;_chi_line_map[550]=661;_chi_line_map[551]=672;_chi_line_map[552]=673;_chi_line_map[553]=674;_chi_line_map[554]=675;_chi_line_map[555]=676;_chi_line_map[556]=661;_chi_line_map[557]=659;_chi_line_map[558]=683;_chi_line_map[559]=684;_chi_line_map[560]=685;_chi_line_map[561]=686;_chi_line_map[562]=687;_chi_line_map[563]=688;_chi_line_map[564]=683;_chi_line_map[565]=691;_chi_line_map[566]=692;_chi_line_map[567]=693;_chi_line_map[568]=694;_chi_line_map[569]=695;_chi_line_map[570]=697;_chi_line_map[571]=698;_chi_line_map[572]=700;_chi_line_map[573]=702;_chi_line_map[574]=703;_chi_line_map[575]=691;_chi_line_map[576]=706;_chi_line_map[577]=707;_chi_line_map[578]=708;_chi_line_map[579]=709;_chi_line_map[580]=710;_chi_line_map[581]=712;_chi_line_map[582]=713;_chi_line_map[583]=714;_chi_line_map[584]=715;_chi_line_map[585]=717;_chi_line_map[586]=718;_chi_line_map[587]=719;_chi_line_map[588]=720;_chi_line_map[589]=721;_chi_line_map[590]=722;_chi_line_map[591]=723;_chi_line_map[592]=724;_chi_line_map[593]=725;_chi_line_map[594]=721;_chi_line_map[595]=728;_chi_line_map[596]=729;_chi_line_map[597]=730;_chi_line_map[598]=731;_chi_line_map[599]=732;_chi_line_map[600]=731;_chi_line_map[601]=734;_chi_line_map[602]=730;_chi_line_map[603]=736;_chi_line_map[604]=730;_chi_line_map[605]=738;_chi_line_map[606]=739;_chi_line_map[607]=740;_chi_line_map[608]=741;_chi_line_map[609]=742;_chi_line_map[610]=743;_chi_line_map[611]=739;_chi_line_map[612]=745;_chi_line_map[613]=739;_chi_line_map[614]=730;_chi_line_map[615]=748;_chi_line_map[616]=730;_chi_line_map[617]=751;_chi_line_map[618]=753;_chi_line_map[619]=754;_chi_line_map[620]=706;_chi_line_map[621]=762;_chi_line_map[622]=763;_chi_line_map[623]=764;_chi_line_map[624]=765;_chi_line_map[625]=766;_chi_line_map[626]=767;_chi_line_map[627]=768;_chi_line_map[628]=769;_chi_line_map[629]=770;_chi_line_map[630]=771;_chi_line_map[631]=772;_chi_line_map[632]=773;_chi_line_map[633]=774;_chi_line_map[634]=775;_chi_line_map[635]=776;_chi_line_map[636]=777;_chi_line_map[637]=778;_chi_line_map[638]=779;_chi_line_map[639]=780;_chi_line_map[640]=779;_chi_line_map[641]=782;_chi_line_map[642]=783;_chi_line_map[643]=784;_chi_line_map[644]=785;_chi_line_map[645]=786;_chi_line_map[646]=787;_chi_line_map[647]=762;_chi_line_map[648]=790;_chi_line_map[649]=791;_chi_line_map[650]=792;_chi_line_map[651]=793;_chi_line_map[652]=792;_chi_line_map[653]=795;_chi_line_map[654]=796;_chi_line_map[655]=797;_chi_line_map[656]=798;_chi_line_map[657]=799;_chi_line_map[658]=790;_chi_line_map[659]=802;_chi_line_map[660]=803;_chi_line_map[661]=804;_chi_line_map[662]=805;_chi_line_map[663]=806;_chi_line_map[664]=807;_chi_line_map[665]=808;_chi_line_map[666]=807;_chi_line_map[667]=810;_chi_line_map[668]=807;_chi_line_map[669]=812;_chi_line_map[670]=802;_chi_line_map[671]=815;_chi_line_map[672]=816;_chi_line_map[673]=817;_chi_line_map[674]=818;_chi_line_map[675]=819;_chi_line_map[676]=820;_chi_line_map[677]=821;_chi_line_map[678]=822;_chi_line_map[679]=823;_chi_line_map[680]=824;_chi_line_map[681]=825;_chi_line_map[682]=826;_chi_line_map[683]=827;_chi_line_map[684]=824;_chi_line_map[685]=829;_chi_line_map[686]=830;_chi_line_map[687]=831;_chi_line_map[688]=824;_chi_line_map[689]=823;_chi_line_map[690]=834;_chi_line_map[691]=815;_chi_line_map[692]=839;_chi_line_map[693]=840;_chi_line_map[694]=841;_chi_line_map[695]=842;_chi_line_map[696]=843;_chi_line_map[697]=844;_chi_line_map[698]=845;_chi_line_map[699]=846;_chi_line_map[700]=844;_chi_line_map[701]=848;_chi_line_map[702]=849;_chi_line_map[703]=850;_chi_line_map[704]=851;_chi_line_map[705]=852;_chi_line_map[706]=853;_chi_line_map[707]=854;_chi_line_map[708]=851;_chi_line_map[709]=856;_chi_line_map[710]=857;_chi_line_map[711]=858;_chi_line_map[712]=859;_chi_line_map[713]=839;_chi_line_map[714]=862;_chi_line_map[715]=863;_chi_line_map[716]=864;_chi_line_map[717]=865;_chi_line_map[718]=866;_chi_line_map[719]=867;_chi_line_map[720]=868;_chi_line_map[721]=869;_chi_line_map[722]=867;_chi_line_map[723]=871;_chi_line_map[724]=872;_chi_line_map[725]=873;_chi_line_map[726]=874;_chi_line_map[727]=875;_chi_line_map[728]=876;_chi_line_map[729]=877;_chi_line_map[730]=878;_chi_line_map[731]=874;_chi_line_map[732]=880;_chi_line_map[733]=881;_chi_line_map[734]=887;_chi_line_map[735]=888;_chi_line_map[736]=889;_chi_line_map[737]=888;_chi_line_map[738]=891;_chi_line_map[739]=888;_chi_line_map[740]=893;_chi_line_map[741]=862;_chi_line_map[742]=896;_chi_line_map[743]=897;_chi_line_map[744]=898;_chi_line_map[745]=899;_chi_line_map[746]=900;_chi_line_map[747]=901;_chi_line_map[748]=902;_chi_line_map[749]=903;_chi_line_map[750]=904;_chi_line_map[751]=905;_chi_line_map[752]=906;_chi_line_map[753]=907;_chi_line_map[754]=896;_chi_line_map[755]=910;_chi_line_map[756]=911;_chi_line_map[757]=912;_chi_line_map[758]=913;_chi_line_map[759]=914;_chi_line_map[760]=915;_chi_line_map[761]=916;_chi_line_map[762]=917;_chi_line_map[763]=918;_chi_line_map[764]=919;_chi_line_map[765]=920;_chi_line_map[766]=921;_chi_line_map[767]=922;_chi_line_map[768]=923;_chi_line_map[769]=924;_chi_line_map[770]=910;_chi_line_map[771]=927;_chi_line_map[772]=928;_chi_line_map[773]=929;_chi_line_map[774]=930;_chi_line_map[775]=931;_chi_line_map[776]=932;_chi_line_map[777]=933;_chi_line_map[778]=930;_chi_line_map[779]=936;_chi_line_map[780]=937;_chi_line_map[781]=938;_chi_line_map[782]=939;_chi_line_map[783]=930;_chi_line_map[784]=942;_chi_line_map[785]=943;_chi_line_map[786]=930;_chi_line_map[787]=946;_chi_line_map[788]=930;_chi_line_map[789]=948;_chi_line_map[790]=930;_chi_line_map[791]=927;_chi_line_map[792]=952;_chi_line_map[793]=953;_chi_line_map[794]=954;_chi_line_map[795]=955;_chi_line_map[796]=956;_chi_line_map[797]=957;_chi_line_map[798]=958;_chi_line_map[799]=959;_chi_line_map[800]=960;_chi_line_map[801]=961;_chi_line_map[802]=962;_chi_line_map[803]=952;_chi_line_map[804]=965;_chi_line_map[805]=966;_chi_line_map[806]=967;_chi_line_map[807]=968;_chi_line_map[808]=969;_chi_line_map[809]=970;_chi_line_map[810]=971;_chi_line_map[811]=972;_chi_line_map[812]=967;_chi_line_map[813]=977;_chi_line_map[814]=978;_chi_line_map[815]=979;_chi_line_map[816]=978;_chi_line_map[817]=982;_chi_line_map[818]=983;_chi_line_map[819]=984;_chi_line_map[820]=986;_chi_line_map[821]=987;_chi_line_map[822]=988;_chi_line_map[823]=987;_chi_line_map[824]=990;_chi_line_map[825]=987;_chi_line_map[826]=986;_chi_line_map[827]=994;_chi_line_map[828]=995;_chi_line_map[829]=996;_chi_line_map[830]=995;_chi_line_map[831]=998;_chi_line_map[832]=995;_chi_line_map[833]=1000;_chi_line_map[834]=995;_chi_line_map[835]=1002;_chi_line_map[836]=995;_chi_line_map[837]=1004;_chi_line_map[838]=995;_chi_line_map[839]=1006;_chi_line_map[840]=995;_chi_line_map[841]=994;_chi_line_map[842]=1009;_chi_line_map[843]=994;_chi_line_map[844]=1011;_chi_line_map[845]=994;_chi_line_map[846]=1013;_chi_line_map[847]=994;_chi_line_map[848]=1015;_chi_line_map[849]=994;_chi_line_map[850]=965;_chi_line_map[851]=1019;_chi_line_map[852]=1020;_chi_line_map[853]=1021;_chi_line_map[854]=1022;_chi_line_map[855]=1023;_chi_line_map[856]=1024;_chi_line_map[857]=1025;_chi_line_map[858]=1027;_chi_line_map[859]=1028;_chi_line_map[860]=1029;_chi_line_map[861]=1025;_chi_line_map[862]=1031;_chi_line_map[863]=1019;_chi_line_map[864]=1036;_chi_line_map[865]=1037;_chi_line_map[866]=1038;_chi_line_map[867]=1039;_chi_line_map[868]=1040;_chi_line_map[869]=1041;_chi_line_map[870]=1042;_chi_line_map[871]=1043;_chi_line_map[872]=1036;_chi_line_map[873]=1046;_chi_line_map[874]=1047;_chi_line_map[875]=1048;_chi_line_map[876]=1049;_chi_line_map[877]=1050;_chi_line_map[878]=1051;_chi_line_map[879]=1052;_chi_line_map[880]=1053;_chi_line_map[881]=1054;_chi_line_map[882]=1055;_chi_line_map[883]=1056;_chi_line_map[884]=1055;_chi_line_map[885]=1058;_chi_line_map[886]=1059;_chi_line_map[887]=1060;_chi_line_map[888]=1061;_chi_line_map[889]=1062;_chi_line_map[890]=1063;_chi_line_map[891]=1064;_chi_line_map[892]=1065;_chi_line_map[893]=1066;_chi_line_map[894]=1067;_chi_line_map[895]=1068;_chi_line_map[896]=1069;_chi_line_map[897]=1070;_chi_line_map[898]=1067;_chi_line_map[899]=1072;_chi_line_map[900]=1073;_chi_line_map[901]=1074;_chi_line_map[902]=1075;_chi_line_map[903]=1076;_chi_line_map[904]=1077;_chi_line_map[905]=1078;_chi_line_map[906]=1077;_chi_line_map[907]=1080;_chi_line_map[908]=1053;_chi_line_map[909]=1082;_chi_line_map[910]=1083;_chi_line_map[911]=1084;_chi_line_map[912]=1085;_chi_line_map[913]=1086;_chi_line_map[914]=1087;_chi_line_map[915]=1088;_chi_line_map[916]=1089;_chi_line_map[917]=1090;_chi_line_map[918]=1046;_chi_line_map[919]=1095;_chi_line_map[920]=1096;_chi_line_map[921]=1097;_chi_line_map[922]=1098;_chi_line_map[923]=1099;_chi_line_map[924]=1100;_chi_line_map[925]=1101;_chi_line_map[926]=1102;_chi_line_map[927]=1103;_chi_line_map[928]=1104;_chi_line_map[929]=1105;_chi_line_map[930]=1106;_chi_line_map[931]=1107;_chi_line_map[932]=1108;_chi_line_map[933]=1109;_chi_line_map[934]=1110;_chi_line_map[935]=1111;_chi_line_map[936]=1112;_chi_line_map[937]=1113;_chi_line_map[938]=1111;_chi_line_map[939]=1115;_chi_line_map[940]=1103;_chi_line_map[941]=1117;_chi_line_map[942]=1118;_chi_line_map[943]=1119;_chi_line_map[944]=1120;_chi_line_map[945]=1121;_chi_line_map[946]=1122;_chi_line_map[947]=1123;_chi_line_map[948]=1124;_chi_line_map[949]=1125;_chi_line_map[950]=1123;_chi_line_map[951]=1127;_chi_line_map[952]=1103;_chi_line_map[953]=1129;_chi_line_map[954]=1100;_chi_line_map[955]=1131;_chi_line_map[956]=1095;_chi_line_map[957]=1140;_chi_line_map[958]=1141;_chi_line_map[959]=1142;_chi_line_map[960]=1143;_chi_line_map[961]=1144;_chi_line_map[962]=1145;_chi_line_map[963]=1146;_chi_line_map[964]=1147;_chi_line_map[965]=1148;_chi_line_map[966]=1149;_chi_line_map[967]=1150;_chi_line_map[968]=1151;_chi_line_map[969]=1152;_chi_line_map[970]=1153;_chi_line_map[971]=1154;_chi_line_map[972]=1155;_chi_line_map[973]=1153;_chi_line_map[974]=1151;_chi_line_map[975]=1148;_chi_line_map[976]=1159;_chi_line_map[977]=1160;_chi_line_map[978]=1161;_chi_line_map[979]=1162;_chi_line_map[980]=1163;_chi_line_map[981]=1164;_chi_line_map[982]=1162;_chi_line_map[983]=1147;_chi_line_map[984]=1146;_chi_line_map[985]=1168;_chi_line_map[986]=1169;_chi_line_map[987]=1170;_chi_line_map[988]=1171;_chi_line_map[989]=1172;_chi_line_map[990]=1173;_chi_line_map[991]=1171;_chi_line_map[992]=1175;_chi_line_map[993]=1176;_chi_line_map[994]=1177;_chi_line_map[995]=1178;_chi_line_map[996]=1179;_chi_line_map[997]=1180;_chi_line_map[998]=1181;_chi_line_map[999]=1177;_chi_line_map[1000]=1183;_chi_line_map[1001]=1140;_chi_line_map[1002]=1189;_chi_line_map[1003]=1190;_chi_line_map[1004]=1191;_chi_line_map[1005]=1192;_chi_line_map[1006]=1191;_chi_line_map[1007]=1193;_chi_line_map[1008]=1191;_chi_line_map[1009]=1194;_chi_line_map[1010]=1191;_chi_line_map[1011]=1195;_chi_line_map[1012]=1191;_chi_line_map[1013]=1196;_chi_line_map[1014]=1191;_chi_line_map[1015]=1197;_chi_line_map[1016]=1191;_chi_line_map[1017]=1198;_chi_line_map[1018]=1191;_chi_line_map[1019]=1199;_chi_line_map[1020]=1191;_chi_line_map[1021]=1200;_chi_line_map[1022]=1191;_chi_line_map[1023]=1201;_chi_line_map[1024]=1191;_chi_line_map[1025]=1202;_chi_line_map[1026]=1191;_chi_line_map[1027]=1203;_chi_line_map[1028]=1191;_chi_line_map[1029]=1204;_chi_line_map[1030]=1191;_chi_line_map[1031]=1205;_chi_line_map[1032]=1191;_chi_line_map[1033]=1206;_chi_line_map[1034]=1191;_chi_line_map[1035]=1207;_chi_line_map[1036]=1191;_chi_line_map[1037]=1208;_chi_line_map[1038]=1191;_chi_line_map[1039]=1209;_chi_line_map[1040]=1191;_chi_line_map[1041]=1210;_chi_line_map[1042]=1191;_chi_line_map[1043]=1211;_chi_line_map[1044]=1191;_chi_line_map[1045]=1212;_chi_line_map[1046]=1191;_chi_line_map[1047]=1213;_chi_line_map[1048]=1191;_chi_line_map[1049]=1214;_chi_line_map[1050]=1191;_chi_line_map[1051]=1215;_chi_line_map[1052]=1191;_chi_line_map[1053]=1216;_chi_line_map[1054]=1191;_chi_line_map[1055]=1218;_chi_line_map[1056]=1219;_chi_line_map[1057]=1191;_chi_line_map[1058]=1221;_chi_line_map[1059]=1189;_chi_line_map[1060]=1231;_chi_line_map[1061]=1232;_chi_line_map[1062]=1233;_chi_line_map[1063]=1234;_chi_line_map[1064]=1231;_chi_line_map[1065]=1237;_chi_line_map[1066]=1238;_chi_line_map[1067]=1239;_chi_line_map[1068]=1240;_chi_line_map[1069]=1241;_chi_line_map[1070]=1242;_chi_line_map[1071]=1244;_chi_line_map[1072]=1245;_chi_line_map[1073]=1244;_chi_line_map[1074]=1248;_chi_line_map[1075]=1249;_chi_line_map[1076]=1250;_chi_line_map[1077]=1251;_chi_line_map[1078]=1253;_chi_line_map[1079]=1256;_chi_line_map[1080]=1257;_chi_line_map[1081]=1258;_chi_line_map[1082]=1259;_chi_line_map[1083]=1260;_chi_line_map[1084]=1261;_chi_line_map[1085]=1262;_chi_line_map[1086]=1263;_chi_line_map[1087]=1264;_chi_line_map[1088]=1265;_chi_line_map[1089]=1266;_chi_line_map[1090]=1259;_chi_line_map[1091]=1270;_chi_line_map[1092]=1273;_chi_line_map[1093]=1274;_chi_line_map[1094]=1275;_chi_line_map[1095]=1276;_chi_line_map[1096]=1277;_chi_line_map[1097]=1278;_chi_line_map[1098]=1279;_chi_line_map[1099]=1280;_chi_line_map[1100]=1279;_chi_line_map[1101]=1289;_chi_line_map[1102]=1290;_chi_line_map[1103]=1291;_chi_line_map[1104]=1292;_chi_line_map[1105]=1293;_chi_line_map[1106]=1290;_chi_line_map[1107]=1295;_chi_line_map[1108]=1296;_chi_line_map[1109]=1297;_chi_line_map[1110]=1298;_chi_line_map[1111]=1297;_chi_line_map[1112]=1300;_chi_line_map[1113]=1297;_chi_line_map[1114]=1296;_chi_line_map[1115]=1290;_chi_line_map[1116]=1304;_chi_line_map[1117]=1276;_chi_line_map[1118]=1307;_chi_line_map[1119]=1308;_chi_line_map[1120]=1309;_chi_line_map[1121]=1310;_chi_line_map[1122]=1311;_chi_line_map[1123]=1312;_chi_line_map[1124]=1313;_chi_line_map[1125]=1314;_chi_line_map[1126]=1315;_chi_line_map[1127]=1316;_chi_line_map[1128]=1313;_chi_line_map[1129]=1318;_chi_line_map[1130]=1319;_chi_line_map[1131]=1320;_chi_line_map[1132]=1321;_chi_line_map[1133]=1320;_chi_line_map[1134]=1307;_chi_line_map[1135]=1325;_chi_line_map[1136]=1237;local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..':'.._chi_generated..':'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..':'.._chi_source_line..':'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;return _chi_result end;m13();function m14() local _chi_line_map={};local function _chi_run()local __P_ = package.loaded['chicc/inference_context'] or {_package={},_types={}};package.loaded['chicc/inference_context'] = __P_;local __S_ = __P_._package;local __T_ = __P_._types;__S_.icNextVariableId={public=false,mutable=true,type='{tag="int"}'};__S_.icPkg={public=false,mutable=true,type='{tag="any"}'};__S_.icNs={public=false,mutable=true,type='{tag="any"}'};__S_.icCompileTables={public=false,mutable=true,type='{tag="any"}'};__S_.icLocalSymbols={public=false,mutable=true,type='{tag="any"}'};__S_.icPackageSymbols={public=false,mutable=true,type='{tag="any"}'};__S_.icNewLocalSymbols={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"}},typeParams={},defaults=0}'};__S_.icLocalSymbolsGet={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="string"},{tag="any"}},typeParams={},defaults=0}'};__S_.icLocalSymbolsDefine={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="string"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.icLocalSymbolsForEach={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="fn",types={{tag="string"},{tag="any"},{tag="unit"}},typeParams={},defaults=0},{tag="unit"}},typeParams={},defaults=0}'};__S_.icInit={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.icFreshVariable={public=true,mutable=false,type='{tag="fn",types={{tag="int"},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.icDefineLocalSymbol={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.icTargetRefinementKey={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Target"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.icUpdateSymbolType={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.icWithNewLocalScope={public=true,mutable=false,type='{tag="fn",types={{tag="fn",types={{tag="any"}},typeParams={},defaults=0},{tag="any"}},typeParams={},defaults=0}'};__S_.icGetLocalSymbol={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"}},typeParams={},defaults=0}'};__S_.icGetTargetType={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="int"},{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.icTrialUnify={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="bool"}},typeParams={},defaults=0}'};__S_.icListLocalFunctionsForType={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.icListCurrentPackageFunctionsForType={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.icListTypesPackageFunctionsForType={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.icListAllLoadedFunctionsForType={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};local __std__lang_map = require("std/lang.map");local __std__lang = require("std/lang");local __chicc__types = require("chicc/types");local __std__lang_array = require("std/lang.array");local __chicc__unification = require("chicc/unification");local __chicc__ast = require("chicc/ast");
 do __P_.icNextVariableId=(1); end;
 do __P_.icPkg=(nil); end;
 do __P_.icNs=(nil); end;
@@ -5848,211 +5865,217 @@ local _chi_tmp31 = 'a';local _chi_tmp32=chi_tostring((_chi_tmp31)) .. chi_tostri
 do function __P_.icDefineLocalSymbol(name,typeScheme)
 local _chi_tmp34=__P_.icLocalSymbolsDefine(__P_.icLocalSymbols,name,typeScheme);local _chi_tmp35=_chi_tmp34;return; end;
  end;
+do function __P_.icTargetRefinementKey(tgt)
+local _chi_tmp36 = '/';local _chi_tmp37 = '/';local _chi_tmp38=chi_tostring(tgt.moduleName) .. chi_tostring((_chi_tmp36)) .. chi_tostring(tgt.packageName) .. chi_tostring((_chi_tmp37)) .. chi_tostring(tgt.name);return _chi_tmp38 end;
+ end;
 do function __P_.icUpdateSymbolType(tgt,typeScheme)
-local _chi_tmp36;do local _chi_tmp37=tgt.tag;_chi_tmp36=_chi_tmp37 end;local tag=_chi_tmp36;
-local _chi_tmp38;local _chi_tmp39 = 'local';if (tag == (_chi_tmp39)) then
-local _chi_tmp40;do local _chi_tmp41=tgt.name;_chi_tmp40=_chi_tmp41 end;local name=_chi_tmp40;
-local _chi_tmp42=__P_.icLocalSymbolsDefine(__P_.icLocalSymbols,name,typeScheme);_chi_tmp38=_chi_tmp42
- else local _chi_tmp43;local _chi_tmp44 = 'package';if (tag == (_chi_tmp44)) then
-local _chi_tmp45;do local _chi_tmp46=tgt.moduleName;_chi_tmp45=_chi_tmp46 end;local tgtMod=_chi_tmp45;
-do local _chi_tmp47=tgt.packageName;_chi_tmp45=_chi_tmp47 end;local tgtPkg=_chi_tmp45;
-do local _chi_tmp48=__P_.icPkg.moduleName;_chi_tmp45=_chi_tmp48 end;local pkgMod=_chi_tmp45;
-do local _chi_tmp49=__P_.icPkg.packageName;_chi_tmp45=_chi_tmp49 end;local pkgPkg=_chi_tmp45;
-local _chi_tmp50;if ((tgtMod == pkgMod) and (tgtPkg == pkgPkg)) then
-local _chi_tmp51;do local _chi_tmp52=tgt.name;_chi_tmp51=_chi_tmp52 end;local name=_chi_tmp51;
-local _chi_tmp53=__P_.icLocalSymbolsDefine(__P_.icPackageSymbols,name,typeScheme);_chi_tmp50=_chi_tmp53
- end;_chi_tmp43=_chi_tmp50
- end;_chi_tmp38=_chi_tmp43 end;local _chi_tmp54=_chi_tmp38;return; end;
+local _chi_tmp39;do local _chi_tmp40=tgt.tag;_chi_tmp39=_chi_tmp40 end;local tag=_chi_tmp39;
+local _chi_tmp41;local _chi_tmp42 = 'local';if (tag == (_chi_tmp42)) then
+local _chi_tmp43;do local _chi_tmp44=tgt.name;_chi_tmp43=_chi_tmp44 end;local name=_chi_tmp43;
+local _chi_tmp45=__P_.icLocalSymbolsDefine(__P_.icLocalSymbols,name,typeScheme);_chi_tmp41=_chi_tmp45
+ else local _chi_tmp46;local _chi_tmp47 = 'package';if (tag == (_chi_tmp47)) then
+local _chi_tmp48;do local _chi_tmp49=tgt.moduleName;_chi_tmp48=_chi_tmp49 end;local tgtMod=_chi_tmp48;
+do local _chi_tmp50=tgt.packageName;_chi_tmp48=_chi_tmp50 end;local tgtPkg=_chi_tmp48;
+do local _chi_tmp51=__P_.icPkg.moduleName;_chi_tmp48=_chi_tmp51 end;local pkgMod=_chi_tmp48;
+do local _chi_tmp52=__P_.icPkg.packageName;_chi_tmp48=_chi_tmp52 end;local pkgPkg=_chi_tmp48;
+local _chi_tmp53;if ((tgtMod == pkgMod) and (tgtPkg == pkgPkg)) then
+local _chi_tmp54;do local _chi_tmp55=tgt.name;_chi_tmp54=_chi_tmp55 end;local name=_chi_tmp54;
+local _chi_tmp56=__P_.icLocalSymbolsDefine(__P_.icPackageSymbols,name,typeScheme);_chi_tmp53=_chi_tmp56
+ end;_chi_tmp46=_chi_tmp53
+ end;_chi_tmp41=_chi_tmp46 end;local _chi_tmp57=_chi_tmp41;return; end;
  end;
 do function __P_.icWithNewLocalScope(f)
-local _chi_tmp55;do _chi_tmp55=__P_.icLocalSymbols end;local prev=_chi_tmp55;
-do local _chi_tmp56=__P_.icNewLocalSymbols(prev,(nil));__P_.icLocalSymbols=_chi_tmp56; end;
+local _chi_tmp58;do _chi_tmp58=__P_.icLocalSymbols end;local prev=_chi_tmp58;
+do local _chi_tmp59=__P_.icNewLocalSymbols(prev,(nil));__P_.icLocalSymbols=_chi_tmp59; end;
 local __scope_ok, __scope_result = pcall(f);
-do local _chi_tmp57=__scope_ok;_chi_tmp55=_chi_tmp57 end;local ok=_chi_tmp55;
+do local _chi_tmp60=__scope_ok;_chi_tmp58=_chi_tmp60 end;local ok=_chi_tmp58;
 do __P_.icLocalSymbols=prev; end;
-local _chi_tmp58;if ok then
-local _chi_tmp59=__scope_result;_chi_tmp58=_chi_tmp59
+local _chi_tmp61;if ok then
+local _chi_tmp62=__scope_result;_chi_tmp61=_chi_tmp62
  else
 error(__scope_result);
-_chi_tmp58=(nil)
- end;return _chi_tmp58 end;
+_chi_tmp61=(nil)
+ end;return _chi_tmp61 end;
  end;
 do function __P_.icGetLocalSymbol(name)
-local _chi_tmp60=__P_.icLocalSymbolsGet(__P_.icLocalSymbols,name);return _chi_tmp60 end;
+local _chi_tmp63=__P_.icLocalSymbolsGet(__P_.icLocalSymbols,name);return _chi_tmp63 end;
  end;
 do function __P_.icGetTargetType(tgt,level,section)
-local _chi_tmp61;do local _chi_tmp62=tgt.tag;_chi_tmp61=_chi_tmp62 end;local tag=_chi_tmp61;
-local _chi_tmp63;local _chi_tmp64 = 'local';if (tag == (_chi_tmp64)) then
-local _chi_tmp65;do local _chi_tmp66=tgt.name;_chi_tmp65=_chi_tmp66 end;local name=_chi_tmp65;
-do local _chi_tmp67=__P_.icLocalSymbolsGet(__P_.icLocalSymbols,name);_chi_tmp65=_chi_tmp67 end;local scheme=_chi_tmp65;
-local _chi_tmp68;if (scheme == (nil)) then
+local _chi_tmp64;do local _chi_tmp65=tgt.tag;_chi_tmp64=_chi_tmp65 end;local tag=_chi_tmp64;
+local _chi_tmp66;local _chi_tmp67 = 'local';if (tag == (_chi_tmp67)) then
+local _chi_tmp68;do local _chi_tmp69=tgt.name;_chi_tmp68=_chi_tmp69 end;local name=_chi_tmp68;
+do local _chi_tmp70=__P_.icLocalSymbolsGet(__P_.icLocalSymbols,name);_chi_tmp68=_chi_tmp70 end;local scheme=_chi_tmp68;
+local _chi_tmp71;if (scheme == (nil)) then
 error({ code = 'UNRECOGNIZED_NAME', text = 'Identifier ' .. tgt.name .. ' not found!' });
-_chi_tmp68=__chicc__types.tAny
+_chi_tmp71=__chicc__types.tAny
  else
-local _chi_tmp69=__chicc__types.instantiate(scheme,level,__P_.icFreshVariable);_chi_tmp68=_chi_tmp69
- end;_chi_tmp63=_chi_tmp68
- else local _chi_tmp70;local _chi_tmp71 = 'package';if (tag == (_chi_tmp71)) then
-local _chi_tmp72;do local _chi_tmp73=tgt.moduleName;_chi_tmp72=_chi_tmp73 end;local tgtMod=_chi_tmp72;
-do local _chi_tmp74=tgt.packageName;_chi_tmp72=_chi_tmp74 end;local tgtPkg=_chi_tmp72;
-do local _chi_tmp75=__P_.icPkg.moduleName;_chi_tmp72=_chi_tmp75 end;local pkgMod=_chi_tmp72;
-do local _chi_tmp76=__P_.icPkg.packageName;_chi_tmp72=_chi_tmp76 end;local pkgPkg=_chi_tmp72;
-do local _chi_tmp77=tgt.name;_chi_tmp72=_chi_tmp77 end;local name=_chi_tmp72;
-local _chi_tmp78;if ((tgtMod == pkgMod) and (tgtPkg == pkgPkg)) then
-local _chi_tmp79;do local _chi_tmp80=__P_.icLocalSymbolsGet(__P_.icPackageSymbols,name);_chi_tmp79=_chi_tmp80 end;local scheme=_chi_tmp79;
-local _chi_tmp81;if (scheme == (nil)) then
+local _chi_tmp72=__chicc__types.instantiate(scheme,level,__P_.icFreshVariable);_chi_tmp71=_chi_tmp72
+ end;_chi_tmp66=_chi_tmp71
+ else local _chi_tmp73;local _chi_tmp74 = 'package';if (tag == (_chi_tmp74)) then
+local _chi_tmp75;do local _chi_tmp76=tgt.moduleName;_chi_tmp75=_chi_tmp76 end;local tgtMod=_chi_tmp75;
+do local _chi_tmp77=tgt.packageName;_chi_tmp75=_chi_tmp77 end;local tgtPkg=_chi_tmp75;
+do local _chi_tmp78=__P_.icPkg.moduleName;_chi_tmp75=_chi_tmp78 end;local pkgMod=_chi_tmp75;
+do local _chi_tmp79=__P_.icPkg.packageName;_chi_tmp75=_chi_tmp79 end;local pkgPkg=_chi_tmp75;
+do local _chi_tmp80=tgt.name;_chi_tmp75=_chi_tmp80 end;local name=_chi_tmp75;
+do local _chi_tmp81=__P_.icLocalSymbols;local _chi_tmp82=__P_.icTargetRefinementKey(tgt);local _chi_tmp83=__P_.icLocalSymbolsGet(_chi_tmp81,_chi_tmp82);_chi_tmp75=_chi_tmp83 end;local narrowed=_chi_tmp75;
+local _chi_tmp84;if (narrowed ~= (nil)) then
+local _chi_tmp85=__chicc__types.instantiate(narrowed,level,__P_.icFreshVariable);_chi_tmp84=_chi_tmp85
+ else local _chi_tmp86;if ((tgtMod == pkgMod) and (tgtPkg == pkgPkg)) then
+local _chi_tmp87;do local _chi_tmp88=__P_.icLocalSymbolsGet(__P_.icPackageSymbols,name);_chi_tmp87=_chi_tmp88 end;local scheme=_chi_tmp87;
+local _chi_tmp89;if (scheme == (nil)) then
 error({ code = 'UNRECOGNIZED_NAME', text = 'Identifier ' .. tgt.name .. ' not found!' });
-_chi_tmp81=__chicc__types.tAny
+_chi_tmp89=__chicc__types.tAny
  else
-local _chi_tmp82=__chicc__types.instantiate(scheme,level,__P_.icFreshVariable);_chi_tmp81=_chi_tmp82
- end;_chi_tmp78=_chi_tmp81
+local _chi_tmp90=__chicc__types.instantiate(scheme,level,__P_.icFreshVariable);_chi_tmp89=_chi_tmp90
+ end;_chi_tmp86=_chi_tmp89
  else
-local _chi_tmp83;do local _chi_tmp84=__P_.icNs and __P_.icNs.getSymbol and __P_.icNs.getSymbol(tgtMod, tgtPkg, name) or nil;_chi_tmp83=_chi_tmp84 end;local sym=_chi_tmp83;
-local _chi_tmp85;if (sym == (nil)) then
+local _chi_tmp91;do local _chi_tmp92=__P_.icNs and __P_.icNs.getSymbol and __P_.icNs.getSymbol(tgtMod, tgtPkg, name) or nil;_chi_tmp91=_chi_tmp92 end;local sym=_chi_tmp91;
+local _chi_tmp93;if (sym == (nil)) then
 error({ code = 'UNRECOGNIZED_NAME', text = 'Identifier ' .. tgt.name .. ' not found!' });
-_chi_tmp85=__chicc__types.tAny
+_chi_tmp93=__chicc__types.tAny
  else
-local _chi_tmp86;do local _chi_tmp87=sym.symbolType;_chi_tmp86=_chi_tmp87 end;local symType=_chi_tmp86;
-local _chi_tmp88;if (symType == (nil)) then
+local _chi_tmp94;do local _chi_tmp95=sym.symbolType;_chi_tmp94=_chi_tmp95 end;local symType=_chi_tmp94;
+local _chi_tmp96;if (symType == (nil)) then
 error({ code = 'UNRECOGNIZED_NAME', text = 'Type not found for identifier ' .. tgt.name });
-_chi_tmp88=__chicc__types.tAny
+_chi_tmp96=__chicc__types.tAny
  else
-local _chi_tmp89=__chicc__types.instantiate(symType,level,__P_.icFreshVariable);_chi_tmp88=_chi_tmp89
- end;_chi_tmp85=_chi_tmp88
- end;_chi_tmp78=_chi_tmp85
- end;_chi_tmp70=_chi_tmp78
+local _chi_tmp97=__chicc__types.instantiate(symType,level,__P_.icFreshVariable);_chi_tmp96=_chi_tmp97
+ end;_chi_tmp93=_chi_tmp96
+ end;_chi_tmp86=_chi_tmp93
+ end;_chi_tmp84=_chi_tmp86 end;_chi_tmp73=_chi_tmp84
  else
 error({ code = 'UNRECOGNIZED_NAME', text = 'Unknown target tag: ' .. tag });
-_chi_tmp70=__chicc__types.tAny
- end;_chi_tmp63=_chi_tmp70 end;return _chi_tmp63 end;
+_chi_tmp73=__chicc__types.tAny
+ end;_chi_tmp66=_chi_tmp73 end;return _chi_tmp66 end;
  end;
 do function __P_.icTrialUnify(typeScheme,receiverType)
-local _chi_tmp90;do _chi_tmp90=receiverType end;local recType=_chi_tmp90;
-do local _chi_tmp91 = 'primitive';local _chi_tmp93=(recType.tag == (_chi_tmp91));if _chi_tmp93 then local _chi_tmp92=__std__lang_array.size(recType.ids);_chi_tmp93=(_chi_tmp92 > (0)) end;local _chi_tmp96=_chi_tmp93;if _chi_tmp96 then local _chi_tmp94=recType.ids[(1)];local _chi_tmp95 = 'any';_chi_tmp96=(_chi_tmp94.name == (_chi_tmp95)) end;_chi_tmp90=_chi_tmp96 end;local isAnyReceiver=_chi_tmp90;
-do local _chi_tmp97;if isAnyReceiver then
-local _chi_tmp98;do _chi_tmp98=typeScheme end;local scheme=_chi_tmp98;
-do _chi_tmp98=scheme end;local body2=_chi_tmp98;
-do local _chi_tmp99;local _chi_tmp100 = 'poly';if (scheme.tag == (_chi_tmp100)) then body2=scheme.body;_chi_tmp99=body2 end; end;
-do local _chi_tmp101;local _chi_tmp102 = 'fn';if (body2.tag == (_chi_tmp102)) then
-local _chi_tmp103=__std__lang_array.size(body2.types);return (_chi_tmp103 >= (2));
+local _chi_tmp98;do _chi_tmp98=receiverType end;local recType=_chi_tmp98;
+do local _chi_tmp99 = 'primitive';local _chi_tmp101=(recType.tag == (_chi_tmp99));if _chi_tmp101 then local _chi_tmp100=__std__lang_array.size(recType.ids);_chi_tmp101=(_chi_tmp100 > (0)) end;local _chi_tmp104=_chi_tmp101;if _chi_tmp104 then local _chi_tmp102=recType.ids[(1)];local _chi_tmp103 = 'any';_chi_tmp104=(_chi_tmp102.name == (_chi_tmp103)) end;_chi_tmp98=_chi_tmp104 end;local isAnyReceiver=_chi_tmp98;
+do local _chi_tmp105;if isAnyReceiver then
+local _chi_tmp106;do _chi_tmp106=typeScheme end;local scheme=_chi_tmp106;
+do _chi_tmp106=scheme end;local body2=_chi_tmp106;
+do local _chi_tmp107;local _chi_tmp108 = 'poly';if (scheme.tag == (_chi_tmp108)) then body2=scheme.body;_chi_tmp107=body2 end; end;
+do local _chi_tmp109;local _chi_tmp110 = 'fn';if (body2.tag == (_chi_tmp110)) then
+local _chi_tmp111=__std__lang_array.size(body2.types);return (_chi_tmp111 >= (2));
  end; end;
 return (false);
  end; end;
-do _chi_tmp90=typeScheme end;local scheme=_chi_tmp90;
-do _chi_tmp90=scheme end;local bodyType=_chi_tmp90;
-do local _chi_tmp104;local _chi_tmp105 = 'poly';if (scheme.tag == (_chi_tmp105)) then
-bodyType=scheme.body;_chi_tmp104=bodyType
+do _chi_tmp98=typeScheme end;local scheme=_chi_tmp98;
+do _chi_tmp98=scheme end;local bodyType=_chi_tmp98;
+do local _chi_tmp112;local _chi_tmp113 = 'poly';if (scheme.tag == (_chi_tmp113)) then
+bodyType=scheme.body;_chi_tmp112=bodyType
  end; end;
-do local _chi_tmp106;local _chi_tmp107 = 'fn';if (bodyType.tag ~= (_chi_tmp107)) then
+do local _chi_tmp114;local _chi_tmp115 = 'fn';if (bodyType.tag ~= (_chi_tmp115)) then
 return (false);
  end; end;
-do _chi_tmp90=bodyType.types end;local types=_chi_tmp90;
-do local _chi_tmp108;local _chi_tmp109=__std__lang_array.size(types);if (_chi_tmp109 < (2)) then
+do _chi_tmp98=bodyType.types end;local types=_chi_tmp98;
+do local _chi_tmp116;local _chi_tmp117=__std__lang_array.size(types);if (_chi_tmp117 < (2)) then
 return (false);
  end; end;
-do local _chi_tmp110=types[(1)];_chi_tmp90=_chi_tmp110 end;local firstParam=_chi_tmp90;
-local _chi_tmp111={};setmetatable(_chi_tmp111, array_meta_table);local _chi_tmp112=__chicc__unification.newConstraint(firstParam,receiverType,(nil),_chi_tmp111);local _chi_tmp113={_chi_tmp112};setmetatable(_chi_tmp113, array_meta_table);local _chi_tmp114=__chicc__unification.tryUnify(_chi_tmp113);return (_chi_tmp114 ~= (nil)) end;
+do local _chi_tmp118=types[(1)];_chi_tmp98=_chi_tmp118 end;local firstParam=_chi_tmp98;
+local _chi_tmp119={};setmetatable(_chi_tmp119, array_meta_table);local _chi_tmp120=__chicc__unification.newConstraint(firstParam,receiverType,(nil),_chi_tmp119);local _chi_tmp121={_chi_tmp120};setmetatable(_chi_tmp121, array_meta_table);local _chi_tmp122=__chicc__unification.tryUnify(_chi_tmp121);return (_chi_tmp122 ~= (nil)) end;
  end;
 do function __P_.icListLocalFunctionsForType(name,receiverType)
-local _chi_tmp115;do local _chi_tmp116={};setmetatable(_chi_tmp116, array_meta_table);_chi_tmp115=_chi_tmp116 end;local results=_chi_tmp115;
-do _chi_tmp115=__P_.icLocalSymbols end;local scope=_chi_tmp115;
-do _chi_tmp115=(false) end;local bound=_chi_tmp115;
-do local function _chi_tmp117() return scope end;local function _chi_tmp118() return __P_.icPackageSymbols end;local function _chi_tmp119() local _chi_tmp120=not bound;return _chi_tmp120 end;while ((_chi_tmp117() ~= _chi_tmp118()) and _chi_tmp119()) do do
-local _chi_tmp121;do local _chi_tmp122=__std__lang_map.get(scope.symbols,name);_chi_tmp121=_chi_tmp122 end;local localSym=_chi_tmp121;
-do local _chi_tmp123;if (localSym ~= (nil)) then
+local _chi_tmp123;do local _chi_tmp124={};setmetatable(_chi_tmp124, array_meta_table);_chi_tmp123=_chi_tmp124 end;local results=_chi_tmp123;
+do _chi_tmp123=__P_.icLocalSymbols end;local scope=_chi_tmp123;
+do _chi_tmp123=(false) end;local bound=_chi_tmp123;
+do local function _chi_tmp125() return scope end;local function _chi_tmp126() return __P_.icPackageSymbols end;local function _chi_tmp127() local _chi_tmp128=not bound;return _chi_tmp128 end;while ((_chi_tmp125() ~= _chi_tmp126()) and _chi_tmp127()) do do
+local _chi_tmp129;do local _chi_tmp130=__std__lang_map.get(scope.symbols,name);_chi_tmp129=_chi_tmp130 end;local localSym=_chi_tmp129;
+do local _chi_tmp131;if (localSym ~= (nil)) then
 do bound=(true); end;
-local _chi_tmp124;local _chi_tmp125=__P_.icTrialUnify(localSym,receiverType);if _chi_tmp125 then
-local _chi_tmp126;do local _chi_tmp127=__chicc__ast.localBindingDotTarget(name);local _chi_tmp128={dotTarget=_chi_tmp127,typeScheme=localSym};setmetatable(_chi_tmp128, record_meta_table);_chi_tmp126=_chi_tmp128 end;local localEntry=_chi_tmp126;
-local _chi_tmp129=__std__lang_array.push(results,localEntry);_chi_tmp124=_chi_tmp129
- end;_chi_tmp123=_chi_tmp124
+local _chi_tmp132;local _chi_tmp133=__P_.icTrialUnify(localSym,receiverType);if _chi_tmp133 then
+local _chi_tmp134;do local _chi_tmp135=__chicc__ast.localBindingDotTarget(name);local _chi_tmp136={dotTarget=_chi_tmp135,typeScheme=localSym};setmetatable(_chi_tmp136, record_meta_table);_chi_tmp134=_chi_tmp136 end;local localEntry=_chi_tmp134;
+local _chi_tmp137=__std__lang_array.push(results,localEntry);_chi_tmp132=_chi_tmp137
+ end;_chi_tmp131=_chi_tmp132
  end; end;
 scope=scope.parent; end ::__continue_0:: end;
  end;
-do local _chi_tmp130=__P_.icLocalSymbolsGet(__P_.icPackageSymbols,name);_chi_tmp115=_chi_tmp130 end;local sym=_chi_tmp115;
-do local _chi_tmp131;if (sym ~= (nil)) then
-local _chi_tmp132;local _chi_tmp133=__P_.icTrialUnify(sym,receiverType);if _chi_tmp133 then
-local _chi_tmp134;do local _chi_tmp135;if (__P_.icCompileTables ~= (nil)) then
-local _chi_tmp136;do _chi_tmp136=__P_.icCompileTables end;local ct=_chi_tmp136;
-do local _chi_tmp137=require('chicc/symbols').ctGetLocalSymbol(ct, name);_chi_tmp136=_chi_tmp137 end;local fullSym=_chi_tmp136;
-local _chi_tmp138;if (fullSym ~= (nil)) then
-local _chi_tmp139;do local _chi_tmp140=fullSym.moduleName;_chi_tmp139=_chi_tmp140 end;local symMod=_chi_tmp139;
-do local _chi_tmp141=fullSym.packageName;_chi_tmp139=_chi_tmp141 end;local symPkg=_chi_tmp139;
-do local _chi_tmp142=__P_.icPkg.moduleName;_chi_tmp139=_chi_tmp142 end;local pkgMod=_chi_tmp139;
-do local _chi_tmp143=__P_.icPkg.packageName;_chi_tmp139=_chi_tmp143 end;local pkgPkg=_chi_tmp139;
-local _chi_tmp144;if ((symMod == pkgMod) and (symPkg == pkgPkg)) then
-local _chi_tmp145=require('chicc/ast').localFnDotTarget(name);_chi_tmp144=_chi_tmp145
+do local _chi_tmp138=__P_.icLocalSymbolsGet(__P_.icPackageSymbols,name);_chi_tmp123=_chi_tmp138 end;local sym=_chi_tmp123;
+do local _chi_tmp139;if (sym ~= (nil)) then
+local _chi_tmp140;local _chi_tmp141=__P_.icTrialUnify(sym,receiverType);if _chi_tmp141 then
+local _chi_tmp142;do local _chi_tmp143;if (__P_.icCompileTables ~= (nil)) then
+local _chi_tmp144;do _chi_tmp144=__P_.icCompileTables end;local ct=_chi_tmp144;
+do local _chi_tmp145=require('chicc/symbols').ctGetLocalSymbol(ct, name);_chi_tmp144=_chi_tmp145 end;local fullSym=_chi_tmp144;
+local _chi_tmp146;if (fullSym ~= (nil)) then
+local _chi_tmp147;do local _chi_tmp148=fullSym.moduleName;_chi_tmp147=_chi_tmp148 end;local symMod=_chi_tmp147;
+do local _chi_tmp149=fullSym.packageName;_chi_tmp147=_chi_tmp149 end;local symPkg=_chi_tmp147;
+do local _chi_tmp150=__P_.icPkg.moduleName;_chi_tmp147=_chi_tmp150 end;local pkgMod=_chi_tmp147;
+do local _chi_tmp151=__P_.icPkg.packageName;_chi_tmp147=_chi_tmp151 end;local pkgPkg=_chi_tmp147;
+local _chi_tmp152;if ((symMod == pkgMod) and (symPkg == pkgPkg)) then
+local _chi_tmp153=require('chicc/ast').localFnDotTarget(name);_chi_tmp152=_chi_tmp153
  else
-local _chi_tmp146=require('chicc/ast').packageFnDotTarget(symMod, symPkg, name);_chi_tmp144=_chi_tmp146
- end;_chi_tmp138=_chi_tmp144
+local _chi_tmp154=require('chicc/ast').packageFnDotTarget(symMod, symPkg, name);_chi_tmp152=_chi_tmp154
+ end;_chi_tmp146=_chi_tmp152
  else
-local _chi_tmp147=require('chicc/ast').localFnDotTarget(name);_chi_tmp138=_chi_tmp147
- end;_chi_tmp135=_chi_tmp138
+local _chi_tmp155=require('chicc/ast').localFnDotTarget(name);_chi_tmp146=_chi_tmp155
+ end;_chi_tmp143=_chi_tmp146
  else
-local _chi_tmp148=require('chicc/ast').localFnDotTarget(name);_chi_tmp135=_chi_tmp148
- end;_chi_tmp134=_chi_tmp135 end;local dotTarget=_chi_tmp134;
-do local _chi_tmp149={ dotTarget = dotTarget, typeScheme = sym };_chi_tmp134=_chi_tmp149 end;local entry=_chi_tmp134;
-local _chi_tmp150=__std__lang_array.push(results,entry);_chi_tmp132=_chi_tmp150
- end;_chi_tmp131=_chi_tmp132
+local _chi_tmp156=require('chicc/ast').localFnDotTarget(name);_chi_tmp143=_chi_tmp156
+ end;_chi_tmp142=_chi_tmp143 end;local dotTarget=_chi_tmp142;
+do local _chi_tmp157={ dotTarget = dotTarget, typeScheme = sym };_chi_tmp142=_chi_tmp157 end;local entry=_chi_tmp142;
+local _chi_tmp158=__std__lang_array.push(results,entry);_chi_tmp140=_chi_tmp158
+ end;_chi_tmp139=_chi_tmp140
  end; end;
 return results end;
  end;
 do function __P_.icListCurrentPackageFunctionsForType(name,receiverType)
-local _chi_tmp151;do local _chi_tmp152={};setmetatable(_chi_tmp152, array_meta_table);_chi_tmp151=_chi_tmp152 end;local results=_chi_tmp151;
-do local _chi_tmp153;if (__P_.icCompileTables == (nil)) then return results; end; end;
-do _chi_tmp151=__P_.icCompileTables end;local ct=_chi_tmp151;
-do local _chi_tmp154=require('chicc/symbols').ctGetLocalSymbol(ct, name);_chi_tmp151=_chi_tmp154 end;local sym=_chi_tmp151;
-do local _chi_tmp155;if (sym ~= (nil)) then
-local _chi_tmp156;do local _chi_tmp157=sym.symbolType;_chi_tmp156=_chi_tmp157 end;local declType=_chi_tmp156;
-local _chi_tmp158;if (declType ~= (nil)) then
-local _chi_tmp159;do local _chi_tmp160;local _chi_tmp161=__std__lang_array.size(declType.typeParams);if (_chi_tmp161 > (0)) then
-local _chi_tmp162=__chicc__types.polyType((0),declType);_chi_tmp160=_chi_tmp162
+local _chi_tmp159;do local _chi_tmp160={};setmetatable(_chi_tmp160, array_meta_table);_chi_tmp159=_chi_tmp160 end;local results=_chi_tmp159;
+do local _chi_tmp161;if (__P_.icCompileTables == (nil)) then return results; end; end;
+do _chi_tmp159=__P_.icCompileTables end;local ct=_chi_tmp159;
+do local _chi_tmp162=require('chicc/symbols').ctGetLocalSymbol(ct, name);_chi_tmp159=_chi_tmp162 end;local sym=_chi_tmp159;
+do local _chi_tmp163;if (sym ~= (nil)) then
+local _chi_tmp164;do local _chi_tmp165=sym.symbolType;_chi_tmp164=_chi_tmp165 end;local declType=_chi_tmp164;
+local _chi_tmp166;if (declType ~= (nil)) then
+local _chi_tmp167;do local _chi_tmp168;local _chi_tmp169=__std__lang_array.size(declType.typeParams);if (_chi_tmp169 > (0)) then
+local _chi_tmp170=__chicc__types.polyType((0),declType);_chi_tmp168=_chi_tmp170
  else
-_chi_tmp160=declType
- end;_chi_tmp159=_chi_tmp160 end;local symType=_chi_tmp159;
-local _chi_tmp163;local _chi_tmp164=__P_.icTrialUnify(symType,receiverType);if _chi_tmp164 then
-local _chi_tmp165;do local _chi_tmp166=sym.moduleName;_chi_tmp165=_chi_tmp166 end;local symMod=_chi_tmp165;
-do local _chi_tmp167=sym.packageName;_chi_tmp165=_chi_tmp167 end;local symPkg=_chi_tmp165;
-do local _chi_tmp168={ dotTarget = require('chicc/ast').packageFnDotTarget(symMod, symPkg, name), typeScheme = symType };_chi_tmp165=_chi_tmp168 end;local entry=_chi_tmp165;
-local _chi_tmp169=__std__lang_array.push(results,entry);_chi_tmp163=_chi_tmp169
- end;_chi_tmp158=_chi_tmp163
- end;_chi_tmp155=_chi_tmp158
+_chi_tmp168=declType
+ end;_chi_tmp167=_chi_tmp168 end;local symType=_chi_tmp167;
+local _chi_tmp171;local _chi_tmp172=__P_.icTrialUnify(symType,receiverType);if _chi_tmp172 then
+local _chi_tmp173;do local _chi_tmp174=sym.moduleName;_chi_tmp173=_chi_tmp174 end;local symMod=_chi_tmp173;
+do local _chi_tmp175=sym.packageName;_chi_tmp173=_chi_tmp175 end;local symPkg=_chi_tmp173;
+do local _chi_tmp176={ dotTarget = require('chicc/ast').packageFnDotTarget(symMod, symPkg, name), typeScheme = symType };_chi_tmp173=_chi_tmp176 end;local entry=_chi_tmp173;
+local _chi_tmp177=__std__lang_array.push(results,entry);_chi_tmp171=_chi_tmp177
+ end;_chi_tmp166=_chi_tmp171
+ end;_chi_tmp163=_chi_tmp166
  end; end;
 return results end;
  end;
 do function __P_.icListTypesPackageFunctionsForType(name,receiverType)
-local _chi_tmp170;do local _chi_tmp171={};setmetatable(_chi_tmp171, array_meta_table);_chi_tmp170=_chi_tmp171 end;local results=_chi_tmp170;
-do local _chi_tmp172;if (__P_.icNs == (nil)) then return results; end; end;
-do _chi_tmp170=receiverType end;local recType=_chi_tmp170;
-do local _chi_tmp173={};setmetatable(_chi_tmp173, array_meta_table);_chi_tmp170=_chi_tmp173 end;local typeIds=_chi_tmp170;
-do local _chi_tmp174;local _chi_tmp175 = 'primitive';local _chi_tmp177=(recType.tag == (_chi_tmp175));if not _chi_tmp177 then local _chi_tmp176 = 'record';_chi_tmp177=(recType.tag == (_chi_tmp176)) end;local _chi_tmp179=_chi_tmp177;if not _chi_tmp179 then local _chi_tmp178 = 'sum';_chi_tmp179=(recType.tag == (_chi_tmp178)) end;local _chi_tmp181=_chi_tmp179;if not _chi_tmp181 then local _chi_tmp180 = 'array';_chi_tmp181=(recType.tag == (_chi_tmp180)) end;if _chi_tmp181 then
-typeIds=recType.ids;_chi_tmp174=typeIds
+local _chi_tmp178;do local _chi_tmp179={};setmetatable(_chi_tmp179, array_meta_table);_chi_tmp178=_chi_tmp179 end;local results=_chi_tmp178;
+do local _chi_tmp180;if (__P_.icNs == (nil)) then return results; end; end;
+do _chi_tmp178=receiverType end;local recType=_chi_tmp178;
+do local _chi_tmp181={};setmetatable(_chi_tmp181, array_meta_table);_chi_tmp178=_chi_tmp181 end;local typeIds=_chi_tmp178;
+do local _chi_tmp182;local _chi_tmp183 = 'primitive';local _chi_tmp185=(recType.tag == (_chi_tmp183));if not _chi_tmp185 then local _chi_tmp184 = 'record';_chi_tmp185=(recType.tag == (_chi_tmp184)) end;local _chi_tmp187=_chi_tmp185;if not _chi_tmp187 then local _chi_tmp186 = 'sum';_chi_tmp187=(recType.tag == (_chi_tmp186)) end;local _chi_tmp189=_chi_tmp187;if not _chi_tmp189 then local _chi_tmp188 = 'array';_chi_tmp189=(recType.tag == (_chi_tmp188)) end;if _chi_tmp189 then
+typeIds=recType.ids;_chi_tmp182=typeIds
  end; end;
-do local _chi_tmp182=__std__lang_array.size(typeIds);_chi_tmp170=_chi_tmp182 end;local idCount=_chi_tmp170;
-do _chi_tmp170=(1) end;local i=_chi_tmp170;
-do local function _chi_tmp183() return i end;local function _chi_tmp184() return idCount end;while (_chi_tmp183() <= _chi_tmp184()) do do
-local _chi_tmp185;do local _chi_tmp186=typeIds[i];_chi_tmp185=_chi_tmp186 end;local typeId=_chi_tmp185;
-do _chi_tmp185=typeId.moduleName end;local idMod=_chi_tmp185;
-do _chi_tmp185=typeId.packageName end;local idPkg=_chi_tmp185;
-do local _chi_tmp187=__P_.icNs.getSymbol and __P_.icNs.getSymbol(idMod, idPkg, name) or nil;_chi_tmp185=_chi_tmp187 end;local sym=_chi_tmp185;
-do local _chi_tmp188;if (sym ~= (nil)) then
-local _chi_tmp189;do local _chi_tmp190=sym.symbolType;_chi_tmp189=_chi_tmp190 end;local symType=_chi_tmp189;
-local _chi_tmp191;if (symType ~= (nil)) then
-local _chi_tmp192;local _chi_tmp193=__P_.icTrialUnify(symType,receiverType);if _chi_tmp193 then
-local _chi_tmp194;do local _chi_tmp195={ dotTarget = require('chicc/ast').packageFnDotTarget(idMod, idPkg, name), typeScheme = symType };_chi_tmp194=_chi_tmp195 end;local entry=_chi_tmp194;
-local _chi_tmp196=__std__lang_array.push(results,entry);_chi_tmp192=_chi_tmp196
- end;_chi_tmp191=_chi_tmp192
- end;_chi_tmp188=_chi_tmp191
+do local _chi_tmp190=__std__lang_array.size(typeIds);_chi_tmp178=_chi_tmp190 end;local idCount=_chi_tmp178;
+do _chi_tmp178=(1) end;local i=_chi_tmp178;
+do local function _chi_tmp191() return i end;local function _chi_tmp192() return idCount end;while (_chi_tmp191() <= _chi_tmp192()) do do
+local _chi_tmp193;do local _chi_tmp194=typeIds[i];_chi_tmp193=_chi_tmp194 end;local typeId=_chi_tmp193;
+do _chi_tmp193=typeId.moduleName end;local idMod=_chi_tmp193;
+do _chi_tmp193=typeId.packageName end;local idPkg=_chi_tmp193;
+do local _chi_tmp195=__P_.icNs.getSymbol and __P_.icNs.getSymbol(idMod, idPkg, name) or nil;_chi_tmp193=_chi_tmp195 end;local sym=_chi_tmp193;
+do local _chi_tmp196;if (sym ~= (nil)) then
+local _chi_tmp197;do local _chi_tmp198=sym.symbolType;_chi_tmp197=_chi_tmp198 end;local symType=_chi_tmp197;
+local _chi_tmp199;if (symType ~= (nil)) then
+local _chi_tmp200;local _chi_tmp201=__P_.icTrialUnify(symType,receiverType);if _chi_tmp201 then
+local _chi_tmp202;do local _chi_tmp203={ dotTarget = require('chicc/ast').packageFnDotTarget(idMod, idPkg, name), typeScheme = symType };_chi_tmp202=_chi_tmp203 end;local entry=_chi_tmp202;
+local _chi_tmp204=__std__lang_array.push(results,entry);_chi_tmp200=_chi_tmp204
+ end;_chi_tmp199=_chi_tmp200
+ end;_chi_tmp196=_chi_tmp199
  end; end;
 i=(i + (1)); end ::__continue_1:: end;
  end;
 return results end;
  end;
 function __P_.icListAllLoadedFunctionsForType(name,receiverType)
-local _chi_tmp197;do local _chi_tmp198={};setmetatable(_chi_tmp198, array_meta_table);_chi_tmp197=_chi_tmp198 end;local results=_chi_tmp197;
-do local _chi_tmp199;if (__P_.icNs == (nil)) then return results; end; end;
+local _chi_tmp205;do local _chi_tmp206={};setmetatable(_chi_tmp206, array_meta_table);_chi_tmp205=_chi_tmp206 end;local results=_chi_tmp205;
+do local _chi_tmp207;if (__P_.icNs == (nil)) then return results; end; end;
 local _seen = {}; for qualifier, loaded in pairs(package.loaded) do if type(qualifier) == 'string' and qualifier:sub(1, 6) ~= 'chicc/' and type(loaded) == 'table' and loaded._package then local slashPos = qualifier:find('/'); if slashPos then local mod = qualifier:sub(1, slashPos - 1); local pkg = qualifier:sub(slashPos + 1); local sym = __P_.icNs.getSymbol(mod, pkg, name); if sym and sym.symbolType then local key = mod .. '/' .. pkg; if not _seen[key] then _seen[key] = true; local trialOk = require('chicc/inference_context').icTrialUnify(sym.symbolType, receiverType); if trialOk then table.insert(results, { dotTarget = require('chicc/ast').packageFnDotTarget(mod, pkg, name), typeScheme = sym.symbolType }) end end end end end end;
 return results end;
 return __P_
- end;local _chi_info=debug.getinfo(_chi_run,'S');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;if string.sub(_chi_source,1,1)=='@' then _chi_source=string.sub(_chi_source,2) end;_chi_line_map[2]=11;_chi_line_map[3]=12;_chi_line_map[4]=13;_chi_line_map[5]=14;_chi_line_map[6]=15;_chi_line_map[7]=16;_chi_line_map[8]=21;_chi_line_map[9]=22;_chi_line_map[10]=23;_chi_line_map[11]=21;_chi_line_map[12]=26;_chi_line_map[13]=27;_chi_line_map[14]=28;_chi_line_map[15]=29;_chi_line_map[16]=30;_chi_line_map[17]=32;_chi_line_map[18]=33;_chi_line_map[19]=34;_chi_line_map[20]=35;_chi_line_map[21]=36;_chi_line_map[22]=37;_chi_line_map[23]=35;_chi_line_map[24]=38;_chi_line_map[25]=35;_chi_line_map[26]=33;_chi_line_map[27]=39;_chi_line_map[28]=33;_chi_line_map[29]=30;_chi_line_map[30]=41;_chi_line_map[31]=30;_chi_line_map[32]=44;_chi_line_map[33]=45;_chi_line_map[34]=46;_chi_line_map[35]=45;_chi_line_map[36]=48;_chi_line_map[37]=45;_chi_line_map[38]=30;_chi_line_map[39]=26;_chi_line_map[40]=53;_chi_line_map[41]=54;_chi_line_map[42]=55;_chi_line_map[43]=53;_chi_line_map[44]=59;_chi_line_map[45]=60;_chi_line_map[46]=61;_chi_line_map[47]=59;_chi_line_map[48]=66;_chi_line_map[49]=67;_chi_line_map[50]=68;_chi_line_map[51]=69;_chi_line_map[52]=70;_chi_line_map[53]=71;_chi_line_map[54]=72;_chi_line_map[55]=66;_chi_line_map[56]=75;_chi_line_map[57]=76;_chi_line_map[58]=77;_chi_line_map[59]=78;_chi_line_map[60]=75;_chi_line_map[61]=81;_chi_line_map[62]=82;_chi_line_map[63]=81;_chi_line_map[64]=85;_chi_line_map[65]=86;_chi_line_map[66]=87;_chi_line_map[67]=88;_chi_line_map[68]=89;_chi_line_map[69]=87;_chi_line_map[70]=91;_chi_line_map[71]=92;_chi_line_map[72]=93;_chi_line_map[73]=94;_chi_line_map[74]=95;_chi_line_map[75]=96;_chi_line_map[76]=97;_chi_line_map[77]=95;_chi_line_map[78]=87;_chi_line_map[79]=85;_chi_line_map[80]=102;_chi_line_map[81]=103;_chi_line_map[82]=104;_chi_line_map[83]=105;_chi_line_map[84]=106;_chi_line_map[85]=107;_chi_line_map[86]=108;_chi_line_map[87]=109;_chi_line_map[88]=108;_chi_line_map[89]=112;_chi_line_map[90]=113;_chi_line_map[91]=108;_chi_line_map[92]=102;_chi_line_map[93]=117;_chi_line_map[94]=118;_chi_line_map[95]=117;_chi_line_map[96]=121;_chi_line_map[97]=122;_chi_line_map[98]=123;_chi_line_map[99]=124;_chi_line_map[100]=125;_chi_line_map[101]=126;_chi_line_map[102]=127;_chi_line_map[103]=128;_chi_line_map[104]=126;_chi_line_map[105]=130;_chi_line_map[106]=126;_chi_line_map[107]=123;_chi_line_map[108]=133;_chi_line_map[109]=134;_chi_line_map[110]=135;_chi_line_map[111]=136;_chi_line_map[112]=137;_chi_line_map[113]=138;_chi_line_map[114]=140;_chi_line_map[115]=141;_chi_line_map[116]=142;_chi_line_map[117]=143;_chi_line_map[118]=141;_chi_line_map[119]=145;_chi_line_map[120]=141;_chi_line_map[121]=138;_chi_line_map[122]=149;_chi_line_map[123]=150;_chi_line_map[124]=151;_chi_line_map[125]=152;_chi_line_map[126]=150;_chi_line_map[127]=154;_chi_line_map[128]=155;_chi_line_map[129]=156;_chi_line_map[130]=157;_chi_line_map[131]=155;_chi_line_map[132]=159;_chi_line_map[133]=155;_chi_line_map[134]=150;_chi_line_map[135]=138;_chi_line_map[136]=123;_chi_line_map[137]=164;_chi_line_map[138]=165;_chi_line_map[139]=123;_chi_line_map[140]=121;_chi_line_map[141]=172;_chi_line_map[142]=173;_chi_line_map[143]=175;_chi_line_map[144]=176;_chi_line_map[145]=177;_chi_line_map[146]=178;_chi_line_map[147]=179;_chi_line_map[148]=180;_chi_line_map[149]=181;_chi_line_map[150]=180;_chi_line_map[151]=183;_chi_line_map[152]=176;_chi_line_map[153]=185;_chi_line_map[154]=186;_chi_line_map[155]=187;_chi_line_map[156]=188;_chi_line_map[157]=187;_chi_line_map[158]=190;_chi_line_map[159]=191;_chi_line_map[160]=190;_chi_line_map[161]=193;_chi_line_map[162]=194;_chi_line_map[163]=195;_chi_line_map[164]=194;_chi_line_map[165]=197;_chi_line_map[166]=198;_chi_line_map[167]=172;_chi_line_map[168]=205;_chi_line_map[169]=206;_chi_line_map[170]=207;_chi_line_map[171]=208;_chi_line_map[172]=209;_chi_line_map[173]=210;_chi_line_map[174]=211;_chi_line_map[175]=212;_chi_line_map[176]=213;_chi_line_map[177]=214;_chi_line_map[178]=215;_chi_line_map[179]=213;_chi_line_map[180]=211;_chi_line_map[181]=218;_chi_line_map[182]=209;_chi_line_map[183]=220;_chi_line_map[184]=221;_chi_line_map[185]=222;_chi_line_map[186]=224;_chi_line_map[187]=225;_chi_line_map[188]=226;_chi_line_map[189]=227;_chi_line_map[190]=228;_chi_line_map[191]=229;_chi_line_map[192]=230;_chi_line_map[193]=231;_chi_line_map[194]=232;_chi_line_map[195]=233;_chi_line_map[196]=232;_chi_line_map[197]=235;_chi_line_map[198]=232;_chi_line_map[199]=227;_chi_line_map[200]=238;_chi_line_map[201]=227;_chi_line_map[202]=224;_chi_line_map[203]=241;_chi_line_map[204]=224;_chi_line_map[205]=243;_chi_line_map[206]=244;_chi_line_map[207]=222;_chi_line_map[208]=221;_chi_line_map[209]=247;_chi_line_map[210]=205;_chi_line_map[211]=251;_chi_line_map[212]=252;_chi_line_map[213]=253;_chi_line_map[214]=254;_chi_line_map[215]=255;_chi_line_map[216]=256;_chi_line_map[217]=257;_chi_line_map[218]=258;_chi_line_map[219]=261;_chi_line_map[220]=262;_chi_line_map[221]=261;_chi_line_map[222]=264;_chi_line_map[223]=261;_chi_line_map[224]=266;_chi_line_map[225]=273;_chi_line_map[226]=274;_chi_line_map[227]=275;_chi_line_map[228]=276;_chi_line_map[229]=266;_chi_line_map[230]=258;_chi_line_map[231]=256;_chi_line_map[232]=280;_chi_line_map[233]=251;_chi_line_map[234]=284;_chi_line_map[235]=285;_chi_line_map[236]=286;_chi_line_map[237]=288;_chi_line_map[238]=289;_chi_line_map[239]=290;_chi_line_map[240]=291;_chi_line_map[241]=290;_chi_line_map[242]=293;_chi_line_map[243]=294;_chi_line_map[244]=295;_chi_line_map[245]=296;_chi_line_map[246]=297;_chi_line_map[247]=298;_chi_line_map[248]=300;_chi_line_map[249]=301;_chi_line_map[250]=302;_chi_line_map[251]=303;_chi_line_map[252]=304;_chi_line_map[253]=305;_chi_line_map[254]=306;_chi_line_map[255]=304;_chi_line_map[256]=303;_chi_line_map[257]=301;_chi_line_map[258]=310;_chi_line_map[259]=295;_chi_line_map[260]=312;_chi_line_map[261]=284;_chi_line_map[262]=317;_chi_line_map[263]=318;_chi_line_map[264]=319;_chi_line_map[265]=320;_chi_line_map[266]=321;_chi_line_map[267]=317;local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..':'.._chi_generated..':'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..':'.._chi_source_line..':'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;return _chi_result end;m14();function m15() local _chi_line_map={};local function _chi_run()local __P_ = package.loaded['chicc/ast_converter'] or {_package={},_types={}};package.loaded['chicc/ast_converter'] = __P_;local __S_ = __P_._package;local __T_ = __P_._types;__S_.currentFnSymbolTable={public=false,mutable=true,type='{tag="any"}'};__S_.currentTypeSchemeVars={public=false,mutable=true,type='{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}'};__S_.typeSchemeLevel={public=false,mutable=true,type='{tag="any"}'};__S_.currentTypeLevel={public=false,mutable=true,type='{tag="int"}'};__S_.nextTempVarId={public=false,mutable=true,type='{tag="int"}'};__S_.weaveInput={public=false,mutable=true,type='{tag="any"}'};__S_.effectiveTypeLevel={public=false,mutable=false,type='{tag="fn",types={{tag="int"}},typeParams={},defaults=0}'};__S_.nextTempVarName={public=false,mutable=false,type='{tag="fn",types={{tag="string"}},typeParams={},defaults=0}'};__S_.getTypeTable={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"}},typeParams={},defaults=0}'};__S_.formatSignificant={public=false,mutable=false,type='{tag="fn",types={{tag="float"},{tag="int"},{tag="string"}},typeParams={},defaults=0}'};__S_.closeVariantType={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="array",elem={tag="typeref",ids={{"chicc","types","Type"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="array",elem={tag="typeref",ids={{"chicc","types","Type"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="array",elem={tag="int"},typeParams={},ids={{"std","lang.array","array"}}},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.floatLiteral={public=false,mutable=false,type='{tag="fn",types={{tag="float"},{tag="string"}},typeParams={},defaults=0}'};__S_.isFnLocal={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="bool"}},typeParams={},defaults=0}'};__S_.getSymbolSkippingLocals={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Target"}}}},typeParams={},defaults=0}'};__S_.getSymbol={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Target"}}}},typeParams={},defaults=0}'};__S_.isMutableLocal={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="bool"}},typeParams={},defaults=0}'};__S_.addLocalSymbol={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="bool"},{tag="bool"},{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Target"}}}},typeParams={},defaults=0}'};__S_.removeLocalSymbol={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.convertLambda={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertFuncWithName={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertFnCall={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertNameDeclaration={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertBlock={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertFor={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertWhen={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertFieldAccess={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertHandle={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertWeave={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertEffectDefinition={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convert={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertLambdaImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertFuncWithNameImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.packageSymbol={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","symbols","Symbol"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.isNullaryVariant={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="bool"}},typeParams={},defaults=0}'};__S_.convertFnCallImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertBlockImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertNameDeclarationImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertCaseBody={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertWhenImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertForImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertFieldAccessImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertWeaveImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertHandleImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.lowerVariantType={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.convertProgram={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.typeDeclarationNames={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast_converter","TypeDeclaration"}}},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.collectTypeRefNames={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}},{tag="unit"}},typeParams={},defaults=0}'};__S_.strongConnect={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast_converter","DeclGraph"}}},{tag="int"},{tag="unit"}},typeParams={},defaults=0}'};__S_.orderTypeDeclarations={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","parse_ast","ParseProgram"}}},{tag="typeref",ids={{"chicc","ast_converter","TypeDeclarationOrder"}}}},typeParams={},defaults=0}'};__T_.TypeDeclaration='{tag="record",ids={{"chicc","ast_converter","TypeDeclaration"}},fields={{"kind",{tag="string"}},{"name",{tag="string"}},{"decl",{tag="any"}}},typeParams={}}';__T_.TypeDeclarationOrder='{tag="record",ids={{"chicc","ast_converter","TypeDeclarationOrder"}},fields={{"order",{tag="array",elem={tag="typeref",ids={{"chicc","ast_converter","TypeDeclaration"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"cycles",{tag="array",elem={tag="array",elem={tag="typeref",ids={{"chicc","ast_converter","TypeDeclaration"}}},typeParams={},ids={{"std","lang.array","array"}}},typeParams={},ids={{"std","lang.array","array"}}}}},typeParams={}}';__T_.DeclGraph='{tag="record",ids={{"chicc","ast_converter","DeclGraph"}},fields={{"deps",{tag="array",elem={tag="array",elem={tag="int"},typeParams={},ids={{"std","lang.array","array"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"index",{tag="array",elem={tag="int"},typeParams={},ids={{"std","lang.array","array"}}}},{"low",{tag="array",elem={tag="int"},typeParams={},ids={{"std","lang.array","array"}}}},{"onStack",{tag="array",elem={tag="bool"},typeParams={},ids={{"std","lang.array","array"}}}},{"stack",{tag="array",elem={tag="int"},typeParams={},ids={{"std","lang.array","array"}}}},{"counter",{tag="int"}},{"sccs",{tag="array",elem={tag="array",elem={tag="int"},typeParams={},ids={{"std","lang.array","array"}}},typeParams={},ids={{"std","lang.array","array"}}}}},typeParams={}}';local __std__lang = require("std/lang");local __std__lang_array = require("std/lang.array");local __chicc__types = require("chicc/types");local __std__math = require("std/math");local __std__lang_string = require("std/lang.string");local __chicc__symbols = require("chicc/symbols");local __chicc__ast = require("chicc/ast");local __chicc__parse_ast = require("chicc/parse_ast");local __std__lang_map = require("std/lang.map");
+ end;local _chi_info=debug.getinfo(_chi_run,'S');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;if string.sub(_chi_source,1,1)=='@' then _chi_source=string.sub(_chi_source,2) end;_chi_line_map[2]=11;_chi_line_map[3]=12;_chi_line_map[4]=13;_chi_line_map[5]=14;_chi_line_map[6]=15;_chi_line_map[7]=16;_chi_line_map[8]=21;_chi_line_map[9]=22;_chi_line_map[10]=23;_chi_line_map[11]=21;_chi_line_map[12]=26;_chi_line_map[13]=27;_chi_line_map[14]=28;_chi_line_map[15]=29;_chi_line_map[16]=30;_chi_line_map[17]=32;_chi_line_map[18]=33;_chi_line_map[19]=34;_chi_line_map[20]=35;_chi_line_map[21]=36;_chi_line_map[22]=37;_chi_line_map[23]=35;_chi_line_map[24]=38;_chi_line_map[25]=35;_chi_line_map[26]=33;_chi_line_map[27]=39;_chi_line_map[28]=33;_chi_line_map[29]=30;_chi_line_map[30]=41;_chi_line_map[31]=30;_chi_line_map[32]=44;_chi_line_map[33]=45;_chi_line_map[34]=46;_chi_line_map[35]=45;_chi_line_map[36]=48;_chi_line_map[37]=45;_chi_line_map[38]=30;_chi_line_map[39]=26;_chi_line_map[40]=53;_chi_line_map[41]=54;_chi_line_map[42]=55;_chi_line_map[43]=53;_chi_line_map[44]=59;_chi_line_map[45]=60;_chi_line_map[46]=61;_chi_line_map[47]=59;_chi_line_map[48]=66;_chi_line_map[49]=67;_chi_line_map[50]=68;_chi_line_map[51]=69;_chi_line_map[52]=70;_chi_line_map[53]=71;_chi_line_map[54]=72;_chi_line_map[55]=66;_chi_line_map[56]=75;_chi_line_map[57]=76;_chi_line_map[58]=77;_chi_line_map[59]=78;_chi_line_map[60]=75;_chi_line_map[61]=81;_chi_line_map[62]=82;_chi_line_map[63]=81;_chi_line_map[64]=85;_chi_line_map[65]=86;_chi_line_map[66]=85;_chi_line_map[67]=89;_chi_line_map[68]=90;_chi_line_map[69]=91;_chi_line_map[70]=92;_chi_line_map[71]=93;_chi_line_map[72]=91;_chi_line_map[73]=95;_chi_line_map[74]=96;_chi_line_map[75]=97;_chi_line_map[76]=98;_chi_line_map[77]=99;_chi_line_map[78]=100;_chi_line_map[79]=101;_chi_line_map[80]=99;_chi_line_map[81]=91;_chi_line_map[82]=89;_chi_line_map[83]=106;_chi_line_map[84]=107;_chi_line_map[85]=108;_chi_line_map[86]=109;_chi_line_map[87]=110;_chi_line_map[88]=111;_chi_line_map[89]=112;_chi_line_map[90]=113;_chi_line_map[91]=112;_chi_line_map[92]=116;_chi_line_map[93]=117;_chi_line_map[94]=112;_chi_line_map[95]=106;_chi_line_map[96]=121;_chi_line_map[97]=122;_chi_line_map[98]=121;_chi_line_map[99]=125;_chi_line_map[100]=126;_chi_line_map[101]=127;_chi_line_map[102]=128;_chi_line_map[103]=129;_chi_line_map[104]=130;_chi_line_map[105]=131;_chi_line_map[106]=132;_chi_line_map[107]=130;_chi_line_map[108]=134;_chi_line_map[109]=130;_chi_line_map[110]=127;_chi_line_map[111]=137;_chi_line_map[112]=138;_chi_line_map[113]=139;_chi_line_map[114]=140;_chi_line_map[115]=141;_chi_line_map[116]=142;_chi_line_map[117]=143;_chi_line_map[118]=144;_chi_line_map[119]=143;_chi_line_map[120]=147;_chi_line_map[121]=148;_chi_line_map[122]=149;_chi_line_map[123]=150;_chi_line_map[124]=148;_chi_line_map[125]=152;_chi_line_map[126]=148;_chi_line_map[127]=143;_chi_line_map[128]=156;_chi_line_map[129]=157;_chi_line_map[130]=158;_chi_line_map[131]=159;_chi_line_map[132]=157;_chi_line_map[133]=161;_chi_line_map[134]=162;_chi_line_map[135]=163;_chi_line_map[136]=164;_chi_line_map[137]=162;_chi_line_map[138]=166;_chi_line_map[139]=162;_chi_line_map[140]=157;_chi_line_map[141]=143;_chi_line_map[142]=127;_chi_line_map[143]=171;_chi_line_map[144]=172;_chi_line_map[145]=127;_chi_line_map[146]=125;_chi_line_map[147]=179;_chi_line_map[148]=180;_chi_line_map[149]=182;_chi_line_map[150]=183;_chi_line_map[151]=184;_chi_line_map[152]=185;_chi_line_map[153]=186;_chi_line_map[154]=187;_chi_line_map[155]=188;_chi_line_map[156]=187;_chi_line_map[157]=190;_chi_line_map[158]=183;_chi_line_map[159]=192;_chi_line_map[160]=193;_chi_line_map[161]=194;_chi_line_map[162]=195;_chi_line_map[163]=194;_chi_line_map[164]=197;_chi_line_map[165]=198;_chi_line_map[166]=197;_chi_line_map[167]=200;_chi_line_map[168]=201;_chi_line_map[169]=202;_chi_line_map[170]=201;_chi_line_map[171]=204;_chi_line_map[172]=205;_chi_line_map[173]=179;_chi_line_map[174]=212;_chi_line_map[175]=213;_chi_line_map[176]=214;_chi_line_map[177]=215;_chi_line_map[178]=216;_chi_line_map[179]=217;_chi_line_map[180]=218;_chi_line_map[181]=219;_chi_line_map[182]=220;_chi_line_map[183]=221;_chi_line_map[184]=222;_chi_line_map[185]=220;_chi_line_map[186]=218;_chi_line_map[187]=225;_chi_line_map[188]=216;_chi_line_map[189]=227;_chi_line_map[190]=228;_chi_line_map[191]=229;_chi_line_map[192]=231;_chi_line_map[193]=232;_chi_line_map[194]=233;_chi_line_map[195]=234;_chi_line_map[196]=235;_chi_line_map[197]=236;_chi_line_map[198]=237;_chi_line_map[199]=238;_chi_line_map[200]=239;_chi_line_map[201]=240;_chi_line_map[202]=239;_chi_line_map[203]=242;_chi_line_map[204]=239;_chi_line_map[205]=234;_chi_line_map[206]=245;_chi_line_map[207]=234;_chi_line_map[208]=231;_chi_line_map[209]=248;_chi_line_map[210]=231;_chi_line_map[211]=250;_chi_line_map[212]=251;_chi_line_map[213]=229;_chi_line_map[214]=228;_chi_line_map[215]=254;_chi_line_map[216]=212;_chi_line_map[217]=258;_chi_line_map[218]=259;_chi_line_map[219]=260;_chi_line_map[220]=261;_chi_line_map[221]=262;_chi_line_map[222]=263;_chi_line_map[223]=264;_chi_line_map[224]=265;_chi_line_map[225]=268;_chi_line_map[226]=269;_chi_line_map[227]=268;_chi_line_map[228]=271;_chi_line_map[229]=268;_chi_line_map[230]=273;_chi_line_map[231]=280;_chi_line_map[232]=281;_chi_line_map[233]=282;_chi_line_map[234]=283;_chi_line_map[235]=273;_chi_line_map[236]=265;_chi_line_map[237]=263;_chi_line_map[238]=287;_chi_line_map[239]=258;_chi_line_map[240]=291;_chi_line_map[241]=292;_chi_line_map[242]=293;_chi_line_map[243]=295;_chi_line_map[244]=296;_chi_line_map[245]=297;_chi_line_map[246]=298;_chi_line_map[247]=297;_chi_line_map[248]=300;_chi_line_map[249]=301;_chi_line_map[250]=302;_chi_line_map[251]=303;_chi_line_map[252]=304;_chi_line_map[253]=305;_chi_line_map[254]=307;_chi_line_map[255]=308;_chi_line_map[256]=309;_chi_line_map[257]=310;_chi_line_map[258]=311;_chi_line_map[259]=312;_chi_line_map[260]=313;_chi_line_map[261]=311;_chi_line_map[262]=310;_chi_line_map[263]=308;_chi_line_map[264]=317;_chi_line_map[265]=302;_chi_line_map[266]=319;_chi_line_map[267]=291;_chi_line_map[268]=324;_chi_line_map[269]=325;_chi_line_map[270]=326;_chi_line_map[271]=327;_chi_line_map[272]=328;_chi_line_map[273]=324;local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..':'.._chi_generated..':'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..':'.._chi_source_line..':'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;return _chi_result end;m14();function m15() local _chi_line_map={};local function _chi_run()local __P_ = package.loaded['chicc/ast_converter'] or {_package={},_types={}};package.loaded['chicc/ast_converter'] = __P_;local __S_ = __P_._package;local __T_ = __P_._types;__S_.currentFnSymbolTable={public=false,mutable=true,type='{tag="any"}'};__S_.currentTypeSchemeVars={public=false,mutable=true,type='{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}'};__S_.typeSchemeLevel={public=false,mutable=true,type='{tag="any"}'};__S_.currentTypeLevel={public=false,mutable=true,type='{tag="int"}'};__S_.nextTempVarId={public=false,mutable=true,type='{tag="int"}'};__S_.weaveInput={public=false,mutable=true,type='{tag="any"}'};__S_.effectiveTypeLevel={public=false,mutable=false,type='{tag="fn",types={{tag="int"}},typeParams={},defaults=0}'};__S_.nextTempVarName={public=false,mutable=false,type='{tag="fn",types={{tag="string"}},typeParams={},defaults=0}'};__S_.getTypeTable={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"}},typeParams={},defaults=0}'};__S_.formatSignificant={public=false,mutable=false,type='{tag="fn",types={{tag="float"},{tag="int"},{tag="string"}},typeParams={},defaults=0}'};__S_.closeVariantType={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="array",elem={tag="typeref",ids={{"chicc","types","Type"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="array",elem={tag="typeref",ids={{"chicc","types","Type"}}},typeParams={},ids={{"std","lang.array","array"}}},{tag="array",elem={tag="int"},typeParams={},ids={{"std","lang.array","array"}}},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.floatLiteral={public=false,mutable=false,type='{tag="fn",types={{tag="float"},{tag="string"}},typeParams={},defaults=0}'};__S_.isFnLocal={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="bool"}},typeParams={},defaults=0}'};__S_.getSymbolSkippingLocals={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Target"}}}},typeParams={},defaults=0}'};__S_.getSymbol={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Target"}}}},typeParams={},defaults=0}'};__S_.isMutableLocal={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="bool"}},typeParams={},defaults=0}'};__S_.addLocalSymbol={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="bool"},{tag="bool"},{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Target"}}}},typeParams={},defaults=0}'};__S_.removeLocalSymbol={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.convertLambda={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertFuncWithName={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertFnCall={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertNameDeclaration={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertBlock={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertFor={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertWhen={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertFieldAccess={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertHandle={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertWeave={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertEffectDefinition={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convert={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertLambdaImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertFuncWithNameImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.packageSymbol={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","symbols","Symbol"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.isNullaryVariant={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="bool"}},typeParams={},defaults=0}'};__S_.convertFnCallImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertBlockImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertNameDeclarationImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertCaseBody={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertWhenImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertForImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertFieldAccessImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertWeaveImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.convertHandleImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","ast","Expr"}}}},typeParams={},defaults=0}'};__S_.lowerVariantType={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.convertProgram={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Expr"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.typeDeclarationNames={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast_converter","TypeDeclaration"}}},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.collectTypeRefNames={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}},{tag="unit"}},typeParams={},defaults=0}'};__S_.strongConnect={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast_converter","DeclGraph"}}},{tag="int"},{tag="unit"}},typeParams={},defaults=0}'};__S_.orderTypeDeclarations={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","parse_ast","ParseProgram"}}},{tag="typeref",ids={{"chicc","ast_converter","TypeDeclarationOrder"}}}},typeParams={},defaults=0}'};__T_.TypeDeclaration='{tag="record",ids={{"chicc","ast_converter","TypeDeclaration"}},fields={{"kind",{tag="string"}},{"name",{tag="string"}},{"decl",{tag="any"}}},typeParams={}}';__T_.TypeDeclarationOrder='{tag="record",ids={{"chicc","ast_converter","TypeDeclarationOrder"}},fields={{"order",{tag="array",elem={tag="typeref",ids={{"chicc","ast_converter","TypeDeclaration"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"cycles",{tag="array",elem={tag="array",elem={tag="typeref",ids={{"chicc","ast_converter","TypeDeclaration"}}},typeParams={},ids={{"std","lang.array","array"}}},typeParams={},ids={{"std","lang.array","array"}}}}},typeParams={}}';__T_.DeclGraph='{tag="record",ids={{"chicc","ast_converter","DeclGraph"}},fields={{"deps",{tag="array",elem={tag="array",elem={tag="int"},typeParams={},ids={{"std","lang.array","array"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"index",{tag="array",elem={tag="int"},typeParams={},ids={{"std","lang.array","array"}}}},{"low",{tag="array",elem={tag="int"},typeParams={},ids={{"std","lang.array","array"}}}},{"onStack",{tag="array",elem={tag="bool"},typeParams={},ids={{"std","lang.array","array"}}}},{"stack",{tag="array",elem={tag="int"},typeParams={},ids={{"std","lang.array","array"}}}},{"counter",{tag="int"}},{"sccs",{tag="array",elem={tag="array",elem={tag="int"},typeParams={},ids={{"std","lang.array","array"}}},typeParams={},ids={{"std","lang.array","array"}}}}},typeParams={}}';local __std__lang = require("std/lang");local __std__lang_array = require("std/lang.array");local __chicc__types = require("chicc/types");local __std__math = require("std/math");local __std__lang_string = require("std/lang.string");local __chicc__symbols = require("chicc/symbols");local __chicc__ast = require("chicc/ast");local __chicc__parse_ast = require("chicc/parse_ast");local __std__lang_map = require("std/lang.map");
 do __P_.currentFnSymbolTable=(nil); end;
 do local _chi_tmp0={};setmetatable(_chi_tmp0, array_meta_table);__P_.currentTypeSchemeVars=_chi_tmp0; end;
 do __P_.typeSchemeLevel=(nil); end;
@@ -6152,1024 +6175,1024 @@ do local _chi_tmp95;if (ctSym ~= (nil)) then
 local _chi_tmp96;do local _chi_tmp97=ctSym.moduleName;_chi_tmp96=_chi_tmp97 end;local symMod=_chi_tmp96;
 do local _chi_tmp98=ctSym.packageName;_chi_tmp96=_chi_tmp98 end;local symPkg=_chi_tmp96;
 do local _chi_tmp99=ctSym.name;_chi_tmp96=_chi_tmp99 end;local symName=_chi_tmp96;
-local _chi_tmp100=__chicc__ast.packageTarget(symMod,symPkg,symName);return _chi_tmp100;
+local _chi_tmp100=__chicc__ast.packageTargetWithMutability(symMod,symPkg,symName,ctSym.isMutable);return _chi_tmp100;
  end; end;
 do local _chi_tmp101=__chicc__symbols.lookupLoadedPublicSymbol(name);_chi_tmp93=_chi_tmp101 end;local loadedSym=_chi_tmp93;
 do local _chi_tmp102;if (loadedSym ~= (nil)) then
 local _chi_tmp103;do local _chi_tmp104=loadedSym.moduleName;_chi_tmp103=_chi_tmp104 end;local loadedMod=_chi_tmp103;
 do local _chi_tmp105=loadedSym.packageName;_chi_tmp103=_chi_tmp105 end;local loadedPkg=_chi_tmp103;
-local _chi_tmp106=__chicc__ast.packageTarget(loadedMod,loadedPkg,name);return _chi_tmp106;
+local _chi_tmp106=__chicc__ast.packageTargetWithMutability(loadedMod,loadedPkg,name,loadedSym.isMutable);return _chi_tmp106;
  end; end;
 local _chi_tmp107=__chicc__ast.localTarget(name);return _chi_tmp107 end;
  end;
 do function __P_.getSymbol(name,tables)
-local _chi_tmp108;local _chi_tmp109=__P_.isFnLocal(name);if _chi_tmp109 then local _chi_tmp110=__chicc__ast.localTarget(name);_chi_tmp108=_chi_tmp110 else local _chi_tmp111=__P_.getSymbolSkippingLocals(name,tables);_chi_tmp108=_chi_tmp111 end;return _chi_tmp108 end;
+local _chi_tmp108;local _chi_tmp109=__P_.isFnLocal(name);if _chi_tmp109 then local _chi_tmp110=name;local _chi_tmp111=__P_.isMutableLocal(name);local _chi_tmp112=__chicc__ast.localTargetWithMutability(_chi_tmp110,_chi_tmp111);_chi_tmp108=_chi_tmp112 else local _chi_tmp113=__P_.getSymbolSkippingLocals(name,tables);_chi_tmp108=_chi_tmp113 end;return _chi_tmp108 end;
  end;
 do function __P_.isMutableLocal(name)
-local _chi_tmp112;do _chi_tmp112=__P_.currentFnSymbolTable end;local fst=_chi_tmp112;
-do local _chi_tmp113;if (fst == (nil)) then return (false); end; end;
-do local _chi_tmp114=__chicc__symbols.fstGet(fst,name);_chi_tmp112=_chi_tmp114 end;local sym=_chi_tmp112;
+local _chi_tmp114;do _chi_tmp114=__P_.currentFnSymbolTable end;local fst=_chi_tmp114;
+do local _chi_tmp115;if (fst == (nil)) then return (false); end; end;
+do local _chi_tmp116=__chicc__symbols.fstGet(fst,name);_chi_tmp114=_chi_tmp116 end;local sym=_chi_tmp114;
 return ((sym ~= (nil)) and sym.isMutable) end;
  end;
 do function __P_.addLocalSymbol(name,isMut,isPub,symType,pkg,tables)
-local _chi_tmp115;do _chi_tmp115=__P_.currentFnSymbolTable end;local fst=_chi_tmp115;
-local _chi_tmp116;if (fst ~= (nil)) then
-do local _chi_tmp117=__chicc__symbols.fstAddLocal(fst,name,(nil),isMut); end;
-local _chi_tmp118=__chicc__ast.localTarget(name);_chi_tmp116=_chi_tmp118
+local _chi_tmp117;do _chi_tmp117=__P_.currentFnSymbolTable end;local fst=_chi_tmp117;
+local _chi_tmp118;if (fst ~= (nil)) then
+do local _chi_tmp119=__chicc__symbols.fstAddLocal(fst,name,(nil),isMut); end;
+local _chi_tmp120=__chicc__ast.localTarget(name);_chi_tmp118=_chi_tmp120
  else
-local _chi_tmp119;do local _chi_tmp120=pkg.moduleName;_chi_tmp119=_chi_tmp120 end;local mod=_chi_tmp119;
-do local _chi_tmp121=pkg.packageName;_chi_tmp119=_chi_tmp121 end;local pkgName=_chi_tmp119;
-do local _chi_tmp122=__chicc__symbols.newSymbol(mod,pkgName,name,symType,isPub,isMut);_chi_tmp119=_chi_tmp122 end;local sym=_chi_tmp119;
-do local _chi_tmp123=__chicc__symbols.ctDefineSymbol(tables,sym); end;
-local _chi_tmp124=__chicc__ast.packageTarget(mod,pkgName,name);_chi_tmp116=_chi_tmp124
- end;return _chi_tmp116 end;
+local _chi_tmp121;do local _chi_tmp122=pkg.moduleName;_chi_tmp121=_chi_tmp122 end;local mod=_chi_tmp121;
+do local _chi_tmp123=pkg.packageName;_chi_tmp121=_chi_tmp123 end;local pkgName=_chi_tmp121;
+do local _chi_tmp124=__chicc__symbols.newSymbol(mod,pkgName,name,symType,isPub,isMut);_chi_tmp121=_chi_tmp124 end;local sym=_chi_tmp121;
+do local _chi_tmp125=__chicc__symbols.ctDefineSymbol(tables,sym); end;
+local _chi_tmp126=__chicc__ast.packageTarget(mod,pkgName,name);_chi_tmp118=_chi_tmp126
+ end;return _chi_tmp118 end;
  end;
 do function __P_.removeLocalSymbol(name,tables)
-local _chi_tmp125;do _chi_tmp125=__P_.currentFnSymbolTable end;local fst=_chi_tmp125;
-local _chi_tmp126;if (fst ~= (nil)) then
-local _chi_tmp127=__chicc__symbols.fstRemove(fst,name);_chi_tmp126=_chi_tmp127
+local _chi_tmp127;do _chi_tmp127=__P_.currentFnSymbolTable end;local fst=_chi_tmp127;
+local _chi_tmp128;if (fst ~= (nil)) then
+local _chi_tmp129=__chicc__symbols.fstRemove(fst,name);_chi_tmp128=_chi_tmp129
  else
-local _chi_tmp128=__chicc__symbols.ctRemoveSymbol(tables,name);_chi_tmp126=_chi_tmp128
- end;local _chi_tmp129=_chi_tmp126;return; end;
+local _chi_tmp130=__chicc__symbols.ctRemoveSymbol(tables,name);_chi_tmp128=_chi_tmp130
+ end;local _chi_tmp131=_chi_tmp128;return; end;
  end;
-do function __P_.convertLambda(node,pkg,tables) local _chi_tmp130 = 'unit';local _chi_tmp131=__chicc__ast.atomExpr((_chi_tmp130),__chicc__types.tUnit,(nil));return _chi_tmp131 end; end;
-do function __P_.convertFuncWithName(node,pkg,tables) local _chi_tmp132 = 'unit';local _chi_tmp133=__chicc__ast.atomExpr((_chi_tmp132),__chicc__types.tUnit,(nil));return _chi_tmp133 end; end;
-do function __P_.convertFnCall(node,pkg,tables) local _chi_tmp134 = 'unit';local _chi_tmp135=__chicc__ast.atomExpr((_chi_tmp134),__chicc__types.tUnit,(nil));return _chi_tmp135 end; end;
-do function __P_.convertNameDeclaration(node,pkg,tables) local _chi_tmp136 = 'unit';local _chi_tmp137=__chicc__ast.atomExpr((_chi_tmp136),__chicc__types.tUnit,(nil));return _chi_tmp137 end; end;
-do function __P_.convertBlock(node,pkg,tables) local _chi_tmp138 = 'unit';local _chi_tmp139=__chicc__ast.atomExpr((_chi_tmp138),__chicc__types.tUnit,(nil));return _chi_tmp139 end; end;
-do function __P_.convertFor(node,pkg,tables) local _chi_tmp140 = 'unit';local _chi_tmp141=__chicc__ast.atomExpr((_chi_tmp140),__chicc__types.tUnit,(nil));return _chi_tmp141 end; end;
-do function __P_.convertWhen(node,pkg,tables) local _chi_tmp142 = 'unit';local _chi_tmp143=__chicc__ast.atomExpr((_chi_tmp142),__chicc__types.tUnit,(nil));return _chi_tmp143 end; end;
-do function __P_.convertFieldAccess(node,pkg,tables) local _chi_tmp144 = 'unit';local _chi_tmp145=__chicc__ast.atomExpr((_chi_tmp144),__chicc__types.tUnit,(nil));return _chi_tmp145 end; end;
-do function __P_.convertHandle(node,pkg,tables) local _chi_tmp146 = 'unit';local _chi_tmp147=__chicc__ast.atomExpr((_chi_tmp146),__chicc__types.tUnit,(nil));return _chi_tmp147 end; end;
-do function __P_.convertWeave(node,pkg,tables) local _chi_tmp148 = 'unit';local _chi_tmp149=__chicc__ast.atomExpr((_chi_tmp148),__chicc__types.tUnit,(nil));return _chi_tmp149 end; end;
+do function __P_.convertLambda(node,pkg,tables) local _chi_tmp132 = 'unit';local _chi_tmp133=__chicc__ast.atomExpr((_chi_tmp132),__chicc__types.tUnit,(nil));return _chi_tmp133 end; end;
+do function __P_.convertFuncWithName(node,pkg,tables) local _chi_tmp134 = 'unit';local _chi_tmp135=__chicc__ast.atomExpr((_chi_tmp134),__chicc__types.tUnit,(nil));return _chi_tmp135 end; end;
+do function __P_.convertFnCall(node,pkg,tables) local _chi_tmp136 = 'unit';local _chi_tmp137=__chicc__ast.atomExpr((_chi_tmp136),__chicc__types.tUnit,(nil));return _chi_tmp137 end; end;
+do function __P_.convertNameDeclaration(node,pkg,tables) local _chi_tmp138 = 'unit';local _chi_tmp139=__chicc__ast.atomExpr((_chi_tmp138),__chicc__types.tUnit,(nil));return _chi_tmp139 end; end;
+do function __P_.convertBlock(node,pkg,tables) local _chi_tmp140 = 'unit';local _chi_tmp141=__chicc__ast.atomExpr((_chi_tmp140),__chicc__types.tUnit,(nil));return _chi_tmp141 end; end;
+do function __P_.convertFor(node,pkg,tables) local _chi_tmp142 = 'unit';local _chi_tmp143=__chicc__ast.atomExpr((_chi_tmp142),__chicc__types.tUnit,(nil));return _chi_tmp143 end; end;
+do function __P_.convertWhen(node,pkg,tables) local _chi_tmp144 = 'unit';local _chi_tmp145=__chicc__ast.atomExpr((_chi_tmp144),__chicc__types.tUnit,(nil));return _chi_tmp145 end; end;
+do function __P_.convertFieldAccess(node,pkg,tables) local _chi_tmp146 = 'unit';local _chi_tmp147=__chicc__ast.atomExpr((_chi_tmp146),__chicc__types.tUnit,(nil));return _chi_tmp147 end; end;
+do function __P_.convertHandle(node,pkg,tables) local _chi_tmp148 = 'unit';local _chi_tmp149=__chicc__ast.atomExpr((_chi_tmp148),__chicc__types.tUnit,(nil));return _chi_tmp149 end; end;
+do function __P_.convertWeave(node,pkg,tables) local _chi_tmp150 = 'unit';local _chi_tmp151=__chicc__ast.atomExpr((_chi_tmp150),__chicc__types.tUnit,(nil));return _chi_tmp151 end; end;
 do function __P_.convertEffectDefinition(node,pkg,tables)
-local _chi_tmp150;do local _chi_tmp151=__chicc__parse_ast.paSection(node);_chi_tmp150=_chi_tmp151 end;local sec=_chi_tmp150;
-do local _chi_tmp152=__chicc__parse_ast.paIsPublic(node);_chi_tmp150=_chi_tmp152 end;local isPub=_chi_tmp150;
-do local _chi_tmp153=__chicc__parse_ast.paName(node);_chi_tmp150=_chi_tmp153 end;local effName=_chi_tmp150;
-do local _chi_tmp154=__chicc__parse_ast.paTypeParameters(node);_chi_tmp150=_chi_tmp154 end;local typeParams=_chi_tmp150;
-do local _chi_tmp155=__chicc__parse_ast.paFormalArguments(node);_chi_tmp150=_chi_tmp155 end;local args=_chi_tmp150;
-do local _chi_tmp156=__chicc__parse_ast.paReturnTypeRef(node);_chi_tmp150=_chi_tmp156 end;local retTypeRef=_chi_tmp150;
-do _chi_tmp150=__P_.currentTypeSchemeVars end;local prevTypeSchemeVars=_chi_tmp150;
-do _chi_tmp150=__P_.typeSchemeLevel end;local prevTypeSchemeLevel=_chi_tmp150;
-do local _chi_tmp157={};setmetatable(_chi_tmp157, array_meta_table);_chi_tmp150=_chi_tmp157 end;local tpNames=_chi_tmp150;
-do _chi_tmp150=(1) end;local tpIdx=_chi_tmp150;
-do local _chi_tmp158=__std__lang_array.size(typeParams);_chi_tmp150=_chi_tmp158 end;local tpCount=_chi_tmp150;
-do local function _chi_tmp159() return tpIdx end;local function _chi_tmp160() return tpCount end;while (_chi_tmp159() <= _chi_tmp160()) do do
-local _chi_tmp161;do local _chi_tmp162=typeParams[tpIdx];_chi_tmp161=_chi_tmp162 end;local tp=_chi_tmp161;
-do local _chi_tmp163=tp.name;_chi_tmp161=_chi_tmp163 end;local tpName=_chi_tmp161;
-do local _chi_tmp164=__std__lang_array.push(tpNames,tpName); end;
+local _chi_tmp152;do local _chi_tmp153=__chicc__parse_ast.paSection(node);_chi_tmp152=_chi_tmp153 end;local sec=_chi_tmp152;
+do local _chi_tmp154=__chicc__parse_ast.paIsPublic(node);_chi_tmp152=_chi_tmp154 end;local isPub=_chi_tmp152;
+do local _chi_tmp155=__chicc__parse_ast.paName(node);_chi_tmp152=_chi_tmp155 end;local effName=_chi_tmp152;
+do local _chi_tmp156=__chicc__parse_ast.paTypeParameters(node);_chi_tmp152=_chi_tmp156 end;local typeParams=_chi_tmp152;
+do local _chi_tmp157=__chicc__parse_ast.paFormalArguments(node);_chi_tmp152=_chi_tmp157 end;local args=_chi_tmp152;
+do local _chi_tmp158=__chicc__parse_ast.paReturnTypeRef(node);_chi_tmp152=_chi_tmp158 end;local retTypeRef=_chi_tmp152;
+do _chi_tmp152=__P_.currentTypeSchemeVars end;local prevTypeSchemeVars=_chi_tmp152;
+do _chi_tmp152=__P_.typeSchemeLevel end;local prevTypeSchemeLevel=_chi_tmp152;
+do local _chi_tmp159={};setmetatable(_chi_tmp159, array_meta_table);_chi_tmp152=_chi_tmp159 end;local tpNames=_chi_tmp152;
+do _chi_tmp152=(1) end;local tpIdx=_chi_tmp152;
+do local _chi_tmp160=__std__lang_array.size(typeParams);_chi_tmp152=_chi_tmp160 end;local tpCount=_chi_tmp152;
+do local function _chi_tmp161() return tpIdx end;local function _chi_tmp162() return tpCount end;while (_chi_tmp161() <= _chi_tmp162()) do do
+local _chi_tmp163;do local _chi_tmp164=typeParams[tpIdx];_chi_tmp163=_chi_tmp164 end;local tp=_chi_tmp163;
+do local _chi_tmp165=tp.name;_chi_tmp163=_chi_tmp165 end;local tpName=_chi_tmp163;
+do local _chi_tmp166=__std__lang_array.push(tpNames,tpName); end;
 tpIdx=(tpIdx + (1)); end ::__continue_5:: end;
  end;
 do __P_.currentTypeSchemeVars=tpNames; end;
 do __P_.typeSchemeLevel=__P_.currentTypeLevel; end;
-do local _chi_tmp165=__P_.getTypeTable(tables);_chi_tmp150=_chi_tmp165 end;local tt=_chi_tmp150;
-do local _chi_tmp166={};setmetatable(_chi_tmp166, array_meta_table);_chi_tmp150=_chi_tmp166 end;local params=_chi_tmp150;
-do local _chi_tmp167={};setmetatable(_chi_tmp167, array_meta_table);_chi_tmp150=_chi_tmp167 end;local typeArr=_chi_tmp150;
-do _chi_tmp150=(1) end;local i=_chi_tmp150;
-do local _chi_tmp168=__std__lang_array.size(args);_chi_tmp150=_chi_tmp168 end;local argCount=_chi_tmp150;
-do local function _chi_tmp169() return i end;local function _chi_tmp170() return argCount end;while (_chi_tmp169() <= _chi_tmp170()) do do
-local _chi_tmp171;do local _chi_tmp172=args[i];_chi_tmp171=_chi_tmp172 end;local arg=_chi_tmp171;
-do local _chi_tmp173=arg.name;_chi_tmp171=_chi_tmp173 end;local argName=_chi_tmp171;
-do local _chi_tmp174=arg.typeRef;_chi_tmp171=_chi_tmp174 end;local argTypeRef=_chi_tmp171;
-do local _chi_tmp175=arg.section;_chi_tmp171=_chi_tmp175 end;local argSec=_chi_tmp171;
-do _chi_tmp171=__chicc__types.tAny end;local argType=_chi_tmp171;
-do local _chi_tmp176;if (argTypeRef ~= (nil)) then
-local _chi_tmp177=tt;local _chi_tmp178=__P_.currentTypeSchemeVars;local _chi_tmp179=argTypeRef;local _chi_tmp180=__P_.effectiveTypeLevel();local _chi_tmp181=__chicc__symbols.resolveType(_chi_tmp177,_chi_tmp178,_chi_tmp179,_chi_tmp180);argType=_chi_tmp181;_chi_tmp176=argType
+do local _chi_tmp167=__P_.getTypeTable(tables);_chi_tmp152=_chi_tmp167 end;local tt=_chi_tmp152;
+do local _chi_tmp168={};setmetatable(_chi_tmp168, array_meta_table);_chi_tmp152=_chi_tmp168 end;local params=_chi_tmp152;
+do local _chi_tmp169={};setmetatable(_chi_tmp169, array_meta_table);_chi_tmp152=_chi_tmp169 end;local typeArr=_chi_tmp152;
+do _chi_tmp152=(1) end;local i=_chi_tmp152;
+do local _chi_tmp170=__std__lang_array.size(args);_chi_tmp152=_chi_tmp170 end;local argCount=_chi_tmp152;
+do local function _chi_tmp171() return i end;local function _chi_tmp172() return argCount end;while (_chi_tmp171() <= _chi_tmp172()) do do
+local _chi_tmp173;do local _chi_tmp174=args[i];_chi_tmp173=_chi_tmp174 end;local arg=_chi_tmp173;
+do local _chi_tmp175=arg.name;_chi_tmp173=_chi_tmp175 end;local argName=_chi_tmp173;
+do local _chi_tmp176=arg.typeRef;_chi_tmp173=_chi_tmp176 end;local argTypeRef=_chi_tmp173;
+do local _chi_tmp177=arg.section;_chi_tmp173=_chi_tmp177 end;local argSec=_chi_tmp173;
+do _chi_tmp173=__chicc__types.tAny end;local argType=_chi_tmp173;
+do local _chi_tmp178;if (argTypeRef ~= (nil)) then
+local _chi_tmp179=tt;local _chi_tmp180=__P_.currentTypeSchemeVars;local _chi_tmp181=argTypeRef;local _chi_tmp182=__P_.effectiveTypeLevel();local _chi_tmp183=__chicc__symbols.resolveType(_chi_tmp179,_chi_tmp180,_chi_tmp181,_chi_tmp182);argType=_chi_tmp183;_chi_tmp178=argType
  end; end;
-do local _chi_tmp182=params;local _chi_tmp183=__chicc__ast.newFnParam(argName,argType,argSec);local _chi_tmp184=__std__lang_array.push(_chi_tmp182,_chi_tmp183); end;
-do local _chi_tmp185=__std__lang_array.push(typeArr,argType); end;
+do local _chi_tmp184=params;local _chi_tmp185=__chicc__ast.newFnParam(argName,argType,argSec);local _chi_tmp186=__std__lang_array.push(_chi_tmp184,_chi_tmp185); end;
+do local _chi_tmp187=__std__lang_array.push(typeArr,argType); end;
 i=(i + (1)); end ::__continue_6:: end;
  end;
-do _chi_tmp150=__chicc__types.tUnit end;local retType=_chi_tmp150;
-do local _chi_tmp186;if (retTypeRef ~= (nil)) then
-local _chi_tmp187=tt;local _chi_tmp188=__P_.currentTypeSchemeVars;local _chi_tmp189=retTypeRef;local _chi_tmp190=__P_.effectiveTypeLevel();local _chi_tmp191=__chicc__symbols.resolveType(_chi_tmp187,_chi_tmp188,_chi_tmp189,_chi_tmp190);retType=_chi_tmp191;_chi_tmp186=retType
+do _chi_tmp152=__chicc__types.tUnit end;local retType=_chi_tmp152;
+do local _chi_tmp188;if (retTypeRef ~= (nil)) then
+local _chi_tmp189=tt;local _chi_tmp190=__P_.currentTypeSchemeVars;local _chi_tmp191=retTypeRef;local _chi_tmp192=__P_.effectiveTypeLevel();local _chi_tmp193=__chicc__symbols.resolveType(_chi_tmp189,_chi_tmp190,_chi_tmp191,_chi_tmp192);retType=_chi_tmp193;_chi_tmp188=retType
  end; end;
-do local _chi_tmp192=__std__lang_array.push(typeArr,retType); end;
-do local _chi_tmp193=__chicc__types.functionType(typeArr,tpNames,(0));_chi_tmp150=_chi_tmp193 end;local effType=_chi_tmp150;
+do local _chi_tmp194=__std__lang_array.push(typeArr,retType); end;
+do local _chi_tmp195=__chicc__types.functionType(typeArr,tpNames,(0));_chi_tmp152=_chi_tmp195 end;local effType=_chi_tmp152;
 do __P_.currentTypeSchemeVars=prevTypeSchemeVars; end;
 do __P_.typeSchemeLevel=prevTypeSchemeLevel; end;
-do local _chi_tmp194=pkg.moduleName;_chi_tmp150=_chi_tmp194 end;local modName=_chi_tmp150;
-do local _chi_tmp195=pkg.packageName;_chi_tmp150=_chi_tmp195 end;local pkgName=_chi_tmp150;
-do local _chi_tmp196=__chicc__ast.effectDefinitionExpr(modName,pkgName,effName,params,sec);_chi_tmp150=_chi_tmp196 end;local result=_chi_tmp150;
-do local _chi_tmp197=__chicc__ast.setExprType(result,effType); end;
-do local _chi_tmp198=__P_.addLocalSymbol(effName,(false),isPub,effType,pkg,tables); end;
+do local _chi_tmp196=pkg.moduleName;_chi_tmp152=_chi_tmp196 end;local modName=_chi_tmp152;
+do local _chi_tmp197=pkg.packageName;_chi_tmp152=_chi_tmp197 end;local pkgName=_chi_tmp152;
+do local _chi_tmp198=__chicc__ast.effectDefinitionExpr(modName,pkgName,effName,params,sec);_chi_tmp152=_chi_tmp198 end;local result=_chi_tmp152;
+do local _chi_tmp199=__chicc__ast.setExprType(result,effType); end;
+do local _chi_tmp200=__P_.addLocalSymbol(effName,(false),isPub,effType,pkg,tables); end;
 return result end;
  end;
 do function __P_.convert(node,pkg,tables)
-local _chi_tmp199;do local _chi_tmp200=__chicc__parse_ast.paTag(node);_chi_tmp199=_chi_tmp200 end;local tag=_chi_tmp199;
-do local _chi_tmp201=__chicc__parse_ast.paSection(node);_chi_tmp199=_chi_tmp201 end;local sec=_chi_tmp199;
-local _chi_tmp202;local _chi_tmp203 = 'UnitValue';if (tag == (_chi_tmp203)) then
-local _chi_tmp204 = 'unit';local _chi_tmp205=__chicc__ast.atomExpr((_chi_tmp204),__chicc__types.tUnit,sec);_chi_tmp202=_chi_tmp205
- else local _chi_tmp206;local _chi_tmp207 = 'LongValue';if (tag == (_chi_tmp207)) then
-local _chi_tmp208;do local _chi_tmp209=__chicc__parse_ast.paLongValue(node);_chi_tmp208=_chi_tmp209 end;local v=_chi_tmp208;
-local _chi_tmp210=chi_tostring(v);local _chi_tmp211=__chicc__ast.atomExpr(_chi_tmp210,__chicc__types.tInt,sec);_chi_tmp206=_chi_tmp211
- else local _chi_tmp212;local _chi_tmp213 = 'FloatValue';if (tag == (_chi_tmp213)) then
-local _chi_tmp214=__chicc__parse_ast.paFloatValue(node);local _chi_tmp215=__P_.floatLiteral(_chi_tmp214);local _chi_tmp216=__chicc__ast.atomExpr(_chi_tmp215,__chicc__types.tFloat,sec);_chi_tmp212=_chi_tmp216
- else local _chi_tmp217;local _chi_tmp218 = 'BoolValue';if (tag == (_chi_tmp218)) then
-local _chi_tmp219;do local _chi_tmp220=__chicc__parse_ast.paBoolValue(node);_chi_tmp219=_chi_tmp220 end;local v=_chi_tmp219;
-local _chi_tmp221;if v then local _chi_tmp222 = 'true';local _chi_tmp223=__chicc__ast.atomExpr((_chi_tmp222),__chicc__types.tBool,sec);_chi_tmp221=_chi_tmp223 else
-local _chi_tmp224 = 'false';local _chi_tmp225=__chicc__ast.atomExpr((_chi_tmp224),__chicc__types.tBool,sec);_chi_tmp221=_chi_tmp225
- end;_chi_tmp217=_chi_tmp221
- else local _chi_tmp226;local _chi_tmp227 = 'StringValue';if (tag == (_chi_tmp227)) then
-local _chi_tmp228;do local _chi_tmp229=__chicc__parse_ast.paStringValue(node);_chi_tmp228=_chi_tmp229 end;local v=_chi_tmp228;
-local _chi_tmp230=__chicc__ast.atomExpr(v,__chicc__types.tString,sec);_chi_tmp226=_chi_tmp230
- else local _chi_tmp231;local _chi_tmp232 = 'StringText';if (tag == (_chi_tmp232)) then
-local _chi_tmp233;do local _chi_tmp234=__chicc__parse_ast.paStringValue(node);_chi_tmp233=_chi_tmp234 end;local v=_chi_tmp233;
-local _chi_tmp235=__chicc__ast.atomExpr(v,__chicc__types.tString,sec);_chi_tmp231=_chi_tmp235
- else local _chi_tmp236;local _chi_tmp237 = 'ParseInterpolation';if (tag == (_chi_tmp237)) then
-local _chi_tmp238;do local _chi_tmp239=__chicc__parse_ast.paInterpValue(node);_chi_tmp238=_chi_tmp239 end;local innerVal=_chi_tmp238;
-do local _chi_tmp240=__P_.convert(innerVal,pkg,tables);_chi_tmp238=_chi_tmp240 end;local converted=_chi_tmp238;
-local _chi_tmp241=__chicc__ast.castExpr_(converted,__chicc__types.tString,sec);_chi_tmp236=_chi_tmp241
- else local _chi_tmp242;local _chi_tmp243 = 'ParseInterpolatedString';if (tag == (_chi_tmp243)) then
-local _chi_tmp244;do local _chi_tmp245=__chicc__parse_ast.paParts(node);_chi_tmp244=_chi_tmp245 end;local parts=_chi_tmp244;
-do local _chi_tmp246={};setmetatable(_chi_tmp246, array_meta_table);_chi_tmp244=_chi_tmp246 end;local convertedParts=_chi_tmp244;
-do _chi_tmp244=(1) end;local i=_chi_tmp244;
-do local _chi_tmp247=__std__lang_array.size(parts);_chi_tmp244=_chi_tmp247 end;local partCount=_chi_tmp244;
-do local function _chi_tmp248() return i end;local function _chi_tmp249() return partCount end;while (_chi_tmp248() <= _chi_tmp249()) do do
-local _chi_tmp250;do local _chi_tmp251=parts[i];_chi_tmp250=_chi_tmp251 end;local part=_chi_tmp250;
-do local _chi_tmp252=__P_.convert(part,pkg,tables);_chi_tmp250=_chi_tmp252 end;local cp=_chi_tmp250;
-do local _chi_tmp253=__std__lang_array.push(convertedParts,cp); end;
+local _chi_tmp201;do local _chi_tmp202=__chicc__parse_ast.paTag(node);_chi_tmp201=_chi_tmp202 end;local tag=_chi_tmp201;
+do local _chi_tmp203=__chicc__parse_ast.paSection(node);_chi_tmp201=_chi_tmp203 end;local sec=_chi_tmp201;
+local _chi_tmp204;local _chi_tmp205 = 'UnitValue';if (tag == (_chi_tmp205)) then
+local _chi_tmp206 = 'unit';local _chi_tmp207=__chicc__ast.atomExpr((_chi_tmp206),__chicc__types.tUnit,sec);_chi_tmp204=_chi_tmp207
+ else local _chi_tmp208;local _chi_tmp209 = 'LongValue';if (tag == (_chi_tmp209)) then
+local _chi_tmp210;do local _chi_tmp211=__chicc__parse_ast.paLongValue(node);_chi_tmp210=_chi_tmp211 end;local v=_chi_tmp210;
+local _chi_tmp212=chi_tostring(v);local _chi_tmp213=__chicc__ast.atomExpr(_chi_tmp212,__chicc__types.tInt,sec);_chi_tmp208=_chi_tmp213
+ else local _chi_tmp214;local _chi_tmp215 = 'FloatValue';if (tag == (_chi_tmp215)) then
+local _chi_tmp216=__chicc__parse_ast.paFloatValue(node);local _chi_tmp217=__P_.floatLiteral(_chi_tmp216);local _chi_tmp218=__chicc__ast.atomExpr(_chi_tmp217,__chicc__types.tFloat,sec);_chi_tmp214=_chi_tmp218
+ else local _chi_tmp219;local _chi_tmp220 = 'BoolValue';if (tag == (_chi_tmp220)) then
+local _chi_tmp221;do local _chi_tmp222=__chicc__parse_ast.paBoolValue(node);_chi_tmp221=_chi_tmp222 end;local v=_chi_tmp221;
+local _chi_tmp223;if v then local _chi_tmp224 = 'true';local _chi_tmp225=__chicc__ast.atomExpr((_chi_tmp224),__chicc__types.tBool,sec);_chi_tmp223=_chi_tmp225 else
+local _chi_tmp226 = 'false';local _chi_tmp227=__chicc__ast.atomExpr((_chi_tmp226),__chicc__types.tBool,sec);_chi_tmp223=_chi_tmp227
+ end;_chi_tmp219=_chi_tmp223
+ else local _chi_tmp228;local _chi_tmp229 = 'StringValue';if (tag == (_chi_tmp229)) then
+local _chi_tmp230;do local _chi_tmp231=__chicc__parse_ast.paStringValue(node);_chi_tmp230=_chi_tmp231 end;local v=_chi_tmp230;
+local _chi_tmp232=__chicc__ast.atomExpr(v,__chicc__types.tString,sec);_chi_tmp228=_chi_tmp232
+ else local _chi_tmp233;local _chi_tmp234 = 'StringText';if (tag == (_chi_tmp234)) then
+local _chi_tmp235;do local _chi_tmp236=__chicc__parse_ast.paStringValue(node);_chi_tmp235=_chi_tmp236 end;local v=_chi_tmp235;
+local _chi_tmp237=__chicc__ast.atomExpr(v,__chicc__types.tString,sec);_chi_tmp233=_chi_tmp237
+ else local _chi_tmp238;local _chi_tmp239 = 'ParseInterpolation';if (tag == (_chi_tmp239)) then
+local _chi_tmp240;do local _chi_tmp241=__chicc__parse_ast.paInterpValue(node);_chi_tmp240=_chi_tmp241 end;local innerVal=_chi_tmp240;
+do local _chi_tmp242=__P_.convert(innerVal,pkg,tables);_chi_tmp240=_chi_tmp242 end;local converted=_chi_tmp240;
+local _chi_tmp243=__chicc__ast.castExpr_(converted,__chicc__types.tString,sec);_chi_tmp238=_chi_tmp243
+ else local _chi_tmp244;local _chi_tmp245 = 'ParseInterpolatedString';if (tag == (_chi_tmp245)) then
+local _chi_tmp246;do local _chi_tmp247=__chicc__parse_ast.paParts(node);_chi_tmp246=_chi_tmp247 end;local parts=_chi_tmp246;
+do local _chi_tmp248={};setmetatable(_chi_tmp248, array_meta_table);_chi_tmp246=_chi_tmp248 end;local convertedParts=_chi_tmp246;
+do _chi_tmp246=(1) end;local i=_chi_tmp246;
+do local _chi_tmp249=__std__lang_array.size(parts);_chi_tmp246=_chi_tmp249 end;local partCount=_chi_tmp246;
+do local function _chi_tmp250() return i end;local function _chi_tmp251() return partCount end;while (_chi_tmp250() <= _chi_tmp251()) do do
+local _chi_tmp252;do local _chi_tmp253=parts[i];_chi_tmp252=_chi_tmp253 end;local part=_chi_tmp252;
+do local _chi_tmp254=__P_.convert(part,pkg,tables);_chi_tmp252=_chi_tmp254 end;local cp=_chi_tmp252;
+do local _chi_tmp255=__std__lang_array.push(convertedParts,cp); end;
 i=(i + (1)); end ::__continue_7:: end;
  end;
-local _chi_tmp254=__chicc__ast.interpolatedStringExpr(convertedParts,sec);_chi_tmp242=_chi_tmp254
- else local _chi_tmp255;local _chi_tmp256 = 'ParseLambda';if (tag == (_chi_tmp256)) then
-local _chi_tmp257=__P_.convertLambda(node,pkg,tables);_chi_tmp255=_chi_tmp257
- else local _chi_tmp258;local _chi_tmp259 = 'ParseFuncWithName';if (tag == (_chi_tmp259)) then
-local _chi_tmp260=__P_.convertFuncWithName(node,pkg,tables);_chi_tmp258=_chi_tmp260
- else local _chi_tmp261;local _chi_tmp262 = 'ParseFnCall';if (tag == (_chi_tmp262)) then
-local _chi_tmp263=__P_.convertFnCall(node,pkg,tables);_chi_tmp261=_chi_tmp263
- else local _chi_tmp264;local _chi_tmp265 = 'ParseVariableRead';if (tag == (_chi_tmp265)) then
-local _chi_tmp266;do local _chi_tmp267=__chicc__parse_ast.paVariableName(node);_chi_tmp266=_chi_tmp267 end;local varName=_chi_tmp266;
-do local _chi_tmp268=__P_.getSymbol(varName,tables);_chi_tmp266=_chi_tmp268 end;local tgt=_chi_tmp266;
-local _chi_tmp269=__chicc__ast.variableAccessExpr(tgt,sec);_chi_tmp264=_chi_tmp269
- else local _chi_tmp270;local _chi_tmp271 = 'ParseAssignment';if (tag == (_chi_tmp271)) then
-local _chi_tmp272;do local _chi_tmp273=__chicc__parse_ast.paVariableName(node);_chi_tmp272=_chi_tmp273 end;local varName=_chi_tmp272;
-do local _chi_tmp274=__P_.getSymbol(varName,tables);_chi_tmp272=_chi_tmp274 end;local tgt=_chi_tmp272;
-do local _chi_tmp275=__P_.isMutableLocal(varName);_chi_tmp272=_chi_tmp275 end;local isMut=_chi_tmp272;
-do local _chi_tmp276=__chicc__parse_ast.paValue(node);local _chi_tmp277=__P_.convert(_chi_tmp276,pkg,tables);_chi_tmp272=_chi_tmp277 end;local val_=_chi_tmp272;
-local _chi_tmp278=__chicc__ast.variableAssignmentExpr(tgt,isMut,val_,sec);_chi_tmp270=_chi_tmp278
- else local _chi_tmp279;local _chi_tmp280 = 'ParseIndexOperator';if (tag == (_chi_tmp280)) then
-local _chi_tmp281;do local _chi_tmp282=__chicc__parse_ast.paVariable(node);local _chi_tmp283=__P_.convert(_chi_tmp282,pkg,tables);_chi_tmp281=_chi_tmp283 end;local var_=_chi_tmp281;
-do local _chi_tmp284=__chicc__parse_ast.paIndexExpr(node);local _chi_tmp285=__P_.convert(_chi_tmp284,pkg,tables);_chi_tmp281=_chi_tmp285 end;local idx=_chi_tmp281;
-local _chi_tmp286=__chicc__ast.indexOpExpr(var_,idx,sec);_chi_tmp279=_chi_tmp286
- else local _chi_tmp287;local _chi_tmp288 = 'ParseIndexedAssignment';if (tag == (_chi_tmp288)) then
-local _chi_tmp289;do local _chi_tmp290=__chicc__parse_ast.paVariable(node);local _chi_tmp291=__P_.convert(_chi_tmp290,pkg,tables);_chi_tmp289=_chi_tmp291 end;local var_=_chi_tmp289;
-do local _chi_tmp292=__chicc__parse_ast.paIndexExpr(node);local _chi_tmp293=__P_.convert(_chi_tmp292,pkg,tables);_chi_tmp289=_chi_tmp293 end;local idx=_chi_tmp289;
-do local _chi_tmp294=__chicc__parse_ast.paIndexValue(node);local _chi_tmp295=__P_.convert(_chi_tmp294,pkg,tables);_chi_tmp289=_chi_tmp295 end;local val_=_chi_tmp289;
-local _chi_tmp296=__chicc__ast.indexedAssignmentExpr(var_,idx,val_,sec);_chi_tmp287=_chi_tmp296
- else local _chi_tmp297;local _chi_tmp298 = 'ParseNameDeclaration';if (tag == (_chi_tmp298)) then
-local _chi_tmp299=__P_.convertNameDeclaration(node,pkg,tables);_chi_tmp297=_chi_tmp299
- else local _chi_tmp300;local _chi_tmp301 = 'ParseBlock';if (tag == (_chi_tmp301)) then
-local _chi_tmp302=__P_.convertBlock(node,pkg,tables);_chi_tmp300=_chi_tmp302
- else local _chi_tmp303;local _chi_tmp304 = 'ParseGroup';if (tag == (_chi_tmp304)) then
-local _chi_tmp305=__chicc__parse_ast.paValue(node);local _chi_tmp306=__P_.convert(_chi_tmp305,pkg,tables);_chi_tmp303=_chi_tmp306
- else local _chi_tmp307;local _chi_tmp308 = 'ParseIfElse';if (tag == (_chi_tmp308)) then
-local _chi_tmp309;do local _chi_tmp310=__chicc__parse_ast.paCondition(node);local _chi_tmp311=__P_.convert(_chi_tmp310,pkg,tables);_chi_tmp309=_chi_tmp311 end;local cond=_chi_tmp309;
-do local _chi_tmp312=__chicc__parse_ast.paThenBody(node);local _chi_tmp313=__P_.convert(_chi_tmp312,pkg,tables);_chi_tmp309=_chi_tmp313 end;local thenB=_chi_tmp309;
-do local _chi_tmp314=__chicc__parse_ast.paElseBody(node);_chi_tmp309=_chi_tmp314 end;local elseNode=_chi_tmp309;
-do local _chi_tmp315;if (elseNode ~= (nil)) then local _chi_tmp316=__P_.convert(elseNode,pkg,tables);_chi_tmp315=_chi_tmp316 else _chi_tmp315=(nil) end;_chi_tmp309=_chi_tmp315 end;local elseB=_chi_tmp309;
-local _chi_tmp317=__chicc__ast.ifElseExpr(cond,thenB,elseB,sec);_chi_tmp307=_chi_tmp317
- else local _chi_tmp318;local _chi_tmp319 = 'ParseWhile';if (tag == (_chi_tmp319)) then
-local _chi_tmp320;do local _chi_tmp321=__chicc__parse_ast.paCondition(node);local _chi_tmp322=__P_.convert(_chi_tmp321,pkg,tables);_chi_tmp320=_chi_tmp322 end;local cond=_chi_tmp320;
-do local _chi_tmp323=__chicc__parse_ast.paLoopBody(node);local _chi_tmp324=__P_.convert(_chi_tmp323,pkg,tables);_chi_tmp320=_chi_tmp324 end;local loopBody=_chi_tmp320;
-local _chi_tmp325=__chicc__ast.whileLoopExpr(cond,loopBody,sec);_chi_tmp318=_chi_tmp325
- else local _chi_tmp326;local _chi_tmp327 = 'ParseFor';if (tag == (_chi_tmp327)) then
-local _chi_tmp328=__P_.convertFor(node,pkg,tables);_chi_tmp326=_chi_tmp328
- else local _chi_tmp329;local _chi_tmp330 = 'ParseWhen';if (tag == (_chi_tmp330)) then
-local _chi_tmp331=__P_.convertWhen(node,pkg,tables);_chi_tmp329=_chi_tmp331
- else local _chi_tmp332;local _chi_tmp333 = 'ParseReturn';if (tag == (_chi_tmp333)) then
-local _chi_tmp334;do local _chi_tmp335=__chicc__parse_ast.paReturnValue(node);_chi_tmp334=_chi_tmp335 end;local retVal=_chi_tmp334;
-do local _chi_tmp336;if (retVal ~= (nil)) then local _chi_tmp337=__P_.convert(retVal,pkg,tables);_chi_tmp336=_chi_tmp337 else local _chi_tmp338 = 'unit';local _chi_tmp339=__chicc__ast.atomExpr((_chi_tmp338),__chicc__types.tUnit,sec);_chi_tmp336=_chi_tmp339 end;_chi_tmp334=_chi_tmp336 end;local converted=_chi_tmp334;
-local _chi_tmp340=__chicc__ast.returnExpr(converted,sec);_chi_tmp332=_chi_tmp340
- else local _chi_tmp341;local _chi_tmp342 = 'ParseBreak';if (tag == (_chi_tmp342)) then
-local _chi_tmp343=__chicc__ast.breakExpr(sec);_chi_tmp341=_chi_tmp343
- else local _chi_tmp344;local _chi_tmp345 = 'ParseContinue';if (tag == (_chi_tmp345)) then
-local _chi_tmp346=__chicc__ast.continueExpr(sec);_chi_tmp344=_chi_tmp346
- else local _chi_tmp347;local _chi_tmp348 = 'ParseNot';if (tag == (_chi_tmp348)) then
-local _chi_tmp349;do local _chi_tmp350=__chicc__parse_ast.paValue(node);local _chi_tmp351=__P_.convert(_chi_tmp350,pkg,tables);_chi_tmp349=_chi_tmp351 end;local inner=_chi_tmp349;
-local _chi_tmp352 = '!';local _chi_tmp353=__chicc__ast.prefixOpExpr((_chi_tmp352),inner,sec);_chi_tmp347=_chi_tmp353
- else local _chi_tmp354;local _chi_tmp355 = 'ParseBinaryOp';if (tag == (_chi_tmp355)) then
-local _chi_tmp356;do local _chi_tmp357=__chicc__parse_ast.paOp(node);_chi_tmp356=_chi_tmp357 end;local op=_chi_tmp356;
-do local _chi_tmp358=__chicc__parse_ast.paLeft(node);local _chi_tmp359=__P_.convert(_chi_tmp358,pkg,tables);_chi_tmp356=_chi_tmp359 end;local left=_chi_tmp356;
-do local _chi_tmp360=__chicc__parse_ast.paRight(node);local _chi_tmp361=__P_.convert(_chi_tmp360,pkg,tables);_chi_tmp356=_chi_tmp361 end;local right=_chi_tmp356;
-local _chi_tmp362=__chicc__ast.infixOpExpr(op,left,right,sec);_chi_tmp354=_chi_tmp362
- else local _chi_tmp363;local _chi_tmp364 = 'ParseCast';if (tag == (_chi_tmp364)) then
-local _chi_tmp365;do local _chi_tmp366=__chicc__parse_ast.paValue(node);local _chi_tmp367=__P_.convert(_chi_tmp366,pkg,tables);_chi_tmp365=_chi_tmp367 end;local inner=_chi_tmp365;
-do local _chi_tmp368=__P_.getTypeTable(tables);_chi_tmp365=_chi_tmp368 end;local tt=_chi_tmp365;
-do local _chi_tmp369=tt;local _chi_tmp370=__P_.currentTypeSchemeVars;local _chi_tmp371=__chicc__parse_ast.paTypeRef(node);local _chi_tmp372=__P_.effectiveTypeLevel();local _chi_tmp373=__chicc__symbols.resolveType(_chi_tmp369,_chi_tmp370,_chi_tmp371,_chi_tmp372);_chi_tmp365=_chi_tmp373 end;local targetType=_chi_tmp365;
-local _chi_tmp374=__chicc__ast.castExpr_(inner,targetType,sec);_chi_tmp363=_chi_tmp374
- else local _chi_tmp375;local _chi_tmp376 = 'ParseIs';if (tag == (_chi_tmp376)) then
-local _chi_tmp377;do local _chi_tmp378=__chicc__parse_ast.paValue(node);local _chi_tmp379=__P_.convert(_chi_tmp378,pkg,tables);_chi_tmp377=_chi_tmp379 end;local inner=_chi_tmp377;
-do local _chi_tmp380=__P_.getTypeTable(tables);_chi_tmp377=_chi_tmp380 end;local tt=_chi_tmp377;
-do local _chi_tmp381=tt;local _chi_tmp382=__P_.currentTypeSchemeVars;local _chi_tmp383=__chicc__parse_ast.paTypeRef(node);local _chi_tmp384=__P_.effectiveTypeLevel();local _chi_tmp385=__chicc__symbols.resolveType(_chi_tmp381,_chi_tmp382,_chi_tmp383,_chi_tmp384);_chi_tmp377=_chi_tmp385 end;local checkedType=_chi_tmp377;
-local _chi_tmp386=__chicc__ast.isExpr(inner,checkedType,sec);_chi_tmp375=_chi_tmp386
- else local _chi_tmp387;local _chi_tmp388 = 'ParseFieldAccess';if (tag == (_chi_tmp388)) then
-local _chi_tmp389=__P_.convertFieldAccess(node,pkg,tables);_chi_tmp387=_chi_tmp389
- else local _chi_tmp390;local _chi_tmp391 = 'ParseFieldAssignment';if (tag == (_chi_tmp391)) then
-local _chi_tmp392;do local _chi_tmp393=__chicc__parse_ast.paReceiver(node);local _chi_tmp394=__P_.convert(_chi_tmp393,pkg,tables);_chi_tmp392=_chi_tmp394 end;local recv=_chi_tmp392;
-do local _chi_tmp395=__chicc__parse_ast.paMemberName(node);_chi_tmp392=_chi_tmp395 end;local memName=_chi_tmp392;
-do local _chi_tmp396=__chicc__parse_ast.paValue(node);local _chi_tmp397=__P_.convert(_chi_tmp396,pkg,tables);_chi_tmp392=_chi_tmp397 end;local val_=_chi_tmp392;
-local _chi_tmp398=__chicc__ast.fieldAssignmentExpr(recv,memName,val_,sec);_chi_tmp390=_chi_tmp398
- else local _chi_tmp399;local _chi_tmp400 = 'ParseCreateArray';if (tag == (_chi_tmp400)) then
-local _chi_tmp401;do local _chi_tmp402=__chicc__parse_ast.paArrayValues(node);_chi_tmp401=_chi_tmp402 end;local values=_chi_tmp401;
-do local _chi_tmp403={};setmetatable(_chi_tmp403, array_meta_table);_chi_tmp401=_chi_tmp403 end;local converted=_chi_tmp401;
-do _chi_tmp401=(1) end;local i=_chi_tmp401;
-do local _chi_tmp404=__std__lang_array.size(values);_chi_tmp401=_chi_tmp404 end;local count=_chi_tmp401;
-do local function _chi_tmp405() return i end;local function _chi_tmp406() return count end;while (_chi_tmp405() <= _chi_tmp406()) do do
-local _chi_tmp407;do local _chi_tmp408=values[i];local _chi_tmp409=__P_.convert(_chi_tmp408,pkg,tables);_chi_tmp407=_chi_tmp409 end;local cv=_chi_tmp407;
-do local _chi_tmp410=__std__lang_array.push(converted,cv); end;
+local _chi_tmp256=__chicc__ast.interpolatedStringExpr(convertedParts,sec);_chi_tmp244=_chi_tmp256
+ else local _chi_tmp257;local _chi_tmp258 = 'ParseLambda';if (tag == (_chi_tmp258)) then
+local _chi_tmp259=__P_.convertLambda(node,pkg,tables);_chi_tmp257=_chi_tmp259
+ else local _chi_tmp260;local _chi_tmp261 = 'ParseFuncWithName';if (tag == (_chi_tmp261)) then
+local _chi_tmp262=__P_.convertFuncWithName(node,pkg,tables);_chi_tmp260=_chi_tmp262
+ else local _chi_tmp263;local _chi_tmp264 = 'ParseFnCall';if (tag == (_chi_tmp264)) then
+local _chi_tmp265=__P_.convertFnCall(node,pkg,tables);_chi_tmp263=_chi_tmp265
+ else local _chi_tmp266;local _chi_tmp267 = 'ParseVariableRead';if (tag == (_chi_tmp267)) then
+local _chi_tmp268;do local _chi_tmp269=__chicc__parse_ast.paVariableName(node);_chi_tmp268=_chi_tmp269 end;local varName=_chi_tmp268;
+do local _chi_tmp270=__P_.getSymbol(varName,tables);_chi_tmp268=_chi_tmp270 end;local tgt=_chi_tmp268;
+local _chi_tmp271=__chicc__ast.variableAccessExpr(tgt,sec);_chi_tmp266=_chi_tmp271
+ else local _chi_tmp272;local _chi_tmp273 = 'ParseAssignment';if (tag == (_chi_tmp273)) then
+local _chi_tmp274;do local _chi_tmp275=__chicc__parse_ast.paVariableName(node);_chi_tmp274=_chi_tmp275 end;local varName=_chi_tmp274;
+do local _chi_tmp276=__P_.getSymbol(varName,tables);_chi_tmp274=_chi_tmp276 end;local tgt=_chi_tmp274;
+do local _chi_tmp277=__P_.isMutableLocal(varName);_chi_tmp274=_chi_tmp277 end;local isMut=_chi_tmp274;
+do local _chi_tmp278=__chicc__parse_ast.paValue(node);local _chi_tmp279=__P_.convert(_chi_tmp278,pkg,tables);_chi_tmp274=_chi_tmp279 end;local val_=_chi_tmp274;
+local _chi_tmp280=__chicc__ast.variableAssignmentExpr(tgt,isMut,val_,sec);_chi_tmp272=_chi_tmp280
+ else local _chi_tmp281;local _chi_tmp282 = 'ParseIndexOperator';if (tag == (_chi_tmp282)) then
+local _chi_tmp283;do local _chi_tmp284=__chicc__parse_ast.paVariable(node);local _chi_tmp285=__P_.convert(_chi_tmp284,pkg,tables);_chi_tmp283=_chi_tmp285 end;local var_=_chi_tmp283;
+do local _chi_tmp286=__chicc__parse_ast.paIndexExpr(node);local _chi_tmp287=__P_.convert(_chi_tmp286,pkg,tables);_chi_tmp283=_chi_tmp287 end;local idx=_chi_tmp283;
+local _chi_tmp288=__chicc__ast.indexOpExpr(var_,idx,sec);_chi_tmp281=_chi_tmp288
+ else local _chi_tmp289;local _chi_tmp290 = 'ParseIndexedAssignment';if (tag == (_chi_tmp290)) then
+local _chi_tmp291;do local _chi_tmp292=__chicc__parse_ast.paVariable(node);local _chi_tmp293=__P_.convert(_chi_tmp292,pkg,tables);_chi_tmp291=_chi_tmp293 end;local var_=_chi_tmp291;
+do local _chi_tmp294=__chicc__parse_ast.paIndexExpr(node);local _chi_tmp295=__P_.convert(_chi_tmp294,pkg,tables);_chi_tmp291=_chi_tmp295 end;local idx=_chi_tmp291;
+do local _chi_tmp296=__chicc__parse_ast.paIndexValue(node);local _chi_tmp297=__P_.convert(_chi_tmp296,pkg,tables);_chi_tmp291=_chi_tmp297 end;local val_=_chi_tmp291;
+local _chi_tmp298=__chicc__ast.indexedAssignmentExpr(var_,idx,val_,sec);_chi_tmp289=_chi_tmp298
+ else local _chi_tmp299;local _chi_tmp300 = 'ParseNameDeclaration';if (tag == (_chi_tmp300)) then
+local _chi_tmp301=__P_.convertNameDeclaration(node,pkg,tables);_chi_tmp299=_chi_tmp301
+ else local _chi_tmp302;local _chi_tmp303 = 'ParseBlock';if (tag == (_chi_tmp303)) then
+local _chi_tmp304=__P_.convertBlock(node,pkg,tables);_chi_tmp302=_chi_tmp304
+ else local _chi_tmp305;local _chi_tmp306 = 'ParseGroup';if (tag == (_chi_tmp306)) then
+local _chi_tmp307=__chicc__parse_ast.paValue(node);local _chi_tmp308=__P_.convert(_chi_tmp307,pkg,tables);_chi_tmp305=_chi_tmp308
+ else local _chi_tmp309;local _chi_tmp310 = 'ParseIfElse';if (tag == (_chi_tmp310)) then
+local _chi_tmp311;do local _chi_tmp312=__chicc__parse_ast.paCondition(node);local _chi_tmp313=__P_.convert(_chi_tmp312,pkg,tables);_chi_tmp311=_chi_tmp313 end;local cond=_chi_tmp311;
+do local _chi_tmp314=__chicc__parse_ast.paThenBody(node);local _chi_tmp315=__P_.convert(_chi_tmp314,pkg,tables);_chi_tmp311=_chi_tmp315 end;local thenB=_chi_tmp311;
+do local _chi_tmp316=__chicc__parse_ast.paElseBody(node);_chi_tmp311=_chi_tmp316 end;local elseNode=_chi_tmp311;
+do local _chi_tmp317;if (elseNode ~= (nil)) then local _chi_tmp318=__P_.convert(elseNode,pkg,tables);_chi_tmp317=_chi_tmp318 else _chi_tmp317=(nil) end;_chi_tmp311=_chi_tmp317 end;local elseB=_chi_tmp311;
+local _chi_tmp319=__chicc__ast.ifElseExpr(cond,thenB,elseB,sec);_chi_tmp309=_chi_tmp319
+ else local _chi_tmp320;local _chi_tmp321 = 'ParseWhile';if (tag == (_chi_tmp321)) then
+local _chi_tmp322;do local _chi_tmp323=__chicc__parse_ast.paCondition(node);local _chi_tmp324=__P_.convert(_chi_tmp323,pkg,tables);_chi_tmp322=_chi_tmp324 end;local cond=_chi_tmp322;
+do local _chi_tmp325=__chicc__parse_ast.paLoopBody(node);local _chi_tmp326=__P_.convert(_chi_tmp325,pkg,tables);_chi_tmp322=_chi_tmp326 end;local loopBody=_chi_tmp322;
+local _chi_tmp327=__chicc__ast.whileLoopExpr(cond,loopBody,sec);_chi_tmp320=_chi_tmp327
+ else local _chi_tmp328;local _chi_tmp329 = 'ParseFor';if (tag == (_chi_tmp329)) then
+local _chi_tmp330=__P_.convertFor(node,pkg,tables);_chi_tmp328=_chi_tmp330
+ else local _chi_tmp331;local _chi_tmp332 = 'ParseWhen';if (tag == (_chi_tmp332)) then
+local _chi_tmp333=__P_.convertWhen(node,pkg,tables);_chi_tmp331=_chi_tmp333
+ else local _chi_tmp334;local _chi_tmp335 = 'ParseReturn';if (tag == (_chi_tmp335)) then
+local _chi_tmp336;do local _chi_tmp337=__chicc__parse_ast.paReturnValue(node);_chi_tmp336=_chi_tmp337 end;local retVal=_chi_tmp336;
+do local _chi_tmp338;if (retVal ~= (nil)) then local _chi_tmp339=__P_.convert(retVal,pkg,tables);_chi_tmp338=_chi_tmp339 else local _chi_tmp340 = 'unit';local _chi_tmp341=__chicc__ast.atomExpr((_chi_tmp340),__chicc__types.tUnit,sec);_chi_tmp338=_chi_tmp341 end;_chi_tmp336=_chi_tmp338 end;local converted=_chi_tmp336;
+local _chi_tmp342=__chicc__ast.returnExpr(converted,sec);_chi_tmp334=_chi_tmp342
+ else local _chi_tmp343;local _chi_tmp344 = 'ParseBreak';if (tag == (_chi_tmp344)) then
+local _chi_tmp345=__chicc__ast.breakExpr(sec);_chi_tmp343=_chi_tmp345
+ else local _chi_tmp346;local _chi_tmp347 = 'ParseContinue';if (tag == (_chi_tmp347)) then
+local _chi_tmp348=__chicc__ast.continueExpr(sec);_chi_tmp346=_chi_tmp348
+ else local _chi_tmp349;local _chi_tmp350 = 'ParseNot';if (tag == (_chi_tmp350)) then
+local _chi_tmp351;do local _chi_tmp352=__chicc__parse_ast.paValue(node);local _chi_tmp353=__P_.convert(_chi_tmp352,pkg,tables);_chi_tmp351=_chi_tmp353 end;local inner=_chi_tmp351;
+local _chi_tmp354 = '!';local _chi_tmp355=__chicc__ast.prefixOpExpr((_chi_tmp354),inner,sec);_chi_tmp349=_chi_tmp355
+ else local _chi_tmp356;local _chi_tmp357 = 'ParseBinaryOp';if (tag == (_chi_tmp357)) then
+local _chi_tmp358;do local _chi_tmp359=__chicc__parse_ast.paOp(node);_chi_tmp358=_chi_tmp359 end;local op=_chi_tmp358;
+do local _chi_tmp360=__chicc__parse_ast.paLeft(node);local _chi_tmp361=__P_.convert(_chi_tmp360,pkg,tables);_chi_tmp358=_chi_tmp361 end;local left=_chi_tmp358;
+do local _chi_tmp362=__chicc__parse_ast.paRight(node);local _chi_tmp363=__P_.convert(_chi_tmp362,pkg,tables);_chi_tmp358=_chi_tmp363 end;local right=_chi_tmp358;
+local _chi_tmp364=__chicc__ast.infixOpExpr(op,left,right,sec);_chi_tmp356=_chi_tmp364
+ else local _chi_tmp365;local _chi_tmp366 = 'ParseCast';if (tag == (_chi_tmp366)) then
+local _chi_tmp367;do local _chi_tmp368=__chicc__parse_ast.paValue(node);local _chi_tmp369=__P_.convert(_chi_tmp368,pkg,tables);_chi_tmp367=_chi_tmp369 end;local inner=_chi_tmp367;
+do local _chi_tmp370=__P_.getTypeTable(tables);_chi_tmp367=_chi_tmp370 end;local tt=_chi_tmp367;
+do local _chi_tmp371=tt;local _chi_tmp372=__P_.currentTypeSchemeVars;local _chi_tmp373=__chicc__parse_ast.paTypeRef(node);local _chi_tmp374=__P_.effectiveTypeLevel();local _chi_tmp375=__chicc__symbols.resolveType(_chi_tmp371,_chi_tmp372,_chi_tmp373,_chi_tmp374);_chi_tmp367=_chi_tmp375 end;local targetType=_chi_tmp367;
+local _chi_tmp376=__chicc__ast.castExpr_(inner,targetType,sec);_chi_tmp365=_chi_tmp376
+ else local _chi_tmp377;local _chi_tmp378 = 'ParseIs';if (tag == (_chi_tmp378)) then
+local _chi_tmp379;do local _chi_tmp380=__chicc__parse_ast.paValue(node);local _chi_tmp381=__P_.convert(_chi_tmp380,pkg,tables);_chi_tmp379=_chi_tmp381 end;local inner=_chi_tmp379;
+do local _chi_tmp382=__P_.getTypeTable(tables);_chi_tmp379=_chi_tmp382 end;local tt=_chi_tmp379;
+do local _chi_tmp383=tt;local _chi_tmp384=__P_.currentTypeSchemeVars;local _chi_tmp385=__chicc__parse_ast.paTypeRef(node);local _chi_tmp386=__P_.effectiveTypeLevel();local _chi_tmp387=__chicc__symbols.resolveType(_chi_tmp383,_chi_tmp384,_chi_tmp385,_chi_tmp386);_chi_tmp379=_chi_tmp387 end;local checkedType=_chi_tmp379;
+local _chi_tmp388=__chicc__ast.isExpr(inner,checkedType,sec);_chi_tmp377=_chi_tmp388
+ else local _chi_tmp389;local _chi_tmp390 = 'ParseFieldAccess';if (tag == (_chi_tmp390)) then
+local _chi_tmp391=__P_.convertFieldAccess(node,pkg,tables);_chi_tmp389=_chi_tmp391
+ else local _chi_tmp392;local _chi_tmp393 = 'ParseFieldAssignment';if (tag == (_chi_tmp393)) then
+local _chi_tmp394;do local _chi_tmp395=__chicc__parse_ast.paReceiver(node);local _chi_tmp396=__P_.convert(_chi_tmp395,pkg,tables);_chi_tmp394=_chi_tmp396 end;local recv=_chi_tmp394;
+do local _chi_tmp397=__chicc__parse_ast.paMemberName(node);_chi_tmp394=_chi_tmp397 end;local memName=_chi_tmp394;
+do local _chi_tmp398=__chicc__parse_ast.paValue(node);local _chi_tmp399=__P_.convert(_chi_tmp398,pkg,tables);_chi_tmp394=_chi_tmp399 end;local val_=_chi_tmp394;
+local _chi_tmp400=__chicc__ast.fieldAssignmentExpr(recv,memName,val_,sec);_chi_tmp392=_chi_tmp400
+ else local _chi_tmp401;local _chi_tmp402 = 'ParseCreateArray';if (tag == (_chi_tmp402)) then
+local _chi_tmp403;do local _chi_tmp404=__chicc__parse_ast.paArrayValues(node);_chi_tmp403=_chi_tmp404 end;local values=_chi_tmp403;
+do local _chi_tmp405={};setmetatable(_chi_tmp405, array_meta_table);_chi_tmp403=_chi_tmp405 end;local converted=_chi_tmp403;
+do _chi_tmp403=(1) end;local i=_chi_tmp403;
+do local _chi_tmp406=__std__lang_array.size(values);_chi_tmp403=_chi_tmp406 end;local count=_chi_tmp403;
+do local function _chi_tmp407() return i end;local function _chi_tmp408() return count end;while (_chi_tmp407() <= _chi_tmp408()) do do
+local _chi_tmp409;do local _chi_tmp410=values[i];local _chi_tmp411=__P_.convert(_chi_tmp410,pkg,tables);_chi_tmp409=_chi_tmp411 end;local cv=_chi_tmp409;
+do local _chi_tmp412=__std__lang_array.push(converted,cv); end;
 i=(i + (1)); end ::__continue_8:: end;
  end;
-local _chi_tmp411=__chicc__ast.createArrayExpr(converted,sec);_chi_tmp399=_chi_tmp411
- else local _chi_tmp412;local _chi_tmp413 = 'ParseCreateRecord';if (tag == (_chi_tmp413)) then
-local _chi_tmp414;do local _chi_tmp415=__chicc__parse_ast.paRecordFields(node);_chi_tmp414=_chi_tmp415 end;local fields=_chi_tmp414;
-do local _chi_tmp416={};setmetatable(_chi_tmp416, array_meta_table);_chi_tmp414=_chi_tmp416 end;local converted=_chi_tmp414;
-do _chi_tmp414=(1) end;local i=_chi_tmp414;
-do local _chi_tmp417=__std__lang_array.size(fields);_chi_tmp414=_chi_tmp417 end;local count=_chi_tmp414;
-do local function _chi_tmp418() return i end;local function _chi_tmp419() return count end;while (_chi_tmp418() <= _chi_tmp419()) do do
-local _chi_tmp420;do local _chi_tmp421=fields[i];_chi_tmp420=_chi_tmp421 end;local f=_chi_tmp420;
-do local _chi_tmp422=f.name;_chi_tmp420=_chi_tmp422 end;local fName=_chi_tmp420;
-do local _chi_tmp423=f.value;_chi_tmp420=_chi_tmp423 end;local fValue=_chi_tmp420;
-do local _chi_tmp424=__P_.convert(fValue,pkg,tables);_chi_tmp420=_chi_tmp424 end;local cv=_chi_tmp420;
-do local _chi_tmp425=converted;local _chi_tmp426=__chicc__ast.newExprField(fName,cv);local _chi_tmp427=__std__lang_array.push(_chi_tmp425,_chi_tmp426); end;
+local _chi_tmp413=__chicc__ast.createArrayExpr(converted,sec);_chi_tmp401=_chi_tmp413
+ else local _chi_tmp414;local _chi_tmp415 = 'ParseCreateRecord';if (tag == (_chi_tmp415)) then
+local _chi_tmp416;do local _chi_tmp417=__chicc__parse_ast.paRecordFields(node);_chi_tmp416=_chi_tmp417 end;local fields=_chi_tmp416;
+do local _chi_tmp418={};setmetatable(_chi_tmp418, array_meta_table);_chi_tmp416=_chi_tmp418 end;local converted=_chi_tmp416;
+do _chi_tmp416=(1) end;local i=_chi_tmp416;
+do local _chi_tmp419=__std__lang_array.size(fields);_chi_tmp416=_chi_tmp419 end;local count=_chi_tmp416;
+do local function _chi_tmp420() return i end;local function _chi_tmp421() return count end;while (_chi_tmp420() <= _chi_tmp421()) do do
+local _chi_tmp422;do local _chi_tmp423=fields[i];_chi_tmp422=_chi_tmp423 end;local f=_chi_tmp422;
+do local _chi_tmp424=f.name;_chi_tmp422=_chi_tmp424 end;local fName=_chi_tmp422;
+do local _chi_tmp425=f.value;_chi_tmp422=_chi_tmp425 end;local fValue=_chi_tmp422;
+do local _chi_tmp426=__P_.convert(fValue,pkg,tables);_chi_tmp422=_chi_tmp426 end;local cv=_chi_tmp422;
+do local _chi_tmp427=converted;local _chi_tmp428=__chicc__ast.newExprField(fName,cv);local _chi_tmp429=__std__lang_array.push(_chi_tmp427,_chi_tmp428); end;
 i=(i + (1)); end ::__continue_9:: end;
  end;
-local _chi_tmp428=__chicc__ast.createRecordExpr(converted,sec);_chi_tmp412=_chi_tmp428
- else local _chi_tmp429;local _chi_tmp430 = 'ParseEffectDefinition';if (tag == (_chi_tmp430)) then
-local _chi_tmp431=__P_.convertEffectDefinition(node,pkg,tables);_chi_tmp429=_chi_tmp431
- else local _chi_tmp432;local _chi_tmp433 = 'ParseHandle';if (tag == (_chi_tmp433)) then
-local _chi_tmp434=__P_.convertHandle(node,pkg,tables);_chi_tmp432=_chi_tmp434
- else local _chi_tmp435;local _chi_tmp436 = 'ParseWeave';if (tag == (_chi_tmp436)) then
-local _chi_tmp437=__P_.convertWeave(node,pkg,tables);_chi_tmp435=_chi_tmp437
- else local _chi_tmp438;local _chi_tmp439 = 'ParseWeavePlaceholder';if (tag == (_chi_tmp439)) then
-local _chi_tmp440;if (__P_.weaveInput ~= (nil)) then
-_chi_tmp440=__P_.weaveInput
+local _chi_tmp430=__chicc__ast.createRecordExpr(converted,sec);_chi_tmp414=_chi_tmp430
+ else local _chi_tmp431;local _chi_tmp432 = 'ParseEffectDefinition';if (tag == (_chi_tmp432)) then
+local _chi_tmp433=__P_.convertEffectDefinition(node,pkg,tables);_chi_tmp431=_chi_tmp433
+ else local _chi_tmp434;local _chi_tmp435 = 'ParseHandle';if (tag == (_chi_tmp435)) then
+local _chi_tmp436=__P_.convertHandle(node,pkg,tables);_chi_tmp434=_chi_tmp436
+ else local _chi_tmp437;local _chi_tmp438 = 'ParseWeave';if (tag == (_chi_tmp438)) then
+local _chi_tmp439=__P_.convertWeave(node,pkg,tables);_chi_tmp437=_chi_tmp439
+ else local _chi_tmp440;local _chi_tmp441 = 'ParseWeavePlaceholder';if (tag == (_chi_tmp441)) then
+local _chi_tmp442;if (__P_.weaveInput ~= (nil)) then
+_chi_tmp442=__P_.weaveInput
  else
-local _chi_tmp441 = 'unit';local _chi_tmp442=__chicc__ast.atomExpr((_chi_tmp441),__chicc__types.tUnit,sec);_chi_tmp440=_chi_tmp442
- end;_chi_tmp438=_chi_tmp440
+local _chi_tmp443 = 'unit';local _chi_tmp444=__chicc__ast.atomExpr((_chi_tmp443),__chicc__types.tUnit,sec);_chi_tmp442=_chi_tmp444
+ end;_chi_tmp440=_chi_tmp442
  else
-do local _chi_tmp443 = 'WARNING: ast_converter unknown tag \'';local _chi_tmp444 = '\'';local _chi_tmp445=chi_tostring((_chi_tmp443)) .. chi_tostring(tag) .. chi_tostring((_chi_tmp444));local _chi_tmp446=__std__lang.println(_chi_tmp445); end;
-local _chi_tmp447 = 'unit';local _chi_tmp448=__chicc__ast.atomExpr((_chi_tmp447),__chicc__types.tUnit,sec);_chi_tmp438=_chi_tmp448
- end;_chi_tmp435=_chi_tmp438 end;_chi_tmp432=_chi_tmp435 end;_chi_tmp429=_chi_tmp432 end;_chi_tmp412=_chi_tmp429 end;_chi_tmp399=_chi_tmp412 end;_chi_tmp390=_chi_tmp399 end;_chi_tmp387=_chi_tmp390 end;_chi_tmp375=_chi_tmp387 end;_chi_tmp363=_chi_tmp375 end;_chi_tmp354=_chi_tmp363 end;_chi_tmp347=_chi_tmp354 end;_chi_tmp344=_chi_tmp347 end;_chi_tmp341=_chi_tmp344 end;_chi_tmp332=_chi_tmp341 end;_chi_tmp329=_chi_tmp332 end;_chi_tmp326=_chi_tmp329 end;_chi_tmp318=_chi_tmp326 end;_chi_tmp307=_chi_tmp318 end;_chi_tmp303=_chi_tmp307 end;_chi_tmp300=_chi_tmp303 end;_chi_tmp297=_chi_tmp300 end;_chi_tmp287=_chi_tmp297 end;_chi_tmp279=_chi_tmp287 end;_chi_tmp270=_chi_tmp279 end;_chi_tmp264=_chi_tmp270 end;_chi_tmp261=_chi_tmp264 end;_chi_tmp258=_chi_tmp261 end;_chi_tmp255=_chi_tmp258 end;_chi_tmp242=_chi_tmp255 end;_chi_tmp236=_chi_tmp242 end;_chi_tmp231=_chi_tmp236 end;_chi_tmp226=_chi_tmp231 end;_chi_tmp217=_chi_tmp226 end;_chi_tmp212=_chi_tmp217 end;_chi_tmp206=_chi_tmp212 end;_chi_tmp202=_chi_tmp206 end;return _chi_tmp202 end;
+do local _chi_tmp445 = 'WARNING: ast_converter unknown tag \'';local _chi_tmp446 = '\'';local _chi_tmp447=chi_tostring((_chi_tmp445)) .. chi_tostring(tag) .. chi_tostring((_chi_tmp446));local _chi_tmp448=__std__lang.println(_chi_tmp447); end;
+local _chi_tmp449 = 'unit';local _chi_tmp450=__chicc__ast.atomExpr((_chi_tmp449),__chicc__types.tUnit,sec);_chi_tmp440=_chi_tmp450
+ end;_chi_tmp437=_chi_tmp440 end;_chi_tmp434=_chi_tmp437 end;_chi_tmp431=_chi_tmp434 end;_chi_tmp414=_chi_tmp431 end;_chi_tmp401=_chi_tmp414 end;_chi_tmp392=_chi_tmp401 end;_chi_tmp389=_chi_tmp392 end;_chi_tmp377=_chi_tmp389 end;_chi_tmp365=_chi_tmp377 end;_chi_tmp356=_chi_tmp365 end;_chi_tmp349=_chi_tmp356 end;_chi_tmp346=_chi_tmp349 end;_chi_tmp343=_chi_tmp346 end;_chi_tmp334=_chi_tmp343 end;_chi_tmp331=_chi_tmp334 end;_chi_tmp328=_chi_tmp331 end;_chi_tmp320=_chi_tmp328 end;_chi_tmp309=_chi_tmp320 end;_chi_tmp305=_chi_tmp309 end;_chi_tmp302=_chi_tmp305 end;_chi_tmp299=_chi_tmp302 end;_chi_tmp289=_chi_tmp299 end;_chi_tmp281=_chi_tmp289 end;_chi_tmp272=_chi_tmp281 end;_chi_tmp266=_chi_tmp272 end;_chi_tmp263=_chi_tmp266 end;_chi_tmp260=_chi_tmp263 end;_chi_tmp257=_chi_tmp260 end;_chi_tmp244=_chi_tmp257 end;_chi_tmp238=_chi_tmp244 end;_chi_tmp233=_chi_tmp238 end;_chi_tmp228=_chi_tmp233 end;_chi_tmp219=_chi_tmp228 end;_chi_tmp214=_chi_tmp219 end;_chi_tmp208=_chi_tmp214 end;_chi_tmp204=_chi_tmp208 end;return _chi_tmp204 end;
  end;
 do function __P_.convertLambdaImpl(node,pkg,tables)
-local _chi_tmp449;do local _chi_tmp450=__chicc__parse_ast.paSection(node);_chi_tmp449=_chi_tmp450 end;local sec=_chi_tmp449;
-do local _chi_tmp451=__chicc__parse_ast.paFormalArguments(node);_chi_tmp449=_chi_tmp451 end;local args=_chi_tmp449;
-do local _chi_tmp452=__chicc__parse_ast.paBody(node);_chi_tmp449=_chi_tmp452 end;local bodyNodes=_chi_tmp449;
-do _chi_tmp449=__P_.currentFnSymbolTable end;local parentFst=_chi_tmp449;
-do local _chi_tmp453=__chicc__symbols.newFnSymbolTable(parentFst);_chi_tmp449=_chi_tmp453 end;local fst=_chi_tmp449;
-do _chi_tmp449=__P_.currentFnSymbolTable end;local prevFst=_chi_tmp449;
+local _chi_tmp451;do local _chi_tmp452=__chicc__parse_ast.paSection(node);_chi_tmp451=_chi_tmp452 end;local sec=_chi_tmp451;
+do local _chi_tmp453=__chicc__parse_ast.paFormalArguments(node);_chi_tmp451=_chi_tmp453 end;local args=_chi_tmp451;
+do local _chi_tmp454=__chicc__parse_ast.paBody(node);_chi_tmp451=_chi_tmp454 end;local bodyNodes=_chi_tmp451;
+do _chi_tmp451=__P_.currentFnSymbolTable end;local parentFst=_chi_tmp451;
+do local _chi_tmp455=__chicc__symbols.newFnSymbolTable(parentFst);_chi_tmp451=_chi_tmp455 end;local fst=_chi_tmp451;
+do _chi_tmp451=__P_.currentFnSymbolTable end;local prevFst=_chi_tmp451;
 do __P_.currentFnSymbolTable=fst; end;
-do local _chi_tmp454={};setmetatable(_chi_tmp454, array_meta_table);_chi_tmp449=_chi_tmp454 end;local params=_chi_tmp449;
-do local _chi_tmp455=__std__lang_map.emptyMap();_chi_tmp449=_chi_tmp455 end;local defaultArgs=_chi_tmp449;
-do _chi_tmp449=(0) end;local defaultArgCount=_chi_tmp449;
-do local _chi_tmp456={};setmetatable(_chi_tmp456, array_meta_table);_chi_tmp449=_chi_tmp456 end;local fnTypes=_chi_tmp449;
-do _chi_tmp449=(1) end;local i=_chi_tmp449;
-do local _chi_tmp457=__std__lang_array.size(args);_chi_tmp449=_chi_tmp457 end;local argCount=_chi_tmp449;
-do local function _chi_tmp458() return i end;local function _chi_tmp459() return argCount end;while (_chi_tmp458() <= _chi_tmp459()) do do
-local _chi_tmp460;do local _chi_tmp461=args[i];_chi_tmp460=_chi_tmp461 end;local arg=_chi_tmp460;
-do local _chi_tmp462=arg.name;_chi_tmp460=_chi_tmp462 end;local argName=_chi_tmp460;
-do local _chi_tmp463=arg.typeRef;_chi_tmp460=_chi_tmp463 end;local argTypeRef=_chi_tmp460;
-do local _chi_tmp464=arg.defaultValue;_chi_tmp460=_chi_tmp464 end;local argDefValue=_chi_tmp460;
-do local _chi_tmp465=arg.section;_chi_tmp460=_chi_tmp465 end;local argSec=_chi_tmp460;
-do _chi_tmp460=(nil) end;local argType=_chi_tmp460;
-do local _chi_tmp466;if (argTypeRef ~= (nil)) then
-local _chi_tmp467;do local _chi_tmp468=__P_.getTypeTable(tables);_chi_tmp467=_chi_tmp468 end;local tt=_chi_tmp467;
-local _chi_tmp469=tt;local _chi_tmp470=__P_.currentTypeSchemeVars;local _chi_tmp471=argTypeRef;local _chi_tmp472=__P_.effectiveTypeLevel();local _chi_tmp473=__chicc__symbols.resolveType(_chi_tmp469,_chi_tmp470,_chi_tmp471,_chi_tmp472);argType=_chi_tmp473;_chi_tmp466=argType
+do local _chi_tmp456={};setmetatable(_chi_tmp456, array_meta_table);_chi_tmp451=_chi_tmp456 end;local params=_chi_tmp451;
+do local _chi_tmp457=__std__lang_map.emptyMap();_chi_tmp451=_chi_tmp457 end;local defaultArgs=_chi_tmp451;
+do _chi_tmp451=(0) end;local defaultArgCount=_chi_tmp451;
+do local _chi_tmp458={};setmetatable(_chi_tmp458, array_meta_table);_chi_tmp451=_chi_tmp458 end;local fnTypes=_chi_tmp451;
+do _chi_tmp451=(1) end;local i=_chi_tmp451;
+do local _chi_tmp459=__std__lang_array.size(args);_chi_tmp451=_chi_tmp459 end;local argCount=_chi_tmp451;
+do local function _chi_tmp460() return i end;local function _chi_tmp461() return argCount end;while (_chi_tmp460() <= _chi_tmp461()) do do
+local _chi_tmp462;do local _chi_tmp463=args[i];_chi_tmp462=_chi_tmp463 end;local arg=_chi_tmp462;
+do local _chi_tmp464=arg.name;_chi_tmp462=_chi_tmp464 end;local argName=_chi_tmp462;
+do local _chi_tmp465=arg.typeRef;_chi_tmp462=_chi_tmp465 end;local argTypeRef=_chi_tmp462;
+do local _chi_tmp466=arg.defaultValue;_chi_tmp462=_chi_tmp466 end;local argDefValue=_chi_tmp462;
+do local _chi_tmp467=arg.section;_chi_tmp462=_chi_tmp467 end;local argSec=_chi_tmp462;
+do _chi_tmp462=(nil) end;local argType=_chi_tmp462;
+do local _chi_tmp468;if (argTypeRef ~= (nil)) then
+local _chi_tmp469;do local _chi_tmp470=__P_.getTypeTable(tables);_chi_tmp469=_chi_tmp470 end;local tt=_chi_tmp469;
+local _chi_tmp471=tt;local _chi_tmp472=__P_.currentTypeSchemeVars;local _chi_tmp473=argTypeRef;local _chi_tmp474=__P_.effectiveTypeLevel();local _chi_tmp475=__chicc__symbols.resolveType(_chi_tmp471,_chi_tmp472,_chi_tmp473,_chi_tmp474);argType=_chi_tmp475;_chi_tmp468=argType
  end; end;
-do local _chi_tmp474;if (argDefValue ~= (nil)) then
-local _chi_tmp475;do local _chi_tmp476=__P_.convert(argDefValue,pkg,tables);_chi_tmp475=_chi_tmp476 end;local defExpr=_chi_tmp475;
-do local _chi_tmp477=__std__lang_map.put(defaultArgs,argName,defExpr); end;
-defaultArgCount=(defaultArgCount + (1));_chi_tmp474=defaultArgCount
+do local _chi_tmp476;if (argDefValue ~= (nil)) then
+local _chi_tmp477;do local _chi_tmp478=__P_.convert(argDefValue,pkg,tables);_chi_tmp477=_chi_tmp478 end;local defExpr=_chi_tmp477;
+do local _chi_tmp479=__std__lang_map.put(defaultArgs,argName,defExpr); end;
+defaultArgCount=(defaultArgCount + (1));_chi_tmp476=defaultArgCount
  end; end;
-do local _chi_tmp478=__chicc__symbols.fstAddArgument(fst,argName,argType); end;
-do local _chi_tmp479=params;local _chi_tmp480=__chicc__ast.newFnParam(argName,argType,argSec);local _chi_tmp481=__std__lang_array.push(_chi_tmp479,_chi_tmp480); end;
-do local _chi_tmp482;if (argType ~= (nil)) then
-local _chi_tmp483=__std__lang_array.push(fnTypes,argType);_chi_tmp482=_chi_tmp483
+do local _chi_tmp480=__chicc__symbols.fstAddArgument(fst,argName,argType); end;
+do local _chi_tmp481=params;local _chi_tmp482=__chicc__ast.newFnParam(argName,argType,argSec);local _chi_tmp483=__std__lang_array.push(_chi_tmp481,_chi_tmp482); end;
+do local _chi_tmp484;if (argType ~= (nil)) then
+local _chi_tmp485=__std__lang_array.push(fnTypes,argType);_chi_tmp484=_chi_tmp485
  else
-local _chi_tmp484;do local _chi_tmp485 = '_p';local _chi_tmp486=chi_tostring((_chi_tmp485)) .. chi_tostring(i);local _chi_tmp487=__chicc__types.variableType(_chi_tmp486,(1));_chi_tmp484=_chi_tmp487 end;local varType=_chi_tmp484;
-local _chi_tmp488=__std__lang_array.push(fnTypes,varType);_chi_tmp482=_chi_tmp488
+local _chi_tmp486;do local _chi_tmp487 = '_p';local _chi_tmp488=chi_tostring((_chi_tmp487)) .. chi_tostring(i);local _chi_tmp489=__chicc__types.variableType(_chi_tmp488,(1));_chi_tmp486=_chi_tmp489 end;local varType=_chi_tmp486;
+local _chi_tmp490=__std__lang_array.push(fnTypes,varType);_chi_tmp484=_chi_tmp490
  end; end;
 i=(i + (1)); end ::__continue_10:: end;
  end;
-do local _chi_tmp489 = '_ret';local _chi_tmp490=__chicc__types.variableType((_chi_tmp489),(1));_chi_tmp449=_chi_tmp490 end;local retVar=_chi_tmp449;
-do local _chi_tmp491=__std__lang_array.push(fnTypes,retVar); end;
-do local _chi_tmp492={};setmetatable(_chi_tmp492, array_meta_table);_chi_tmp449=_chi_tmp492 end;local bodyExprs=_chi_tmp449;
+do local _chi_tmp491 = '_ret';local _chi_tmp492=__chicc__types.variableType((_chi_tmp491),(1));_chi_tmp451=_chi_tmp492 end;local retVar=_chi_tmp451;
+do local _chi_tmp493=__std__lang_array.push(fnTypes,retVar); end;
+do local _chi_tmp494={};setmetatable(_chi_tmp494, array_meta_table);_chi_tmp451=_chi_tmp494 end;local bodyExprs=_chi_tmp451;
 do i=(1); end;
-do local _chi_tmp493=__std__lang_array.size(bodyNodes);_chi_tmp449=_chi_tmp493 end;local bodyCount=_chi_tmp449;
-do local function _chi_tmp494() return i end;local function _chi_tmp495() return bodyCount end;while (_chi_tmp494() <= _chi_tmp495()) do do
-local _chi_tmp496;do local _chi_tmp497=bodyNodes[i];local _chi_tmp498=__P_.convert(_chi_tmp497,pkg,tables);_chi_tmp496=_chi_tmp498 end;local be=_chi_tmp496;
-do local _chi_tmp499=__std__lang_array.push(bodyExprs,be); end;
+do local _chi_tmp495=__std__lang_array.size(bodyNodes);_chi_tmp451=_chi_tmp495 end;local bodyCount=_chi_tmp451;
+do local function _chi_tmp496() return i end;local function _chi_tmp497() return bodyCount end;while (_chi_tmp496() <= _chi_tmp497()) do do
+local _chi_tmp498;do local _chi_tmp499=bodyNodes[i];local _chi_tmp500=__P_.convert(_chi_tmp499,pkg,tables);_chi_tmp498=_chi_tmp500 end;local be=_chi_tmp498;
+do local _chi_tmp501=__std__lang_array.push(bodyExprs,be); end;
 i=(i + (1)); end ::__continue_11:: end;
  end;
 do __P_.currentFnSymbolTable=prevFst; end;
-do local _chi_tmp500=__chicc__ast.blockExpr(bodyExprs,sec);_chi_tmp449=_chi_tmp500 end;local body=_chi_tmp449;
-do local _chi_tmp501={};setmetatable(_chi_tmp501, array_meta_table);local _chi_tmp502=__chicc__types.functionType(fnTypes,_chi_tmp501,defaultArgCount);_chi_tmp449=_chi_tmp502 end;local funcType=_chi_tmp449;
-do local _chi_tmp503;if (defaultArgCount > (0)) then _chi_tmp503=defaultArgs else _chi_tmp503=(nil) end;_chi_tmp449=_chi_tmp503 end;local defaults=_chi_tmp449;
-do local _chi_tmp504=__chicc__ast.fnExpr(params,defaults,body,sec);_chi_tmp449=_chi_tmp504 end;local result=_chi_tmp449;
-do local _chi_tmp505=__chicc__ast.setExprType(result,funcType); end;
+do local _chi_tmp502=__chicc__ast.blockExpr(bodyExprs,sec);_chi_tmp451=_chi_tmp502 end;local body=_chi_tmp451;
+do local _chi_tmp503={};setmetatable(_chi_tmp503, array_meta_table);local _chi_tmp504=__chicc__types.functionType(fnTypes,_chi_tmp503,defaultArgCount);_chi_tmp451=_chi_tmp504 end;local funcType=_chi_tmp451;
+do local _chi_tmp505;if (defaultArgCount > (0)) then _chi_tmp505=defaultArgs else _chi_tmp505=(nil) end;_chi_tmp451=_chi_tmp505 end;local defaults=_chi_tmp451;
+do local _chi_tmp506=__chicc__ast.fnExpr(params,defaults,body,sec);_chi_tmp451=_chi_tmp506 end;local result=_chi_tmp451;
+do local _chi_tmp507=__chicc__ast.setExprType(result,funcType); end;
 return result end;
  end;
 do __P_.convertLambda=__P_.convertLambdaImpl; end;
 do function __P_.convertFuncWithNameImpl(node,pkg,tables)
-local _chi_tmp506;do local _chi_tmp507=__chicc__parse_ast.paSection(node);_chi_tmp506=_chi_tmp507 end;local sec=_chi_tmp506;
-do local _chi_tmp508=__chicc__parse_ast.paName(node);_chi_tmp506=_chi_tmp508 end;local fnName=_chi_tmp506;
-do local _chi_tmp509=__chicc__parse_ast.paIsPublic(node);_chi_tmp506=_chi_tmp509 end;local isPub=_chi_tmp506;
-do local _chi_tmp510=__chicc__parse_ast.paTypeParameters(node);_chi_tmp506=_chi_tmp510 end;local typeParams=_chi_tmp506;
-do local _chi_tmp511=__chicc__parse_ast.paFormalArguments(node);_chi_tmp506=_chi_tmp511 end;local args=_chi_tmp506;
-do local _chi_tmp512=__chicc__parse_ast.paReturnTypeRef(node);_chi_tmp506=_chi_tmp512 end;local retTypeRef=_chi_tmp506;
-do local _chi_tmp513=__chicc__parse_ast.paFuncBody(node);_chi_tmp506=_chi_tmp513 end;local funcBodyNode=_chi_tmp506;
-do _chi_tmp506=__P_.currentTypeSchemeVars end;local prevTypeSchemeVars=_chi_tmp506;
-do _chi_tmp506=__P_.typeSchemeLevel end;local prevTypeSchemeLevel=_chi_tmp506;
-do local _chi_tmp514={};setmetatable(_chi_tmp514, array_meta_table);_chi_tmp506=_chi_tmp514 end;local tpNames=_chi_tmp506;
-do _chi_tmp506=(1) end;local tpIdx=_chi_tmp506;
-do local _chi_tmp515=__std__lang_array.size(typeParams);_chi_tmp506=_chi_tmp515 end;local tpCount=_chi_tmp506;
-do local function _chi_tmp516() return tpIdx end;local function _chi_tmp517() return tpCount end;while (_chi_tmp516() <= _chi_tmp517()) do do
-local _chi_tmp518;do local _chi_tmp519=typeParams[tpIdx];_chi_tmp518=_chi_tmp519 end;local tp=_chi_tmp518;
-do local _chi_tmp520=tp.name;_chi_tmp518=_chi_tmp520 end;local tpName=_chi_tmp518;
-do local _chi_tmp521=__std__lang_array.push(tpNames,tpName); end;
+local _chi_tmp508;do local _chi_tmp509=__chicc__parse_ast.paSection(node);_chi_tmp508=_chi_tmp509 end;local sec=_chi_tmp508;
+do local _chi_tmp510=__chicc__parse_ast.paName(node);_chi_tmp508=_chi_tmp510 end;local fnName=_chi_tmp508;
+do local _chi_tmp511=__chicc__parse_ast.paIsPublic(node);_chi_tmp508=_chi_tmp511 end;local isPub=_chi_tmp508;
+do local _chi_tmp512=__chicc__parse_ast.paTypeParameters(node);_chi_tmp508=_chi_tmp512 end;local typeParams=_chi_tmp508;
+do local _chi_tmp513=__chicc__parse_ast.paFormalArguments(node);_chi_tmp508=_chi_tmp513 end;local args=_chi_tmp508;
+do local _chi_tmp514=__chicc__parse_ast.paReturnTypeRef(node);_chi_tmp508=_chi_tmp514 end;local retTypeRef=_chi_tmp508;
+do local _chi_tmp515=__chicc__parse_ast.paFuncBody(node);_chi_tmp508=_chi_tmp515 end;local funcBodyNode=_chi_tmp508;
+do _chi_tmp508=__P_.currentTypeSchemeVars end;local prevTypeSchemeVars=_chi_tmp508;
+do _chi_tmp508=__P_.typeSchemeLevel end;local prevTypeSchemeLevel=_chi_tmp508;
+do local _chi_tmp516={};setmetatable(_chi_tmp516, array_meta_table);_chi_tmp508=_chi_tmp516 end;local tpNames=_chi_tmp508;
+do _chi_tmp508=(1) end;local tpIdx=_chi_tmp508;
+do local _chi_tmp517=__std__lang_array.size(typeParams);_chi_tmp508=_chi_tmp517 end;local tpCount=_chi_tmp508;
+do local function _chi_tmp518() return tpIdx end;local function _chi_tmp519() return tpCount end;while (_chi_tmp518() <= _chi_tmp519()) do do
+local _chi_tmp520;do local _chi_tmp521=typeParams[tpIdx];_chi_tmp520=_chi_tmp521 end;local tp=_chi_tmp520;
+do local _chi_tmp522=tp.name;_chi_tmp520=_chi_tmp522 end;local tpName=_chi_tmp520;
+do local _chi_tmp523=__std__lang_array.push(tpNames,tpName); end;
 tpIdx=(tpIdx + (1)); end ::__continue_12:: end;
  end;
 do __P_.currentTypeSchemeVars=tpNames; end;
 do __P_.typeSchemeLevel=(__P_.currentTypeLevel + (1)); end;
-do local _chi_tmp522=__P_.getTypeTable(tables);_chi_tmp506=_chi_tmp522 end;local tt=_chi_tmp506;
-do local _chi_tmp523={};setmetatable(_chi_tmp523, array_meta_table);_chi_tmp506=_chi_tmp523 end;local paramTypes=_chi_tmp506;
-do _chi_tmp506=(0) end;local defaultArgCount=_chi_tmp506;
-do _chi_tmp506=(1) end;local i=_chi_tmp506;
-do local _chi_tmp524=__std__lang_array.size(args);_chi_tmp506=_chi_tmp524 end;local argCount=_chi_tmp506;
-do local function _chi_tmp525() return i end;local function _chi_tmp526() return argCount end;while (_chi_tmp525() <= _chi_tmp526()) do do
-local _chi_tmp527;do local _chi_tmp528=args[i];_chi_tmp527=_chi_tmp528 end;local arg=_chi_tmp527;
-do local _chi_tmp529=arg.typeRef;_chi_tmp527=_chi_tmp529 end;local argTypeRef=_chi_tmp527;
-do local _chi_tmp530=arg.defaultValue;_chi_tmp527=_chi_tmp530 end;local argDefValue=_chi_tmp527;
-do local _chi_tmp531;if (argTypeRef ~= (nil)) then
-local _chi_tmp532;do local _chi_tmp533=tt;local _chi_tmp534=__P_.currentTypeSchemeVars;local _chi_tmp535=argTypeRef;local _chi_tmp536=__P_.effectiveTypeLevel();local _chi_tmp537=__chicc__symbols.resolveType(_chi_tmp533,_chi_tmp534,_chi_tmp535,_chi_tmp536);_chi_tmp532=_chi_tmp537 end;local resolved=_chi_tmp532;
-local _chi_tmp538=__std__lang_array.push(paramTypes,resolved);_chi_tmp531=_chi_tmp538
+do local _chi_tmp524=__P_.getTypeTable(tables);_chi_tmp508=_chi_tmp524 end;local tt=_chi_tmp508;
+do local _chi_tmp525={};setmetatable(_chi_tmp525, array_meta_table);_chi_tmp508=_chi_tmp525 end;local paramTypes=_chi_tmp508;
+do _chi_tmp508=(0) end;local defaultArgCount=_chi_tmp508;
+do _chi_tmp508=(1) end;local i=_chi_tmp508;
+do local _chi_tmp526=__std__lang_array.size(args);_chi_tmp508=_chi_tmp526 end;local argCount=_chi_tmp508;
+do local function _chi_tmp527() return i end;local function _chi_tmp528() return argCount end;while (_chi_tmp527() <= _chi_tmp528()) do do
+local _chi_tmp529;do local _chi_tmp530=args[i];_chi_tmp529=_chi_tmp530 end;local arg=_chi_tmp529;
+do local _chi_tmp531=arg.typeRef;_chi_tmp529=_chi_tmp531 end;local argTypeRef=_chi_tmp529;
+do local _chi_tmp532=arg.defaultValue;_chi_tmp529=_chi_tmp532 end;local argDefValue=_chi_tmp529;
+do local _chi_tmp533;if (argTypeRef ~= (nil)) then
+local _chi_tmp534;do local _chi_tmp535=tt;local _chi_tmp536=__P_.currentTypeSchemeVars;local _chi_tmp537=argTypeRef;local _chi_tmp538=__P_.effectiveTypeLevel();local _chi_tmp539=__chicc__symbols.resolveType(_chi_tmp535,_chi_tmp536,_chi_tmp537,_chi_tmp538);_chi_tmp534=_chi_tmp539 end;local resolved=_chi_tmp534;
+local _chi_tmp540=__std__lang_array.push(paramTypes,resolved);_chi_tmp533=_chi_tmp540
  else
-local _chi_tmp539=paramTypes;local _chi_tmp540 = '_p';local _chi_tmp541=chi_tostring((_chi_tmp540)) .. chi_tostring(i);local _chi_tmp542=__P_.effectiveTypeLevel();local _chi_tmp543=__chicc__types.variableType(_chi_tmp541,_chi_tmp542);local _chi_tmp544=__std__lang_array.push(_chi_tmp539,_chi_tmp543);_chi_tmp531=_chi_tmp544
+local _chi_tmp541=paramTypes;local _chi_tmp542 = '_p';local _chi_tmp543=chi_tostring((_chi_tmp542)) .. chi_tostring(i);local _chi_tmp544=__P_.effectiveTypeLevel();local _chi_tmp545=__chicc__types.variableType(_chi_tmp543,_chi_tmp544);local _chi_tmp546=__std__lang_array.push(_chi_tmp541,_chi_tmp545);_chi_tmp533=_chi_tmp546
  end; end;
-do local _chi_tmp545;if (argDefValue ~= (nil)) then
-defaultArgCount=(defaultArgCount + (1));_chi_tmp545=defaultArgCount
+do local _chi_tmp547;if (argDefValue ~= (nil)) then
+defaultArgCount=(defaultArgCount + (1));_chi_tmp547=defaultArgCount
  end; end;
 i=(i + (1)); end ::__continue_13:: end;
  end;
-do _chi_tmp506=__chicc__types.tUnit end;local returnType=_chi_tmp506;
-do local _chi_tmp546;if (retTypeRef ~= (nil)) then
-local _chi_tmp547=tt;local _chi_tmp548=__P_.currentTypeSchemeVars;local _chi_tmp549=retTypeRef;local _chi_tmp550=__P_.effectiveTypeLevel();local _chi_tmp551=__chicc__symbols.resolveType(_chi_tmp547,_chi_tmp548,_chi_tmp549,_chi_tmp550);returnType=_chi_tmp551;_chi_tmp546=returnType
+do _chi_tmp508=__chicc__types.tUnit end;local returnType=_chi_tmp508;
+do local _chi_tmp548;if (retTypeRef ~= (nil)) then
+local _chi_tmp549=tt;local _chi_tmp550=__P_.currentTypeSchemeVars;local _chi_tmp551=retTypeRef;local _chi_tmp552=__P_.effectiveTypeLevel();local _chi_tmp553=__chicc__symbols.resolveType(_chi_tmp549,_chi_tmp550,_chi_tmp551,_chi_tmp552);returnType=_chi_tmp553;_chi_tmp548=returnType
  end; end;
-do local _chi_tmp552={};setmetatable(_chi_tmp552, array_meta_table);_chi_tmp506=_chi_tmp552 end;local fnTypeArr=_chi_tmp506;
+do local _chi_tmp554={};setmetatable(_chi_tmp554, array_meta_table);_chi_tmp508=_chi_tmp554 end;local fnTypeArr=_chi_tmp508;
 do i=(1); end;
-do local _chi_tmp553=__std__lang_array.size(paramTypes);_chi_tmp506=_chi_tmp553 end;local ptCount=_chi_tmp506;
-do local function _chi_tmp554() return i end;local function _chi_tmp555() return ptCount end;while (_chi_tmp554() <= _chi_tmp555()) do do
-do local _chi_tmp556=paramTypes[i];local _chi_tmp557=__std__lang_array.push(fnTypeArr,_chi_tmp556); end;
+do local _chi_tmp555=__std__lang_array.size(paramTypes);_chi_tmp508=_chi_tmp555 end;local ptCount=_chi_tmp508;
+do local function _chi_tmp556() return i end;local function _chi_tmp557() return ptCount end;while (_chi_tmp556() <= _chi_tmp557()) do do
+do local _chi_tmp558=paramTypes[i];local _chi_tmp559=__std__lang_array.push(fnTypeArr,_chi_tmp558); end;
 i=(i + (1)); end ::__continue_14:: end;
  end;
-do local _chi_tmp558=__std__lang_array.push(fnTypeArr,returnType); end;
-do local _chi_tmp559=__chicc__types.functionType(fnTypeArr,tpNames,defaultArgCount);_chi_tmp506=_chi_tmp559 end;local funcType=_chi_tmp506;
-do local _chi_tmp560=__P_.addLocalSymbol(fnName,(false),isPub,funcType,pkg,tables);_chi_tmp506=_chi_tmp560 end;local fnTarget=_chi_tmp506;
-do _chi_tmp506=__P_.currentFnSymbolTable end;local parentFst=_chi_tmp506;
-do local _chi_tmp561=__chicc__symbols.newFnSymbolTable(parentFst);_chi_tmp506=_chi_tmp561 end;local fst=_chi_tmp506;
-do _chi_tmp506=__P_.currentFnSymbolTable end;local prevFst=_chi_tmp506;
+do local _chi_tmp560=__std__lang_array.push(fnTypeArr,returnType); end;
+do local _chi_tmp561=__chicc__types.functionType(fnTypeArr,tpNames,defaultArgCount);_chi_tmp508=_chi_tmp561 end;local funcType=_chi_tmp508;
+do local _chi_tmp562=__P_.addLocalSymbol(fnName,(false),isPub,funcType,pkg,tables);_chi_tmp508=_chi_tmp562 end;local fnTarget=_chi_tmp508;
+do _chi_tmp508=__P_.currentFnSymbolTable end;local parentFst=_chi_tmp508;
+do local _chi_tmp563=__chicc__symbols.newFnSymbolTable(parentFst);_chi_tmp508=_chi_tmp563 end;local fst=_chi_tmp508;
+do _chi_tmp508=__P_.currentFnSymbolTable end;local prevFst=_chi_tmp508;
 do __P_.currentFnSymbolTable=fst; end;
-do local _chi_tmp562={};setmetatable(_chi_tmp562, array_meta_table);_chi_tmp506=_chi_tmp562 end;local params=_chi_tmp506;
-do local _chi_tmp563=__std__lang_map.emptyMap();_chi_tmp506=_chi_tmp563 end;local defaultArgs=_chi_tmp506;
+do local _chi_tmp564={};setmetatable(_chi_tmp564, array_meta_table);_chi_tmp508=_chi_tmp564 end;local params=_chi_tmp508;
+do local _chi_tmp565=__std__lang_map.emptyMap();_chi_tmp508=_chi_tmp565 end;local defaultArgs=_chi_tmp508;
 do i=(1); end;
-do local function _chi_tmp564() return i end;local function _chi_tmp565() return argCount end;while (_chi_tmp564() <= _chi_tmp565()) do do
-local _chi_tmp566;do local _chi_tmp567=args[i];_chi_tmp566=_chi_tmp567 end;local arg=_chi_tmp566;
-do local _chi_tmp568=arg.name;_chi_tmp566=_chi_tmp568 end;local argName=_chi_tmp566;
-do local _chi_tmp569=arg.typeRef;_chi_tmp566=_chi_tmp569 end;local argTypeRef=_chi_tmp566;
-do local _chi_tmp570=arg.defaultValue;_chi_tmp566=_chi_tmp570 end;local argDefValue=_chi_tmp566;
-do local _chi_tmp571=arg.section;_chi_tmp566=_chi_tmp571 end;local argSec=_chi_tmp566;
-do local _chi_tmp572;if (argTypeRef ~= (nil)) then local _chi_tmp573=paramTypes[i];_chi_tmp572=_chi_tmp573 else _chi_tmp572=(nil) end;_chi_tmp566=_chi_tmp572 end;local argType=_chi_tmp566;
-do local _chi_tmp574;if (argDefValue ~= (nil)) then
-local _chi_tmp575;do local _chi_tmp576=__P_.convert(argDefValue,pkg,tables);_chi_tmp575=_chi_tmp576 end;local defExpr=_chi_tmp575;
-local _chi_tmp577=__std__lang_map.put(defaultArgs,argName,defExpr);_chi_tmp574=_chi_tmp577
+do local function _chi_tmp566() return i end;local function _chi_tmp567() return argCount end;while (_chi_tmp566() <= _chi_tmp567()) do do
+local _chi_tmp568;do local _chi_tmp569=args[i];_chi_tmp568=_chi_tmp569 end;local arg=_chi_tmp568;
+do local _chi_tmp570=arg.name;_chi_tmp568=_chi_tmp570 end;local argName=_chi_tmp568;
+do local _chi_tmp571=arg.typeRef;_chi_tmp568=_chi_tmp571 end;local argTypeRef=_chi_tmp568;
+do local _chi_tmp572=arg.defaultValue;_chi_tmp568=_chi_tmp572 end;local argDefValue=_chi_tmp568;
+do local _chi_tmp573=arg.section;_chi_tmp568=_chi_tmp573 end;local argSec=_chi_tmp568;
+do local _chi_tmp574;if (argTypeRef ~= (nil)) then local _chi_tmp575=paramTypes[i];_chi_tmp574=_chi_tmp575 else _chi_tmp574=(nil) end;_chi_tmp568=_chi_tmp574 end;local argType=_chi_tmp568;
+do local _chi_tmp576;if (argDefValue ~= (nil)) then
+local _chi_tmp577;do local _chi_tmp578=__P_.convert(argDefValue,pkg,tables);_chi_tmp577=_chi_tmp578 end;local defExpr=_chi_tmp577;
+local _chi_tmp579=__std__lang_map.put(defaultArgs,argName,defExpr);_chi_tmp576=_chi_tmp579
  end; end;
-do local _chi_tmp578=__chicc__symbols.fstAddArgument(fst,argName,argType); end;
-do local _chi_tmp579=params;local _chi_tmp580=__chicc__ast.newFnParam(argName,argType,argSec);local _chi_tmp581=__std__lang_array.push(_chi_tmp579,_chi_tmp580); end;
+do local _chi_tmp580=__chicc__symbols.fstAddArgument(fst,argName,argType); end;
+do local _chi_tmp581=params;local _chi_tmp582=__chicc__ast.newFnParam(argName,argType,argSec);local _chi_tmp583=__std__lang_array.push(_chi_tmp581,_chi_tmp582); end;
 i=(i + (1)); end ::__continue_15:: end;
  end;
 do __P_.currentTypeLevel=(__P_.currentTypeLevel + (1)); end;
-do local _chi_tmp582=__P_.convert(funcBodyNode,pkg,tables);_chi_tmp506=_chi_tmp582 end;local body=_chi_tmp506;
+do local _chi_tmp584=__P_.convert(funcBodyNode,pkg,tables);_chi_tmp508=_chi_tmp584 end;local body=_chi_tmp508;
 do __P_.currentTypeLevel=(__P_.currentTypeLevel - (1)); end;
-do local _chi_tmp583=returnType.tag;_chi_tmp506=_chi_tmp583 end;local retTag=_chi_tmp506;
-local _chi_tmp584;local _chi_tmp585 = 'fn';if (retTag == (_chi_tmp585)) then
-local _chi_tmp586;do local _chi_tmp587=body.kind;_chi_tmp586=_chi_tmp587 end;local bodyKind=_chi_tmp586;
-local _chi_tmp588;local _chi_tmp589 = 'block';if (bodyKind == (_chi_tmp589)) then
-local _chi_tmp590;do local _chi_tmp591=#body.blockBody;_chi_tmp590=_chi_tmp591 end;local bodyCount=_chi_tmp590;
-local _chi_tmp592;if (bodyCount > (0)) then
-local _chi_tmp593;do local _chi_tmp594=body.blockBody[bodyCount];_chi_tmp593=_chi_tmp594 end;local lastExpr=_chi_tmp593;
-do local _chi_tmp595=lastExpr.kind;_chi_tmp593=_chi_tmp595 end;local lastKind=_chi_tmp593;
-local _chi_tmp596;local _chi_tmp597 = 'block';if (lastKind == (_chi_tmp597)) then
-local _chi_tmp598;do local _chi_tmp599 = '_ret';local _chi_tmp600=__P_.effectiveTypeLevel();local _chi_tmp601=__chicc__types.variableType((_chi_tmp599),_chi_tmp600);_chi_tmp598=_chi_tmp601 end;local lambdaRetVar=_chi_tmp598;
-do local _chi_tmp602={lambdaRetVar};setmetatable(_chi_tmp602, array_meta_table);local _chi_tmp603={};setmetatable(_chi_tmp603, array_meta_table);local _chi_tmp604=__chicc__types.functionType(_chi_tmp602,_chi_tmp603,(0));_chi_tmp598=_chi_tmp604 end;local lambdaType=_chi_tmp598;
-do local _chi_tmp605={};setmetatable(_chi_tmp605, array_meta_table);_chi_tmp598=_chi_tmp605 end;local lambdaParams=_chi_tmp598;
-do local _chi_tmp606=lastExpr.section;_chi_tmp598=_chi_tmp606 end;local lambdaSec=_chi_tmp598;
-do local _chi_tmp607=__chicc__ast.fnExpr(lambdaParams,(nil),lastExpr,lambdaSec);_chi_tmp598=_chi_tmp607 end;local lambdaFn=_chi_tmp598;
-do local _chi_tmp608=__chicc__ast.setExprType(lambdaFn,lambdaType); end;
+do local _chi_tmp585=returnType.tag;_chi_tmp508=_chi_tmp585 end;local retTag=_chi_tmp508;
+local _chi_tmp586;local _chi_tmp587 = 'fn';if (retTag == (_chi_tmp587)) then
+local _chi_tmp588;do local _chi_tmp589=body.kind;_chi_tmp588=_chi_tmp589 end;local bodyKind=_chi_tmp588;
+local _chi_tmp590;local _chi_tmp591 = 'block';if (bodyKind == (_chi_tmp591)) then
+local _chi_tmp592;do local _chi_tmp593=#body.blockBody;_chi_tmp592=_chi_tmp593 end;local bodyCount=_chi_tmp592;
+local _chi_tmp594;if (bodyCount > (0)) then
+local _chi_tmp595;do local _chi_tmp596=body.blockBody[bodyCount];_chi_tmp595=_chi_tmp596 end;local lastExpr=_chi_tmp595;
+do local _chi_tmp597=lastExpr.kind;_chi_tmp595=_chi_tmp597 end;local lastKind=_chi_tmp595;
+local _chi_tmp598;local _chi_tmp599 = 'block';if (lastKind == (_chi_tmp599)) then
+local _chi_tmp600;do local _chi_tmp601 = '_ret';local _chi_tmp602=__P_.effectiveTypeLevel();local _chi_tmp603=__chicc__types.variableType((_chi_tmp601),_chi_tmp602);_chi_tmp600=_chi_tmp603 end;local lambdaRetVar=_chi_tmp600;
+do local _chi_tmp604={lambdaRetVar};setmetatable(_chi_tmp604, array_meta_table);local _chi_tmp605={};setmetatable(_chi_tmp605, array_meta_table);local _chi_tmp606=__chicc__types.functionType(_chi_tmp604,_chi_tmp605,(0));_chi_tmp600=_chi_tmp606 end;local lambdaType=_chi_tmp600;
+do local _chi_tmp607={};setmetatable(_chi_tmp607, array_meta_table);_chi_tmp600=_chi_tmp607 end;local lambdaParams=_chi_tmp600;
+do local _chi_tmp608=lastExpr.section;_chi_tmp600=_chi_tmp608 end;local lambdaSec=_chi_tmp600;
+do local _chi_tmp609=__chicc__ast.fnExpr(lambdaParams,(nil),lastExpr,lambdaSec);_chi_tmp600=_chi_tmp609 end;local lambdaFn=_chi_tmp600;
+do local _chi_tmp610=__chicc__ast.setExprType(lambdaFn,lambdaType); end;
 do lambdaFn.expectedType=returnType; end;
-body.blockBody[bodyCount] = lambdaFn;_chi_tmp596=nil
- end;_chi_tmp592=_chi_tmp596
- end;_chi_tmp588=_chi_tmp592
- end;_chi_tmp584=_chi_tmp588
+body.blockBody[bodyCount] = lambdaFn;_chi_tmp598=nil
+ end;_chi_tmp594=_chi_tmp598
+ end;_chi_tmp590=_chi_tmp594
+ end;_chi_tmp586=_chi_tmp590
  end;
 do __P_.currentFnSymbolTable=prevFst; end;
 do __P_.currentTypeSchemeVars=prevTypeSchemeVars; end;
 do __P_.typeSchemeLevel=prevTypeSchemeLevel; end;
-do local _chi_tmp609;if (defaultArgCount > (0)) then _chi_tmp609=defaultArgs else _chi_tmp609=(nil) end;_chi_tmp506=_chi_tmp609 end;local defaults=_chi_tmp506;
-do local _chi_tmp610=__chicc__ast.fnExpr(params,defaults,body,sec);_chi_tmp506=_chi_tmp610 end;local fnBody=_chi_tmp506;
-do local _chi_tmp611=__chicc__ast.declarationExpr(isPub,fnTarget,(false),funcType,fnBody,sec);_chi_tmp506=_chi_tmp611 end;local decl=_chi_tmp506;
+do local _chi_tmp611;if (defaultArgCount > (0)) then _chi_tmp611=defaultArgs else _chi_tmp611=(nil) end;_chi_tmp508=_chi_tmp611 end;local defaults=_chi_tmp508;
+do local _chi_tmp612=__chicc__ast.fnExpr(params,defaults,body,sec);_chi_tmp508=_chi_tmp612 end;local fnBody=_chi_tmp508;
+do local _chi_tmp613=__chicc__ast.declarationExpr(isPub,fnTarget,(false),funcType,fnBody,sec);_chi_tmp508=_chi_tmp613 end;local decl=_chi_tmp508;
 do decl.isNamedFn=(true); end;
 return decl end;
  end;
 do __P_.convertFuncWithName=__P_.convertFuncWithNameImpl; end;
 do function __P_.packageSymbol(name,tables)
-do local _chi_tmp612;local _chi_tmp613=__P_.isFnLocal(name);if _chi_tmp613 then return (nil); end; end;
-local _chi_tmp614=__chicc__symbols.ctGetLocalSymbol(tables,name);return _chi_tmp614 end;
+do local _chi_tmp614;local _chi_tmp615=__P_.isFnLocal(name);if _chi_tmp615 then return (nil); end; end;
+local _chi_tmp616=__chicc__symbols.ctGetLocalSymbol(tables,name);return _chi_tmp616 end;
  end;
 do function __P_.isNullaryVariant(name,tables)
-local _chi_tmp615;do local _chi_tmp616=__P_.packageSymbol(name,tables);_chi_tmp615=_chi_tmp616 end;local sym=_chi_tmp615;
-do local _chi_tmp617;if (sym == (nil)) then return (false); end; end;
-do _chi_tmp615=sym.symbolType end;local symType=_chi_tmp615;
-local _chi_tmp624=(symType ~= (nil));if _chi_tmp624 then local _chi_tmp618=__chicc__types.sumListTypes(symType);local function _chi_tmp619(t) local _chi_tmp620=__chicc__types.variantNameOf(t);local _chi_tmp622=(_chi_tmp620 == name);if _chi_tmp622 then local _chi_tmp621=__std__lang_array.size(t.fields);_chi_tmp622=(_chi_tmp621 == (0)) end;return _chi_tmp622 end;local _chi_tmp623=__std__lang_array.any(_chi_tmp618,_chi_tmp619);_chi_tmp624=_chi_tmp623 end;return _chi_tmp624 end;
+local _chi_tmp617;do local _chi_tmp618=__P_.packageSymbol(name,tables);_chi_tmp617=_chi_tmp618 end;local sym=_chi_tmp617;
+do local _chi_tmp619;if (sym == (nil)) then return (false); end; end;
+do _chi_tmp617=sym.symbolType end;local symType=_chi_tmp617;
+local _chi_tmp626=(symType ~= (nil));if _chi_tmp626 then local _chi_tmp620=__chicc__types.sumListTypes(symType);local function _chi_tmp621(t) local _chi_tmp622=__chicc__types.variantNameOf(t);local _chi_tmp624=(_chi_tmp622 == name);if _chi_tmp624 then local _chi_tmp623=__std__lang_array.size(t.fields);_chi_tmp624=(_chi_tmp623 == (0)) end;return _chi_tmp624 end;local _chi_tmp625=__std__lang_array.any(_chi_tmp620,_chi_tmp621);_chi_tmp626=_chi_tmp625 end;return _chi_tmp626 end;
  end;
 do function __P_.convertFnCallImpl(node,pkg,tables)
-local _chi_tmp625;do local _chi_tmp626=__chicc__parse_ast.paSection(node);_chi_tmp625=_chi_tmp626 end;local sec=_chi_tmp625;
-do local _chi_tmp627=__chicc__parse_ast.paCallee(node);_chi_tmp625=_chi_tmp627 end;local calleeNode=_chi_tmp625;
-do local _chi_tmp628=__chicc__parse_ast.paArguments(node);_chi_tmp625=_chi_tmp628 end;local argNodes=_chi_tmp625;
-do local _chi_tmp629;local _chi_tmp630=__std__lang_array.size(argNodes);local _chi_tmp633=(_chi_tmp630 == (0));if _chi_tmp633 then local _chi_tmp631=__chicc__parse_ast.paTag(calleeNode);local _chi_tmp632 = 'ParseVariableRead';_chi_tmp633=(_chi_tmp631 == (_chi_tmp632)) end;local _chi_tmp636=_chi_tmp633;if _chi_tmp636 then local _chi_tmp634=__chicc__parse_ast.paVariableName(calleeNode);local _chi_tmp635=__P_.isNullaryVariant(_chi_tmp634,tables);_chi_tmp636=_chi_tmp635 end;if _chi_tmp636 then
-local _chi_tmp637=__P_.convert(calleeNode,pkg,tables);return _chi_tmp637;
+local _chi_tmp627;do local _chi_tmp628=__chicc__parse_ast.paSection(node);_chi_tmp627=_chi_tmp628 end;local sec=_chi_tmp627;
+do local _chi_tmp629=__chicc__parse_ast.paCallee(node);_chi_tmp627=_chi_tmp629 end;local calleeNode=_chi_tmp627;
+do local _chi_tmp630=__chicc__parse_ast.paArguments(node);_chi_tmp627=_chi_tmp630 end;local argNodes=_chi_tmp627;
+do local _chi_tmp631;local _chi_tmp632=__std__lang_array.size(argNodes);local _chi_tmp635=(_chi_tmp632 == (0));if _chi_tmp635 then local _chi_tmp633=__chicc__parse_ast.paTag(calleeNode);local _chi_tmp634 = 'ParseVariableRead';_chi_tmp635=(_chi_tmp633 == (_chi_tmp634)) end;local _chi_tmp638=_chi_tmp635;if _chi_tmp638 then local _chi_tmp636=__chicc__parse_ast.paVariableName(calleeNode);local _chi_tmp637=__P_.isNullaryVariant(_chi_tmp636,tables);_chi_tmp638=_chi_tmp637 end;if _chi_tmp638 then
+local _chi_tmp639=__P_.convert(calleeNode,pkg,tables);return _chi_tmp639;
  end; end;
-do local _chi_tmp638=__P_.convert(calleeNode,pkg,tables);_chi_tmp625=_chi_tmp638 end;local callee=_chi_tmp625;
-do local _chi_tmp639={};setmetatable(_chi_tmp639, array_meta_table);_chi_tmp625=_chi_tmp639 end;local convertedArgs=_chi_tmp625;
-do _chi_tmp625=(1) end;local i=_chi_tmp625;
-do local _chi_tmp640=__std__lang_array.size(argNodes);_chi_tmp625=_chi_tmp640 end;local argCount=_chi_tmp625;
-do local function _chi_tmp641() return i end;local function _chi_tmp642() return argCount end;while (_chi_tmp641() <= _chi_tmp642()) do do
-local _chi_tmp643;do local _chi_tmp644=argNodes[i];local _chi_tmp645=__P_.convert(_chi_tmp644,pkg,tables);_chi_tmp643=_chi_tmp645 end;local ca=_chi_tmp643;
-do local _chi_tmp646=__std__lang_array.push(convertedArgs,ca); end;
+do local _chi_tmp640=__P_.convert(calleeNode,pkg,tables);_chi_tmp627=_chi_tmp640 end;local callee=_chi_tmp627;
+do local _chi_tmp641={};setmetatable(_chi_tmp641, array_meta_table);_chi_tmp627=_chi_tmp641 end;local convertedArgs=_chi_tmp627;
+do _chi_tmp627=(1) end;local i=_chi_tmp627;
+do local _chi_tmp642=__std__lang_array.size(argNodes);_chi_tmp627=_chi_tmp642 end;local argCount=_chi_tmp627;
+do local function _chi_tmp643() return i end;local function _chi_tmp644() return argCount end;while (_chi_tmp643() <= _chi_tmp644()) do do
+local _chi_tmp645;do local _chi_tmp646=argNodes[i];local _chi_tmp647=__P_.convert(_chi_tmp646,pkg,tables);_chi_tmp645=_chi_tmp647 end;local ca=_chi_tmp645;
+do local _chi_tmp648=__std__lang_array.push(convertedArgs,ca); end;
 i=(i + (1)); end ::__continue_16:: end;
  end;
-do local _chi_tmp647=__chicc__parse_ast.paTag(calleeNode);_chi_tmp625=_chi_tmp647 end;local calleeTag=_chi_tmp625;
-do _chi_tmp625=(1) end;local wi=_chi_tmp625;
-do local _chi_tmp648=__std__lang_array.size(convertedArgs);_chi_tmp625=_chi_tmp648 end;local wCount=_chi_tmp625;
-local function _chi_tmp649() return wi end;local function _chi_tmp650() return wCount end;while (_chi_tmp649() <= _chi_tmp650()) do do
-local _chi_tmp651;do local _chi_tmp652=convertedArgs[wi];_chi_tmp651=_chi_tmp652 end;local arg=_chi_tmp651;
-do local _chi_tmp653=arg.kind;_chi_tmp651=_chi_tmp653 end;local argKind=_chi_tmp651;
-local _chi_tmp654;local _chi_tmp655 = 'block';if (argKind == (_chi_tmp655)) then
-local _chi_tmp656;do local _chi_tmp657={};setmetatable(_chi_tmp657, array_meta_table);_chi_tmp656=_chi_tmp657 end;local emptyParams=_chi_tmp656;
-do local _chi_tmp658=arg.section;_chi_tmp656=_chi_tmp658 end;local blockSec=_chi_tmp656;
-do local _chi_tmp659=__chicc__ast.fnExpr(emptyParams,(nil),arg,blockSec);_chi_tmp656=_chi_tmp659 end;local wrappedFn=_chi_tmp656;
-convertedArgs[wi] = wrappedFn;_chi_tmp654=nil
+do local _chi_tmp649=__chicc__parse_ast.paTag(calleeNode);_chi_tmp627=_chi_tmp649 end;local calleeTag=_chi_tmp627;
+do _chi_tmp627=(1) end;local wi=_chi_tmp627;
+do local _chi_tmp650=__std__lang_array.size(convertedArgs);_chi_tmp627=_chi_tmp650 end;local wCount=_chi_tmp627;
+local function _chi_tmp651() return wi end;local function _chi_tmp652() return wCount end;while (_chi_tmp651() <= _chi_tmp652()) do do
+local _chi_tmp653;do local _chi_tmp654=convertedArgs[wi];_chi_tmp653=_chi_tmp654 end;local arg=_chi_tmp653;
+do local _chi_tmp655=arg.kind;_chi_tmp653=_chi_tmp655 end;local argKind=_chi_tmp653;
+local _chi_tmp656;local _chi_tmp657 = 'block';if (argKind == (_chi_tmp657)) then
+local _chi_tmp658;do local _chi_tmp659={};setmetatable(_chi_tmp659, array_meta_table);_chi_tmp658=_chi_tmp659 end;local emptyParams=_chi_tmp658;
+do local _chi_tmp660=arg.section;_chi_tmp658=_chi_tmp660 end;local blockSec=_chi_tmp658;
+do local _chi_tmp661=__chicc__ast.fnExpr(emptyParams,(nil),arg,blockSec);_chi_tmp658=_chi_tmp661 end;local wrappedFn=_chi_tmp658;
+convertedArgs[wi] = wrappedFn;_chi_tmp656=nil
  end;
 wi=(wi + (1)); end ::__continue_17:: end;
-do _chi_tmp625=callee end;local wrappedCallee=_chi_tmp625;
-do local _chi_tmp660;local _chi_tmp661 = 'ParseBlock';if (calleeTag == (_chi_tmp661)) then
-local _chi_tmp662;if (argCount == (0)) then
-local _chi_tmp663;do local _chi_tmp664=callee.kind;_chi_tmp663=_chi_tmp664 end;local calleeKind=_chi_tmp663;
-local _chi_tmp665;local _chi_tmp666 = 'block';if (calleeKind == (_chi_tmp666)) then
-local _chi_tmp667;do local _chi_tmp668={};setmetatable(_chi_tmp668, array_meta_table);_chi_tmp667=_chi_tmp668 end;local emptyParams=_chi_tmp667;
-do local _chi_tmp669=callee.section;_chi_tmp667=_chi_tmp669 end;local calleeSec=_chi_tmp667;
-local _chi_tmp670=__chicc__ast.fnExpr(emptyParams,(nil),callee,calleeSec);wrappedCallee=_chi_tmp670;_chi_tmp665=wrappedCallee
- end;_chi_tmp662=_chi_tmp665
- end;_chi_tmp660=_chi_tmp662
+do _chi_tmp627=callee end;local wrappedCallee=_chi_tmp627;
+do local _chi_tmp662;local _chi_tmp663 = 'ParseBlock';if (calleeTag == (_chi_tmp663)) then
+local _chi_tmp664;if (argCount == (0)) then
+local _chi_tmp665;do local _chi_tmp666=callee.kind;_chi_tmp665=_chi_tmp666 end;local calleeKind=_chi_tmp665;
+local _chi_tmp667;local _chi_tmp668 = 'block';if (calleeKind == (_chi_tmp668)) then
+local _chi_tmp669;do local _chi_tmp670={};setmetatable(_chi_tmp670, array_meta_table);_chi_tmp669=_chi_tmp670 end;local emptyParams=_chi_tmp669;
+do local _chi_tmp671=callee.section;_chi_tmp669=_chi_tmp671 end;local calleeSec=_chi_tmp669;
+local _chi_tmp672=__chicc__ast.fnExpr(emptyParams,(nil),callee,calleeSec);wrappedCallee=_chi_tmp672;_chi_tmp667=wrappedCallee
+ end;_chi_tmp664=_chi_tmp667
+ end;_chi_tmp662=_chi_tmp664
  end; end;
-local _chi_tmp671=__chicc__ast.fnCallExpr(wrappedCallee,convertedArgs,sec);return _chi_tmp671 end;
+local _chi_tmp673=__chicc__ast.fnCallExpr(wrappedCallee,convertedArgs,sec);return _chi_tmp673 end;
  end;
 do __P_.convertFnCall=__P_.convertFnCallImpl; end;
 do function __P_.convertBlockImpl(node,pkg,tables)
-local _chi_tmp672;do local _chi_tmp673=__chicc__parse_ast.paSection(node);_chi_tmp672=_chi_tmp673 end;local sec=_chi_tmp672;
-do local _chi_tmp674=__chicc__parse_ast.paBody(node);_chi_tmp672=_chi_tmp674 end;local bodyNodes=_chi_tmp672;
-do _chi_tmp672=__P_.currentFnSymbolTable end;local prevFst=_chi_tmp672;
-do local _chi_tmp675=__chicc__symbols.newFnSymbolTable(prevFst);__P_.currentFnSymbolTable=_chi_tmp675; end;
+local _chi_tmp674;do local _chi_tmp675=__chicc__parse_ast.paSection(node);_chi_tmp674=_chi_tmp675 end;local sec=_chi_tmp674;
+do local _chi_tmp676=__chicc__parse_ast.paBody(node);_chi_tmp674=_chi_tmp676 end;local bodyNodes=_chi_tmp674;
+do _chi_tmp674=__P_.currentFnSymbolTable end;local prevFst=_chi_tmp674;
+do local _chi_tmp677=__chicc__symbols.newFnSymbolTable(prevFst);__P_.currentFnSymbolTable=_chi_tmp677; end;
 do __P_.currentTypeLevel=(__P_.currentTypeLevel + (1)); end;
-do local _chi_tmp676={};setmetatable(_chi_tmp676, array_meta_table);_chi_tmp672=_chi_tmp676 end;local bodyExprs=_chi_tmp672;
-do _chi_tmp672=(1) end;local i=_chi_tmp672;
-do local _chi_tmp677=__std__lang_array.size(bodyNodes);_chi_tmp672=_chi_tmp677 end;local count=_chi_tmp672;
-do local function _chi_tmp678() return i end;local function _chi_tmp679() return count end;while (_chi_tmp678() <= _chi_tmp679()) do do
-local _chi_tmp680;do local _chi_tmp681=bodyNodes[i];local _chi_tmp682=__P_.convert(_chi_tmp681,pkg,tables);_chi_tmp680=_chi_tmp682 end;local be=_chi_tmp680;
-do local _chi_tmp683=__std__lang_array.push(bodyExprs,be); end;
+do local _chi_tmp678={};setmetatable(_chi_tmp678, array_meta_table);_chi_tmp674=_chi_tmp678 end;local bodyExprs=_chi_tmp674;
+do _chi_tmp674=(1) end;local i=_chi_tmp674;
+do local _chi_tmp679=__std__lang_array.size(bodyNodes);_chi_tmp674=_chi_tmp679 end;local count=_chi_tmp674;
+do local function _chi_tmp680() return i end;local function _chi_tmp681() return count end;while (_chi_tmp680() <= _chi_tmp681()) do do
+local _chi_tmp682;do local _chi_tmp683=bodyNodes[i];local _chi_tmp684=__P_.convert(_chi_tmp683,pkg,tables);_chi_tmp682=_chi_tmp684 end;local be=_chi_tmp682;
+do local _chi_tmp685=__std__lang_array.push(bodyExprs,be); end;
 i=(i + (1)); end ::__continue_18:: end;
  end;
 do __P_.currentTypeLevel=(__P_.currentTypeLevel - (1)); end;
 do __P_.currentFnSymbolTable=prevFst; end;
-local _chi_tmp684=__chicc__ast.blockExpr(bodyExprs,sec);return _chi_tmp684 end;
+local _chi_tmp686=__chicc__ast.blockExpr(bodyExprs,sec);return _chi_tmp686 end;
  end;
 do __P_.convertBlock=__P_.convertBlockImpl; end;
 do function __P_.convertNameDeclarationImpl(node,pkg,tables)
-local _chi_tmp685;do local _chi_tmp686=__chicc__parse_ast.paSection(node);_chi_tmp685=_chi_tmp686 end;local sec=_chi_tmp685;
-do local _chi_tmp687=__chicc__parse_ast.paIsPublic(node);_chi_tmp685=_chi_tmp687 end;local isPub=_chi_tmp685;
-do local _chi_tmp688=__chicc__parse_ast.paSymbolName(node);_chi_tmp685=_chi_tmp688 end;local symName=_chi_tmp685;
-do local _chi_tmp689=__chicc__parse_ast.paIsMutable(node);_chi_tmp685=_chi_tmp689 end;local isMut=_chi_tmp685;
-do local _chi_tmp690=__chicc__parse_ast.paTypeRef(node);_chi_tmp685=_chi_tmp690 end;local typeRef=_chi_tmp685;
-do local _chi_tmp691=__chicc__parse_ast.paValue(node);_chi_tmp685=_chi_tmp691 end;local valNode=_chi_tmp685;
-do local _chi_tmp692=__P_.convert(valNode,pkg,tables);_chi_tmp685=_chi_tmp692 end;local val_=_chi_tmp685;
+local _chi_tmp687;do local _chi_tmp688=__chicc__parse_ast.paSection(node);_chi_tmp687=_chi_tmp688 end;local sec=_chi_tmp687;
+do local _chi_tmp689=__chicc__parse_ast.paIsPublic(node);_chi_tmp687=_chi_tmp689 end;local isPub=_chi_tmp687;
+do local _chi_tmp690=__chicc__parse_ast.paSymbolName(node);_chi_tmp687=_chi_tmp690 end;local symName=_chi_tmp687;
+do local _chi_tmp691=__chicc__parse_ast.paIsMutable(node);_chi_tmp687=_chi_tmp691 end;local isMut=_chi_tmp687;
+do local _chi_tmp692=__chicc__parse_ast.paTypeRef(node);_chi_tmp687=_chi_tmp692 end;local typeRef=_chi_tmp687;
+do local _chi_tmp693=__chicc__parse_ast.paValue(node);_chi_tmp687=_chi_tmp693 end;local valNode=_chi_tmp687;
+do local _chi_tmp694=__P_.convert(valNode,pkg,tables);_chi_tmp687=_chi_tmp694 end;local val_=_chi_tmp687;
 do __P_.currentTypeLevel=(__P_.currentTypeLevel + (1)); end;
-do _chi_tmp685=(nil) end;local expType=_chi_tmp685;
-do local _chi_tmp693;if (typeRef ~= (nil)) then
-local _chi_tmp694;do local _chi_tmp695=__P_.getTypeTable(tables);_chi_tmp694=_chi_tmp695 end;local tt=_chi_tmp694;
-local _chi_tmp696=tt;local _chi_tmp697=__P_.currentTypeSchemeVars;local _chi_tmp698=typeRef;local _chi_tmp699=__P_.effectiveTypeLevel();local _chi_tmp700=__chicc__symbols.resolveType(_chi_tmp696,_chi_tmp697,_chi_tmp698,_chi_tmp699);expType=_chi_tmp700;_chi_tmp693=expType
+do _chi_tmp687=(nil) end;local expType=_chi_tmp687;
+do local _chi_tmp695;if (typeRef ~= (nil)) then
+local _chi_tmp696;do local _chi_tmp697=__P_.getTypeTable(tables);_chi_tmp696=_chi_tmp697 end;local tt=_chi_tmp696;
+local _chi_tmp698=tt;local _chi_tmp699=__P_.currentTypeSchemeVars;local _chi_tmp700=typeRef;local _chi_tmp701=__P_.effectiveTypeLevel();local _chi_tmp702=__chicc__symbols.resolveType(_chi_tmp698,_chi_tmp699,_chi_tmp700,_chi_tmp701);expType=_chi_tmp702;_chi_tmp695=expType
  end; end;
-do _chi_tmp685=(nil) end;local symType=_chi_tmp685;
-do local _chi_tmp701=val_.kind;_chi_tmp685=_chi_tmp701 end;local valKind=_chi_tmp685;
-do local _chi_tmp702;local _chi_tmp703 = 'fn';if (valKind == (_chi_tmp703)) then
-local _chi_tmp704=val_.exprType;symType=_chi_tmp704;_chi_tmp702=symType
+do _chi_tmp687=(nil) end;local symType=_chi_tmp687;
+do local _chi_tmp703=val_.kind;_chi_tmp687=_chi_tmp703 end;local valKind=_chi_tmp687;
+do local _chi_tmp704;local _chi_tmp705 = 'fn';if (valKind == (_chi_tmp705)) then
+local _chi_tmp706=val_.exprType;symType=_chi_tmp706;_chi_tmp704=symType
  end; end;
-do local _chi_tmp705=__P_.addLocalSymbol(symName,isMut,isPub,symType,pkg,tables);_chi_tmp685=_chi_tmp705 end;local symTarget=_chi_tmp685;
+do local _chi_tmp707=__P_.addLocalSymbol(symName,isMut,isPub,symType,pkg,tables);_chi_tmp687=_chi_tmp707 end;local symTarget=_chi_tmp687;
 do __P_.currentTypeLevel=(__P_.currentTypeLevel - (1)); end;
-local _chi_tmp706=__chicc__ast.declarationExpr(isPub,symTarget,isMut,expType,val_,sec);return _chi_tmp706 end;
+local _chi_tmp708=__chicc__ast.declarationExpr(isPub,symTarget,isMut,expType,val_,sec);return _chi_tmp708 end;
  end;
 do __P_.convertNameDeclaration=__P_.convertNameDeclarationImpl; end;
 do function __P_.convertCaseBody(node,pkg,tables)
-local _chi_tmp707;do _chi_tmp707=__P_.currentFnSymbolTable end;local prevFst=_chi_tmp707;
-do local _chi_tmp708=__chicc__symbols.newFnSymbolTable(prevFst);__P_.currentFnSymbolTable=_chi_tmp708; end;
-do local _chi_tmp709=__P_.convert(node,pkg,tables);_chi_tmp707=_chi_tmp709 end;local body=_chi_tmp707;
+local _chi_tmp709;do _chi_tmp709=__P_.currentFnSymbolTable end;local prevFst=_chi_tmp709;
+do local _chi_tmp710=__chicc__symbols.newFnSymbolTable(prevFst);__P_.currentFnSymbolTable=_chi_tmp710; end;
+do local _chi_tmp711=__P_.convert(node,pkg,tables);_chi_tmp709=_chi_tmp711 end;local body=_chi_tmp709;
 do __P_.currentFnSymbolTable=prevFst; end;
 return body end;
  end;
 do function __P_.convertWhenImpl(node,pkg,tables)
-local _chi_tmp710;do local _chi_tmp711=__chicc__parse_ast.paSection(node);_chi_tmp710=_chi_tmp711 end;local sec=_chi_tmp710;
-do local _chi_tmp712=__chicc__parse_ast.paWhenCases(node);_chi_tmp710=_chi_tmp712 end;local cases=_chi_tmp710;
-do local _chi_tmp713=__chicc__parse_ast.paElseCase(node);_chi_tmp710=_chi_tmp713 end;local elseCase=_chi_tmp710;
-do local _chi_tmp714=__std__lang_array.size(cases);_chi_tmp710=_chi_tmp714 end;local caseCount=_chi_tmp710;
-do local _chi_tmp715;if ((caseCount == (0)) and (elseCase == (nil))) then
-local _chi_tmp716 = 'unit';local _chi_tmp717=__chicc__ast.atomExpr((_chi_tmp716),__chicc__types.tUnit,sec);return _chi_tmp717;
+local _chi_tmp712;do local _chi_tmp713=__chicc__parse_ast.paSection(node);_chi_tmp712=_chi_tmp713 end;local sec=_chi_tmp712;
+do local _chi_tmp714=__chicc__parse_ast.paWhenCases(node);_chi_tmp712=_chi_tmp714 end;local cases=_chi_tmp712;
+do local _chi_tmp715=__chicc__parse_ast.paElseCase(node);_chi_tmp712=_chi_tmp715 end;local elseCase=_chi_tmp712;
+do local _chi_tmp716=__std__lang_array.size(cases);_chi_tmp712=_chi_tmp716 end;local caseCount=_chi_tmp712;
+do local _chi_tmp717;if ((caseCount == (0)) and (elseCase == (nil))) then
+local _chi_tmp718 = 'unit';local _chi_tmp719=__chicc__ast.atomExpr((_chi_tmp718),__chicc__types.tUnit,sec);return _chi_tmp719;
  end; end;
-do local _chi_tmp718;if ((caseCount == (0)) and (elseCase ~= (nil))) then
-local _chi_tmp719;do local _chi_tmp720=elseCase.body;_chi_tmp719=_chi_tmp720 end;local ecBody=_chi_tmp719;
-local _chi_tmp721=__P_.convertCaseBody(ecBody,pkg,tables);return _chi_tmp721;
+do local _chi_tmp720;if ((caseCount == (0)) and (elseCase ~= (nil))) then
+local _chi_tmp721;do local _chi_tmp722=elseCase.body;_chi_tmp721=_chi_tmp722 end;local ecBody=_chi_tmp721;
+local _chi_tmp723=__P_.convertCaseBody(ecBody,pkg,tables);return _chi_tmp723;
  end; end;
-do local _chi_tmp722=cases[caseCount];_chi_tmp710=_chi_tmp722 end;local lastCase=_chi_tmp710;
-do local _chi_tmp723=lastCase.condition;_chi_tmp710=_chi_tmp723 end;local lastCond=_chi_tmp710;
-do local _chi_tmp724=lastCase.body;_chi_tmp710=_chi_tmp724 end;local lastBody=_chi_tmp710;
-do local _chi_tmp725=lastCase.section;_chi_tmp710=_chi_tmp725 end;local lastSec=_chi_tmp710;
-do local _chi_tmp726=__P_.convert(lastCond,pkg,tables);_chi_tmp710=_chi_tmp726 end;local lastCondExpr=_chi_tmp710;
-do local _chi_tmp727=__P_.convertCaseBody(lastBody,pkg,tables);_chi_tmp710=_chi_tmp727 end;local lastBodyExpr=_chi_tmp710;
-do _chi_tmp710=(nil) end;local result=_chi_tmp710;
-do local _chi_tmp728;if (elseCase ~= (nil)) then
-local _chi_tmp729;do local _chi_tmp730=elseCase.body;_chi_tmp729=_chi_tmp730 end;local ecBody=_chi_tmp729;
-do local _chi_tmp731=__P_.convertCaseBody(ecBody,pkg,tables);_chi_tmp729=_chi_tmp731 end;local elseExpr=_chi_tmp729;
-local _chi_tmp732=__chicc__ast.ifElseExpr(lastCondExpr,lastBodyExpr,elseExpr,lastSec);result=_chi_tmp732;_chi_tmp728=result
+do local _chi_tmp724=cases[caseCount];_chi_tmp712=_chi_tmp724 end;local lastCase=_chi_tmp712;
+do local _chi_tmp725=lastCase.condition;_chi_tmp712=_chi_tmp725 end;local lastCond=_chi_tmp712;
+do local _chi_tmp726=lastCase.body;_chi_tmp712=_chi_tmp726 end;local lastBody=_chi_tmp712;
+do local _chi_tmp727=lastCase.section;_chi_tmp712=_chi_tmp727 end;local lastSec=_chi_tmp712;
+do local _chi_tmp728=__P_.convert(lastCond,pkg,tables);_chi_tmp712=_chi_tmp728 end;local lastCondExpr=_chi_tmp712;
+do local _chi_tmp729=__P_.convertCaseBody(lastBody,pkg,tables);_chi_tmp712=_chi_tmp729 end;local lastBodyExpr=_chi_tmp712;
+do _chi_tmp712=(nil) end;local result=_chi_tmp712;
+do local _chi_tmp730;if (elseCase ~= (nil)) then
+local _chi_tmp731;do local _chi_tmp732=elseCase.body;_chi_tmp731=_chi_tmp732 end;local ecBody=_chi_tmp731;
+do local _chi_tmp733=__P_.convertCaseBody(ecBody,pkg,tables);_chi_tmp731=_chi_tmp733 end;local elseExpr=_chi_tmp731;
+local _chi_tmp734=__chicc__ast.ifElseExpr(lastCondExpr,lastBodyExpr,elseExpr,lastSec);result=_chi_tmp734;_chi_tmp730=result
  else
-local _chi_tmp733=__chicc__ast.ifElseExpr(lastCondExpr,lastBodyExpr,(nil),lastSec);result=_chi_tmp733;_chi_tmp728=result
+local _chi_tmp735=__chicc__ast.ifElseExpr(lastCondExpr,lastBodyExpr,(nil),lastSec);result=_chi_tmp735;_chi_tmp730=result
  end; end;
-do _chi_tmp710=(caseCount - (1)) end;local idx=_chi_tmp710;
-do local function _chi_tmp734() return idx end;local function _chi_tmp735() return (1) end;while (_chi_tmp734() >= _chi_tmp735()) do do
-local _chi_tmp736;do local _chi_tmp737=cases[idx];_chi_tmp736=_chi_tmp737 end;local wc=_chi_tmp736;
-do local _chi_tmp738=wc.condition;_chi_tmp736=_chi_tmp738 end;local wcCond=_chi_tmp736;
-do local _chi_tmp739=wc.body;_chi_tmp736=_chi_tmp739 end;local wcBody=_chi_tmp736;
-do local _chi_tmp740=wc.section;_chi_tmp736=_chi_tmp740 end;local wcSec=_chi_tmp736;
-do local _chi_tmp741=__P_.convert(wcCond,pkg,tables);_chi_tmp736=_chi_tmp741 end;local condExpr=_chi_tmp736;
-do local _chi_tmp742=__P_.convertCaseBody(wcBody,pkg,tables);_chi_tmp736=_chi_tmp742 end;local bodyExpr=_chi_tmp736;
-do local _chi_tmp743=__chicc__ast.ifElseExpr(condExpr,bodyExpr,result,wcSec);result=_chi_tmp743; end;
+do _chi_tmp712=(caseCount - (1)) end;local idx=_chi_tmp712;
+do local function _chi_tmp736() return idx end;local function _chi_tmp737() return (1) end;while (_chi_tmp736() >= _chi_tmp737()) do do
+local _chi_tmp738;do local _chi_tmp739=cases[idx];_chi_tmp738=_chi_tmp739 end;local wc=_chi_tmp738;
+do local _chi_tmp740=wc.condition;_chi_tmp738=_chi_tmp740 end;local wcCond=_chi_tmp738;
+do local _chi_tmp741=wc.body;_chi_tmp738=_chi_tmp741 end;local wcBody=_chi_tmp738;
+do local _chi_tmp742=wc.section;_chi_tmp738=_chi_tmp742 end;local wcSec=_chi_tmp738;
+do local _chi_tmp743=__P_.convert(wcCond,pkg,tables);_chi_tmp738=_chi_tmp743 end;local condExpr=_chi_tmp738;
+do local _chi_tmp744=__P_.convertCaseBody(wcBody,pkg,tables);_chi_tmp738=_chi_tmp744 end;local bodyExpr=_chi_tmp738;
+do local _chi_tmp745=__chicc__ast.ifElseExpr(condExpr,bodyExpr,result,wcSec);result=_chi_tmp745; end;
 idx=(idx - (1)); end ::__continue_19:: end;
  end;
 return result end;
  end;
 do __P_.convertWhen=__P_.convertWhenImpl; end;
 do function __P_.convertForImpl(node,pkg,tables)
-local _chi_tmp744;do local _chi_tmp745=__chicc__parse_ast.paSection(node);_chi_tmp744=_chi_tmp745 end;local sec=_chi_tmp744;
-do local _chi_tmp746=__chicc__parse_ast.paForVars(node);_chi_tmp744=_chi_tmp746 end;local vars=_chi_tmp744;
-do local _chi_tmp747=__chicc__parse_ast.paIterable(node);_chi_tmp744=_chi_tmp747 end;local iterNode=_chi_tmp744;
-do local _chi_tmp748=__chicc__parse_ast.paForState(node);_chi_tmp744=_chi_tmp748 end;local stateNode=_chi_tmp744;
-do local _chi_tmp749=__chicc__parse_ast.paForInit(node);_chi_tmp744=_chi_tmp749 end;local initNode=_chi_tmp744;
-do local _chi_tmp750=__chicc__parse_ast.paForBody(node);_chi_tmp744=_chi_tmp750 end;local bodyNode=_chi_tmp744;
-do _chi_tmp744=__P_.currentFnSymbolTable end;local parentFst=_chi_tmp744;
-do local _chi_tmp751=__chicc__symbols.newFnSymbolTable(parentFst);_chi_tmp744=_chi_tmp751 end;local fst=_chi_tmp744;
-do _chi_tmp744=(1) end;local vi=_chi_tmp744;
-do local _chi_tmp752=__std__lang_array.size(vars);_chi_tmp744=_chi_tmp752 end;local varCount=_chi_tmp744;
-do local function _chi_tmp753() return vi end;local function _chi_tmp754() return varCount end;while (_chi_tmp753() <= _chi_tmp754()) do do
-do local _chi_tmp755=vars[vi];local _chi_tmp756=__chicc__symbols.fstAddLocal(fst,_chi_tmp755,(nil),(false)); end;
+local _chi_tmp746;do local _chi_tmp747=__chicc__parse_ast.paSection(node);_chi_tmp746=_chi_tmp747 end;local sec=_chi_tmp746;
+do local _chi_tmp748=__chicc__parse_ast.paForVars(node);_chi_tmp746=_chi_tmp748 end;local vars=_chi_tmp746;
+do local _chi_tmp749=__chicc__parse_ast.paIterable(node);_chi_tmp746=_chi_tmp749 end;local iterNode=_chi_tmp746;
+do local _chi_tmp750=__chicc__parse_ast.paForState(node);_chi_tmp746=_chi_tmp750 end;local stateNode=_chi_tmp746;
+do local _chi_tmp751=__chicc__parse_ast.paForInit(node);_chi_tmp746=_chi_tmp751 end;local initNode=_chi_tmp746;
+do local _chi_tmp752=__chicc__parse_ast.paForBody(node);_chi_tmp746=_chi_tmp752 end;local bodyNode=_chi_tmp746;
+do _chi_tmp746=__P_.currentFnSymbolTable end;local parentFst=_chi_tmp746;
+do local _chi_tmp753=__chicc__symbols.newFnSymbolTable(parentFst);_chi_tmp746=_chi_tmp753 end;local fst=_chi_tmp746;
+do _chi_tmp746=(1) end;local vi=_chi_tmp746;
+do local _chi_tmp754=__std__lang_array.size(vars);_chi_tmp746=_chi_tmp754 end;local varCount=_chi_tmp746;
+do local function _chi_tmp755() return vi end;local function _chi_tmp756() return varCount end;while (_chi_tmp755() <= _chi_tmp756()) do do
+do local _chi_tmp757=vars[vi];local _chi_tmp758=__chicc__symbols.fstAddLocal(fst,_chi_tmp757,(nil),(false)); end;
 vi=(vi + (1)); end ::__continue_20:: end;
  end;
-do local _chi_tmp757=__P_.convert(iterNode,pkg,tables);_chi_tmp744=_chi_tmp757 end;local iter=_chi_tmp744;
-do local _chi_tmp758;if (stateNode ~= (nil)) then local _chi_tmp759=__P_.convert(stateNode,pkg,tables);_chi_tmp758=_chi_tmp759 else _chi_tmp758=(nil) end;_chi_tmp744=_chi_tmp758 end;local state=_chi_tmp744;
-do local _chi_tmp760;if (initNode ~= (nil)) then local _chi_tmp761=__P_.convert(initNode,pkg,tables);_chi_tmp760=_chi_tmp761 else _chi_tmp760=(nil) end;_chi_tmp744=_chi_tmp760 end;local init=_chi_tmp744;
-do _chi_tmp744=__P_.currentFnSymbolTable end;local prevFst=_chi_tmp744;
+do local _chi_tmp759=__P_.convert(iterNode,pkg,tables);_chi_tmp746=_chi_tmp759 end;local iter=_chi_tmp746;
+do local _chi_tmp760;if (stateNode ~= (nil)) then local _chi_tmp761=__P_.convert(stateNode,pkg,tables);_chi_tmp760=_chi_tmp761 else _chi_tmp760=(nil) end;_chi_tmp746=_chi_tmp760 end;local state=_chi_tmp746;
+do local _chi_tmp762;if (initNode ~= (nil)) then local _chi_tmp763=__P_.convert(initNode,pkg,tables);_chi_tmp762=_chi_tmp763 else _chi_tmp762=(nil) end;_chi_tmp746=_chi_tmp762 end;local init=_chi_tmp746;
+do _chi_tmp746=__P_.currentFnSymbolTable end;local prevFst=_chi_tmp746;
 do __P_.currentFnSymbolTable=fst; end;
-do local _chi_tmp762=__P_.convert(bodyNode,pkg,tables);_chi_tmp744=_chi_tmp762 end;local body=_chi_tmp744;
+do local _chi_tmp764=__P_.convert(bodyNode,pkg,tables);_chi_tmp746=_chi_tmp764 end;local body=_chi_tmp746;
 do __P_.currentFnSymbolTable=prevFst; end;
-local _chi_tmp763=__chicc__ast.forLoopExpr(vars,iter,state,init,body,sec);return _chi_tmp763 end;
+local _chi_tmp765=__chicc__ast.forLoopExpr(vars,iter,state,init,body,sec);return _chi_tmp765 end;
  end;
 do __P_.convertFor=__P_.convertForImpl; end;
 do function __P_.convertFieldAccessImpl(node,pkg,tables)
-local _chi_tmp764;do local _chi_tmp765=__chicc__parse_ast.paSection(node);_chi_tmp764=_chi_tmp765 end;local sec=_chi_tmp764;
-do local _chi_tmp766=__chicc__parse_ast.paReceiverName(node);_chi_tmp764=_chi_tmp766 end;local receiverName=_chi_tmp764;
-do local _chi_tmp767=__chicc__parse_ast.paMemberName(node);_chi_tmp764=_chi_tmp767 end;local memberName=_chi_tmp764;
-do local _chi_tmp768=__chicc__parse_ast.paMemberSection(node);_chi_tmp764=_chi_tmp768 end;local memberSec=_chi_tmp764;
-do local _chi_tmp769;local _chi_tmp770=__P_.isFnLocal(receiverName);if _chi_tmp770 then _chi_tmp769=(nil) else local _chi_tmp771=__chicc__symbols.ctGetAliasedPackage(tables,receiverName);_chi_tmp769=_chi_tmp771 end;_chi_tmp764=_chi_tmp769 end;local aliasedPkg=_chi_tmp764;
-do local _chi_tmp772;if (aliasedPkg ~= (nil)) then
-local _chi_tmp773;do local _chi_tmp774=aliasedPkg.moduleName;_chi_tmp773=_chi_tmp774 end;local aliasMod=_chi_tmp773;
-do local _chi_tmp775=aliasedPkg.packageName;_chi_tmp773=_chi_tmp775 end;local aliasPkg=_chi_tmp773;
-do local _chi_tmp776=tables.ns;_chi_tmp773=_chi_tmp776 end;local ns=_chi_tmp773;
-do local _chi_tmp777;if (ns ~= (nil)) then
-local _chi_tmp778;do local _chi_tmp779=ns.getSymbol and ns.getSymbol(aliasMod, aliasPkg, memberName) or nil;_chi_tmp778=_chi_tmp779 end;local pkgSym=_chi_tmp778;
-local _chi_tmp780;if (pkgSym ~= (nil)) then
-local _chi_tmp781;do local _chi_tmp782=pkgSym.moduleName;_chi_tmp781=_chi_tmp782 end;local sMod=_chi_tmp781;
-do local _chi_tmp783=pkgSym.packageName;_chi_tmp781=_chi_tmp783 end;local sPkg=_chi_tmp781;
-do local _chi_tmp784=node.receiver and node.receiver.section or nil;_chi_tmp781=_chi_tmp784 end;local recvSection=_chi_tmp781;
-local _chi_tmp785=__chicc__ast.packageTarget(sMod,sPkg,memberName);local _chi_tmp786=__chicc__ast.variableAccessExpr(_chi_tmp785,recvSection);return _chi_tmp786;
- end;_chi_tmp777=_chi_tmp780
+local _chi_tmp766;do local _chi_tmp767=__chicc__parse_ast.paSection(node);_chi_tmp766=_chi_tmp767 end;local sec=_chi_tmp766;
+do local _chi_tmp768=__chicc__parse_ast.paReceiverName(node);_chi_tmp766=_chi_tmp768 end;local receiverName=_chi_tmp766;
+do local _chi_tmp769=__chicc__parse_ast.paMemberName(node);_chi_tmp766=_chi_tmp769 end;local memberName=_chi_tmp766;
+do local _chi_tmp770=__chicc__parse_ast.paMemberSection(node);_chi_tmp766=_chi_tmp770 end;local memberSec=_chi_tmp766;
+do local _chi_tmp771;local _chi_tmp772=__P_.isFnLocal(receiverName);if _chi_tmp772 then _chi_tmp771=(nil) else local _chi_tmp773=__chicc__symbols.ctGetAliasedPackage(tables,receiverName);_chi_tmp771=_chi_tmp773 end;_chi_tmp766=_chi_tmp771 end;local aliasedPkg=_chi_tmp766;
+do local _chi_tmp774;if (aliasedPkg ~= (nil)) then
+local _chi_tmp775;do local _chi_tmp776=aliasedPkg.moduleName;_chi_tmp775=_chi_tmp776 end;local aliasMod=_chi_tmp775;
+do local _chi_tmp777=aliasedPkg.packageName;_chi_tmp775=_chi_tmp777 end;local aliasPkg=_chi_tmp775;
+do local _chi_tmp778=tables.ns;_chi_tmp775=_chi_tmp778 end;local ns=_chi_tmp775;
+do local _chi_tmp779;if (ns ~= (nil)) then
+local _chi_tmp780;do local _chi_tmp781=ns.getSymbol and ns.getSymbol(aliasMod, aliasPkg, memberName) or nil;_chi_tmp780=_chi_tmp781 end;local pkgSym=_chi_tmp780;
+local _chi_tmp782;if (pkgSym ~= (nil)) then
+local _chi_tmp783;do local _chi_tmp784=pkgSym.moduleName;_chi_tmp783=_chi_tmp784 end;local sMod=_chi_tmp783;
+do local _chi_tmp785=pkgSym.packageName;_chi_tmp783=_chi_tmp785 end;local sPkg=_chi_tmp783;
+do local _chi_tmp786=node.receiver and node.receiver.section or nil;_chi_tmp783=_chi_tmp786 end;local recvSection=_chi_tmp783;
+local _chi_tmp787=__chicc__ast.packageTarget(sMod,sPkg,memberName);local _chi_tmp788=__chicc__ast.variableAccessExpr(_chi_tmp787,recvSection);return _chi_tmp788;
+ end;_chi_tmp779=_chi_tmp782
  end; end;
-do local _chi_tmp787=node.receiver and node.receiver.section or nil;_chi_tmp773=_chi_tmp787 end;local recvSection=_chi_tmp773;
-local _chi_tmp788=__chicc__ast.packageTarget(aliasMod,aliasPkg,memberName);local _chi_tmp789=__chicc__ast.variableAccessExpr(_chi_tmp788,recvSection);return _chi_tmp789;
+do local _chi_tmp789=node.receiver and node.receiver.section or nil;_chi_tmp775=_chi_tmp789 end;local recvSection=_chi_tmp775;
+local _chi_tmp790=__chicc__ast.packageTarget(aliasMod,aliasPkg,memberName);local _chi_tmp791=__chicc__ast.variableAccessExpr(_chi_tmp790,recvSection);return _chi_tmp791;
  end; end;
-do local _chi_tmp790=__chicc__parse_ast.paReceiver(node);local _chi_tmp791=__P_.convert(_chi_tmp790,pkg,tables);_chi_tmp764=_chi_tmp791 end;local recv=_chi_tmp764;
-local _chi_tmp792=__chicc__ast.fieldAccessExpr(recv,memberName,memberSec,sec);return _chi_tmp792 end;
+do local _chi_tmp792=__chicc__parse_ast.paReceiver(node);local _chi_tmp793=__P_.convert(_chi_tmp792,pkg,tables);_chi_tmp766=_chi_tmp793 end;local recv=_chi_tmp766;
+local _chi_tmp794=__chicc__ast.fieldAccessExpr(recv,memberName,memberSec,sec);return _chi_tmp794 end;
  end;
 do __P_.convertFieldAccess=__P_.convertFieldAccessImpl; end;
 do function __P_.convertWeaveImpl(node,pkg,tables)
-local _chi_tmp793;do local _chi_tmp794=__chicc__parse_ast.paSection(node);_chi_tmp793=_chi_tmp794 end;local sec=_chi_tmp793;
-do local _chi_tmp795=__chicc__parse_ast.paValue(node);_chi_tmp793=_chi_tmp795 end;local valNode=_chi_tmp793;
-do local _chi_tmp796=__chicc__parse_ast.paOpTemplate(node);_chi_tmp793=_chi_tmp796 end;local templateNode=_chi_tmp793;
-do local _chi_tmp797=__P_.convert(valNode,pkg,tables);_chi_tmp793=_chi_tmp797 end;local inputValue=_chi_tmp793;
-do local _chi_tmp798=__P_.nextTempVarName();_chi_tmp793=_chi_tmp798 end;local tempVarName=_chi_tmp793;
-do local _chi_tmp799=__P_.addLocalSymbol(tempVarName,(false),(false),(nil),pkg,tables);_chi_tmp793=_chi_tmp799 end;local tempTarget=_chi_tmp793;
-do local _chi_tmp800=tempTarget;local _chi_tmp801=inputValue;local _chi_tmp802=__chicc__parse_ast.paSection(valNode);local _chi_tmp803=__chicc__ast.declarationExpr((false),_chi_tmp800,(false),(nil),_chi_tmp801,_chi_tmp802);_chi_tmp793=_chi_tmp803 end;local tempDecl=_chi_tmp793;
-do local _chi_tmp804=tempTarget;local _chi_tmp805=__chicc__parse_ast.paSection(valNode);local _chi_tmp806=__chicc__ast.variableAccessExpr(_chi_tmp804,_chi_tmp805);_chi_tmp793=_chi_tmp806 end;local readVar=_chi_tmp793;
-do _chi_tmp793=__P_.weaveInput end;local prevWeaveInput=_chi_tmp793;
+local _chi_tmp795;do local _chi_tmp796=__chicc__parse_ast.paSection(node);_chi_tmp795=_chi_tmp796 end;local sec=_chi_tmp795;
+do local _chi_tmp797=__chicc__parse_ast.paValue(node);_chi_tmp795=_chi_tmp797 end;local valNode=_chi_tmp795;
+do local _chi_tmp798=__chicc__parse_ast.paOpTemplate(node);_chi_tmp795=_chi_tmp798 end;local templateNode=_chi_tmp795;
+do local _chi_tmp799=__P_.convert(valNode,pkg,tables);_chi_tmp795=_chi_tmp799 end;local inputValue=_chi_tmp795;
+do local _chi_tmp800=__P_.nextTempVarName();_chi_tmp795=_chi_tmp800 end;local tempVarName=_chi_tmp795;
+do local _chi_tmp801=__P_.addLocalSymbol(tempVarName,(false),(false),(nil),pkg,tables);_chi_tmp795=_chi_tmp801 end;local tempTarget=_chi_tmp795;
+do local _chi_tmp802=tempTarget;local _chi_tmp803=inputValue;local _chi_tmp804=__chicc__parse_ast.paSection(valNode);local _chi_tmp805=__chicc__ast.declarationExpr((false),_chi_tmp802,(false),(nil),_chi_tmp803,_chi_tmp804);_chi_tmp795=_chi_tmp805 end;local tempDecl=_chi_tmp795;
+do local _chi_tmp806=tempTarget;local _chi_tmp807=__chicc__parse_ast.paSection(valNode);local _chi_tmp808=__chicc__ast.variableAccessExpr(_chi_tmp806,_chi_tmp807);_chi_tmp795=_chi_tmp808 end;local readVar=_chi_tmp795;
+do _chi_tmp795=__P_.weaveInput end;local prevWeaveInput=_chi_tmp795;
 do __P_.weaveInput=readVar; end;
-do local _chi_tmp807=__P_.convert(templateNode,pkg,tables);_chi_tmp793=_chi_tmp807 end;local filledTemplate=_chi_tmp793;
+do local _chi_tmp809=__P_.convert(templateNode,pkg,tables);_chi_tmp795=_chi_tmp809 end;local filledTemplate=_chi_tmp795;
 do __P_.weaveInput=prevWeaveInput; end;
-local _chi_tmp808={tempDecl,filledTemplate};setmetatable(_chi_tmp808, array_meta_table);local _chi_tmp809=__chicc__ast.blockExpr(_chi_tmp808,sec);return _chi_tmp809 end;
+local _chi_tmp810={tempDecl,filledTemplate};setmetatable(_chi_tmp810, array_meta_table);local _chi_tmp811=__chicc__ast.blockExpr(_chi_tmp810,sec);return _chi_tmp811 end;
  end;
 do __P_.convertWeave=__P_.convertWeaveImpl; end;
 do function __P_.convertHandleImpl(node,pkg,tables)
-local _chi_tmp810;do local _chi_tmp811=__chicc__parse_ast.paSection(node);_chi_tmp810=_chi_tmp811 end;local sec=_chi_tmp810;
-do local _chi_tmp812=__chicc__parse_ast.paHandleBody(node);_chi_tmp810=_chi_tmp812 end;local bodyNode=_chi_tmp810;
-do local _chi_tmp813=__chicc__parse_ast.paEffectCases(node);_chi_tmp810=_chi_tmp813 end;local casesArr=_chi_tmp810;
-do local _chi_tmp814=__P_.convert(bodyNode,pkg,tables);_chi_tmp810=_chi_tmp814 end;local body=_chi_tmp810;
-do local _chi_tmp815={};setmetatable(_chi_tmp815, array_meta_table);_chi_tmp810=_chi_tmp815 end;local handleCases=_chi_tmp810;
-do _chi_tmp810=(1) end;local i=_chi_tmp810;
-do local _chi_tmp816=__std__lang_array.size(casesArr);_chi_tmp810=_chi_tmp816 end;local caseCount=_chi_tmp810;
-do local function _chi_tmp817() return i end;local function _chi_tmp818() return caseCount end;while (_chi_tmp817() <= _chi_tmp818()) do do
-local _chi_tmp819;do local _chi_tmp820=casesArr[i];_chi_tmp819=_chi_tmp820 end;local c=_chi_tmp819;
-do local _chi_tmp821=c.effectName;_chi_tmp819=_chi_tmp821 end;local effName=_chi_tmp819;
-do local _chi_tmp822=c.argumentNames;_chi_tmp819=_chi_tmp822 end;local argNames=_chi_tmp819;
-do local _chi_tmp823=c.body;_chi_tmp819=_chi_tmp823 end;local caseBody=_chi_tmp819;
-do local _chi_tmp824=c.section;_chi_tmp819=_chi_tmp824 end;local caseSec=_chi_tmp819;
-do local _chi_tmp825=__chicc__symbols.newFnSymbolTable(__P_.currentFnSymbolTable);_chi_tmp819=_chi_tmp825 end;local virtualFst=_chi_tmp819;
-do _chi_tmp819=__P_.currentFnSymbolTable end;local prevFst=_chi_tmp819;
+local _chi_tmp812;do local _chi_tmp813=__chicc__parse_ast.paSection(node);_chi_tmp812=_chi_tmp813 end;local sec=_chi_tmp812;
+do local _chi_tmp814=__chicc__parse_ast.paHandleBody(node);_chi_tmp812=_chi_tmp814 end;local bodyNode=_chi_tmp812;
+do local _chi_tmp815=__chicc__parse_ast.paEffectCases(node);_chi_tmp812=_chi_tmp815 end;local casesArr=_chi_tmp812;
+do local _chi_tmp816=__P_.convert(bodyNode,pkg,tables);_chi_tmp812=_chi_tmp816 end;local body=_chi_tmp812;
+do local _chi_tmp817={};setmetatable(_chi_tmp817, array_meta_table);_chi_tmp812=_chi_tmp817 end;local handleCases=_chi_tmp812;
+do _chi_tmp812=(1) end;local i=_chi_tmp812;
+do local _chi_tmp818=__std__lang_array.size(casesArr);_chi_tmp812=_chi_tmp818 end;local caseCount=_chi_tmp812;
+do local function _chi_tmp819() return i end;local function _chi_tmp820() return caseCount end;while (_chi_tmp819() <= _chi_tmp820()) do do
+local _chi_tmp821;do local _chi_tmp822=casesArr[i];_chi_tmp821=_chi_tmp822 end;local c=_chi_tmp821;
+do local _chi_tmp823=c.effectName;_chi_tmp821=_chi_tmp823 end;local effName=_chi_tmp821;
+do local _chi_tmp824=c.argumentNames;_chi_tmp821=_chi_tmp824 end;local argNames=_chi_tmp821;
+do local _chi_tmp825=c.body;_chi_tmp821=_chi_tmp825 end;local caseBody=_chi_tmp821;
+do local _chi_tmp826=c.section;_chi_tmp821=_chi_tmp826 end;local caseSec=_chi_tmp821;
+do local _chi_tmp827=__chicc__symbols.newFnSymbolTable(__P_.currentFnSymbolTable);_chi_tmp821=_chi_tmp827 end;local virtualFst=_chi_tmp821;
+do _chi_tmp821=__P_.currentFnSymbolTable end;local prevFst=_chi_tmp821;
 do __P_.currentFnSymbolTable=virtualFst; end;
-do local _chi_tmp826 = '';_chi_tmp819=(_chi_tmp826) end;local eMod=_chi_tmp819;
-do local _chi_tmp827 = '';_chi_tmp819=(_chi_tmp827) end;local ePkg=_chi_tmp819;
-do local _chi_tmp828=__P_.getSymbolSkippingLocals(effName,tables);_chi_tmp819=_chi_tmp828 end;local effTarget=_chi_tmp819;
-do local _chi_tmp829=effTarget.tag;_chi_tmp819=_chi_tmp829 end;local effTargetTag=_chi_tmp819;
-do local _chi_tmp830;local _chi_tmp831 = 'package';if (effTargetTag == (_chi_tmp831)) then
-do local _chi_tmp832=effTarget.moduleName;eMod=_chi_tmp832; end;
-local _chi_tmp833=effTarget.packageName;ePkg=_chi_tmp833;_chi_tmp830=ePkg
+do local _chi_tmp828 = '';_chi_tmp821=(_chi_tmp828) end;local eMod=_chi_tmp821;
+do local _chi_tmp829 = '';_chi_tmp821=(_chi_tmp829) end;local ePkg=_chi_tmp821;
+do local _chi_tmp830=__P_.getSymbolSkippingLocals(effName,tables);_chi_tmp821=_chi_tmp830 end;local effTarget=_chi_tmp821;
+do local _chi_tmp831=effTarget.tag;_chi_tmp821=_chi_tmp831 end;local effTargetTag=_chi_tmp821;
+do local _chi_tmp832;local _chi_tmp833 = 'package';if (effTargetTag == (_chi_tmp833)) then
+do local _chi_tmp834=effTarget.moduleName;eMod=_chi_tmp834; end;
+local _chi_tmp835=effTarget.packageName;ePkg=_chi_tmp835;_chi_tmp832=ePkg
  end; end;
-do local _chi_tmp834 = 'resume';local _chi_tmp835=__chicc__symbols.fstAddLocal(virtualFst,(_chi_tmp834),(nil),(false)); end;
-do _chi_tmp819=(1) end;local ai=_chi_tmp819;
-do local _chi_tmp836=__std__lang_array.size(argNames);_chi_tmp819=_chi_tmp836 end;local anCount=_chi_tmp819;
-do local function _chi_tmp837() return ai end;local function _chi_tmp838() return anCount end;while (_chi_tmp837() <= _chi_tmp838()) do do
-do local _chi_tmp839=argNames[ai];local _chi_tmp840=__chicc__symbols.fstAddLocal(virtualFst,_chi_tmp839,(nil),(false)); end;
+do local _chi_tmp836 = 'resume';local _chi_tmp837=__chicc__symbols.fstAddLocal(virtualFst,(_chi_tmp836),(nil),(false)); end;
+do _chi_tmp821=(1) end;local ai=_chi_tmp821;
+do local _chi_tmp838=__std__lang_array.size(argNames);_chi_tmp821=_chi_tmp838 end;local anCount=_chi_tmp821;
+do local function _chi_tmp839() return ai end;local function _chi_tmp840() return anCount end;while (_chi_tmp839() <= _chi_tmp840()) do do
+do local _chi_tmp841=argNames[ai];local _chi_tmp842=__chicc__symbols.fstAddLocal(virtualFst,_chi_tmp841,(nil),(false)); end;
 ai=(ai + (1)); end ::__continue_22:: end;
  end;
-do local _chi_tmp841=__P_.convert(caseBody,pkg,tables);_chi_tmp819=_chi_tmp841 end;local convertedBody=_chi_tmp819;
-do local _chi_tmp842 = 'resume';local _chi_tmp843=__chicc__symbols.fstRemove(virtualFst,(_chi_tmp842)); end;
+do local _chi_tmp843=__P_.convert(caseBody,pkg,tables);_chi_tmp821=_chi_tmp843 end;local convertedBody=_chi_tmp821;
+do local _chi_tmp844 = 'resume';local _chi_tmp845=__chicc__symbols.fstRemove(virtualFst,(_chi_tmp844)); end;
 do ai=(1); end;
-do local function _chi_tmp844() return ai end;local function _chi_tmp845() return anCount end;while (_chi_tmp844() <= _chi_tmp845()) do do
-do local _chi_tmp846=argNames[ai];local _chi_tmp847=__chicc__symbols.fstRemove(virtualFst,_chi_tmp846); end;
+do local function _chi_tmp846() return ai end;local function _chi_tmp847() return anCount end;while (_chi_tmp846() <= _chi_tmp847()) do do
+do local _chi_tmp848=argNames[ai];local _chi_tmp849=__chicc__symbols.fstRemove(virtualFst,_chi_tmp848); end;
 ai=(ai + (1)); end ::__continue_23:: end;
  end;
 do __P_.currentFnSymbolTable=prevFst; end;
-do local _chi_tmp848=handleCases;local _chi_tmp849=__chicc__ast.newHandleCase(eMod,ePkg,effName,argNames,convertedBody,caseSec);local _chi_tmp850=__std__lang_array.push(_chi_tmp848,_chi_tmp849); end;
+do local _chi_tmp850=handleCases;local _chi_tmp851=__chicc__ast.newHandleCase(eMod,ePkg,effName,argNames,convertedBody,caseSec);local _chi_tmp852=__std__lang_array.push(_chi_tmp850,_chi_tmp851); end;
 i=(i + (1)); end ::__continue_21:: end;
  end;
-local _chi_tmp851=__chicc__ast.handleExpr(body,handleCases,sec);return _chi_tmp851 end;
+local _chi_tmp853=__chicc__ast.handleExpr(body,handleCases,sec);return _chi_tmp853 end;
  end;
 do __P_.convertHandle=__P_.convertHandleImpl; end;
 do function __P_.lowerVariantType(vdef,pkg,tables)
-local _chi_tmp852;do local _chi_tmp853={};setmetatable(_chi_tmp853, array_meta_table);_chi_tmp852=_chi_tmp853 end;local decls=_chi_tmp852;
-do local _chi_tmp854=__P_.getTypeTable(tables);_chi_tmp852=_chi_tmp854 end;local tt=_chi_tmp852;
-do local _chi_tmp855=pkg.moduleName;_chi_tmp852=_chi_tmp855 end;local modName=_chi_tmp852;
-do local _chi_tmp856=pkg.packageName;_chi_tmp852=_chi_tmp856 end;local pkgName=_chi_tmp852;
-do local _chi_tmp857=tt.aliases;_chi_tmp852=_chi_tmp857 end;local aliasesMap=_chi_tmp852;
-do local _chi_tmp858=vdef.typeName;_chi_tmp852=_chi_tmp858 end;local typeName=_chi_tmp852;
-do local _chi_tmp859=vdef.typeParameters;_chi_tmp852=_chi_tmp859 end;local typeParams=_chi_tmp852;
-do local _chi_tmp860=vdef.constructors;_chi_tmp852=_chi_tmp860 end;local ctors=_chi_tmp852;
-local _chi_tmp861;local _chi_tmp862=__std__lang_array.size(typeParams);if (_chi_tmp862 > (0)) then
-error({ code = 'UNSUPPORTED_FEATURE', text = 'generic data types are not supported yet (data ' .. vdef.typeName .. ')' });_chi_tmp861=nil
+local _chi_tmp854;do local _chi_tmp855={};setmetatable(_chi_tmp855, array_meta_table);_chi_tmp854=_chi_tmp855 end;local decls=_chi_tmp854;
+do local _chi_tmp856=__P_.getTypeTable(tables);_chi_tmp854=_chi_tmp856 end;local tt=_chi_tmp854;
+do local _chi_tmp857=pkg.moduleName;_chi_tmp854=_chi_tmp857 end;local modName=_chi_tmp854;
+do local _chi_tmp858=pkg.packageName;_chi_tmp854=_chi_tmp858 end;local pkgName=_chi_tmp854;
+do local _chi_tmp859=tt.aliases;_chi_tmp854=_chi_tmp859 end;local aliasesMap=_chi_tmp854;
+do local _chi_tmp860=vdef.typeName;_chi_tmp854=_chi_tmp860 end;local typeName=_chi_tmp854;
+do local _chi_tmp861=vdef.typeParameters;_chi_tmp854=_chi_tmp861 end;local typeParams=_chi_tmp854;
+do local _chi_tmp862=vdef.constructors;_chi_tmp854=_chi_tmp862 end;local ctors=_chi_tmp854;
+local _chi_tmp863;local _chi_tmp864=__std__lang_array.size(typeParams);if (_chi_tmp864 > (0)) then
+error({ code = 'UNSUPPORTED_FEATURE', text = 'generic data types are not supported yet (data ' .. vdef.typeName .. ')' });_chi_tmp863=nil
  end;
-do local _chi_tmp863=__std__lang_array.size(ctors);_chi_tmp852=_chi_tmp863 end;local ctorCount=_chi_tmp852;
-do local _chi_tmp864={};setmetatable(_chi_tmp864, array_meta_table);_chi_tmp852=_chi_tmp864 end;local placeholders=_chi_tmp852;
-do local _chi_tmp865={};setmetatable(_chi_tmp865, array_meta_table);_chi_tmp852=_chi_tmp865 end;local definitions=_chi_tmp852;
-do local _chi_tmp866=__P_.nextTempVarName();local _chi_tmp867=__chicc__types.variableType(_chi_tmp866,((0) - (1)));_chi_tmp852=_chi_tmp867 end;local dataPlaceholder=_chi_tmp852;
-do local _chi_tmp868=__std__lang_array.push(placeholders,dataPlaceholder); end;
-do local _chi_tmp869=__std__lang_array.push(definitions,__chicc__types.tAny); end;
-do local _chi_tmp870={ typeId = { moduleName = modName, packageName = pkgName, name = typeName }, aliasType = dataPlaceholder };_chi_tmp852=_chi_tmp870 end;local dataPlaceholderAlias=_chi_tmp852;
-do local _chi_tmp871=__std__lang_map.put(aliasesMap,typeName,dataPlaceholderAlias); end;
-do _chi_tmp852=(1) end;local ci=_chi_tmp852;
-do local function _chi_tmp872() return ci end;local function _chi_tmp873() return ctorCount end;while (_chi_tmp872() <= _chi_tmp873()) do do
-local _chi_tmp874;do local _chi_tmp875=ctors[ci];_chi_tmp874=_chi_tmp875 end;local ctor=_chi_tmp874;
-do local _chi_tmp876=ctor.name;_chi_tmp874=_chi_tmp876 end;local ctorName=_chi_tmp874;
-do local _chi_tmp877=__P_.nextTempVarName();local _chi_tmp878=__chicc__types.variableType(_chi_tmp877,((0) - (1)));_chi_tmp874=_chi_tmp878 end;local placeholder=_chi_tmp874;
-do local _chi_tmp879=__std__lang_array.push(placeholders,placeholder); end;
-do local _chi_tmp880=__std__lang_array.push(definitions,__chicc__types.tAny); end;
-do local _chi_tmp881;if (ctorName ~= typeName) then
-local _chi_tmp882;do local _chi_tmp883={ typeId = { moduleName = modName, packageName = pkgName, name = ctorName }, aliasType = placeholder };_chi_tmp882=_chi_tmp883 end;local ctorPlaceholderAlias=_chi_tmp882;
-local _chi_tmp884=__std__lang_map.put(aliasesMap,ctorName,ctorPlaceholderAlias);_chi_tmp881=_chi_tmp884
+do local _chi_tmp865=__std__lang_array.size(ctors);_chi_tmp854=_chi_tmp865 end;local ctorCount=_chi_tmp854;
+do local _chi_tmp866={};setmetatable(_chi_tmp866, array_meta_table);_chi_tmp854=_chi_tmp866 end;local placeholders=_chi_tmp854;
+do local _chi_tmp867={};setmetatable(_chi_tmp867, array_meta_table);_chi_tmp854=_chi_tmp867 end;local definitions=_chi_tmp854;
+do local _chi_tmp868=__P_.nextTempVarName();local _chi_tmp869=__chicc__types.variableType(_chi_tmp868,((0) - (1)));_chi_tmp854=_chi_tmp869 end;local dataPlaceholder=_chi_tmp854;
+do local _chi_tmp870=__std__lang_array.push(placeholders,dataPlaceholder); end;
+do local _chi_tmp871=__std__lang_array.push(definitions,__chicc__types.tAny); end;
+do local _chi_tmp872={ typeId = { moduleName = modName, packageName = pkgName, name = typeName }, aliasType = dataPlaceholder };_chi_tmp854=_chi_tmp872 end;local dataPlaceholderAlias=_chi_tmp854;
+do local _chi_tmp873=__std__lang_map.put(aliasesMap,typeName,dataPlaceholderAlias); end;
+do _chi_tmp854=(1) end;local ci=_chi_tmp854;
+do local function _chi_tmp874() return ci end;local function _chi_tmp875() return ctorCount end;while (_chi_tmp874() <= _chi_tmp875()) do do
+local _chi_tmp876;do local _chi_tmp877=ctors[ci];_chi_tmp876=_chi_tmp877 end;local ctor=_chi_tmp876;
+do local _chi_tmp878=ctor.name;_chi_tmp876=_chi_tmp878 end;local ctorName=_chi_tmp876;
+do local _chi_tmp879=__P_.nextTempVarName();local _chi_tmp880=__chicc__types.variableType(_chi_tmp879,((0) - (1)));_chi_tmp876=_chi_tmp880 end;local placeholder=_chi_tmp876;
+do local _chi_tmp881=__std__lang_array.push(placeholders,placeholder); end;
+do local _chi_tmp882=__std__lang_array.push(definitions,__chicc__types.tAny); end;
+do local _chi_tmp883;if (ctorName ~= typeName) then
+local _chi_tmp884;do local _chi_tmp885={ typeId = { moduleName = modName, packageName = pkgName, name = ctorName }, aliasType = placeholder };_chi_tmp884=_chi_tmp885 end;local ctorPlaceholderAlias=_chi_tmp884;
+local _chi_tmp886=__std__lang_map.put(aliasesMap,ctorName,ctorPlaceholderAlias);_chi_tmp883=_chi_tmp886
  end; end;
 ci=(ci + (1)); end ::__continue_24:: end;
  end;
-do local _chi_tmp885={};setmetatable(_chi_tmp885, array_meta_table);_chi_tmp852=_chi_tmp885 end;local ctorRecords=_chi_tmp852;
-do local _chi_tmp886={};setmetatable(_chi_tmp886, array_meta_table);_chi_tmp852=_chi_tmp886 end;local ctorParamTypes=_chi_tmp852;
+do local _chi_tmp887={};setmetatable(_chi_tmp887, array_meta_table);_chi_tmp854=_chi_tmp887 end;local ctorRecords=_chi_tmp854;
+do local _chi_tmp888={};setmetatable(_chi_tmp888, array_meta_table);_chi_tmp854=_chi_tmp888 end;local ctorParamTypes=_chi_tmp854;
 do ci=(1); end;
-do local function _chi_tmp887() return ci end;local function _chi_tmp888() return ctorCount end;while (_chi_tmp887() <= _chi_tmp888()) do do
-local _chi_tmp889;do local _chi_tmp890=ctors[ci];_chi_tmp889=_chi_tmp890 end;local ctor=_chi_tmp889;
-do local _chi_tmp891=ctor.name;_chi_tmp889=_chi_tmp891 end;local ctorName=_chi_tmp889;
-do local _chi_tmp892=ctor.fields;_chi_tmp889=_chi_tmp892 end;local fields=_chi_tmp889;
-do local _chi_tmp893=__std__lang_array.size(fields);_chi_tmp889=_chi_tmp893 end;local fieldCount=_chi_tmp889;
-do local _chi_tmp894={};setmetatable(_chi_tmp894, array_meta_table);_chi_tmp889=_chi_tmp894 end;local recFields=_chi_tmp889;
-do local _chi_tmp895={};setmetatable(_chi_tmp895, array_meta_table);_chi_tmp889=_chi_tmp895 end;local paramTypes=_chi_tmp889;
-do _chi_tmp889=(1) end;local fi=_chi_tmp889;
-do local function _chi_tmp896() return fi end;local function _chi_tmp897() return fieldCount end;while (_chi_tmp896() <= _chi_tmp897()) do do
-local _chi_tmp898;do local _chi_tmp899=fields[fi];_chi_tmp898=_chi_tmp899 end;local field=_chi_tmp898;
-do local _chi_tmp900=field.name;_chi_tmp898=_chi_tmp900 end;local fieldName=_chi_tmp898;
-do local _chi_tmp901=tt;local _chi_tmp902={};setmetatable(_chi_tmp902, array_meta_table);local _chi_tmp903=field.typeRef;local _chi_tmp904=__P_.effectiveTypeLevel();local _chi_tmp905=__chicc__symbols.resolveType(_chi_tmp901,_chi_tmp902,_chi_tmp903,_chi_tmp904);_chi_tmp898=_chi_tmp905 end;local fieldType=_chi_tmp898;
-do local _chi_tmp906={name=fieldName,fieldType=fieldType};setmetatable(_chi_tmp906, record_meta_table);local _chi_tmp907=__std__lang_array.push(recFields,_chi_tmp906); end;
-do local _chi_tmp908=__std__lang_array.push(paramTypes,fieldType); end;
+do local function _chi_tmp889() return ci end;local function _chi_tmp890() return ctorCount end;while (_chi_tmp889() <= _chi_tmp890()) do do
+local _chi_tmp891;do local _chi_tmp892=ctors[ci];_chi_tmp891=_chi_tmp892 end;local ctor=_chi_tmp891;
+do local _chi_tmp893=ctor.name;_chi_tmp891=_chi_tmp893 end;local ctorName=_chi_tmp891;
+do local _chi_tmp894=ctor.fields;_chi_tmp891=_chi_tmp894 end;local fields=_chi_tmp891;
+do local _chi_tmp895=__std__lang_array.size(fields);_chi_tmp891=_chi_tmp895 end;local fieldCount=_chi_tmp891;
+do local _chi_tmp896={};setmetatable(_chi_tmp896, array_meta_table);_chi_tmp891=_chi_tmp896 end;local recFields=_chi_tmp891;
+do local _chi_tmp897={};setmetatable(_chi_tmp897, array_meta_table);_chi_tmp891=_chi_tmp897 end;local paramTypes=_chi_tmp891;
+do _chi_tmp891=(1) end;local fi=_chi_tmp891;
+do local function _chi_tmp898() return fi end;local function _chi_tmp899() return fieldCount end;while (_chi_tmp898() <= _chi_tmp899()) do do
+local _chi_tmp900;do local _chi_tmp901=fields[fi];_chi_tmp900=_chi_tmp901 end;local field=_chi_tmp900;
+do local _chi_tmp902=field.name;_chi_tmp900=_chi_tmp902 end;local fieldName=_chi_tmp900;
+do local _chi_tmp903=tt;local _chi_tmp904={};setmetatable(_chi_tmp904, array_meta_table);local _chi_tmp905=field.typeRef;local _chi_tmp906=__P_.effectiveTypeLevel();local _chi_tmp907=__chicc__symbols.resolveType(_chi_tmp903,_chi_tmp904,_chi_tmp905,_chi_tmp906);_chi_tmp900=_chi_tmp907 end;local fieldType=_chi_tmp900;
+do local _chi_tmp908={name=fieldName,fieldType=fieldType};setmetatable(_chi_tmp908, record_meta_table);local _chi_tmp909=__std__lang_array.push(recFields,_chi_tmp908); end;
+do local _chi_tmp910=__std__lang_array.push(paramTypes,fieldType); end;
 fi=(fi + (1)); end ::__continue_26:: end;
  end;
-do local _chi_tmp909=__chicc__types.newTypeId(modName,pkgName,ctorName);_chi_tmp889=_chi_tmp909 end;local ctorId=_chi_tmp889;
-do local _chi_tmp910={ctorId};setmetatable(_chi_tmp910, array_meta_table);local _chi_tmp911={};setmetatable(_chi_tmp911, array_meta_table);local _chi_tmp912=__chicc__types.recordType(_chi_tmp910,recFields,_chi_tmp911);_chi_tmp889=_chi_tmp912 end;local rec=_chi_tmp889;
+do local _chi_tmp911=__chicc__types.newTypeId(modName,pkgName,ctorName);_chi_tmp891=_chi_tmp911 end;local ctorId=_chi_tmp891;
+do local _chi_tmp912={ctorId};setmetatable(_chi_tmp912, array_meta_table);local _chi_tmp913={};setmetatable(_chi_tmp913, array_meta_table);local _chi_tmp914=__chicc__types.recordType(_chi_tmp912,recFields,_chi_tmp913);_chi_tmp891=_chi_tmp914 end;local rec=_chi_tmp891;
 do rec.name=ctorName; end;
-do local _chi_tmp913=__std__lang_array.push(ctorRecords,rec); end;
-do local _chi_tmp914=__std__lang_array.push(ctorParamTypes,paramTypes); end;
+do local _chi_tmp915=__std__lang_array.push(ctorRecords,rec); end;
+do local _chi_tmp916=__std__lang_array.push(ctorParamTypes,paramTypes); end;
 do definitions[(ci + (1))]=rec; end;
 ci=(ci + (1)); end ::__continue_25:: end;
  end;
-do local _chi_tmp915=ctorRecords[(1)];_chi_tmp852=_chi_tmp915 end;local dataType=_chi_tmp852;
-do local _chi_tmp916;if (ctorCount > (1)) then
-local _chi_tmp917;do _chi_tmp917=(2) end;local si=_chi_tmp917;
-local function _chi_tmp918() return si end;local function _chi_tmp919() return ctorCount end;while (_chi_tmp918() <= _chi_tmp919()) do do
-do local _chi_tmp920={};setmetatable(_chi_tmp920, array_meta_table);local _chi_tmp921=ctorRecords[si];local _chi_tmp922={};setmetatable(_chi_tmp922, array_meta_table);local _chi_tmp923=__chicc__types.sumType(_chi_tmp920,dataType,_chi_tmp921,_chi_tmp922);dataType=_chi_tmp923; end;
+do local _chi_tmp917=ctorRecords[(1)];_chi_tmp854=_chi_tmp917 end;local dataType=_chi_tmp854;
+do local _chi_tmp918;if (ctorCount > (1)) then
+local _chi_tmp919;do _chi_tmp919=(2) end;local si=_chi_tmp919;
+local function _chi_tmp920() return si end;local function _chi_tmp921() return ctorCount end;while (_chi_tmp920() <= _chi_tmp921()) do do
+do local _chi_tmp922={};setmetatable(_chi_tmp922, array_meta_table);local _chi_tmp923=ctorRecords[si];local _chi_tmp924={};setmetatable(_chi_tmp924, array_meta_table);local _chi_tmp925=__chicc__types.sumType(_chi_tmp922,dataType,_chi_tmp923,_chi_tmp924);dataType=_chi_tmp925; end;
 si=(si + (1)); end ::__continue_27:: end;
-_chi_tmp916=nil
+_chi_tmp918=nil
  end; end;
 do definitions[(1)]=dataType; end;
-do local _chi_tmp924={};setmetatable(_chi_tmp924, array_meta_table);_chi_tmp852=_chi_tmp924 end;local ctorIsFieldType=_chi_tmp852;
+do local _chi_tmp926={};setmetatable(_chi_tmp926, array_meta_table);_chi_tmp854=_chi_tmp926 end;local ctorIsFieldType=_chi_tmp854;
 do ci=(1); end;
-do local function _chi_tmp925() return ci end;local function _chi_tmp926() return ctorCount end;while (_chi_tmp925() <= _chi_tmp926()) do do
-local _chi_tmp927;do local _chi_tmp928=placeholders[(ci + (1))];_chi_tmp927=_chi_tmp928 end;local placeholder=_chi_tmp927;
-do _chi_tmp927=(false) end;local referenced=_chi_tmp927;
-do _chi_tmp927=(1) end;local ownerIndex=_chi_tmp927;
-do local function _chi_tmp929() return ownerIndex end;local function _chi_tmp930() return ctorCount end;local function _chi_tmp931() local _chi_tmp932=not referenced;return _chi_tmp932 end;while ((_chi_tmp929() <= _chi_tmp930()) and _chi_tmp931()) do do
-local _chi_tmp933;do local _chi_tmp934=ctorParamTypes[ownerIndex];_chi_tmp933=_chi_tmp934 end;local paramTypes=_chi_tmp933;
-do _chi_tmp933=(1) end;local fi=_chi_tmp933;
-do local function _chi_tmp935() return fi end;local function _chi_tmp936() local _chi_tmp937=__std__lang_array.size(paramTypes);return _chi_tmp937 end;local function _chi_tmp938() local _chi_tmp939=not referenced;return _chi_tmp939 end;while ((_chi_tmp935() <= _chi_tmp936()) and _chi_tmp938()) do do
-do local _chi_tmp940;local _chi_tmp941=paramTypes[fi];local _chi_tmp942=__chicc__types.occursIn(placeholder,_chi_tmp941);if _chi_tmp942 then referenced=(true);_chi_tmp940=referenced end; end;
+do local function _chi_tmp927() return ci end;local function _chi_tmp928() return ctorCount end;while (_chi_tmp927() <= _chi_tmp928()) do do
+local _chi_tmp929;do local _chi_tmp930=placeholders[(ci + (1))];_chi_tmp929=_chi_tmp930 end;local placeholder=_chi_tmp929;
+do _chi_tmp929=(false) end;local referenced=_chi_tmp929;
+do _chi_tmp929=(1) end;local ownerIndex=_chi_tmp929;
+do local function _chi_tmp931() return ownerIndex end;local function _chi_tmp932() return ctorCount end;local function _chi_tmp933() local _chi_tmp934=not referenced;return _chi_tmp934 end;while ((_chi_tmp931() <= _chi_tmp932()) and _chi_tmp933()) do do
+local _chi_tmp935;do local _chi_tmp936=ctorParamTypes[ownerIndex];_chi_tmp935=_chi_tmp936 end;local paramTypes=_chi_tmp935;
+do _chi_tmp935=(1) end;local fi=_chi_tmp935;
+do local function _chi_tmp937() return fi end;local function _chi_tmp938() local _chi_tmp939=__std__lang_array.size(paramTypes);return _chi_tmp939 end;local function _chi_tmp940() local _chi_tmp941=not referenced;return _chi_tmp941 end;while ((_chi_tmp937() <= _chi_tmp938()) and _chi_tmp940()) do do
+do local _chi_tmp942;local _chi_tmp943=paramTypes[fi];local _chi_tmp944=__chicc__types.occursIn(placeholder,_chi_tmp943);if _chi_tmp944 then referenced=(true);_chi_tmp942=referenced end; end;
 fi=(fi + (1)); end ::__continue_30:: end;
  end;
 ownerIndex=(ownerIndex + (1)); end ::__continue_29:: end;
  end;
-do local _chi_tmp943=__std__lang_array.push(ctorIsFieldType,referenced); end;
+do local _chi_tmp945=__std__lang_array.push(ctorIsFieldType,referenced); end;
 ci=(ci + (1)); end ::__continue_28:: end;
  end;
-do local _chi_tmp944={};setmetatable(_chi_tmp944, array_meta_table);_chi_tmp852=_chi_tmp944 end;local closedCtorRecords=_chi_tmp852;
+do local _chi_tmp946={};setmetatable(_chi_tmp946, array_meta_table);_chi_tmp854=_chi_tmp946 end;local closedCtorRecords=_chi_tmp854;
 do ci=(1); end;
-do local function _chi_tmp945() return ci end;local function _chi_tmp946() return ctorCount end;while (_chi_tmp945() <= _chi_tmp946()) do do
-local _chi_tmp947;do local _chi_tmp948=ctors[ci];_chi_tmp947=_chi_tmp948 end;local ctor=_chi_tmp947;
-do local _chi_tmp949=ctor.name;_chi_tmp947=_chi_tmp949 end;local ctorName=_chi_tmp947;
-do local _chi_tmp950=ctor.fields;_chi_tmp947=_chi_tmp950 end;local fields=_chi_tmp947;
-do local _chi_tmp951=ctorParamTypes[ci];_chi_tmp947=_chi_tmp951 end;local paramTypes=_chi_tmp947;
-do local _chi_tmp952={};setmetatable(_chi_tmp952, array_meta_table);_chi_tmp947=_chi_tmp952 end;local closedParamTypes=_chi_tmp947;
-do local _chi_tmp953={};setmetatable(_chi_tmp953, array_meta_table);_chi_tmp947=_chi_tmp953 end;local closedFields=_chi_tmp947;
-do _chi_tmp947=(1) end;local fi=_chi_tmp947;
-do local function _chi_tmp954() return fi end;local function _chi_tmp955() local _chi_tmp956=__std__lang_array.size(fields);return _chi_tmp956 end;while (_chi_tmp954() <= _chi_tmp955()) do do
-local _chi_tmp957;do local _chi_tmp958=fields[fi];_chi_tmp957=_chi_tmp958 end;local field=_chi_tmp957;
-do local _chi_tmp959=field.name;_chi_tmp957=_chi_tmp959 end;local fieldName=_chi_tmp957;
-do local _chi_tmp960=paramTypes[fi];local _chi_tmp961={};setmetatable(_chi_tmp961, array_meta_table);local _chi_tmp962=__P_.closeVariantType(_chi_tmp960,placeholders,definitions,_chi_tmp961);_chi_tmp957=_chi_tmp962 end;local closedFieldType=_chi_tmp957;
-do local _chi_tmp963=__std__lang_array.push(closedParamTypes,closedFieldType); end;
-do local _chi_tmp964={name=fieldName,fieldType=closedFieldType};setmetatable(_chi_tmp964, record_meta_table);local _chi_tmp965=__std__lang_array.push(closedFields,_chi_tmp964); end;
+do local function _chi_tmp947() return ci end;local function _chi_tmp948() return ctorCount end;while (_chi_tmp947() <= _chi_tmp948()) do do
+local _chi_tmp949;do local _chi_tmp950=ctors[ci];_chi_tmp949=_chi_tmp950 end;local ctor=_chi_tmp949;
+do local _chi_tmp951=ctor.name;_chi_tmp949=_chi_tmp951 end;local ctorName=_chi_tmp949;
+do local _chi_tmp952=ctor.fields;_chi_tmp949=_chi_tmp952 end;local fields=_chi_tmp949;
+do local _chi_tmp953=ctorParamTypes[ci];_chi_tmp949=_chi_tmp953 end;local paramTypes=_chi_tmp949;
+do local _chi_tmp954={};setmetatable(_chi_tmp954, array_meta_table);_chi_tmp949=_chi_tmp954 end;local closedParamTypes=_chi_tmp949;
+do local _chi_tmp955={};setmetatable(_chi_tmp955, array_meta_table);_chi_tmp949=_chi_tmp955 end;local closedFields=_chi_tmp949;
+do _chi_tmp949=(1) end;local fi=_chi_tmp949;
+do local function _chi_tmp956() return fi end;local function _chi_tmp957() local _chi_tmp958=__std__lang_array.size(fields);return _chi_tmp958 end;while (_chi_tmp956() <= _chi_tmp957()) do do
+local _chi_tmp959;do local _chi_tmp960=fields[fi];_chi_tmp959=_chi_tmp960 end;local field=_chi_tmp959;
+do local _chi_tmp961=field.name;_chi_tmp959=_chi_tmp961 end;local fieldName=_chi_tmp959;
+do local _chi_tmp962=paramTypes[fi];local _chi_tmp963={};setmetatable(_chi_tmp963, array_meta_table);local _chi_tmp964=__P_.closeVariantType(_chi_tmp962,placeholders,definitions,_chi_tmp963);_chi_tmp959=_chi_tmp964 end;local closedFieldType=_chi_tmp959;
+do local _chi_tmp965=__std__lang_array.push(closedParamTypes,closedFieldType); end;
+do local _chi_tmp966={name=fieldName,fieldType=closedFieldType};setmetatable(_chi_tmp966, record_meta_table);local _chi_tmp967=__std__lang_array.push(closedFields,_chi_tmp966); end;
 fi=(fi + (1)); end ::__continue_32:: end;
  end;
 do ctorParamTypes[ci]=closedParamTypes; end;
-do local _chi_tmp966=__chicc__types.newTypeId(modName,pkgName,ctorName);_chi_tmp947=_chi_tmp966 end;local ctorId=_chi_tmp947;
-do local _chi_tmp967={ctorId};setmetatable(_chi_tmp967, array_meta_table);local _chi_tmp968={};setmetatable(_chi_tmp968, array_meta_table);local _chi_tmp969=__chicc__types.recordType(_chi_tmp967,closedFields,_chi_tmp968);_chi_tmp947=_chi_tmp969 end;local rec=_chi_tmp947;
+do local _chi_tmp968=__chicc__types.newTypeId(modName,pkgName,ctorName);_chi_tmp949=_chi_tmp968 end;local ctorId=_chi_tmp949;
+do local _chi_tmp969={ctorId};setmetatable(_chi_tmp969, array_meta_table);local _chi_tmp970={};setmetatable(_chi_tmp970, array_meta_table);local _chi_tmp971=__chicc__types.recordType(_chi_tmp969,closedFields,_chi_tmp970);_chi_tmp949=_chi_tmp971 end;local rec=_chi_tmp949;
 do rec.name=ctorName; end;
-do local _chi_tmp970=__std__lang_array.push(closedCtorRecords,rec); end;
-do local _chi_tmp971;if (ctorName ~= typeName) then
-local _chi_tmp972;do local _chi_tmp973={ typeId = { moduleName = modName, packageName = pkgName, name = ctorName }, aliasType = rec };_chi_tmp972=_chi_tmp973 end;local ctorAlias=_chi_tmp972;
-local _chi_tmp974=__std__lang_map.put(aliasesMap,ctorName,ctorAlias);_chi_tmp971=_chi_tmp974
+do local _chi_tmp972=__std__lang_array.push(closedCtorRecords,rec); end;
+do local _chi_tmp973;if (ctorName ~= typeName) then
+local _chi_tmp974;do local _chi_tmp975={ typeId = { moduleName = modName, packageName = pkgName, name = ctorName }, aliasType = rec };_chi_tmp974=_chi_tmp975 end;local ctorAlias=_chi_tmp974;
+local _chi_tmp976=__std__lang_map.put(aliasesMap,ctorName,ctorAlias);_chi_tmp973=_chi_tmp976
  end; end;
 ci=(ci + (1)); end ::__continue_31:: end;
  end;
-do local _chi_tmp975={};setmetatable(_chi_tmp975, array_meta_table);local _chi_tmp976=__P_.closeVariantType(dataPlaceholder,placeholders,definitions,_chi_tmp975);dataType=_chi_tmp976; end;
-do local _chi_tmp977={ typeId = { moduleName = modName, packageName = pkgName, name = typeName }, aliasType = dataType };_chi_tmp852=_chi_tmp977 end;local dataAlias=_chi_tmp852;
-do local _chi_tmp978=__std__lang_map.put(aliasesMap,typeName,dataAlias); end;
+do local _chi_tmp977={};setmetatable(_chi_tmp977, array_meta_table);local _chi_tmp978=__P_.closeVariantType(dataPlaceholder,placeholders,definitions,_chi_tmp977);dataType=_chi_tmp978; end;
+do local _chi_tmp979={ typeId = { moduleName = modName, packageName = pkgName, name = typeName }, aliasType = dataType };_chi_tmp854=_chi_tmp979 end;local dataAlias=_chi_tmp854;
+do local _chi_tmp980=__std__lang_map.put(aliasesMap,typeName,dataAlias); end;
 do ci=(1); end;
-do local function _chi_tmp979() return ci end;local function _chi_tmp980() return ctorCount end;while (_chi_tmp979() <= _chi_tmp980()) do do
-local _chi_tmp981;do local _chi_tmp982=ctors[ci];_chi_tmp981=_chi_tmp982 end;local ctor=_chi_tmp981;
-do local _chi_tmp983=ctor.name;_chi_tmp981=_chi_tmp983 end;local ctorName=_chi_tmp981;
-do local _chi_tmp984=ctor.isPublic;_chi_tmp981=_chi_tmp984 end;local ctorIsPub=_chi_tmp981;
-do local _chi_tmp985=ctor.fields;_chi_tmp981=_chi_tmp985 end;local fields=_chi_tmp981;
-do local _chi_tmp986=ctor.section;_chi_tmp981=_chi_tmp986 end;local ctorSec=_chi_tmp981;
-do local _chi_tmp987=ctorParamTypes[ci];_chi_tmp981=_chi_tmp987 end;local paramTypes=_chi_tmp981;
-do local _chi_tmp988=__std__lang_array.size(fields);_chi_tmp981=_chi_tmp988 end;local fieldCount=_chi_tmp981;
-do local _chi_tmp989;if (fieldCount == (0)) then
-local _chi_tmp990;do local _chi_tmp991=__P_.addLocalSymbol(ctorName,(false),ctorIsPub,dataType,pkg,tables);_chi_tmp990=_chi_tmp991 end;local valueTarget=_chi_tmp990;
-do local _chi_tmp992={};setmetatable(_chi_tmp992, array_meta_table);local _chi_tmp993=__chicc__ast.createVariantExpr(_chi_tmp992,ctorName,ctorSec);_chi_tmp990=_chi_tmp993 end;local value=_chi_tmp990;
-do local _chi_tmp994=decls;local _chi_tmp995=__chicc__ast.declarationExpr(ctorIsPub,valueTarget,(false),dataType,value,ctorSec);local _chi_tmp996=__std__lang_array.push(_chi_tmp994,_chi_tmp995); end;
+do local function _chi_tmp981() return ci end;local function _chi_tmp982() return ctorCount end;while (_chi_tmp981() <= _chi_tmp982()) do do
+local _chi_tmp983;do local _chi_tmp984=ctors[ci];_chi_tmp983=_chi_tmp984 end;local ctor=_chi_tmp983;
+do local _chi_tmp985=ctor.name;_chi_tmp983=_chi_tmp985 end;local ctorName=_chi_tmp983;
+do local _chi_tmp986=ctor.isPublic;_chi_tmp983=_chi_tmp986 end;local ctorIsPub=_chi_tmp983;
+do local _chi_tmp987=ctor.fields;_chi_tmp983=_chi_tmp987 end;local fields=_chi_tmp983;
+do local _chi_tmp988=ctor.section;_chi_tmp983=_chi_tmp988 end;local ctorSec=_chi_tmp983;
+do local _chi_tmp989=ctorParamTypes[ci];_chi_tmp983=_chi_tmp989 end;local paramTypes=_chi_tmp983;
+do local _chi_tmp990=__std__lang_array.size(fields);_chi_tmp983=_chi_tmp990 end;local fieldCount=_chi_tmp983;
+do local _chi_tmp991;if (fieldCount == (0)) then
+local _chi_tmp992;do local _chi_tmp993=__P_.addLocalSymbol(ctorName,(false),ctorIsPub,dataType,pkg,tables);_chi_tmp992=_chi_tmp993 end;local valueTarget=_chi_tmp992;
+do local _chi_tmp994={};setmetatable(_chi_tmp994, array_meta_table);local _chi_tmp995=__chicc__ast.createVariantExpr(_chi_tmp994,ctorName,ctorSec);_chi_tmp992=_chi_tmp995 end;local value=_chi_tmp992;
+do local _chi_tmp996=decls;local _chi_tmp997=__chicc__ast.declarationExpr(ctorIsPub,valueTarget,(false),dataType,value,ctorSec);local _chi_tmp998=__std__lang_array.push(_chi_tmp996,_chi_tmp997); end;
 do ci=(ci + (1)); end;
 goto __continue_33;
  end; end;
-do local _chi_tmp997={};setmetatable(_chi_tmp997, array_meta_table);_chi_tmp981=_chi_tmp997 end;local fnTypeArr=_chi_tmp981;
-do _chi_tmp981=(1) end;local fi=_chi_tmp981;
-do local function _chi_tmp998() return fi end;local function _chi_tmp999() return fieldCount end;while (_chi_tmp998() <= _chi_tmp999()) do do
-do local _chi_tmp1000=paramTypes[fi];local _chi_tmp1001=__std__lang_array.push(fnTypeArr,_chi_tmp1000); end;
+do local _chi_tmp999={};setmetatable(_chi_tmp999, array_meta_table);_chi_tmp983=_chi_tmp999 end;local fnTypeArr=_chi_tmp983;
+do _chi_tmp983=(1) end;local fi=_chi_tmp983;
+do local function _chi_tmp1000() return fi end;local function _chi_tmp1001() return fieldCount end;while (_chi_tmp1000() <= _chi_tmp1001()) do do
+do local _chi_tmp1002=paramTypes[fi];local _chi_tmp1003=__std__lang_array.push(fnTypeArr,_chi_tmp1002); end;
 fi=(fi + (1)); end ::__continue_34:: end;
  end;
-do local _chi_tmp1002;local _chi_tmp1003=ctorIsFieldType[ci];if _chi_tmp1003 then
-local _chi_tmp1004=closedCtorRecords[ci];local _chi_tmp1005=__std__lang_array.push(fnTypeArr,_chi_tmp1004);_chi_tmp1002=_chi_tmp1005
+do local _chi_tmp1004;local _chi_tmp1005=ctorIsFieldType[ci];if _chi_tmp1005 then
+local _chi_tmp1006=closedCtorRecords[ci];local _chi_tmp1007=__std__lang_array.push(fnTypeArr,_chi_tmp1006);_chi_tmp1004=_chi_tmp1007
  else
-local _chi_tmp1006=__std__lang_array.push(fnTypeArr,dataType);_chi_tmp1002=_chi_tmp1006
+local _chi_tmp1008=__std__lang_array.push(fnTypeArr,dataType);_chi_tmp1004=_chi_tmp1008
  end; end;
-do local _chi_tmp1007={};setmetatable(_chi_tmp1007, array_meta_table);local _chi_tmp1008=__chicc__types.functionType(fnTypeArr,_chi_tmp1007,(0));_chi_tmp981=_chi_tmp1008 end;local funcType=_chi_tmp981;
-do local _chi_tmp1009=__P_.addLocalSymbol(ctorName,(false),ctorIsPub,funcType,pkg,tables);_chi_tmp981=_chi_tmp1009 end;local ctorTarget=_chi_tmp981;
-do _chi_tmp981=__P_.currentFnSymbolTable end;local parentFst=_chi_tmp981;
-do local _chi_tmp1010=__chicc__symbols.newFnSymbolTable(parentFst);_chi_tmp981=_chi_tmp1010 end;local fst=_chi_tmp981;
+do local _chi_tmp1009={};setmetatable(_chi_tmp1009, array_meta_table);local _chi_tmp1010=__chicc__types.functionType(fnTypeArr,_chi_tmp1009,(0));_chi_tmp983=_chi_tmp1010 end;local funcType=_chi_tmp983;
+do local _chi_tmp1011=__P_.addLocalSymbol(ctorName,(false),ctorIsPub,funcType,pkg,tables);_chi_tmp983=_chi_tmp1011 end;local ctorTarget=_chi_tmp983;
+do _chi_tmp983=__P_.currentFnSymbolTable end;local parentFst=_chi_tmp983;
+do local _chi_tmp1012=__chicc__symbols.newFnSymbolTable(parentFst);_chi_tmp983=_chi_tmp1012 end;local fst=_chi_tmp983;
 do __P_.currentFnSymbolTable=fst; end;
-do local _chi_tmp1011={};setmetatable(_chi_tmp1011, array_meta_table);_chi_tmp981=_chi_tmp1011 end;local params=_chi_tmp981;
-do local _chi_tmp1012={};setmetatable(_chi_tmp1012, array_meta_table);_chi_tmp981=_chi_tmp1012 end;local exprFields=_chi_tmp981;
+do local _chi_tmp1013={};setmetatable(_chi_tmp1013, array_meta_table);_chi_tmp983=_chi_tmp1013 end;local params=_chi_tmp983;
+do local _chi_tmp1014={};setmetatable(_chi_tmp1014, array_meta_table);_chi_tmp983=_chi_tmp1014 end;local exprFields=_chi_tmp983;
 do fi=(1); end;
-do local function _chi_tmp1013() return fi end;local function _chi_tmp1014() return fieldCount end;while (_chi_tmp1013() <= _chi_tmp1014()) do do
-local _chi_tmp1015;do local _chi_tmp1016=fields[fi];_chi_tmp1015=_chi_tmp1016 end;local field=_chi_tmp1015;
-do local _chi_tmp1017=field.name;_chi_tmp1015=_chi_tmp1017 end;local fieldName=_chi_tmp1015;
-do local _chi_tmp1018=paramTypes[fi];_chi_tmp1015=_chi_tmp1018 end;local argType=_chi_tmp1015;
-do local _chi_tmp1019=__chicc__symbols.fstAddArgument(fst,fieldName,argType); end;
-do local _chi_tmp1020=params;local _chi_tmp1021=__chicc__ast.newFnParam(fieldName,argType,ctorSec);local _chi_tmp1022=__std__lang_array.push(_chi_tmp1020,_chi_tmp1021); end;
-do local _chi_tmp1023=__chicc__ast.localTarget(fieldName);local _chi_tmp1024=__chicc__ast.variableAccessExpr(_chi_tmp1023,ctorSec);_chi_tmp1015=_chi_tmp1024 end;local fieldRead=_chi_tmp1015;
-do local _chi_tmp1025=exprFields;local _chi_tmp1026=__chicc__ast.newExprField(fieldName,fieldRead);local _chi_tmp1027=__std__lang_array.push(_chi_tmp1025,_chi_tmp1026); end;
+do local function _chi_tmp1015() return fi end;local function _chi_tmp1016() return fieldCount end;while (_chi_tmp1015() <= _chi_tmp1016()) do do
+local _chi_tmp1017;do local _chi_tmp1018=fields[fi];_chi_tmp1017=_chi_tmp1018 end;local field=_chi_tmp1017;
+do local _chi_tmp1019=field.name;_chi_tmp1017=_chi_tmp1019 end;local fieldName=_chi_tmp1017;
+do local _chi_tmp1020=paramTypes[fi];_chi_tmp1017=_chi_tmp1020 end;local argType=_chi_tmp1017;
+do local _chi_tmp1021=__chicc__symbols.fstAddArgument(fst,fieldName,argType); end;
+do local _chi_tmp1022=params;local _chi_tmp1023=__chicc__ast.newFnParam(fieldName,argType,ctorSec);local _chi_tmp1024=__std__lang_array.push(_chi_tmp1022,_chi_tmp1023); end;
+do local _chi_tmp1025=__chicc__ast.localTarget(fieldName);local _chi_tmp1026=__chicc__ast.variableAccessExpr(_chi_tmp1025,ctorSec);_chi_tmp1017=_chi_tmp1026 end;local fieldRead=_chi_tmp1017;
+do local _chi_tmp1027=exprFields;local _chi_tmp1028=__chicc__ast.newExprField(fieldName,fieldRead);local _chi_tmp1029=__std__lang_array.push(_chi_tmp1027,_chi_tmp1028); end;
 fi=(fi + (1)); end ::__continue_35:: end;
  end;
 do __P_.currentFnSymbolTable=parentFst; end;
-do local _chi_tmp1028=__chicc__ast.createVariantExpr(exprFields,ctorName,ctorSec);_chi_tmp981=_chi_tmp1028 end;local body=_chi_tmp981;
-do local _chi_tmp1029=__chicc__ast.fnExpr(params,(nil),body,ctorSec);_chi_tmp981=_chi_tmp1029 end;local fnBody=_chi_tmp981;
-do local _chi_tmp1030=__chicc__ast.declarationExpr(ctorIsPub,ctorTarget,(false),funcType,fnBody,ctorSec);_chi_tmp981=_chi_tmp1030 end;local decl=_chi_tmp981;
-do local _chi_tmp1031=__std__lang_array.push(decls,decl); end;
+do local _chi_tmp1030=__chicc__ast.createVariantExpr(exprFields,ctorName,ctorSec);_chi_tmp983=_chi_tmp1030 end;local body=_chi_tmp983;
+do local _chi_tmp1031=__chicc__ast.fnExpr(params,(nil),body,ctorSec);_chi_tmp983=_chi_tmp1031 end;local fnBody=_chi_tmp983;
+do local _chi_tmp1032=__chicc__ast.declarationExpr(ctorIsPub,ctorTarget,(false),funcType,fnBody,ctorSec);_chi_tmp983=_chi_tmp1032 end;local decl=_chi_tmp983;
+do local _chi_tmp1033=__std__lang_array.push(decls,decl); end;
 ci=(ci + (1)); end ::__continue_33:: end;
  end;
 return decls end;
  end;
 do function __P_.convertProgram(parseProg,pkg,tables)
-local _chi_tmp1032;do local _chi_tmp1033=parseProg.section;_chi_tmp1032=_chi_tmp1033 end;local progSection=_chi_tmp1032;
-do local _chi_tmp1034=parseProg.typeAliases;_chi_tmp1032=_chi_tmp1034 end;local typeAliases=_chi_tmp1032;
-do _chi_tmp1032=(1) end;local i=_chi_tmp1032;
-do local _chi_tmp1035=__std__lang_array.size(typeAliases);_chi_tmp1032=_chi_tmp1035 end;local aliasCount=_chi_tmp1032;
-do local function _chi_tmp1036() return i end;local function _chi_tmp1037() return aliasCount end;while (_chi_tmp1036() <= _chi_tmp1037()) do do
-local _chi_tmp1038;do local _chi_tmp1039=typeAliases[i];_chi_tmp1038=_chi_tmp1039 end;local alias=_chi_tmp1038;
-do local _chi_tmp1040=alias.name;_chi_tmp1038=_chi_tmp1040 end;local aliasName=_chi_tmp1038;
-do local _chi_tmp1041=alias.typeRef;_chi_tmp1038=_chi_tmp1041 end;local aliasTypeRef=_chi_tmp1038;
-do local _chi_tmp1042=alias.typeParameters;_chi_tmp1038=_chi_tmp1042 end;local aliasTypeParams=_chi_tmp1038;
-do local _chi_tmp1043={};setmetatable(_chi_tmp1043, array_meta_table);_chi_tmp1038=_chi_tmp1043 end;local tpNames=_chi_tmp1038;
-do _chi_tmp1038=(1) end;local tpi=_chi_tmp1038;
-do local _chi_tmp1044=__std__lang_array.size(aliasTypeParams);_chi_tmp1038=_chi_tmp1044 end;local tpCount=_chi_tmp1038;
-do local function _chi_tmp1045() return tpi end;local function _chi_tmp1046() return tpCount end;while (_chi_tmp1045() <= _chi_tmp1046()) do do
-local _chi_tmp1047;do local _chi_tmp1048=aliasTypeParams[tpi];_chi_tmp1047=_chi_tmp1048 end;local tp=_chi_tmp1047;
-do local _chi_tmp1049=tp.name;_chi_tmp1047=_chi_tmp1049 end;local tpName=_chi_tmp1047;
-do local _chi_tmp1050=__std__lang_array.push(tpNames,tpName); end;
+local _chi_tmp1034;do local _chi_tmp1035=parseProg.section;_chi_tmp1034=_chi_tmp1035 end;local progSection=_chi_tmp1034;
+do local _chi_tmp1036=parseProg.typeAliases;_chi_tmp1034=_chi_tmp1036 end;local typeAliases=_chi_tmp1034;
+do _chi_tmp1034=(1) end;local i=_chi_tmp1034;
+do local _chi_tmp1037=__std__lang_array.size(typeAliases);_chi_tmp1034=_chi_tmp1037 end;local aliasCount=_chi_tmp1034;
+do local function _chi_tmp1038() return i end;local function _chi_tmp1039() return aliasCount end;while (_chi_tmp1038() <= _chi_tmp1039()) do do
+local _chi_tmp1040;do local _chi_tmp1041=typeAliases[i];_chi_tmp1040=_chi_tmp1041 end;local alias=_chi_tmp1040;
+do local _chi_tmp1042=alias.name;_chi_tmp1040=_chi_tmp1042 end;local aliasName=_chi_tmp1040;
+do local _chi_tmp1043=alias.typeRef;_chi_tmp1040=_chi_tmp1043 end;local aliasTypeRef=_chi_tmp1040;
+do local _chi_tmp1044=alias.typeParameters;_chi_tmp1040=_chi_tmp1044 end;local aliasTypeParams=_chi_tmp1040;
+do local _chi_tmp1045={};setmetatable(_chi_tmp1045, array_meta_table);_chi_tmp1040=_chi_tmp1045 end;local tpNames=_chi_tmp1040;
+do _chi_tmp1040=(1) end;local tpi=_chi_tmp1040;
+do local _chi_tmp1046=__std__lang_array.size(aliasTypeParams);_chi_tmp1040=_chi_tmp1046 end;local tpCount=_chi_tmp1040;
+do local function _chi_tmp1047() return tpi end;local function _chi_tmp1048() return tpCount end;while (_chi_tmp1047() <= _chi_tmp1048()) do do
+local _chi_tmp1049;do local _chi_tmp1050=aliasTypeParams[tpi];_chi_tmp1049=_chi_tmp1050 end;local tp=_chi_tmp1049;
+do local _chi_tmp1051=tp.name;_chi_tmp1049=_chi_tmp1051 end;local tpName=_chi_tmp1049;
+do local _chi_tmp1052=__std__lang_array.push(tpNames,tpName); end;
 tpi=(tpi + (1)); end ::__continue_37:: end;
  end;
-do local _chi_tmp1051=__P_.getTypeTable(tables);_chi_tmp1038=_chi_tmp1051 end;local tt=_chi_tmp1038;
-do local _chi_tmp1052=tt.aliases;_chi_tmp1038=_chi_tmp1052 end;local aliasesMap=_chi_tmp1038;
-do local _chi_tmp1053=__std__lang_map.get(aliasesMap,aliasName);_chi_tmp1038=_chi_tmp1053 end;local existing=_chi_tmp1038;
-do local _chi_tmp1054;if (existing == (nil)) then
-local _chi_tmp1055;do local _chi_tmp1056=__chicc__symbols.resolveType(tt,tpNames,aliasTypeRef,__P_.currentTypeLevel);_chi_tmp1055=_chi_tmp1056 end;local resolved=_chi_tmp1055;
-do local _chi_tmp1057=pkg.moduleName;_chi_tmp1055=_chi_tmp1057 end;local modName=_chi_tmp1055;
-do local _chi_tmp1058=pkg.packageName;_chi_tmp1055=_chi_tmp1058 end;local pkgName=_chi_tmp1055;
-do local _chi_tmp1059={ typeId = { moduleName = modName, packageName = pkgName, name = aliasName }, aliasType = resolved };_chi_tmp1055=_chi_tmp1059 end;local typeAlias=_chi_tmp1055;
-local _chi_tmp1060=__std__lang_map.put(aliasesMap,aliasName,typeAlias);_chi_tmp1054=_chi_tmp1060
+do local _chi_tmp1053=__P_.getTypeTable(tables);_chi_tmp1040=_chi_tmp1053 end;local tt=_chi_tmp1040;
+do local _chi_tmp1054=tt.aliases;_chi_tmp1040=_chi_tmp1054 end;local aliasesMap=_chi_tmp1040;
+do local _chi_tmp1055=__std__lang_map.get(aliasesMap,aliasName);_chi_tmp1040=_chi_tmp1055 end;local existing=_chi_tmp1040;
+do local _chi_tmp1056;if (existing == (nil)) then
+local _chi_tmp1057;do local _chi_tmp1058=__chicc__symbols.resolveType(tt,tpNames,aliasTypeRef,__P_.currentTypeLevel);_chi_tmp1057=_chi_tmp1058 end;local resolved=_chi_tmp1057;
+do local _chi_tmp1059=pkg.moduleName;_chi_tmp1057=_chi_tmp1059 end;local modName=_chi_tmp1057;
+do local _chi_tmp1060=pkg.packageName;_chi_tmp1057=_chi_tmp1060 end;local pkgName=_chi_tmp1057;
+do local _chi_tmp1061={ typeId = { moduleName = modName, packageName = pkgName, name = aliasName }, aliasType = resolved };_chi_tmp1057=_chi_tmp1061 end;local typeAlias=_chi_tmp1057;
+local _chi_tmp1062=__std__lang_map.put(aliasesMap,aliasName,typeAlias);_chi_tmp1056=_chi_tmp1062
  end; end;
 i=(i + (1)); end ::__continue_36:: end;
  end;
-do local _chi_tmp1061=parseProg.code;_chi_tmp1032=_chi_tmp1061 end;local codeExprs=_chi_tmp1032;
-do local _chi_tmp1062={};setmetatable(_chi_tmp1062, array_meta_table);_chi_tmp1032=_chi_tmp1062 end;local converted=_chi_tmp1032;
+do local _chi_tmp1063=parseProg.code;_chi_tmp1034=_chi_tmp1063 end;local codeExprs=_chi_tmp1034;
+do local _chi_tmp1064={};setmetatable(_chi_tmp1064, array_meta_table);_chi_tmp1034=_chi_tmp1064 end;local converted=_chi_tmp1034;
 do i=(1); end;
-do local _chi_tmp1063=__std__lang_array.size(codeExprs);_chi_tmp1032=_chi_tmp1063 end;local codeCount=_chi_tmp1032;
-do local function _chi_tmp1064() return i end;local function _chi_tmp1065() return codeCount end;while (_chi_tmp1064() <= _chi_tmp1065()) do do
-local _chi_tmp1066;do local _chi_tmp1067=codeExprs[i];local _chi_tmp1068=__P_.convert(_chi_tmp1067,pkg,tables);_chi_tmp1066=_chi_tmp1068 end;local ce=_chi_tmp1066;
-do local _chi_tmp1069=__std__lang_array.push(converted,ce); end;
+do local _chi_tmp1065=__std__lang_array.size(codeExprs);_chi_tmp1034=_chi_tmp1065 end;local codeCount=_chi_tmp1034;
+do local function _chi_tmp1066() return i end;local function _chi_tmp1067() return codeCount end;while (_chi_tmp1066() <= _chi_tmp1067()) do do
+local _chi_tmp1068;do local _chi_tmp1069=codeExprs[i];local _chi_tmp1070=__P_.convert(_chi_tmp1069,pkg,tables);_chi_tmp1068=_chi_tmp1070 end;local ce=_chi_tmp1068;
+do local _chi_tmp1071=__std__lang_array.push(converted,ce); end;
 i=(i + (1)); end ::__continue_38:: end;
  end;
 return converted end;
  end;
 do function __P_.typeDeclarationNames(d)
-local _chi_tmp1070;do local _chi_tmp1071={d.name};setmetatable(_chi_tmp1071, array_meta_table);_chi_tmp1070=_chi_tmp1071 end;local names=_chi_tmp1070;
-do local _chi_tmp1072;local _chi_tmp1073 = 'data';if (d.kind == (_chi_tmp1073)) then
+local _chi_tmp1072;do local _chi_tmp1073={d.name};setmetatable(_chi_tmp1073, array_meta_table);_chi_tmp1072=_chi_tmp1073 end;local names=_chi_tmp1072;
+do local _chi_tmp1074;local _chi_tmp1075 = 'data';if (d.kind == (_chi_tmp1075)) then
 for _,ctor in ipairs(d.decl.constructors) do do
-local _chi_tmp1074=__std__lang_array.push(names,ctor.name); end ::__continue_39:: end;
-_chi_tmp1072=nil
+local _chi_tmp1076=__std__lang_array.push(names,ctor.name); end ::__continue_39:: end;
+_chi_tmp1074=nil
  end; end;
 return names end;
  end;
 do function __P_.collectTypeRefNames(ref,out)
-local _chi_tmp1075;if (ref ~= (nil)) then
-local _chi_tmp1076;do _chi_tmp1076=ref.tag end;local tag=_chi_tmp1076;
-local _chi_tmp1077;local _chi_tmp1078 = 'TypeNameRef';local _chi_tmp1080=(tag == (_chi_tmp1078));if not _chi_tmp1080 then local _chi_tmp1079 = 'TypeParameterRef';_chi_tmp1080=(tag == (_chi_tmp1079)) end;if _chi_tmp1080 then
-local _chi_tmp1081=__std__lang_array.push(out,ref.name);_chi_tmp1077=_chi_tmp1081
+local _chi_tmp1077;if (ref ~= (nil)) then
+local _chi_tmp1078;do _chi_tmp1078=ref.tag end;local tag=_chi_tmp1078;
+local _chi_tmp1079;local _chi_tmp1080 = 'TypeNameRef';local _chi_tmp1082=(tag == (_chi_tmp1080));if not _chi_tmp1082 then local _chi_tmp1081 = 'TypeParameterRef';_chi_tmp1082=(tag == (_chi_tmp1081)) end;if _chi_tmp1082 then
+local _chi_tmp1083=__std__lang_array.push(out,ref.name);_chi_tmp1079=_chi_tmp1083
  else
-do local _chi_tmp1082=__P_.collectTypeRefNames(ref.lhs,out); end;
-do local _chi_tmp1083=__P_.collectTypeRefNames(ref.rhs,out); end;
-do local _chi_tmp1084=__P_.collectTypeRefNames(ref.returnType,out); end;
-do local _chi_tmp1085=__P_.collectTypeRefNames(ref.baseType,out); end;
-do for _,a in ipairs(ref.argumentTypeRefs) do do local _chi_tmp1086=__P_.collectTypeRefNames(a,out); end ::__continue_40:: end; end;
-do for _,a in ipairs(ref.typeParameters) do do local _chi_tmp1087=__P_.collectTypeRefNames(a,out); end ::__continue_41:: end; end;
-for _,f in ipairs(ref.fields) do do local _chi_tmp1088=__P_.collectTypeRefNames(f.typeRef,out); end ::__continue_42:: end;_chi_tmp1077=nil
- end;_chi_tmp1075=_chi_tmp1077
- end;local _chi_tmp1089=_chi_tmp1075;return; end;
+do local _chi_tmp1084=__P_.collectTypeRefNames(ref.lhs,out); end;
+do local _chi_tmp1085=__P_.collectTypeRefNames(ref.rhs,out); end;
+do local _chi_tmp1086=__P_.collectTypeRefNames(ref.returnType,out); end;
+do local _chi_tmp1087=__P_.collectTypeRefNames(ref.baseType,out); end;
+do for _,a in ipairs(ref.argumentTypeRefs) do do local _chi_tmp1088=__P_.collectTypeRefNames(a,out); end ::__continue_40:: end; end;
+do for _,a in ipairs(ref.typeParameters) do do local _chi_tmp1089=__P_.collectTypeRefNames(a,out); end ::__continue_41:: end; end;
+for _,f in ipairs(ref.fields) do do local _chi_tmp1090=__P_.collectTypeRefNames(f.typeRef,out); end ::__continue_42:: end;_chi_tmp1079=nil
+ end;_chi_tmp1077=_chi_tmp1079
+ end;local _chi_tmp1091=_chi_tmp1077;return; end;
  end;
 do function __P_.strongConnect(g,v)
-local _chi_tmp1090;do _chi_tmp1090=g.index end;local index=_chi_tmp1090;
-do _chi_tmp1090=g.low end;local low=_chi_tmp1090;
-do _chi_tmp1090=g.onStack end;local onStack=_chi_tmp1090;
+local _chi_tmp1092;do _chi_tmp1092=g.index end;local index=_chi_tmp1092;
+do _chi_tmp1092=g.low end;local low=_chi_tmp1092;
+do _chi_tmp1092=g.onStack end;local onStack=_chi_tmp1092;
 do g.counter=(g.counter + (1)); end;
 do index[v]=g.counter; end;
 do low[v]=g.counter; end;
-do local _chi_tmp1091=__std__lang_array.push(g.stack,v); end;
+do local _chi_tmp1093=__std__lang_array.push(g.stack,v); end;
 do onStack[v]=(true); end;
-do local _chi_tmp1092=g.deps[v];for _,w in ipairs(_chi_tmp1092) do do
-local _chi_tmp1093;local _chi_tmp1094=index[w];if (_chi_tmp1094 == (0)) then
-do local _chi_tmp1095=__P_.strongConnect(g,w); end;
-local _chi_tmp1096;local _chi_tmp1097=low[w];local _chi_tmp1098=low[v];if (_chi_tmp1097 < _chi_tmp1098) then local _chi_tmp1099=low[w];low[v]=_chi_tmp1099;_chi_tmp1096=_chi_tmp1099 end;_chi_tmp1093=_chi_tmp1096
- else local _chi_tmp1100;local _chi_tmp1101=onStack[w];local _chi_tmp1104=_chi_tmp1101;if _chi_tmp1104 then local _chi_tmp1102=index[w];local _chi_tmp1103=low[v];_chi_tmp1104=(_chi_tmp1102 < _chi_tmp1103) end;if _chi_tmp1104 then
-local _chi_tmp1105=index[w];low[v]=_chi_tmp1105;_chi_tmp1100=_chi_tmp1105
- end;_chi_tmp1093=_chi_tmp1100 end; end ::__continue_43:: end;
+do local _chi_tmp1094=g.deps[v];for _,w in ipairs(_chi_tmp1094) do do
+local _chi_tmp1095;local _chi_tmp1096=index[w];if (_chi_tmp1096 == (0)) then
+do local _chi_tmp1097=__P_.strongConnect(g,w); end;
+local _chi_tmp1098;local _chi_tmp1099=low[w];local _chi_tmp1100=low[v];if (_chi_tmp1099 < _chi_tmp1100) then local _chi_tmp1101=low[w];low[v]=_chi_tmp1101;_chi_tmp1098=_chi_tmp1101 end;_chi_tmp1095=_chi_tmp1098
+ else local _chi_tmp1102;local _chi_tmp1103=onStack[w];local _chi_tmp1106=_chi_tmp1103;if _chi_tmp1106 then local _chi_tmp1104=index[w];local _chi_tmp1105=low[v];_chi_tmp1106=(_chi_tmp1104 < _chi_tmp1105) end;if _chi_tmp1106 then
+local _chi_tmp1107=index[w];low[v]=_chi_tmp1107;_chi_tmp1102=_chi_tmp1107
+ end;_chi_tmp1095=_chi_tmp1102 end; end ::__continue_43:: end;
  end;
-local _chi_tmp1106;local _chi_tmp1107=low[v];local _chi_tmp1108=index[v];if (_chi_tmp1107 == _chi_tmp1108) then
-local _chi_tmp1109;do local _chi_tmp1110={};setmetatable(_chi_tmp1110, array_meta_table);_chi_tmp1109=_chi_tmp1110 end;local scc=_chi_tmp1109;
-do _chi_tmp1109=(0) end;local w=_chi_tmp1109;
-do local function _chi_tmp1111() return w end;local function _chi_tmp1112() return v end;while (_chi_tmp1111() ~= _chi_tmp1112()) do do
-do local _chi_tmp1113=__std__lang_array.pop(g.stack);w=_chi_tmp1113; end;
+local _chi_tmp1108;local _chi_tmp1109=low[v];local _chi_tmp1110=index[v];if (_chi_tmp1109 == _chi_tmp1110) then
+local _chi_tmp1111;do local _chi_tmp1112={};setmetatable(_chi_tmp1112, array_meta_table);_chi_tmp1111=_chi_tmp1112 end;local scc=_chi_tmp1111;
+do _chi_tmp1111=(0) end;local w=_chi_tmp1111;
+do local function _chi_tmp1113() return w end;local function _chi_tmp1114() return v end;while (_chi_tmp1113() ~= _chi_tmp1114()) do do
+do local _chi_tmp1115=__std__lang_array.pop(g.stack);w=_chi_tmp1115; end;
 do onStack[w]=(false); end;
-local _chi_tmp1114=__std__lang_array.push(scc,w); end ::__continue_44:: end;
+local _chi_tmp1116=__std__lang_array.push(scc,w); end ::__continue_44:: end;
  end;
-do local _chi_tmp1115=__std__lang_array.sort(scc); end;
-local _chi_tmp1116=__std__lang_array.push(g.sccs,scc);_chi_tmp1106=_chi_tmp1116
- end;local _chi_tmp1117=_chi_tmp1106;return; end;
+do local _chi_tmp1117=__std__lang_array.sort(scc); end;
+local _chi_tmp1118=__std__lang_array.push(g.sccs,scc);_chi_tmp1108=_chi_tmp1118
+ end;local _chi_tmp1119=_chi_tmp1108;return; end;
  end;
 function __P_.orderTypeDeclarations(parseProg)
-local _chi_tmp1118;do local _chi_tmp1119={};setmetatable(_chi_tmp1119, array_meta_table);_chi_tmp1118=_chi_tmp1119 end;local decls=_chi_tmp1118;
+local _chi_tmp1120;do local _chi_tmp1121={};setmetatable(_chi_tmp1121, array_meta_table);_chi_tmp1120=_chi_tmp1121 end;local decls=_chi_tmp1120;
 do for _,alias in ipairs(parseProg.typeAliases) do do
-local _chi_tmp1120 = 'alias';local _chi_tmp1121={kind=(_chi_tmp1120),name=alias.name,decl=alias};setmetatable(_chi_tmp1121, record_meta_table);local _chi_tmp1122=__std__lang_array.push(decls,_chi_tmp1121); end ::__continue_45:: end;
+local _chi_tmp1122 = 'alias';local _chi_tmp1123={kind=(_chi_tmp1122),name=alias.name,decl=alias};setmetatable(_chi_tmp1123, record_meta_table);local _chi_tmp1124=__std__lang_array.push(decls,_chi_tmp1123); end ::__continue_45:: end;
  end;
 do for _,vdef in ipairs(parseProg.variantTypes) do do
-local _chi_tmp1123 = 'data';local _chi_tmp1124={kind=(_chi_tmp1123),name=vdef.typeName,decl=vdef};setmetatable(_chi_tmp1124, record_meta_table);local _chi_tmp1125=__std__lang_array.push(decls,_chi_tmp1124); end ::__continue_46:: end;
+local _chi_tmp1125 = 'data';local _chi_tmp1126={kind=(_chi_tmp1125),name=vdef.typeName,decl=vdef};setmetatable(_chi_tmp1126, record_meta_table);local _chi_tmp1127=__std__lang_array.push(decls,_chi_tmp1126); end ::__continue_46:: end;
  end;
-do local _chi_tmp1126=__std__lang_map.emptyMap();_chi_tmp1118=_chi_tmp1126 end;local declOf=_chi_tmp1118;
+do local _chi_tmp1128=__std__lang_map.emptyMap();_chi_tmp1120=_chi_tmp1128 end;local declOf=_chi_tmp1120;
 do for i,d in ipairs(decls) do do
-local _chi_tmp1127=__P_.typeDeclarationNames(d);for _,name in ipairs(_chi_tmp1127) do do
-local _chi_tmp1128=__std__lang_map.put(declOf,name,i); end ::__continue_48:: end;
+local _chi_tmp1129=__P_.typeDeclarationNames(d);for _,name in ipairs(_chi_tmp1129) do do
+local _chi_tmp1130=__std__lang_map.put(declOf,name,i); end ::__continue_48:: end;
  end ::__continue_47:: end;
  end;
-do local _chi_tmp1129=__std__lang_array.size(decls);_chi_tmp1118=_chi_tmp1129 end;local n=_chi_tmp1118;
-do local _chi_tmp1130={};setmetatable(_chi_tmp1130, array_meta_table);local _chi_tmp1131={};setmetatable(_chi_tmp1131, array_meta_table);local _chi_tmp1132={};setmetatable(_chi_tmp1132, array_meta_table);local _chi_tmp1133={};setmetatable(_chi_tmp1133, array_meta_table);local _chi_tmp1134={};setmetatable(_chi_tmp1134, array_meta_table);local _chi_tmp1135={};setmetatable(_chi_tmp1135, array_meta_table);local _chi_tmp1136={deps=_chi_tmp1130,index=_chi_tmp1131,low=_chi_tmp1132,onStack=_chi_tmp1133,stack=_chi_tmp1134,counter=(0),sccs=_chi_tmp1135};setmetatable(_chi_tmp1136, record_meta_table);_chi_tmp1118=_chi_tmp1136 end;local g=_chi_tmp1118;
+do local _chi_tmp1131=__std__lang_array.size(decls);_chi_tmp1120=_chi_tmp1131 end;local n=_chi_tmp1120;
+do local _chi_tmp1132={};setmetatable(_chi_tmp1132, array_meta_table);local _chi_tmp1133={};setmetatable(_chi_tmp1133, array_meta_table);local _chi_tmp1134={};setmetatable(_chi_tmp1134, array_meta_table);local _chi_tmp1135={};setmetatable(_chi_tmp1135, array_meta_table);local _chi_tmp1136={};setmetatable(_chi_tmp1136, array_meta_table);local _chi_tmp1137={};setmetatable(_chi_tmp1137, array_meta_table);local _chi_tmp1138={deps=_chi_tmp1132,index=_chi_tmp1133,low=_chi_tmp1134,onStack=_chi_tmp1135,stack=_chi_tmp1136,counter=(0),sccs=_chi_tmp1137};setmetatable(_chi_tmp1138, record_meta_table);_chi_tmp1120=_chi_tmp1138 end;local g=_chi_tmp1120;
 do for i,d in ipairs(decls) do do
-local _chi_tmp1137;do local _chi_tmp1138={};setmetatable(_chi_tmp1138, array_meta_table);_chi_tmp1137=_chi_tmp1138 end;local params=_chi_tmp1137;
+local _chi_tmp1139;do local _chi_tmp1140={};setmetatable(_chi_tmp1140, array_meta_table);_chi_tmp1139=_chi_tmp1140 end;local params=_chi_tmp1139;
 do for _,tp in ipairs(d.decl.typeParameters) do do
-local _chi_tmp1139=__std__lang_array.push(params,tp.name); end ::__continue_50:: end;
+local _chi_tmp1141=__std__lang_array.push(params,tp.name); end ::__continue_50:: end;
  end;
-do local _chi_tmp1140={};setmetatable(_chi_tmp1140, array_meta_table);_chi_tmp1137=_chi_tmp1140 end;local names=_chi_tmp1137;
-do local _chi_tmp1141;local _chi_tmp1142 = 'alias';if (d.kind == (_chi_tmp1142)) then
-local _chi_tmp1143=__P_.collectTypeRefNames(d.decl.typeRef,names);_chi_tmp1141=_chi_tmp1143
+do local _chi_tmp1142={};setmetatable(_chi_tmp1142, array_meta_table);_chi_tmp1139=_chi_tmp1142 end;local names=_chi_tmp1139;
+do local _chi_tmp1143;local _chi_tmp1144 = 'alias';if (d.kind == (_chi_tmp1144)) then
+local _chi_tmp1145=__P_.collectTypeRefNames(d.decl.typeRef,names);_chi_tmp1143=_chi_tmp1145
  else
 for _,ctor in ipairs(d.decl.constructors) do do
 for _,field in ipairs(ctor.fields) do do
-local _chi_tmp1144=__P_.collectTypeRefNames(field.typeRef,names); end ::__continue_52:: end;
+local _chi_tmp1146=__P_.collectTypeRefNames(field.typeRef,names); end ::__continue_52:: end;
  end ::__continue_51:: end;
-_chi_tmp1141=nil
+_chi_tmp1143=nil
  end; end;
-do local _chi_tmp1145={};setmetatable(_chi_tmp1145, array_meta_table);_chi_tmp1137=_chi_tmp1145 end;local deps=_chi_tmp1137;
+do local _chi_tmp1147={};setmetatable(_chi_tmp1147, array_meta_table);_chi_tmp1139=_chi_tmp1147 end;local deps=_chi_tmp1139;
 do for _,name in ipairs(names) do do
-local _chi_tmp1146;do local _chi_tmp1147=__std__lang_map.getOrDefault(declOf,name,(0));_chi_tmp1146=_chi_tmp1147 end;local j=_chi_tmp1146;
-local _chi_tmp1148;local _chi_tmp1150=((j ~= (0)) and (j ~= i));if _chi_tmp1150 then local _chi_tmp1149=__chicc__symbols.arrayContains(params,name);_chi_tmp1150=(_chi_tmp1149 == (false)) end;if _chi_tmp1150 then
-local _chi_tmp1151=__std__lang_array.push(deps,j);_chi_tmp1148=_chi_tmp1151
+local _chi_tmp1148;do local _chi_tmp1149=__std__lang_map.getOrDefault(declOf,name,(0));_chi_tmp1148=_chi_tmp1149 end;local j=_chi_tmp1148;
+local _chi_tmp1150;local _chi_tmp1152=((j ~= (0)) and (j ~= i));if _chi_tmp1152 then local _chi_tmp1151=__chicc__symbols.arrayContains(params,name);_chi_tmp1152=(_chi_tmp1151 == (false)) end;if _chi_tmp1152 then
+local _chi_tmp1153=__std__lang_array.push(deps,j);_chi_tmp1150=_chi_tmp1153
  end; end ::__continue_53:: end;
  end;
-do local _chi_tmp1152=__std__lang_array.push(g.deps,deps); end;
-do local _chi_tmp1153=__std__lang_array.push(g.index,(0)); end;
-do local _chi_tmp1154=__std__lang_array.push(g.low,(0)); end;
-local _chi_tmp1155=__std__lang_array.push(g.onStack,(false)); end ::__continue_49:: end;
+do local _chi_tmp1154=__std__lang_array.push(g.deps,deps); end;
+do local _chi_tmp1155=__std__lang_array.push(g.index,(0)); end;
+do local _chi_tmp1156=__std__lang_array.push(g.low,(0)); end;
+local _chi_tmp1157=__std__lang_array.push(g.onStack,(false)); end ::__continue_49:: end;
  end;
-do _chi_tmp1118=(1) end;local v=_chi_tmp1118;
-do local function _chi_tmp1156() return v end;local function _chi_tmp1157() return n end;while (_chi_tmp1156() <= _chi_tmp1157()) do do
-do local _chi_tmp1158;local _chi_tmp1159=g.index[v];if (_chi_tmp1159 == (0)) then
-local _chi_tmp1160=__P_.strongConnect(g,v);_chi_tmp1158=_chi_tmp1160
+do _chi_tmp1120=(1) end;local v=_chi_tmp1120;
+do local function _chi_tmp1158() return v end;local function _chi_tmp1159() return n end;while (_chi_tmp1158() <= _chi_tmp1159()) do do
+do local _chi_tmp1160;local _chi_tmp1161=g.index[v];if (_chi_tmp1161 == (0)) then
+local _chi_tmp1162=__P_.strongConnect(g,v);_chi_tmp1160=_chi_tmp1162
  end; end;
 v=(v + (1)); end ::__continue_54:: end;
  end;
-do local _chi_tmp1161={};setmetatable(_chi_tmp1161, array_meta_table);_chi_tmp1118=_chi_tmp1161 end;local order=_chi_tmp1118;
-do local _chi_tmp1162={};setmetatable(_chi_tmp1162, array_meta_table);_chi_tmp1118=_chi_tmp1162 end;local cycles=_chi_tmp1118;
+do local _chi_tmp1163={};setmetatable(_chi_tmp1163, array_meta_table);_chi_tmp1120=_chi_tmp1163 end;local order=_chi_tmp1120;
+do local _chi_tmp1164={};setmetatable(_chi_tmp1164, array_meta_table);_chi_tmp1120=_chi_tmp1164 end;local cycles=_chi_tmp1120;
 do for _,scc in ipairs(g.sccs) do do
-local _chi_tmp1163;do local _chi_tmp1164={};setmetatable(_chi_tmp1164, array_meta_table);_chi_tmp1163=_chi_tmp1164 end;local members=_chi_tmp1163;
+local _chi_tmp1165;do local _chi_tmp1166={};setmetatable(_chi_tmp1166, array_meta_table);_chi_tmp1165=_chi_tmp1166 end;local members=_chi_tmp1165;
 do for _,m in ipairs(scc) do do
-do local _chi_tmp1165=decls[m];local _chi_tmp1166=__std__lang_array.push(members,_chi_tmp1165); end;
-local _chi_tmp1167=decls[m];local _chi_tmp1168=__std__lang_array.push(order,_chi_tmp1167); end ::__continue_56:: end;
+do local _chi_tmp1167=decls[m];local _chi_tmp1168=__std__lang_array.push(members,_chi_tmp1167); end;
+local _chi_tmp1169=decls[m];local _chi_tmp1170=__std__lang_array.push(order,_chi_tmp1169); end ::__continue_56:: end;
  end;
-local _chi_tmp1169;local _chi_tmp1170=__std__lang_array.size(members);if (_chi_tmp1170 > (1)) then
-local _chi_tmp1171=__std__lang_array.push(cycles,members);_chi_tmp1169=_chi_tmp1171
+local _chi_tmp1171;local _chi_tmp1172=__std__lang_array.size(members);if (_chi_tmp1172 > (1)) then
+local _chi_tmp1173=__std__lang_array.push(cycles,members);_chi_tmp1171=_chi_tmp1173
  end; end ::__continue_55:: end;
  end;
-local _chi_tmp1172={order=order,cycles=cycles};setmetatable(_chi_tmp1172, record_meta_table);return _chi_tmp1172 end;
+local _chi_tmp1174={order=order,cycles=cycles};setmetatable(_chi_tmp1174, record_meta_table);return _chi_tmp1174 end;
 return __P_
  end;local _chi_info=debug.getinfo(_chi_run,'S');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;if string.sub(_chi_source,1,1)=='@' then _chi_source=string.sub(_chi_source,2) end;_chi_line_map[2]=13;_chi_line_map[3]=14;_chi_line_map[4]=15;_chi_line_map[5]=16;_chi_line_map[6]=17;_chi_line_map[7]=18;_chi_line_map[8]=22;_chi_line_map[9]=23;_chi_line_map[10]=24;_chi_line_map[11]=23;_chi_line_map[12]=26;_chi_line_map[13]=23;_chi_line_map[14]=22;_chi_line_map[15]=30;_chi_line_map[16]=31;_chi_line_map[17]=32;_chi_line_map[18]=33;_chi_line_map[19]=30;_chi_line_map[20]=36;_chi_line_map[21]=37;_chi_line_map[22]=36;_chi_line_map[23]=40;_chi_line_map[24]=41;_chi_line_map[25]=40;_chi_line_map[26]=44;_chi_line_map[27]=45;_chi_line_map[28]=46;_chi_line_map[29]=47;_chi_line_map[30]=48;_chi_line_map[31]=49;_chi_line_map[32]=50;_chi_line_map[33]=51;_chi_line_map[34]=52;_chi_line_map[35]=53;_chi_line_map[36]=51;_chi_line_map[37]=55;_chi_line_map[38]=56;_chi_line_map[39]=57;_chi_line_map[40]=58;_chi_line_map[41]=59;_chi_line_map[42]=58;_chi_line_map[43]=61;_chi_line_map[44]=49;_chi_line_map[45]=63;_chi_line_map[46]=47;_chi_line_map[47]=65;_chi_line_map[48]=45;_chi_line_map[49]=68;_chi_line_map[50]=69;_chi_line_map[51]=70;_chi_line_map[52]=71;_chi_line_map[53]=72;_chi_line_map[54]=73;_chi_line_map[55]=71;_chi_line_map[56]=75;_chi_line_map[57]=68;_chi_line_map[58]=77;_chi_line_map[59]=78;_chi_line_map[60]=79;_chi_line_map[61]=80;_chi_line_map[62]=81;_chi_line_map[63]=82;_chi_line_map[64]=83;_chi_line_map[65]=79;_chi_line_map[66]=85;_chi_line_map[67]=86;_chi_line_map[68]=87;_chi_line_map[69]=68;_chi_line_map[70]=89;_chi_line_map[71]=68;_chi_line_map[72]=91;_chi_line_map[73]=68;_chi_line_map[74]=93;_chi_line_map[75]=68;_chi_line_map[76]=95;_chi_line_map[77]=68;_chi_line_map[78]=97;_chi_line_map[79]=68;_chi_line_map[80]=44;_chi_line_map[81]=103;_chi_line_map[82]=104;_chi_line_map[83]=105;_chi_line_map[84]=106;_chi_line_map[85]=107;_chi_line_map[86]=108;_chi_line_map[87]=109;_chi_line_map[88]=107;_chi_line_map[89]=111;_chi_line_map[90]=103;_chi_line_map[91]=116;_chi_line_map[92]=117;_chi_line_map[93]=118;_chi_line_map[94]=116;_chi_line_map[95]=121;_chi_line_map[96]=122;_chi_line_map[97]=123;_chi_line_map[98]=124;_chi_line_map[99]=125;_chi_line_map[100]=126;_chi_line_map[101]=127;_chi_line_map[102]=123;_chi_line_map[103]=131;_chi_line_map[104]=132;_chi_line_map[105]=133;_chi_line_map[106]=134;_chi_line_map[107]=135;_chi_line_map[108]=132;_chi_line_map[109]=138;_chi_line_map[110]=121;_chi_line_map[111]=141;_chi_line_map[112]=142;_chi_line_map[113]=141;_chi_line_map[114]=147;_chi_line_map[115]=148;_chi_line_map[116]=149;_chi_line_map[117]=150;_chi_line_map[118]=151;_chi_line_map[119]=147;_chi_line_map[120]=155;_chi_line_map[121]=156;_chi_line_map[122]=157;_chi_line_map[123]=158;_chi_line_map[124]=159;_chi_line_map[125]=157;_chi_line_map[126]=161;_chi_line_map[127]=162;_chi_line_map[128]=163;_chi_line_map[129]=164;_chi_line_map[130]=165;_chi_line_map[131]=157;_chi_line_map[132]=155;_chi_line_map[133]=169;_chi_line_map[134]=170;_chi_line_map[135]=171;_chi_line_map[136]=172;_chi_line_map[137]=171;_chi_line_map[138]=174;_chi_line_map[139]=171;_chi_line_map[140]=169;_chi_line_map[141]=183;_chi_line_map[142]=184;_chi_line_map[143]=185;_chi_line_map[144]=186;_chi_line_map[145]=187;_chi_line_map[146]=188;_chi_line_map[147]=189;_chi_line_map[148]=190;_chi_line_map[149]=191;_chi_line_map[150]=192;_chi_line_map[151]=196;_chi_line_map[152]=197;_chi_line_map[153]=198;_chi_line_map[154]=199;_chi_line_map[155]=200;_chi_line_map[156]=201;_chi_line_map[157]=202;_chi_line_map[158]=205;_chi_line_map[159]=206;_chi_line_map[160]=208;_chi_line_map[161]=209;_chi_line_map[162]=210;_chi_line_map[163]=211;_chi_line_map[164]=212;_chi_line_map[165]=213;_chi_line_map[166]=214;_chi_line_map[167]=215;_chi_line_map[168]=211;_chi_line_map[169]=217;_chi_line_map[170]=218;_chi_line_map[171]=220;_chi_line_map[172]=222;_chi_line_map[173]=223;_chi_line_map[174]=224;_chi_line_map[175]=225;_chi_line_map[176]=226;_chi_line_map[177]=227;_chi_line_map[178]=228;_chi_line_map[179]=229;_chi_line_map[180]=230;_chi_line_map[181]=232;_chi_line_map[182]=233;_chi_line_map[183]=234;_chi_line_map[184]=233;_chi_line_map[185]=236;_chi_line_map[186]=237;_chi_line_map[187]=238;_chi_line_map[188]=226;_chi_line_map[189]=242;_chi_line_map[190]=243;_chi_line_map[191]=244;_chi_line_map[192]=243;_chi_line_map[193]=246;_chi_line_map[194]=248;_chi_line_map[195]=251;_chi_line_map[196]=252;_chi_line_map[197]=254;_chi_line_map[198]=255;_chi_line_map[199]=257;_chi_line_map[200]=258;_chi_line_map[201]=261;_chi_line_map[202]=263;_chi_line_map[203]=196;_chi_line_map[204]=268;_chi_line_map[205]=269;_chi_line_map[206]=270;_chi_line_map[207]=272;_chi_line_map[208]=273;_chi_line_map[209]=272;_chi_line_map[210]=275;_chi_line_map[211]=276;_chi_line_map[212]=272;_chi_line_map[213]=278;_chi_line_map[214]=272;_chi_line_map[215]=280;_chi_line_map[216]=281;_chi_line_map[217]=282;_chi_line_map[218]=281;_chi_line_map[219]=272;_chi_line_map[220]=284;_chi_line_map[221]=285;_chi_line_map[222]=272;_chi_line_map[223]=287;_chi_line_map[224]=288;_chi_line_map[225]=272;_chi_line_map[226]=290;_chi_line_map[227]=291;_chi_line_map[228]=292;_chi_line_map[229]=272;_chi_line_map[230]=294;_chi_line_map[231]=295;_chi_line_map[232]=296;_chi_line_map[233]=297;_chi_line_map[234]=298;_chi_line_map[235]=299;_chi_line_map[236]=300;_chi_line_map[237]=301;_chi_line_map[238]=302;_chi_line_map[239]=298;_chi_line_map[240]=304;_chi_line_map[241]=272;_chi_line_map[242]=306;_chi_line_map[243]=272;_chi_line_map[244]=308;_chi_line_map[245]=272;_chi_line_map[246]=310;_chi_line_map[247]=272;_chi_line_map[248]=312;_chi_line_map[249]=313;_chi_line_map[250]=314;_chi_line_map[251]=272;_chi_line_map[252]=316;_chi_line_map[253]=317;_chi_line_map[254]=318;_chi_line_map[255]=319;_chi_line_map[256]=320;_chi_line_map[257]=272;_chi_line_map[258]=322;_chi_line_map[259]=323;_chi_line_map[260]=324;_chi_line_map[261]=272;_chi_line_map[262]=326;_chi_line_map[263]=327;_chi_line_map[264]=328;_chi_line_map[265]=329;_chi_line_map[266]=272;_chi_line_map[267]=331;_chi_line_map[268]=272;_chi_line_map[269]=333;_chi_line_map[270]=272;_chi_line_map[271]=335;_chi_line_map[272]=272;_chi_line_map[273]=337;_chi_line_map[274]=338;_chi_line_map[275]=339;_chi_line_map[276]=340;_chi_line_map[277]=341;_chi_line_map[278]=272;_chi_line_map[279]=343;_chi_line_map[280]=344;_chi_line_map[281]=345;_chi_line_map[282]=272;_chi_line_map[283]=347;_chi_line_map[284]=272;_chi_line_map[285]=349;_chi_line_map[286]=272;_chi_line_map[287]=351;_chi_line_map[288]=352;_chi_line_map[289]=353;_chi_line_map[290]=272;_chi_line_map[291]=355;_chi_line_map[292]=272;_chi_line_map[293]=357;_chi_line_map[294]=272;_chi_line_map[295]=359;_chi_line_map[296]=360;_chi_line_map[297]=272;_chi_line_map[298]=362;_chi_line_map[299]=363;_chi_line_map[300]=364;_chi_line_map[301]=365;_chi_line_map[302]=272;_chi_line_map[303]=367;_chi_line_map[304]=368;_chi_line_map[305]=369;_chi_line_map[306]=370;_chi_line_map[307]=272;_chi_line_map[308]=372;_chi_line_map[309]=373;_chi_line_map[310]=374;_chi_line_map[311]=375;_chi_line_map[312]=272;_chi_line_map[313]=377;_chi_line_map[314]=272;_chi_line_map[315]=379;_chi_line_map[316]=380;_chi_line_map[317]=381;_chi_line_map[318]=382;_chi_line_map[319]=272;_chi_line_map[320]=384;_chi_line_map[321]=385;_chi_line_map[322]=386;_chi_line_map[323]=387;_chi_line_map[324]=388;_chi_line_map[325]=389;_chi_line_map[326]=390;_chi_line_map[327]=391;_chi_line_map[328]=388;_chi_line_map[329]=393;_chi_line_map[330]=272;_chi_line_map[331]=395;_chi_line_map[332]=396;_chi_line_map[333]=397;_chi_line_map[334]=398;_chi_line_map[335]=399;_chi_line_map[336]=400;_chi_line_map[337]=401;_chi_line_map[338]=402;_chi_line_map[339]=403;_chi_line_map[340]=404;_chi_line_map[341]=405;_chi_line_map[342]=399;_chi_line_map[343]=407;_chi_line_map[344]=272;_chi_line_map[345]=409;_chi_line_map[346]=272;_chi_line_map[347]=411;_chi_line_map[348]=272;_chi_line_map[349]=413;_chi_line_map[350]=272;_chi_line_map[351]=415;_chi_line_map[352]=416;_chi_line_map[353]=415;_chi_line_map[354]=418;_chi_line_map[355]=415;_chi_line_map[356]=272;_chi_line_map[357]=422;_chi_line_map[358]=423;_chi_line_map[359]=272;_chi_line_map[360]=268;_chi_line_map[361]=429;_chi_line_map[362]=430;_chi_line_map[363]=431;_chi_line_map[364]=432;_chi_line_map[365]=434;_chi_line_map[366]=435;_chi_line_map[367]=436;_chi_line_map[368]=437;_chi_line_map[369]=439;_chi_line_map[370]=440;_chi_line_map[371]=441;_chi_line_map[372]=442;_chi_line_map[373]=443;_chi_line_map[374]=444;_chi_line_map[375]=445;_chi_line_map[376]=446;_chi_line_map[377]=447;_chi_line_map[378]=448;_chi_line_map[379]=449;_chi_line_map[380]=450;_chi_line_map[381]=452;_chi_line_map[382]=453;_chi_line_map[383]=454;_chi_line_map[384]=455;_chi_line_map[385]=453;_chi_line_map[386]=458;_chi_line_map[387]=459;_chi_line_map[388]=460;_chi_line_map[389]=461;_chi_line_map[390]=458;_chi_line_map[391]=464;_chi_line_map[392]=465;_chi_line_map[393]=468;_chi_line_map[394]=469;_chi_line_map[395]=468;_chi_line_map[396]=471;_chi_line_map[397]=472;_chi_line_map[398]=468;_chi_line_map[399]=475;_chi_line_map[400]=445;_chi_line_map[401]=479;_chi_line_map[402]=480;_chi_line_map[403]=483;_chi_line_map[404]=484;_chi_line_map[405]=485;_chi_line_map[406]=486;_chi_line_map[407]=487;_chi_line_map[408]=488;_chi_line_map[409]=489;_chi_line_map[410]=486;_chi_line_map[411]=492;_chi_line_map[412]=494;_chi_line_map[413]=496;_chi_line_map[414]=498;_chi_line_map[415]=499;_chi_line_map[416]=500;_chi_line_map[417]=501;_chi_line_map[418]=429;_chi_line_map[419]=504;_chi_line_map[420]=508;_chi_line_map[421]=509;_chi_line_map[422]=510;_chi_line_map[423]=511;_chi_line_map[424]=512;_chi_line_map[425]=513;_chi_line_map[426]=514;_chi_line_map[427]=515;_chi_line_map[428]=518;_chi_line_map[429]=519;_chi_line_map[430]=521;_chi_line_map[431]=522;_chi_line_map[432]=523;_chi_line_map[433]=524;_chi_line_map[434]=525;_chi_line_map[435]=526;_chi_line_map[436]=527;_chi_line_map[437]=528;_chi_line_map[438]=524;_chi_line_map[439]=530;_chi_line_map[440]=531;_chi_line_map[441]=533;_chi_line_map[442]=536;_chi_line_map[443]=537;_chi_line_map[444]=538;_chi_line_map[445]=539;_chi_line_map[446]=540;_chi_line_map[447]=541;_chi_line_map[448]=542;_chi_line_map[449]=543;_chi_line_map[450]=544;_chi_line_map[451]=545;_chi_line_map[452]=546;_chi_line_map[453]=544;_chi_line_map[454]=548;_chi_line_map[455]=544;_chi_line_map[456]=550;_chi_line_map[457]=551;_chi_line_map[458]=550;_chi_line_map[459]=553;_chi_line_map[460]=540;_chi_line_map[461]=557;_chi_line_map[462]=558;_chi_line_map[463]=559;_chi_line_map[464]=558;_chi_line_map[465]=563;_chi_line_map[466]=564;_chi_line_map[467]=565;_chi_line_map[468]=566;_chi_line_map[469]=567;_chi_line_map[470]=568;_chi_line_map[471]=566;_chi_line_map[472]=570;_chi_line_map[473]=571;_chi_line_map[474]=574;_chi_line_map[475]=577;_chi_line_map[476]=578;_chi_line_map[477]=579;_chi_line_map[478]=580;_chi_line_map[479]=583;_chi_line_map[480]=584;_chi_line_map[481]=585;_chi_line_map[482]=586;_chi_line_map[483]=587;_chi_line_map[484]=588;_chi_line_map[485]=589;_chi_line_map[486]=590;_chi_line_map[487]=591;_chi_line_map[488]=595;_chi_line_map[489]=597;_chi_line_map[490]=598;_chi_line_map[491]=599;_chi_line_map[492]=597;_chi_line_map[493]=602;_chi_line_map[494]=603;_chi_line_map[495]=604;_chi_line_map[496]=586;_chi_line_map[497]=608;_chi_line_map[498]=609;_chi_line_map[499]=610;_chi_line_map[500]=616;_chi_line_map[501]=617;_chi_line_map[502]=618;_chi_line_map[503]=619;_chi_line_map[504]=620;_chi_line_map[505]=621;_chi_line_map[506]=622;_chi_line_map[507]=623;_chi_line_map[508]=624;_chi_line_map[509]=625;_chi_line_map[510]=626;_chi_line_map[511]=627;_chi_line_map[512]=628;_chi_line_map[513]=629;_chi_line_map[514]=630;_chi_line_map[515]=631;_chi_line_map[516]=632;_chi_line_map[517]=624;_chi_line_map[518]=621;_chi_line_map[519]=619;_chi_line_map[520]=617;_chi_line_map[521]=638;_chi_line_map[522]=641;_chi_line_map[523]=642;_chi_line_map[524]=644;_chi_line_map[525]=645;_chi_line_map[526]=647;_chi_line_map[527]=648;_chi_line_map[528]=649;_chi_line_map[529]=508;_chi_line_map[530]=652;_chi_line_map[531]=658;_chi_line_map[532]=659;_chi_line_map[533]=660;_chi_line_map[534]=658;_chi_line_map[535]=664;_chi_line_map[536]=665;_chi_line_map[537]=666;_chi_line_map[538]=667;_chi_line_map[539]=668;_chi_line_map[540]=664;_chi_line_map[541]=671;_chi_line_map[542]=672;_chi_line_map[543]=673;_chi_line_map[544]=674;_chi_line_map[545]=677;_chi_line_map[546]=678;_chi_line_map[547]=677;_chi_line_map[548]=681;_chi_line_map[549]=683;_chi_line_map[550]=684;_chi_line_map[551]=685;_chi_line_map[552]=686;_chi_line_map[553]=687;_chi_line_map[554]=688;_chi_line_map[555]=689;_chi_line_map[556]=686;_chi_line_map[557]=692;_chi_line_map[558]=697;_chi_line_map[559]=698;_chi_line_map[560]=699;_chi_line_map[561]=700;_chi_line_map[562]=701;_chi_line_map[563]=702;_chi_line_map[564]=703;_chi_line_map[565]=704;_chi_line_map[566]=705;_chi_line_map[567]=706;_chi_line_map[568]=702;_chi_line_map[569]=708;_chi_line_map[570]=713;_chi_line_map[571]=714;_chi_line_map[572]=715;_chi_line_map[573]=716;_chi_line_map[574]=717;_chi_line_map[575]=718;_chi_line_map[576]=719;_chi_line_map[577]=720;_chi_line_map[578]=717;_chi_line_map[579]=715;_chi_line_map[580]=714;_chi_line_map[581]=725;_chi_line_map[582]=671;_chi_line_map[583]=728;_chi_line_map[584]=734;_chi_line_map[585]=735;_chi_line_map[586]=736;_chi_line_map[587]=738;_chi_line_map[588]=739;_chi_line_map[589]=740;_chi_line_map[590]=741;_chi_line_map[591]=742;_chi_line_map[592]=743;_chi_line_map[593]=744;_chi_line_map[594]=745;_chi_line_map[595]=746;_chi_line_map[596]=747;_chi_line_map[597]=744;_chi_line_map[598]=749;_chi_line_map[599]=750;_chi_line_map[600]=752;_chi_line_map[601]=734;_chi_line_map[602]=755;_chi_line_map[603]=759;_chi_line_map[604]=760;_chi_line_map[605]=761;_chi_line_map[606]=762;_chi_line_map[607]=763;_chi_line_map[608]=764;_chi_line_map[609]=765;_chi_line_map[610]=767;_chi_line_map[611]=769;_chi_line_map[612]=771;_chi_line_map[613]=772;_chi_line_map[614]=773;_chi_line_map[615]=774;_chi_line_map[616]=772;_chi_line_map[617]=778;_chi_line_map[618]=780;_chi_line_map[619]=781;_chi_line_map[620]=782;_chi_line_map[621]=781;_chi_line_map[622]=784;_chi_line_map[623]=785;_chi_line_map[624]=787;_chi_line_map[625]=759;_chi_line_map[626]=790;_chi_line_map[627]=795;_chi_line_map[628]=796;_chi_line_map[629]=797;_chi_line_map[630]=798;_chi_line_map[631]=799;_chi_line_map[632]=800;_chi_line_map[633]=795;_chi_line_map[634]=803;_chi_line_map[635]=804;_chi_line_map[636]=805;_chi_line_map[637]=806;_chi_line_map[638]=808;_chi_line_map[639]=811;_chi_line_map[640]=812;_chi_line_map[641]=811;_chi_line_map[642]=816;_chi_line_map[643]=817;_chi_line_map[644]=818;_chi_line_map[645]=816;_chi_line_map[646]=823;_chi_line_map[647]=824;_chi_line_map[648]=825;_chi_line_map[649]=826;_chi_line_map[650]=828;_chi_line_map[651]=829;_chi_line_map[652]=831;_chi_line_map[653]=832;_chi_line_map[654]=833;_chi_line_map[655]=834;_chi_line_map[656]=835;_chi_line_map[657]=832;_chi_line_map[658]=837;_chi_line_map[659]=832;_chi_line_map[660]=841;_chi_line_map[661]=842;_chi_line_map[662]=843;_chi_line_map[663]=844;_chi_line_map[664]=845;_chi_line_map[665]=846;_chi_line_map[666]=848;_chi_line_map[667]=849;_chi_line_map[668]=850;_chi_line_map[669]=851;_chi_line_map[670]=842;_chi_line_map[671]=854;_chi_line_map[672]=803;_chi_line_map[673]=857;_chi_line_map[674]=861;_chi_line_map[675]=862;_chi_line_map[676]=863;_chi_line_map[677]=864;_chi_line_map[678]=865;_chi_line_map[679]=866;_chi_line_map[680]=867;_chi_line_map[681]=870;_chi_line_map[682]=871;_chi_line_map[683]=872;_chi_line_map[684]=873;_chi_line_map[685]=874;_chi_line_map[686]=875;_chi_line_map[687]=876;_chi_line_map[688]=874;_chi_line_map[689]=879;_chi_line_map[690]=880;_chi_line_map[691]=881;_chi_line_map[692]=883;_chi_line_map[693]=884;_chi_line_map[694]=885;_chi_line_map[695]=886;_chi_line_map[696]=888;_chi_line_map[697]=861;_chi_line_map[698]=891;_chi_line_map[699]=895;_chi_line_map[700]=896;_chi_line_map[701]=897;_chi_line_map[702]=898;_chi_line_map[703]=899;_chi_line_map[704]=901;_chi_line_map[705]=902;_chi_line_map[706]=903;_chi_line_map[707]=904;_chi_line_map[708]=906;_chi_line_map[709]=907;_chi_line_map[710]=908;_chi_line_map[711]=909;_chi_line_map[712]=910;_chi_line_map[713]=911;_chi_line_map[714]=912;_chi_line_map[715]=913;_chi_line_map[716]=909;_chi_line_map[717]=907;_chi_line_map[718]=917;_chi_line_map[719]=918;_chi_line_map[720]=902;_chi_line_map[721]=922;_chi_line_map[722]=923;_chi_line_map[723]=895;_chi_line_map[724]=926;_chi_line_map[725]=930;_chi_line_map[726]=931;_chi_line_map[727]=932;_chi_line_map[728]=933;_chi_line_map[729]=935;_chi_line_map[730]=936;_chi_line_map[731]=939;_chi_line_map[732]=940;_chi_line_map[733]=943;_chi_line_map[734]=946;_chi_line_map[735]=947;_chi_line_map[736]=948;_chi_line_map[737]=949;_chi_line_map[738]=951;_chi_line_map[739]=930;_chi_line_map[740]=954;_chi_line_map[741]=958;_chi_line_map[742]=959;_chi_line_map[743]=960;_chi_line_map[744]=961;_chi_line_map[745]=963;_chi_line_map[746]=965;_chi_line_map[747]=966;_chi_line_map[748]=967;_chi_line_map[749]=968;_chi_line_map[750]=969;_chi_line_map[751]=970;_chi_line_map[752]=971;_chi_line_map[753]=972;_chi_line_map[754]=973;_chi_line_map[755]=976;_chi_line_map[756]=977;_chi_line_map[757]=978;_chi_line_map[758]=981;_chi_line_map[759]=982;_chi_line_map[760]=983;_chi_line_map[761]=984;_chi_line_map[762]=985;_chi_line_map[763]=986;_chi_line_map[764]=987;_chi_line_map[765]=985;_chi_line_map[766]=991;_chi_line_map[767]=992;_chi_line_map[768]=993;_chi_line_map[769]=994;_chi_line_map[770]=995;_chi_line_map[771]=996;_chi_line_map[772]=994;_chi_line_map[773]=1000;_chi_line_map[774]=1003;_chi_line_map[775]=1004;_chi_line_map[776]=1005;_chi_line_map[777]=1006;_chi_line_map[778]=1007;_chi_line_map[779]=1005;_chi_line_map[780]=1010;_chi_line_map[781]=1012;_chi_line_map[782]=1013;_chi_line_map[783]=968;_chi_line_map[784]=1016;_chi_line_map[785]=958;_chi_line_map[786]=1019;_chi_line_map[787]=1035;_chi_line_map[788]=1036;_chi_line_map[789]=1038;_chi_line_map[790]=1039;_chi_line_map[791]=1040;_chi_line_map[792]=1041;_chi_line_map[793]=1043;_chi_line_map[794]=1044;_chi_line_map[795]=1045;_chi_line_map[796]=1049;_chi_line_map[797]=1050;_chi_line_map[798]=1049;_chi_line_map[799]=1053;_chi_line_map[800]=1057;_chi_line_map[801]=1058;_chi_line_map[802]=1059;_chi_line_map[803]=1060;_chi_line_map[804]=1061;_chi_line_map[805]=1062;_chi_line_map[806]=1063;_chi_line_map[807]=1065;_chi_line_map[808]=1066;_chi_line_map[809]=1067;_chi_line_map[810]=1068;_chi_line_map[811]=1069;_chi_line_map[812]=1070;_chi_line_map[813]=1071;_chi_line_map[814]=1072;_chi_line_map[815]=1073;_chi_line_map[816]=1074;_chi_line_map[817]=1072;_chi_line_map[818]=1076;_chi_line_map[819]=1066;_chi_line_map[820]=1080;_chi_line_map[821]=1081;_chi_line_map[822]=1082;_chi_line_map[823]=1083;_chi_line_map[824]=1084;_chi_line_map[825]=1085;_chi_line_map[826]=1086;_chi_line_map[827]=1087;_chi_line_map[828]=1089;_chi_line_map[829]=1090;_chi_line_map[830]=1091;_chi_line_map[831]=1092;_chi_line_map[832]=1093;_chi_line_map[833]=1094;_chi_line_map[834]=1095;_chi_line_map[835]=1096;_chi_line_map[836]=1097;_chi_line_map[837]=1098;_chi_line_map[838]=1092;_chi_line_map[839]=1101;_chi_line_map[840]=1102;_chi_line_map[841]=1106;_chi_line_map[842]=1107;_chi_line_map[843]=1108;_chi_line_map[844]=1109;_chi_line_map[845]=1110;_chi_line_map[846]=1083;_chi_line_map[847]=1117;_chi_line_map[848]=1118;_chi_line_map[849]=1119;_chi_line_map[850]=1120;_chi_line_map[851]=1121;_chi_line_map[852]=1122;_chi_line_map[853]=1120;_chi_line_map[854]=1118;_chi_line_map[855]=1125;_chi_line_map[856]=1129;_chi_line_map[857]=1130;_chi_line_map[858]=1131;_chi_line_map[859]=1132;_chi_line_map[860]=1133;_chi_line_map[861]=1134;_chi_line_map[862]=1135;_chi_line_map[863]=1136;_chi_line_map[864]=1137;_chi_line_map[865]=1138;_chi_line_map[866]=1139;_chi_line_map[867]=1140;_chi_line_map[868]=1138;_chi_line_map[869]=1142;_chi_line_map[870]=1135;_chi_line_map[871]=1144;_chi_line_map[872]=1145;_chi_line_map[873]=1131;_chi_line_map[874]=1150;_chi_line_map[875]=1151;_chi_line_map[876]=1152;_chi_line_map[877]=1153;_chi_line_map[878]=1154;_chi_line_map[879]=1155;_chi_line_map[880]=1156;_chi_line_map[881]=1157;_chi_line_map[882]=1158;_chi_line_map[883]=1159;_chi_line_map[884]=1160;_chi_line_map[885]=1161;_chi_line_map[886]=1162;_chi_line_map[887]=1163;_chi_line_map[888]=1164;_chi_line_map[889]=1165;_chi_line_map[890]=1166;_chi_line_map[891]=1160;_chi_line_map[892]=1168;_chi_line_map[893]=1169;_chi_line_map[894]=1170;_chi_line_map[895]=1171;_chi_line_map[896]=1172;_chi_line_map[897]=1173;_chi_line_map[898]=1174;_chi_line_map[899]=1175;_chi_line_map[900]=1173;_chi_line_map[901]=1177;_chi_line_map[902]=1152;_chi_line_map[903]=1180;_chi_line_map[904]=1181;_chi_line_map[905]=1182;_chi_line_map[906]=1186;_chi_line_map[907]=1187;_chi_line_map[908]=1188;_chi_line_map[909]=1189;_chi_line_map[910]=1190;_chi_line_map[911]=1191;_chi_line_map[912]=1192;_chi_line_map[913]=1193;_chi_line_map[914]=1194;_chi_line_map[915]=1196;_chi_line_map[916]=1197;_chi_line_map[917]=1198;_chi_line_map[918]=1199;_chi_line_map[919]=1200;_chi_line_map[920]=1201;_chi_line_map[921]=1196;_chi_line_map[922]=1204;_chi_line_map[923]=1205;_chi_line_map[924]=1206;_chi_line_map[925]=1207;_chi_line_map[926]=1208;_chi_line_map[927]=1206;_chi_line_map[928]=1210;_chi_line_map[929]=1211;_chi_line_map[930]=1210;_chi_line_map[931]=1213;_chi_line_map[932]=1210;_chi_line_map[933]=1215;_chi_line_map[934]=1216;_chi_line_map[935]=1220;_chi_line_map[936]=1221;_chi_line_map[937]=1222;_chi_line_map[938]=1224;_chi_line_map[939]=1225;_chi_line_map[940]=1226;_chi_line_map[941]=1227;_chi_line_map[942]=1228;_chi_line_map[943]=1229;_chi_line_map[944]=1230;_chi_line_map[945]=1231;_chi_line_map[946]=1232;_chi_line_map[947]=1233;_chi_line_map[948]=1234;_chi_line_map[949]=1235;_chi_line_map[950]=1227;_chi_line_map[951]=1238;_chi_line_map[952]=1240;_chi_line_map[953]=1241;_chi_line_map[954]=1242;_chi_line_map[955]=1243;_chi_line_map[956]=1244;_chi_line_map[957]=1187;_chi_line_map[958]=1247;_chi_line_map[959]=1035;_chi_line_map[960]=1252;_chi_line_map[961]=1253;_chi_line_map[962]=1256;_chi_line_map[963]=1257;_chi_line_map[964]=1258;_chi_line_map[965]=1259;_chi_line_map[966]=1260;_chi_line_map[967]=1261;_chi_line_map[968]=1262;_chi_line_map[969]=1263;_chi_line_map[970]=1266;_chi_line_map[971]=1267;_chi_line_map[972]=1268;_chi_line_map[973]=1269;_chi_line_map[974]=1270;_chi_line_map[975]=1271;_chi_line_map[976]=1272;_chi_line_map[977]=1273;_chi_line_map[978]=1269;_chi_line_map[979]=1276;_chi_line_map[980]=1279;_chi_line_map[981]=1280;_chi_line_map[982]=1281;_chi_line_map[983]=1282;_chi_line_map[984]=1283;_chi_line_map[985]=1284;_chi_line_map[986]=1287;_chi_line_map[987]=1288;_chi_line_map[988]=1281;_chi_line_map[989]=1291;_chi_line_map[990]=1259;_chi_line_map[991]=1297;_chi_line_map[992]=1298;_chi_line_map[993]=1299;_chi_line_map[994]=1300;_chi_line_map[995]=1301;_chi_line_map[996]=1302;_chi_line_map[997]=1303;_chi_line_map[998]=1304;_chi_line_map[999]=1301;_chi_line_map[1000]=1307;_chi_line_map[1001]=1252;_chi_line_map[1002]=1320;_chi_line_map[1003]=1321;_chi_line_map[1004]=1322;_chi_line_map[1005]=1323;_chi_line_map[1006]=1324;_chi_line_map[1007]=1323;_chi_line_map[1008]=1322;_chi_line_map[1009]=1327;_chi_line_map[1010]=1320;_chi_line_map[1011]=1331;_chi_line_map[1012]=1332;_chi_line_map[1013]=1333;_chi_line_map[1014]=1334;_chi_line_map[1015]=1335;_chi_line_map[1016]=1334;_chi_line_map[1017]=1337;_chi_line_map[1018]=1338;_chi_line_map[1019]=1339;_chi_line_map[1020]=1340;_chi_line_map[1021]=1341;_chi_line_map[1022]=1342;_chi_line_map[1023]=1343;_chi_line_map[1024]=1334;_chi_line_map[1025]=1332;_chi_line_map[1026]=1331;_chi_line_map[1027]=1361;_chi_line_map[1028]=1362;_chi_line_map[1029]=1363;_chi_line_map[1030]=1364;_chi_line_map[1031]=1365;_chi_line_map[1032]=1366;_chi_line_map[1033]=1367;_chi_line_map[1034]=1368;_chi_line_map[1035]=1369;_chi_line_map[1036]=1370;_chi_line_map[1037]=1371;_chi_line_map[1038]=1372;_chi_line_map[1039]=1373;_chi_line_map[1040]=1371;_chi_line_map[1041]=1375;_chi_line_map[1042]=1371;_chi_line_map[1043]=1370;_chi_line_map[1044]=1378;_chi_line_map[1045]=1379;_chi_line_map[1046]=1380;_chi_line_map[1047]=1381;_chi_line_map[1048]=1382;_chi_line_map[1049]=1383;_chi_line_map[1050]=1384;_chi_line_map[1051]=1381;_chi_line_map[1052]=1386;_chi_line_map[1053]=1387;_chi_line_map[1054]=1378;_chi_line_map[1055]=1361;_chi_line_map[1056]=1396;_chi_line_map[1057]=1397;_chi_line_map[1058]=1398;_chi_line_map[1059]=1399;_chi_line_map[1060]=1398;_chi_line_map[1061]=1401;_chi_line_map[1062]=1402;_chi_line_map[1063]=1401;_chi_line_map[1064]=1405;_chi_line_map[1065]=1406;_chi_line_map[1066]=1407;_chi_line_map[1067]=1408;_chi_line_map[1068]=1407;_chi_line_map[1069]=1406;_chi_line_map[1070]=1412;_chi_line_map[1071]=1413;_chi_line_map[1072]=1414;_chi_line_map[1073]=1415;_chi_line_map[1074]=1416;_chi_line_map[1075]=1417;_chi_line_map[1076]=1416;_chi_line_map[1077]=1419;_chi_line_map[1078]=1420;_chi_line_map[1079]=1421;_chi_line_map[1080]=1420;_chi_line_map[1081]=1423;_chi_line_map[1082]=1424;_chi_line_map[1083]=1425;_chi_line_map[1084]=1424;_chi_line_map[1085]=1423;_chi_line_map[1086]=1420;_chi_line_map[1087]=1432;_chi_line_map[1088]=1433;_chi_line_map[1089]=1434;_chi_line_map[1090]=1435;_chi_line_map[1091]=1436;_chi_line_map[1092]=1435;_chi_line_map[1093]=1433;_chi_line_map[1094]=1439;_chi_line_map[1095]=1440;_chi_line_map[1096]=1441;_chi_line_map[1097]=1442;_chi_line_map[1098]=1414;_chi_line_map[1099]=1445;_chi_line_map[1100]=1446;_chi_line_map[1101]=1447;_chi_line_map[1102]=1448;_chi_line_map[1103]=1447;_chi_line_map[1104]=1450;_chi_line_map[1105]=1446;_chi_line_map[1106]=1453;_chi_line_map[1107]=1454;_chi_line_map[1108]=1455;_chi_line_map[1109]=1456;_chi_line_map[1110]=1457;_chi_line_map[1111]=1458;_chi_line_map[1112]=1459;_chi_line_map[1113]=1457;_chi_line_map[1114]=1461;_chi_line_map[1115]=1462;_chi_line_map[1116]=1461;_chi_line_map[1117]=1455;_chi_line_map[1118]=1465;_chi_line_map[1119]=1396;local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..':'.._chi_generated..':'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..':'.._chi_source_line..':'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;return _chi_result end;m15();function m16() local _chi_line_map={};local function _chi_run()local __P_ = package.loaded['chicc/checks'] or {_package={},_types={}};package.loaded['chicc/checks'] = __P_;local __S_ = __P_._package;local __T_ = __P_._types;__S_.cnDefinedNames={public=false,mutable=true,type='{tag="any"}'};__S_.cnMessages={public=false,mutable=true,type='{tag="any"}'};__S_.cnCtRef={public=false,mutable=true,type='{tag="any"}'};__S_.cnWeaveDepth={public=false,mutable=true,type='{tag="int"}'};__S_.cnInit={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.cnHasName={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="bool"}},typeParams={},defaults=0}'};__S_.cnAddName={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="unit"}},typeParams={},defaults=0}'};__S_.cnWithNewScope={public=false,mutable=false,type='{tag="fn",types={{tag="fn",types={{tag="unit"}},typeParams={},defaults=0},{tag="unit"}},typeParams={},defaults=0}'};__S_.cnAddMessage={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.cnSectionToCp={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="sum",ids={},lhs={tag="record",ids={},fields={{"line",{tag="int"}},{"column",{tag="int"}}},typeParams={}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.cnCheckName={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.cnWalkParseAst={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.importConflictCheck={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.checkNames={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.walkExpr={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="fn",types={{tag="any"},{tag="bool"}},typeParams={},defaults=0},{tag="unit"}},typeParams={},defaults=0}'};__S_.walkExprList={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="fn",types={{tag="any"},{tag="bool"}},typeParams={},defaults=0},{tag="unit"}},typeParams={},defaults=0}'};__S_.exprSectionToCp={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="sum",ids={},lhs={tag="record",ids={},fields={{"line",{tag="int"}},{"column",{tag="int"}}},typeParams={}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.visibilityCheck={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="string"},{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.fnCallCheck={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.immutabilityCheck={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="string"},{tag="string"},{tag="any"},{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.rtExpectedReturnType={public=false,mutable=true,type='{tag="any"}'};__S_.rtSectionToCp={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="sum",ids={},lhs={tag="record",ids={},fields={{"line",{tag="int"}},{"column",{tag="int"}}},typeParams={}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.rtWalkExpr={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.returnTypeCheck={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.rtWalkExprImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};local __std__lang = require("std/lang");local __std__lang_array = require("std/lang.array");local __chicc__symbols = require("chicc/symbols");local __chicc__messages = require("chicc/messages");local __chicc__ast = require("chicc/ast");local __chicc__types = require("chicc/types");local __chicc__unification = require("chicc/unification");
 do __P_.cnDefinedNames=(nil); end;
@@ -7760,7 +7783,7 @@ _chi_tmp577=nil
  end;_chi_tmp555=_chi_tmp577 end;_chi_tmp524=_chi_tmp555 end;local _chi_tmp637=_chi_tmp524;return; end;
  end;
 __P_.rtWalkExpr=__P_.rtWalkExprImpl;return __P_
- end;local _chi_info=debug.getinfo(_chi_run,'S');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;if string.sub(_chi_source,1,1)=='@' then _chi_source=string.sub(_chi_source,2) end;_chi_line_map[2]=12;_chi_line_map[3]=13;_chi_line_map[4]=14;_chi_line_map[5]=16;_chi_line_map[6]=18;_chi_line_map[7]=19;_chi_line_map[8]=20;_chi_line_map[9]=21;_chi_line_map[10]=22;_chi_line_map[11]=18;_chi_line_map[12]=25;_chi_line_map[13]=26;_chi_line_map[14]=27;_chi_line_map[15]=28;_chi_line_map[16]=25;_chi_line_map[17]=31;_chi_line_map[18]=32;_chi_line_map[19]=33;_chi_line_map[20]=31;_chi_line_map[21]=36;_chi_line_map[22]=38;_chi_line_map[23]=39;_chi_line_map[24]=40;_chi_line_map[25]=41;_chi_line_map[26]=42;_chi_line_map[27]=43;_chi_line_map[28]=36;_chi_line_map[29]=46;_chi_line_map[30]=47;_chi_line_map[31]=48;_chi_line_map[32]=46;_chi_line_map[33]=51;_chi_line_map[34]=52;_chi_line_map[35]=54;_chi_line_map[36]=55;_chi_line_map[37]=56;_chi_line_map[38]=52;_chi_line_map[39]=51;_chi_line_map[40]=62;_chi_line_map[41]=63;_chi_line_map[42]=64;_chi_line_map[43]=65;_chi_line_map[44]=66;_chi_line_map[45]=67;_chi_line_map[46]=68;_chi_line_map[47]=74;_chi_line_map[48]=75;_chi_line_map[49]=76;_chi_line_map[50]=77;_chi_line_map[51]=78;_chi_line_map[52]=77;_chi_line_map[53]=80;_chi_line_map[54]=81;_chi_line_map[55]=77;_chi_line_map[56]=68;_chi_line_map[57]=66;_chi_line_map[58]=63;_chi_line_map[59]=62;_chi_line_map[60]=89;_chi_line_map[61]=90;_chi_line_map[62]=92;_chi_line_map[63]=94;_chi_line_map[64]=95;_chi_line_map[65]=96;_chi_line_map[66]=95;_chi_line_map[67]=98;_chi_line_map[68]=99;_chi_line_map[69]=92;_chi_line_map[70]=101;_chi_line_map[71]=92;_chi_line_map[72]=103;_chi_line_map[73]=104;_chi_line_map[74]=105;_chi_line_map[75]=106;_chi_line_map[76]=107;_chi_line_map[77]=108;_chi_line_map[78]=109;_chi_line_map[79]=110;_chi_line_map[80]=111;_chi_line_map[81]=107;_chi_line_map[82]=113;_chi_line_map[83]=114;_chi_line_map[84]=115;_chi_line_map[85]=116;_chi_line_map[86]=117;_chi_line_map[87]=118;_chi_line_map[88]=119;_chi_line_map[89]=116;_chi_line_map[90]=103;_chi_line_map[91]=92;_chi_line_map[92]=125;_chi_line_map[93]=126;_chi_line_map[94]=127;_chi_line_map[95]=128;_chi_line_map[96]=129;_chi_line_map[97]=130;_chi_line_map[98]=131;_chi_line_map[99]=132;_chi_line_map[100]=133;_chi_line_map[101]=134;_chi_line_map[102]=135;_chi_line_map[103]=136;_chi_line_map[104]=137;_chi_line_map[105]=138;_chi_line_map[106]=135;_chi_line_map[107]=140;_chi_line_map[108]=141;_chi_line_map[109]=142;_chi_line_map[110]=141;_chi_line_map[111]=131;_chi_line_map[112]=92;_chi_line_map[113]=147;_chi_line_map[114]=148;_chi_line_map[115]=149;_chi_line_map[116]=150;_chi_line_map[117]=151;_chi_line_map[118]=152;_chi_line_map[119]=153;_chi_line_map[120]=154;_chi_line_map[121]=156;_chi_line_map[122]=157;_chi_line_map[123]=158;_chi_line_map[124]=159;_chi_line_map[125]=160;_chi_line_map[126]=153;_chi_line_map[127]=162;_chi_line_map[128]=163;_chi_line_map[129]=164;_chi_line_map[130]=163;_chi_line_map[131]=149;_chi_line_map[132]=92;_chi_line_map[133]=168;_chi_line_map[134]=169;_chi_line_map[135]=92;_chi_line_map[136]=171;_chi_line_map[137]=172;_chi_line_map[138]=173;_chi_line_map[139]=172;_chi_line_map[140]=175;_chi_line_map[141]=176;_chi_line_map[142]=177;_chi_line_map[143]=178;_chi_line_map[144]=179;_chi_line_map[145]=180;_chi_line_map[146]=181;_chi_line_map[147]=182;_chi_line_map[148]=183;_chi_line_map[149]=184;_chi_line_map[150]=185;_chi_line_map[151]=186;_chi_line_map[152]=187;_chi_line_map[153]=188;_chi_line_map[154]=185;_chi_line_map[155]=190;_chi_line_map[156]=191;_chi_line_map[157]=192;_chi_line_map[158]=191;_chi_line_map[159]=180;_chi_line_map[160]=195;_chi_line_map[161]=178;_chi_line_map[162]=92;_chi_line_map[163]=198;_chi_line_map[164]=199;_chi_line_map[165]=200;_chi_line_map[166]=199;_chi_line_map[167]=202;_chi_line_map[168]=203;_chi_line_map[169]=204;_chi_line_map[170]=205;_chi_line_map[171]=206;_chi_line_map[172]=207;_chi_line_map[173]=208;_chi_line_map[174]=205;_chi_line_map[175]=92;_chi_line_map[176]=211;_chi_line_map[177]=212;_chi_line_map[178]=213;_chi_line_map[179]=214;_chi_line_map[180]=215;_chi_line_map[181]=216;_chi_line_map[182]=217;_chi_line_map[183]=218;_chi_line_map[184]=215;_chi_line_map[185]=211;_chi_line_map[186]=92;_chi_line_map[187]=222;_chi_line_map[188]=223;_chi_line_map[189]=92;_chi_line_map[190]=225;_chi_line_map[191]=226;_chi_line_map[192]=227;_chi_line_map[193]=228;_chi_line_map[194]=229;_chi_line_map[195]=230;_chi_line_map[196]=92;_chi_line_map[197]=232;_chi_line_map[198]=233;_chi_line_map[199]=234;_chi_line_map[200]=235;_chi_line_map[201]=92;_chi_line_map[202]=237;_chi_line_map[203]=238;_chi_line_map[204]=239;_chi_line_map[205]=240;_chi_line_map[206]=241;_chi_line_map[207]=242;_chi_line_map[208]=243;_chi_line_map[209]=245;_chi_line_map[210]=246;_chi_line_map[211]=247;_chi_line_map[212]=240;_chi_line_map[213]=249;_chi_line_map[214]=250;_chi_line_map[215]=251;_chi_line_map[216]=252;_chi_line_map[217]=250;_chi_line_map[218]=92;_chi_line_map[219]=255;_chi_line_map[220]=256;_chi_line_map[221]=92;_chi_line_map[222]=258;_chi_line_map[223]=259;_chi_line_map[224]=92;_chi_line_map[225]=261;_chi_line_map[226]=262;_chi_line_map[227]=263;_chi_line_map[228]=264;_chi_line_map[229]=92;_chi_line_map[230]=266;_chi_line_map[231]=267;_chi_line_map[232]=92;_chi_line_map[233]=269;_chi_line_map[234]=270;_chi_line_map[235]=92;_chi_line_map[236]=272;_chi_line_map[237]=273;_chi_line_map[238]=92;_chi_line_map[239]=275;_chi_line_map[240]=276;_chi_line_map[241]=277;_chi_line_map[242]=278;_chi_line_map[243]=92;_chi_line_map[244]=280;_chi_line_map[245]=281;_chi_line_map[246]=282;_chi_line_map[247]=92;_chi_line_map[248]=284;_chi_line_map[249]=285;_chi_line_map[250]=286;_chi_line_map[251]=287;_chi_line_map[252]=92;_chi_line_map[253]=289;_chi_line_map[254]=290;_chi_line_map[255]=291;_chi_line_map[256]=292;_chi_line_map[257]=293;_chi_line_map[258]=294;_chi_line_map[259]=92;_chi_line_map[260]=296;_chi_line_map[261]=297;_chi_line_map[262]=298;_chi_line_map[263]=299;_chi_line_map[264]=300;_chi_line_map[265]=301;_chi_line_map[266]=302;_chi_line_map[267]=299;_chi_line_map[268]=92;_chi_line_map[269]=305;_chi_line_map[270]=306;_chi_line_map[271]=305;_chi_line_map[272]=92;_chi_line_map[273]=309;_chi_line_map[274]=310;_chi_line_map[275]=311;_chi_line_map[276]=312;_chi_line_map[277]=313;_chi_line_map[278]=314;_chi_line_map[279]=315;_chi_line_map[280]=312;_chi_line_map[281]=92;_chi_line_map[282]=318;_chi_line_map[283]=319;_chi_line_map[284]=92;_chi_line_map[285]=321;_chi_line_map[286]=322;_chi_line_map[287]=323;_chi_line_map[288]=324;_chi_line_map[289]=325;_chi_line_map[290]=326;_chi_line_map[291]=327;_chi_line_map[292]=324;_chi_line_map[293]=92;_chi_line_map[294]=330;_chi_line_map[295]=331;_chi_line_map[296]=332;_chi_line_map[297]=333;_chi_line_map[298]=334;_chi_line_map[299]=335;_chi_line_map[300]=336;_chi_line_map[301]=337;_chi_line_map[302]=333;_chi_line_map[303]=92;_chi_line_map[304]=89;_chi_line_map[305]=353;_chi_line_map[306]=354;_chi_line_map[307]=355;_chi_line_map[308]=356;_chi_line_map[309]=357;_chi_line_map[310]=358;_chi_line_map[311]=359;_chi_line_map[312]=360;_chi_line_map[313]=361;_chi_line_map[314]=362;_chi_line_map[315]=363;_chi_line_map[316]=364;_chi_line_map[317]=357;_chi_line_map[318]=353;_chi_line_map[319]=368;_chi_line_map[320]=369;_chi_line_map[321]=370;_chi_line_map[322]=371;_chi_line_map[323]=372;_chi_line_map[324]=373;_chi_line_map[325]=374;_chi_line_map[326]=375;_chi_line_map[327]=372;_chi_line_map[328]=368;_chi_line_map[329]=387;_chi_line_map[330]=388;_chi_line_map[331]=389;_chi_line_map[332]=390;_chi_line_map[333]=391;_chi_line_map[334]=392;_chi_line_map[335]=393;_chi_line_map[336]=394;_chi_line_map[337]=395;_chi_line_map[338]=396;_chi_line_map[339]=397;_chi_line_map[340]=394;_chi_line_map[341]=390;_chi_line_map[342]=387;_chi_line_map[343]=402;_chi_line_map[344]=403;_chi_line_map[345]=404;_chi_line_map[346]=405;_chi_line_map[347]=406;_chi_line_map[348]=407;_chi_line_map[349]=408;_chi_line_map[350]=405;_chi_line_map[351]=402;_chi_line_map[352]=412;_chi_line_map[353]=413;_chi_line_map[354]=414;_chi_line_map[355]=416;_chi_line_map[356]=417;_chi_line_map[357]=418;_chi_line_map[358]=414;_chi_line_map[359]=412;_chi_line_map[360]=424;_chi_line_map[361]=425;_chi_line_map[362]=426;_chi_line_map[363]=427;_chi_line_map[364]=428;_chi_line_map[365]=429;_chi_line_map[366]=430;_chi_line_map[367]=431;_chi_line_map[368]=432;_chi_line_map[369]=433;_chi_line_map[370]=434;_chi_line_map[371]=435;_chi_line_map[372]=436;_chi_line_map[373]=437;_chi_line_map[374]=438;_chi_line_map[375]=439;_chi_line_map[376]=440;_chi_line_map[377]=441;_chi_line_map[378]=442;_chi_line_map[379]=443;_chi_line_map[380]=439;_chi_line_map[381]=437;_chi_line_map[382]=433;_chi_line_map[383]=431;_chi_line_map[384]=429;_chi_line_map[385]=427;_chi_line_map[386]=450;_chi_line_map[387]=425;_chi_line_map[388]=424;_chi_line_map[389]=456;_chi_line_map[390]=457;_chi_line_map[391]=458;_chi_line_map[392]=459;_chi_line_map[393]=460;_chi_line_map[394]=461;_chi_line_map[395]=462;_chi_line_map[396]=463;_chi_line_map[397]=464;_chi_line_map[398]=465;_chi_line_map[399]=466;_chi_line_map[400]=467;_chi_line_map[401]=468;_chi_line_map[402]=465;_chi_line_map[403]=463;_chi_line_map[404]=461;_chi_line_map[405]=459;_chi_line_map[406]=473;_chi_line_map[407]=457;_chi_line_map[408]=456;_chi_line_map[409]=479;_chi_line_map[410]=480;_chi_line_map[411]=481;_chi_line_map[412]=482;_chi_line_map[413]=483;_chi_line_map[414]=484;_chi_line_map[415]=485;_chi_line_map[416]=486;_chi_line_map[417]=487;_chi_line_map[418]=488;_chi_line_map[419]=487;_chi_line_map[420]=490;_chi_line_map[421]=491;_chi_line_map[422]=492;_chi_line_map[423]=493;_chi_line_map[424]=494;_chi_line_map[425]=495;_chi_line_map[426]=496;_chi_line_map[427]=495;_chi_line_map[428]=493;_chi_line_map[429]=499;_chi_line_map[430]=500;_chi_line_map[431]=501;_chi_line_map[432]=500;_chi_line_map[433]=493;_chi_line_map[434]=487;_chi_line_map[435]=505;_chi_line_map[436]=506;_chi_line_map[437]=507;_chi_line_map[438]=508;_chi_line_map[439]=509;_chi_line_map[440]=510;_chi_line_map[441]=507;_chi_line_map[442]=505;_chi_line_map[443]=484;_chi_line_map[444]=482;_chi_line_map[445]=515;_chi_line_map[446]=480;_chi_line_map[447]=479;_chi_line_map[448]=522;_chi_line_map[449]=524;_chi_line_map[450]=525;_chi_line_map[451]=527;_chi_line_map[452]=528;_chi_line_map[453]=529;_chi_line_map[454]=525;_chi_line_map[455]=524;_chi_line_map[456]=534;_chi_line_map[457]=536;_chi_line_map[458]=537;_chi_line_map[459]=538;_chi_line_map[460]=539;_chi_line_map[461]=540;_chi_line_map[462]=541;_chi_line_map[463]=542;_chi_line_map[464]=543;_chi_line_map[465]=540;_chi_line_map[466]=536;_chi_line_map[467]=547;_chi_line_map[468]=548;_chi_line_map[469]=549;_chi_line_map[470]=551;_chi_line_map[471]=552;_chi_line_map[472]=553;_chi_line_map[473]=556;_chi_line_map[474]=557;_chi_line_map[475]=558;_chi_line_map[476]=556;_chi_line_map[477]=562;_chi_line_map[478]=563;_chi_line_map[479]=564;_chi_line_map[480]=563;_chi_line_map[481]=566;_chi_line_map[482]=563;_chi_line_map[483]=568;_chi_line_map[484]=569;_chi_line_map[485]=570;_chi_line_map[486]=571;_chi_line_map[487]=572;_chi_line_map[488]=573;_chi_line_map[489]=574;_chi_line_map[490]=575;_chi_line_map[491]=576;_chi_line_map[492]=574;_chi_line_map[493]=571;_chi_line_map[494]=569;_chi_line_map[495]=581;_chi_line_map[496]=582;_chi_line_map[497]=583;_chi_line_map[498]=584;_chi_line_map[499]=585;_chi_line_map[500]=586;_chi_line_map[501]=587;_chi_line_map[502]=584;_chi_line_map[503]=589;_chi_line_map[504]=551;_chi_line_map[505]=591;_chi_line_map[506]=592;_chi_line_map[507]=593;_chi_line_map[508]=594;_chi_line_map[509]=595;_chi_line_map[510]=596;_chi_line_map[511]=597;_chi_line_map[512]=598;_chi_line_map[513]=599;_chi_line_map[514]=600;_chi_line_map[515]=598;_chi_line_map[516]=595;_chi_line_map[517]=593;_chi_line_map[518]=605;_chi_line_map[519]=606;_chi_line_map[520]=607;_chi_line_map[521]=608;_chi_line_map[522]=609;_chi_line_map[523]=610;_chi_line_map[524]=611;_chi_line_map[525]=608;_chi_line_map[526]=613;_chi_line_map[527]=551;_chi_line_map[528]=615;_chi_line_map[529]=616;_chi_line_map[530]=617;_chi_line_map[531]=618;_chi_line_map[532]=619;_chi_line_map[533]=620;_chi_line_map[534]=616;_chi_line_map[535]=622;_chi_line_map[536]=623;_chi_line_map[537]=624;_chi_line_map[538]=625;_chi_line_map[539]=624;_chi_line_map[540]=627;_chi_line_map[541]=628;_chi_line_map[542]=627;_chi_line_map[543]=632;_chi_line_map[544]=633;_chi_line_map[545]=634;_chi_line_map[546]=635;_chi_line_map[547]=636;_chi_line_map[548]=637;_chi_line_map[549]=638;_chi_line_map[550]=639;_chi_line_map[551]=640;_chi_line_map[552]=641;_chi_line_map[553]=642;_chi_line_map[554]=643;_chi_line_map[555]=644;_chi_line_map[556]=645;_chi_line_map[557]=644;_chi_line_map[558]=641;_chi_line_map[559]=648;_chi_line_map[560]=649;_chi_line_map[561]=650;_chi_line_map[562]=651;_chi_line_map[563]=652;_chi_line_map[564]=651;_chi_line_map[565]=648;_chi_line_map[566]=655;_chi_line_map[567]=656;_chi_line_map[568]=657;_chi_line_map[569]=658;_chi_line_map[570]=636;_chi_line_map[571]=633;_chi_line_map[572]=632;_chi_line_map[573]=616;_chi_line_map[574]=664;_chi_line_map[575]=665;_chi_line_map[576]=666;_chi_line_map[577]=665;_chi_line_map[578]=551;_chi_line_map[579]=670;_chi_line_map[580]=671;_chi_line_map[581]=672;_chi_line_map[582]=673;_chi_line_map[583]=674;_chi_line_map[584]=675;_chi_line_map[585]=676;_chi_line_map[586]=673;_chi_line_map[587]=551;_chi_line_map[588]=547;_chi_line_map[589]=680;local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..':'.._chi_generated..':'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..':'.._chi_source_line..':'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;return _chi_result end;m16();function m17() local _chi_line_map={};local function _chi_run()local __P_ = package.loaded['chicc/typer'] or {_package={},_types={}};package.loaded['chicc/typer'] = __P_;local __S_ = __P_._package;local __T_ = __P_._types;__S_.typerErr={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.pickDeterministicUfcs={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"}},typeParams={},defaults=0}'};__S_.ufcsCandidateQualifiers={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.sumFieldType={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="string"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.sumRemoveType={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.defaultArgTypes={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="int"},{tag="array",elem={tag="typeref",ids={{"chicc","types","Type"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.withoutDefaults={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.addConstraint={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.clearConstraints={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.isIntType={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="bool"}},typeParams={},defaults=0}'};__S_.isFloatType={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="bool"}},typeParams={},defaults=0}'};__S_.typerUf={public=false,mutable=true,type='{tag="any"}'};__S_.typerSetUf={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.typerGetUf={public=true,mutable=false,type='{tag="fn",types={{tag="any"}},typeParams={},defaults=0}'};__S_.branchTerminates={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="bool"}},typeParams={},defaults=0}'};__S_.typeTerm={public=true,mutable=true,type='{tag="fn",types={{tag="any"},{tag="int"},{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.typeTerms={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="int"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.isSyntacticValue={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="bool"}},typeParams={},defaults=0}'};__S_.typeTermImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="int"},{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};local __std__lang = require("std/lang");local __chicc__source = require("chicc/source");local __chicc__types = require("chicc/types");local __std__lang_array = require("std/lang.array");local __chicc__unification = require("chicc/unification");local __chicc__inference_context = require("chicc/inference_context");local __std__lang_map = require("std/lang.map");local __chicc__ast = require("chicc/ast");local __chicc__messages = require("chicc/messages");
+ end;local _chi_info=debug.getinfo(_chi_run,'S');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;if string.sub(_chi_source,1,1)=='@' then _chi_source=string.sub(_chi_source,2) end;_chi_line_map[2]=12;_chi_line_map[3]=13;_chi_line_map[4]=14;_chi_line_map[5]=16;_chi_line_map[6]=18;_chi_line_map[7]=19;_chi_line_map[8]=20;_chi_line_map[9]=21;_chi_line_map[10]=22;_chi_line_map[11]=18;_chi_line_map[12]=25;_chi_line_map[13]=26;_chi_line_map[14]=27;_chi_line_map[15]=28;_chi_line_map[16]=25;_chi_line_map[17]=31;_chi_line_map[18]=32;_chi_line_map[19]=33;_chi_line_map[20]=31;_chi_line_map[21]=36;_chi_line_map[22]=38;_chi_line_map[23]=39;_chi_line_map[24]=40;_chi_line_map[25]=41;_chi_line_map[26]=42;_chi_line_map[27]=43;_chi_line_map[28]=36;_chi_line_map[29]=46;_chi_line_map[30]=47;_chi_line_map[31]=48;_chi_line_map[32]=46;_chi_line_map[33]=51;_chi_line_map[34]=52;_chi_line_map[35]=54;_chi_line_map[36]=55;_chi_line_map[37]=56;_chi_line_map[38]=52;_chi_line_map[39]=51;_chi_line_map[40]=62;_chi_line_map[41]=63;_chi_line_map[42]=64;_chi_line_map[43]=65;_chi_line_map[44]=66;_chi_line_map[45]=67;_chi_line_map[46]=68;_chi_line_map[47]=74;_chi_line_map[48]=75;_chi_line_map[49]=76;_chi_line_map[50]=77;_chi_line_map[51]=78;_chi_line_map[52]=77;_chi_line_map[53]=80;_chi_line_map[54]=81;_chi_line_map[55]=77;_chi_line_map[56]=68;_chi_line_map[57]=66;_chi_line_map[58]=63;_chi_line_map[59]=62;_chi_line_map[60]=89;_chi_line_map[61]=90;_chi_line_map[62]=92;_chi_line_map[63]=94;_chi_line_map[64]=95;_chi_line_map[65]=96;_chi_line_map[66]=95;_chi_line_map[67]=98;_chi_line_map[68]=99;_chi_line_map[69]=92;_chi_line_map[70]=101;_chi_line_map[71]=92;_chi_line_map[72]=103;_chi_line_map[73]=104;_chi_line_map[74]=105;_chi_line_map[75]=106;_chi_line_map[76]=107;_chi_line_map[77]=108;_chi_line_map[78]=109;_chi_line_map[79]=110;_chi_line_map[80]=111;_chi_line_map[81]=107;_chi_line_map[82]=113;_chi_line_map[83]=114;_chi_line_map[84]=115;_chi_line_map[85]=116;_chi_line_map[86]=117;_chi_line_map[87]=118;_chi_line_map[88]=119;_chi_line_map[89]=116;_chi_line_map[90]=103;_chi_line_map[91]=92;_chi_line_map[92]=125;_chi_line_map[93]=126;_chi_line_map[94]=127;_chi_line_map[95]=128;_chi_line_map[96]=129;_chi_line_map[97]=130;_chi_line_map[98]=131;_chi_line_map[99]=132;_chi_line_map[100]=133;_chi_line_map[101]=134;_chi_line_map[102]=135;_chi_line_map[103]=136;_chi_line_map[104]=137;_chi_line_map[105]=138;_chi_line_map[106]=135;_chi_line_map[107]=140;_chi_line_map[108]=141;_chi_line_map[109]=142;_chi_line_map[110]=141;_chi_line_map[111]=131;_chi_line_map[112]=92;_chi_line_map[113]=147;_chi_line_map[114]=148;_chi_line_map[115]=149;_chi_line_map[116]=150;_chi_line_map[117]=151;_chi_line_map[118]=152;_chi_line_map[119]=153;_chi_line_map[120]=154;_chi_line_map[121]=156;_chi_line_map[122]=157;_chi_line_map[123]=158;_chi_line_map[124]=159;_chi_line_map[125]=160;_chi_line_map[126]=153;_chi_line_map[127]=162;_chi_line_map[128]=163;_chi_line_map[129]=164;_chi_line_map[130]=163;_chi_line_map[131]=149;_chi_line_map[132]=92;_chi_line_map[133]=168;_chi_line_map[134]=169;_chi_line_map[135]=92;_chi_line_map[136]=171;_chi_line_map[137]=172;_chi_line_map[138]=173;_chi_line_map[139]=172;_chi_line_map[140]=175;_chi_line_map[141]=176;_chi_line_map[142]=177;_chi_line_map[143]=178;_chi_line_map[144]=179;_chi_line_map[145]=180;_chi_line_map[146]=181;_chi_line_map[147]=182;_chi_line_map[148]=183;_chi_line_map[149]=184;_chi_line_map[150]=185;_chi_line_map[151]=186;_chi_line_map[152]=187;_chi_line_map[153]=188;_chi_line_map[154]=185;_chi_line_map[155]=190;_chi_line_map[156]=191;_chi_line_map[157]=192;_chi_line_map[158]=191;_chi_line_map[159]=180;_chi_line_map[160]=195;_chi_line_map[161]=178;_chi_line_map[162]=92;_chi_line_map[163]=198;_chi_line_map[164]=199;_chi_line_map[165]=200;_chi_line_map[166]=199;_chi_line_map[167]=202;_chi_line_map[168]=203;_chi_line_map[169]=204;_chi_line_map[170]=205;_chi_line_map[171]=206;_chi_line_map[172]=207;_chi_line_map[173]=208;_chi_line_map[174]=205;_chi_line_map[175]=92;_chi_line_map[176]=211;_chi_line_map[177]=212;_chi_line_map[178]=213;_chi_line_map[179]=214;_chi_line_map[180]=215;_chi_line_map[181]=216;_chi_line_map[182]=217;_chi_line_map[183]=218;_chi_line_map[184]=215;_chi_line_map[185]=211;_chi_line_map[186]=92;_chi_line_map[187]=222;_chi_line_map[188]=223;_chi_line_map[189]=92;_chi_line_map[190]=225;_chi_line_map[191]=226;_chi_line_map[192]=227;_chi_line_map[193]=228;_chi_line_map[194]=229;_chi_line_map[195]=230;_chi_line_map[196]=92;_chi_line_map[197]=232;_chi_line_map[198]=233;_chi_line_map[199]=234;_chi_line_map[200]=235;_chi_line_map[201]=92;_chi_line_map[202]=237;_chi_line_map[203]=238;_chi_line_map[204]=239;_chi_line_map[205]=240;_chi_line_map[206]=241;_chi_line_map[207]=242;_chi_line_map[208]=243;_chi_line_map[209]=245;_chi_line_map[210]=246;_chi_line_map[211]=247;_chi_line_map[212]=240;_chi_line_map[213]=249;_chi_line_map[214]=250;_chi_line_map[215]=251;_chi_line_map[216]=252;_chi_line_map[217]=250;_chi_line_map[218]=92;_chi_line_map[219]=255;_chi_line_map[220]=256;_chi_line_map[221]=92;_chi_line_map[222]=258;_chi_line_map[223]=259;_chi_line_map[224]=92;_chi_line_map[225]=261;_chi_line_map[226]=262;_chi_line_map[227]=263;_chi_line_map[228]=264;_chi_line_map[229]=92;_chi_line_map[230]=266;_chi_line_map[231]=267;_chi_line_map[232]=92;_chi_line_map[233]=269;_chi_line_map[234]=270;_chi_line_map[235]=92;_chi_line_map[236]=272;_chi_line_map[237]=273;_chi_line_map[238]=92;_chi_line_map[239]=275;_chi_line_map[240]=276;_chi_line_map[241]=277;_chi_line_map[242]=278;_chi_line_map[243]=92;_chi_line_map[244]=280;_chi_line_map[245]=281;_chi_line_map[246]=282;_chi_line_map[247]=92;_chi_line_map[248]=284;_chi_line_map[249]=285;_chi_line_map[250]=286;_chi_line_map[251]=287;_chi_line_map[252]=92;_chi_line_map[253]=289;_chi_line_map[254]=290;_chi_line_map[255]=291;_chi_line_map[256]=292;_chi_line_map[257]=293;_chi_line_map[258]=294;_chi_line_map[259]=92;_chi_line_map[260]=296;_chi_line_map[261]=297;_chi_line_map[262]=298;_chi_line_map[263]=299;_chi_line_map[264]=300;_chi_line_map[265]=301;_chi_line_map[266]=302;_chi_line_map[267]=299;_chi_line_map[268]=92;_chi_line_map[269]=305;_chi_line_map[270]=306;_chi_line_map[271]=305;_chi_line_map[272]=92;_chi_line_map[273]=309;_chi_line_map[274]=310;_chi_line_map[275]=311;_chi_line_map[276]=312;_chi_line_map[277]=313;_chi_line_map[278]=314;_chi_line_map[279]=315;_chi_line_map[280]=312;_chi_line_map[281]=92;_chi_line_map[282]=318;_chi_line_map[283]=319;_chi_line_map[284]=92;_chi_line_map[285]=321;_chi_line_map[286]=322;_chi_line_map[287]=323;_chi_line_map[288]=324;_chi_line_map[289]=325;_chi_line_map[290]=326;_chi_line_map[291]=327;_chi_line_map[292]=324;_chi_line_map[293]=92;_chi_line_map[294]=330;_chi_line_map[295]=331;_chi_line_map[296]=332;_chi_line_map[297]=333;_chi_line_map[298]=334;_chi_line_map[299]=335;_chi_line_map[300]=336;_chi_line_map[301]=337;_chi_line_map[302]=333;_chi_line_map[303]=92;_chi_line_map[304]=89;_chi_line_map[305]=353;_chi_line_map[306]=354;_chi_line_map[307]=355;_chi_line_map[308]=356;_chi_line_map[309]=357;_chi_line_map[310]=358;_chi_line_map[311]=359;_chi_line_map[312]=360;_chi_line_map[313]=361;_chi_line_map[314]=362;_chi_line_map[315]=363;_chi_line_map[316]=364;_chi_line_map[317]=357;_chi_line_map[318]=353;_chi_line_map[319]=368;_chi_line_map[320]=369;_chi_line_map[321]=370;_chi_line_map[322]=371;_chi_line_map[323]=372;_chi_line_map[324]=373;_chi_line_map[325]=374;_chi_line_map[326]=375;_chi_line_map[327]=372;_chi_line_map[328]=368;_chi_line_map[329]=387;_chi_line_map[330]=388;_chi_line_map[331]=389;_chi_line_map[332]=390;_chi_line_map[333]=391;_chi_line_map[334]=392;_chi_line_map[335]=393;_chi_line_map[336]=394;_chi_line_map[337]=395;_chi_line_map[338]=396;_chi_line_map[339]=397;_chi_line_map[340]=394;_chi_line_map[341]=390;_chi_line_map[342]=387;_chi_line_map[343]=402;_chi_line_map[344]=403;_chi_line_map[345]=404;_chi_line_map[346]=405;_chi_line_map[347]=406;_chi_line_map[348]=407;_chi_line_map[349]=408;_chi_line_map[350]=405;_chi_line_map[351]=402;_chi_line_map[352]=412;_chi_line_map[353]=413;_chi_line_map[354]=414;_chi_line_map[355]=416;_chi_line_map[356]=417;_chi_line_map[357]=418;_chi_line_map[358]=414;_chi_line_map[359]=412;_chi_line_map[360]=424;_chi_line_map[361]=425;_chi_line_map[362]=426;_chi_line_map[363]=427;_chi_line_map[364]=428;_chi_line_map[365]=429;_chi_line_map[366]=430;_chi_line_map[367]=431;_chi_line_map[368]=432;_chi_line_map[369]=433;_chi_line_map[370]=434;_chi_line_map[371]=435;_chi_line_map[372]=436;_chi_line_map[373]=437;_chi_line_map[374]=438;_chi_line_map[375]=439;_chi_line_map[376]=440;_chi_line_map[377]=441;_chi_line_map[378]=442;_chi_line_map[379]=443;_chi_line_map[380]=439;_chi_line_map[381]=437;_chi_line_map[382]=433;_chi_line_map[383]=431;_chi_line_map[384]=429;_chi_line_map[385]=427;_chi_line_map[386]=450;_chi_line_map[387]=425;_chi_line_map[388]=424;_chi_line_map[389]=456;_chi_line_map[390]=457;_chi_line_map[391]=458;_chi_line_map[392]=459;_chi_line_map[393]=460;_chi_line_map[394]=461;_chi_line_map[395]=462;_chi_line_map[396]=463;_chi_line_map[397]=464;_chi_line_map[398]=465;_chi_line_map[399]=466;_chi_line_map[400]=467;_chi_line_map[401]=468;_chi_line_map[402]=465;_chi_line_map[403]=463;_chi_line_map[404]=461;_chi_line_map[405]=459;_chi_line_map[406]=473;_chi_line_map[407]=457;_chi_line_map[408]=456;_chi_line_map[409]=479;_chi_line_map[410]=480;_chi_line_map[411]=481;_chi_line_map[412]=482;_chi_line_map[413]=483;_chi_line_map[414]=484;_chi_line_map[415]=485;_chi_line_map[416]=486;_chi_line_map[417]=487;_chi_line_map[418]=488;_chi_line_map[419]=487;_chi_line_map[420]=490;_chi_line_map[421]=491;_chi_line_map[422]=492;_chi_line_map[423]=493;_chi_line_map[424]=494;_chi_line_map[425]=495;_chi_line_map[426]=496;_chi_line_map[427]=495;_chi_line_map[428]=493;_chi_line_map[429]=499;_chi_line_map[430]=500;_chi_line_map[431]=501;_chi_line_map[432]=500;_chi_line_map[433]=493;_chi_line_map[434]=487;_chi_line_map[435]=505;_chi_line_map[436]=506;_chi_line_map[437]=507;_chi_line_map[438]=508;_chi_line_map[439]=509;_chi_line_map[440]=510;_chi_line_map[441]=507;_chi_line_map[442]=505;_chi_line_map[443]=484;_chi_line_map[444]=482;_chi_line_map[445]=515;_chi_line_map[446]=480;_chi_line_map[447]=479;_chi_line_map[448]=522;_chi_line_map[449]=524;_chi_line_map[450]=525;_chi_line_map[451]=527;_chi_line_map[452]=528;_chi_line_map[453]=529;_chi_line_map[454]=525;_chi_line_map[455]=524;_chi_line_map[456]=534;_chi_line_map[457]=536;_chi_line_map[458]=537;_chi_line_map[459]=538;_chi_line_map[460]=539;_chi_line_map[461]=540;_chi_line_map[462]=541;_chi_line_map[463]=542;_chi_line_map[464]=543;_chi_line_map[465]=540;_chi_line_map[466]=536;_chi_line_map[467]=547;_chi_line_map[468]=548;_chi_line_map[469]=549;_chi_line_map[470]=551;_chi_line_map[471]=552;_chi_line_map[472]=553;_chi_line_map[473]=556;_chi_line_map[474]=557;_chi_line_map[475]=558;_chi_line_map[476]=556;_chi_line_map[477]=562;_chi_line_map[478]=563;_chi_line_map[479]=564;_chi_line_map[480]=563;_chi_line_map[481]=566;_chi_line_map[482]=563;_chi_line_map[483]=568;_chi_line_map[484]=569;_chi_line_map[485]=570;_chi_line_map[486]=571;_chi_line_map[487]=572;_chi_line_map[488]=573;_chi_line_map[489]=574;_chi_line_map[490]=575;_chi_line_map[491]=576;_chi_line_map[492]=574;_chi_line_map[493]=571;_chi_line_map[494]=569;_chi_line_map[495]=581;_chi_line_map[496]=582;_chi_line_map[497]=583;_chi_line_map[498]=584;_chi_line_map[499]=585;_chi_line_map[500]=586;_chi_line_map[501]=587;_chi_line_map[502]=584;_chi_line_map[503]=589;_chi_line_map[504]=551;_chi_line_map[505]=591;_chi_line_map[506]=592;_chi_line_map[507]=593;_chi_line_map[508]=594;_chi_line_map[509]=595;_chi_line_map[510]=596;_chi_line_map[511]=597;_chi_line_map[512]=598;_chi_line_map[513]=599;_chi_line_map[514]=600;_chi_line_map[515]=598;_chi_line_map[516]=595;_chi_line_map[517]=593;_chi_line_map[518]=605;_chi_line_map[519]=606;_chi_line_map[520]=607;_chi_line_map[521]=608;_chi_line_map[522]=609;_chi_line_map[523]=610;_chi_line_map[524]=611;_chi_line_map[525]=608;_chi_line_map[526]=613;_chi_line_map[527]=551;_chi_line_map[528]=615;_chi_line_map[529]=616;_chi_line_map[530]=617;_chi_line_map[531]=618;_chi_line_map[532]=619;_chi_line_map[533]=620;_chi_line_map[534]=616;_chi_line_map[535]=622;_chi_line_map[536]=623;_chi_line_map[537]=624;_chi_line_map[538]=625;_chi_line_map[539]=624;_chi_line_map[540]=627;_chi_line_map[541]=628;_chi_line_map[542]=627;_chi_line_map[543]=632;_chi_line_map[544]=633;_chi_line_map[545]=634;_chi_line_map[546]=635;_chi_line_map[547]=636;_chi_line_map[548]=637;_chi_line_map[549]=638;_chi_line_map[550]=639;_chi_line_map[551]=640;_chi_line_map[552]=641;_chi_line_map[553]=642;_chi_line_map[554]=643;_chi_line_map[555]=644;_chi_line_map[556]=645;_chi_line_map[557]=644;_chi_line_map[558]=641;_chi_line_map[559]=648;_chi_line_map[560]=649;_chi_line_map[561]=650;_chi_line_map[562]=651;_chi_line_map[563]=652;_chi_line_map[564]=651;_chi_line_map[565]=648;_chi_line_map[566]=655;_chi_line_map[567]=656;_chi_line_map[568]=657;_chi_line_map[569]=658;_chi_line_map[570]=636;_chi_line_map[571]=633;_chi_line_map[572]=632;_chi_line_map[573]=616;_chi_line_map[574]=664;_chi_line_map[575]=665;_chi_line_map[576]=666;_chi_line_map[577]=665;_chi_line_map[578]=551;_chi_line_map[579]=670;_chi_line_map[580]=671;_chi_line_map[581]=672;_chi_line_map[582]=673;_chi_line_map[583]=674;_chi_line_map[584]=675;_chi_line_map[585]=676;_chi_line_map[586]=673;_chi_line_map[587]=551;_chi_line_map[588]=547;_chi_line_map[589]=680;local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..':'.._chi_generated..':'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..':'.._chi_source_line..':'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;return _chi_result end;m16();function m17() local _chi_line_map={};local function _chi_run()local __P_ = package.loaded['chicc/typer'] or {_package={},_types={}};package.loaded['chicc/typer'] = __P_;local __S_ = __P_._package;local __T_ = __P_._types;__S_.typerErr={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.pickDeterministicUfcs={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"}},typeParams={},defaults=0}'};__S_.ufcsCandidateQualifiers={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.sumFieldType={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="string"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.sumRemoveType={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.firstTypeIdName={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.primitiveRuntimeKind={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="string"}},typeParams={},defaults=0}'};__S_.isRuntimePrimitiveCheck={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="bool"}},typeParams={},defaults=0}'};__S_.isUnknownFlowSource={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.uncertainTypeTest={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","typer","TypeTestOutcome"}}}},typeParams={},defaults=0}'};__S_.alwaysMatchingTypeTest={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","typer","TypeTestOutcome"}}}},typeParams={},defaults=0}'};__S_.neverMatchingTypeTest={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","typer","TypeTestOutcome"}}}},typeParams={},defaults=0}'};__S_.runtimeTestOutcome={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","typer","TypeTestOutcome"}}}},typeParams={},defaults=0}'};__S_.filterFlowType={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="bool"},{tag="typeref",ids={{"chicc","typer","FlowFilter"}}}},typeParams={},defaults=0}'};__S_.refinedFlowType={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}},{tag="bool"},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.simpleBindingTarget={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","ast","Target"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.isUnitLiteral={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="bool"}},typeParams={},defaults=0}'};__S_.guardForCondition={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","typer","FlowGuard"}}},rhs={tag="unit"},typeParams={}}},typeParams={},defaults=0}'};__S_.resolveFlowType={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.flowRefinementForBranch={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="bool"},{tag="any"},{tag="any"}},typeParams={},defaults=0}'};__S_.defineFlowRefinement={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.defaultArgTypes={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="int"},{tag="array",elem={tag="typeref",ids={{"chicc","types","Type"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.withoutDefaults={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","types","Type"}}},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.addConstraint={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.clearConstraints={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.isIntType={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="bool"}},typeParams={},defaults=0}'};__S_.isFloatType={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="bool"}},typeParams={},defaults=0}'};__S_.typerUf={public=false,mutable=true,type='{tag="any"}'};__S_.typerSetUf={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.typerGetUf={public=true,mutable=false,type='{tag="fn",types={{tag="any"}},typeParams={},defaults=0}'};__S_.branchTerminates={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="bool"}},typeParams={},defaults=0}'};__S_.typeTerm={public=true,mutable=true,type='{tag="fn",types={{tag="any"},{tag="int"},{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__S_.typeTerms={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="int"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.isSyntacticValue={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="bool"}},typeParams={},defaults=0}'};__S_.typeTermImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="int"},{tag="any"},{tag="typeref",ids={{"chicc","types","Type"}}}},typeParams={},defaults=0}'};__T_.TypeTestOutcome='{tag="record",ids={{"chicc","typer","TypeTestOutcome"}},fields={{"mayMatch",{tag="bool"}},{"mayMiss",{tag="bool"}}},typeParams={}}';__T_.FlowFilter='{tag="record",ids={{"chicc","typer","FlowFilter"}},fields={{"hasValues",{tag="bool"}},{"resultType",{tag="typeref",ids={{"chicc","types","Type"}}}}},typeParams={}}';__T_.FlowGuard='{tag="record",ids={{"chicc","typer","FlowGuard"}},fields={{"target",{tag="typeref",ids={{"chicc","ast","Target"}}}},{"sourceType",{tag="typeref",ids={{"chicc","types","Type"}}}},{"testedType",{tag="typeref",ids={{"chicc","types","Type"}}}},{"matchesWhenTrue",{tag="bool"}}},typeParams={}}';local __std__lang = require("std/lang");local __chicc__source = require("chicc/source");local __chicc__types = require("chicc/types");local __std__lang_array = require("std/lang.array");local __chicc__unification = require("chicc/unification");local __chicc__inference_context = require("chicc/inference_context");local __std__lang_map = require("std/lang.map");local __chicc__ast = require("chicc/ast");local __chicc__messages = require("chicc/messages");
 do function __P_.typerErr(message,section)
 local _chi_tmp0;do local _chi_tmp1=section == nil;_chi_tmp0=_chi_tmp1 end;local isNil=_chi_tmp0;
 local _chi_tmp2;if isNil then
@@ -7842,773 +7865,953 @@ j=(j + (1)); end ::__continue_4:: end;
  end;
 return result end;
  end;
+do function __P_.firstTypeIdName(t)
+do local _chi_tmp62;local _chi_tmp63 = 'primitive';local _chi_tmp65=(t.tag ~= (_chi_tmp63));if not _chi_tmp65 then local _chi_tmp64=__std__lang_array.size(t.ids);_chi_tmp65=(_chi_tmp64 == (0)) end;if _chi_tmp65 then local _chi_tmp66 = '';return (_chi_tmp66); end; end;
+local _chi_tmp67=t.ids[(1)];return _chi_tmp67.name end;
+ end;
+do function __P_.primitiveRuntimeKind(t)
+do local _chi_tmp68;local _chi_tmp69 = 'primitive';if (t.tag ~= (_chi_tmp69)) then local _chi_tmp70 = '';return (_chi_tmp70); end; end;
+local _chi_tmp71;do _chi_tmp71=(false) end;local foundAny=_chi_tmp71;
+do _chi_tmp71=t.ids end;local ids=_chi_tmp71;
+do _chi_tmp71=(1) end;local i=_chi_tmp71;
+do local function _chi_tmp72() return i end;local function _chi_tmp73() local _chi_tmp74=__std__lang_array.size(ids);return _chi_tmp74 end;while (_chi_tmp72() <= _chi_tmp73()) do do
+local _chi_tmp75;do local _chi_tmp76=ids[i];_chi_tmp75=_chi_tmp76.name end;local name=_chi_tmp75;
+do local _chi_tmp77;local _chi_tmp78 = 'int';local _chi_tmp80=(name == (_chi_tmp78));if not _chi_tmp80 then local _chi_tmp79 = 'float';_chi_tmp80=(name == (_chi_tmp79)) end;local _chi_tmp82=_chi_tmp80;if not _chi_tmp82 then local _chi_tmp81 = 'bool';_chi_tmp82=(name == (_chi_tmp81)) end;local _chi_tmp84=_chi_tmp82;if not _chi_tmp84 then local _chi_tmp83 = 'string';_chi_tmp84=(name == (_chi_tmp83)) end;local _chi_tmp86=_chi_tmp84;if not _chi_tmp86 then local _chi_tmp85 = 'unit';_chi_tmp86=(name == (_chi_tmp85)) end;if _chi_tmp86 then
+return name;
+ end; end;
+do local _chi_tmp87;local _chi_tmp88 = 'any';if (name == (_chi_tmp88)) then foundAny=(true);_chi_tmp87=foundAny end; end;
+i=(i + (1)); end ::__continue_5:: end;
+ end;
+local _chi_tmp89;if foundAny then local _chi_tmp90 = 'any';_chi_tmp89=(_chi_tmp90) else local _chi_tmp91 = '';_chi_tmp89=(_chi_tmp91) end;return _chi_tmp89 end;
+ end;
+do function __P_.isRuntimePrimitiveCheck(name)
+local _chi_tmp92 = 'int';local _chi_tmp94=(name == (_chi_tmp92));if not _chi_tmp94 then local _chi_tmp93 = 'float';_chi_tmp94=(name == (_chi_tmp93)) end;local _chi_tmp96=_chi_tmp94;if not _chi_tmp96 then local _chi_tmp95 = 'bool';_chi_tmp96=(name == (_chi_tmp95)) end;local _chi_tmp98=_chi_tmp96;if not _chi_tmp98 then local _chi_tmp97 = 'string';_chi_tmp98=(name == (_chi_tmp97)) end;local _chi_tmp100=_chi_tmp98;if not _chi_tmp100 then local _chi_tmp99 = 'unit';_chi_tmp100=(name == (_chi_tmp99)) end;return _chi_tmp100 end;
+ end;
+do function __P_.isUnknownFlowSource(t)
+local _chi_tmp101 = 'var';local _chi_tmp103=(t.tag == (_chi_tmp101));if not _chi_tmp103 then local _chi_tmp102 = 'poly';_chi_tmp103=(t.tag == (_chi_tmp102)) end;local _chi_tmp105=_chi_tmp103;if not _chi_tmp105 then local _chi_tmp104 = 'recursive';_chi_tmp105=(t.tag == (_chi_tmp104)) end;local _chi_tmp110=_chi_tmp105;if not _chi_tmp110 then local _chi_tmp106 = 'primitive';local _chi_tmp109=(t.tag == (_chi_tmp106));if _chi_tmp109 then local _chi_tmp107=__P_.primitiveRuntimeKind(t);local _chi_tmp108 = 'any';_chi_tmp109=(_chi_tmp107 == (_chi_tmp108)) end;_chi_tmp110=_chi_tmp109 end;return _chi_tmp110 end;
+ end;
+do function __P_.uncertainTypeTest()
+local _chi_tmp111={mayMatch=(true),mayMiss=(true)};setmetatable(_chi_tmp111, record_meta_table);return _chi_tmp111 end;
+ end;
+do function __P_.alwaysMatchingTypeTest()
+local _chi_tmp112={mayMatch=(true),mayMiss=(false)};setmetatable(_chi_tmp112, record_meta_table);return _chi_tmp112 end;
+ end;
+do function __P_.neverMatchingTypeTest()
+local _chi_tmp113={mayMatch=(false),mayMiss=(true)};setmetatable(_chi_tmp113, record_meta_table);return _chi_tmp113 end;
+ end;
+do function __P_.runtimeTestOutcome(source,tested)
+do local _chi_tmp114;local _chi_tmp115 = 'sum';if (tested.tag == (_chi_tmp115)) then
+local _chi_tmp116;do local _chi_tmp117=__P_.runtimeTestOutcome(source,tested.lhs);_chi_tmp116=_chi_tmp117 end;local lhs=_chi_tmp116;
+do local _chi_tmp118=__P_.runtimeTestOutcome(source,tested.rhs);_chi_tmp116=_chi_tmp118 end;local rhs=_chi_tmp116;
+local _chi_tmp119={mayMatch=(lhs.mayMatch or rhs.mayMatch),mayMiss=(lhs.mayMiss and rhs.mayMiss)};setmetatable(_chi_tmp119, record_meta_table);return _chi_tmp119;
+ end; end;
+local _chi_tmp120;do local _chi_tmp121;local _chi_tmp122 = 'record';if (tested.tag == (_chi_tmp122)) then _chi_tmp121=tested.name else local _chi_tmp123 = '';_chi_tmp121=(_chi_tmp123) end;_chi_tmp120=_chi_tmp121 end;local variantName=_chi_tmp120;
+do local _chi_tmp124;local _chi_tmp125 = '';if (variantName ~= (_chi_tmp125)) then
+do local _chi_tmp126;local _chi_tmp127 = 'record';if (source.tag == (_chi_tmp127)) then
+local _chi_tmp128;do _chi_tmp128=source.name end;local sourceVariantName=_chi_tmp128;
+do local _chi_tmp129;local _chi_tmp130 = '';if (sourceVariantName == (_chi_tmp130)) then local _chi_tmp131=__P_.uncertainTypeTest();return _chi_tmp131; end; end;
+do local _chi_tmp132;if (sourceVariantName == variantName) then local _chi_tmp133=__P_.alwaysMatchingTypeTest();return _chi_tmp133; end; end;
+local _chi_tmp134=__P_.neverMatchingTypeTest();return _chi_tmp134;
+ end; end;
+do local _chi_tmp135;local _chi_tmp136=__P_.isUnknownFlowSource(source);if _chi_tmp136 then local _chi_tmp137=__P_.uncertainTypeTest();return _chi_tmp137; end; end;
+local _chi_tmp138=__P_.neverMatchingTypeTest();return _chi_tmp138;
+ end; end;
+do local _chi_tmp139;if (source.tag == tested.tag) then
+do local _chi_tmp140;local _chi_tmp141 = 'primitive';if (source.tag ~= (_chi_tmp141)) then local _chi_tmp142=__P_.alwaysMatchingTypeTest();return _chi_tmp142; end; end;
+local _chi_tmp143;do local _chi_tmp144=__P_.firstTypeIdName(source);_chi_tmp143=_chi_tmp144 end;local sourceName=_chi_tmp143;
+do local _chi_tmp145=__P_.firstTypeIdName(tested);_chi_tmp143=_chi_tmp145 end;local testedName=_chi_tmp143;
+do local _chi_tmp146;if (sourceName == testedName) then local _chi_tmp147=__P_.alwaysMatchingTypeTest();return _chi_tmp147; end; end;
+do local _chi_tmp148;local _chi_tmp149=__P_.isRuntimePrimitiveCheck(testedName);if _chi_tmp149 then
+local _chi_tmp150;do local _chi_tmp151=__P_.primitiveRuntimeKind(source);_chi_tmp150=_chi_tmp151 end;local sourceKind=_chi_tmp150;
+do local _chi_tmp152;local _chi_tmp153 = 'any';local _chi_tmp155=(sourceKind == (_chi_tmp153));if not _chi_tmp155 then local _chi_tmp154 = '';_chi_tmp155=(sourceKind == (_chi_tmp154)) end;if _chi_tmp155 then local _chi_tmp156=__P_.uncertainTypeTest();return _chi_tmp156; end; end;
+local _chi_tmp157;if (sourceKind == testedName) then local _chi_tmp158=__P_.alwaysMatchingTypeTest();return _chi_tmp158; end;_chi_tmp148=_chi_tmp157
+ end; end;
+local _chi_tmp159=__P_.neverMatchingTypeTest();return _chi_tmp159;
+ end; end;
+do local _chi_tmp160;local _chi_tmp161=__P_.isUnknownFlowSource(source);if _chi_tmp161 then
+do local _chi_tmp162;local _chi_tmp163 = 'array';local _chi_tmp165=(tested.tag == (_chi_tmp163));if not _chi_tmp165 then local _chi_tmp164 = 'record';_chi_tmp165=(tested.tag == (_chi_tmp164)) end;local _chi_tmp167=_chi_tmp165;if not _chi_tmp167 then local _chi_tmp166 = 'fn';_chi_tmp167=(tested.tag == (_chi_tmp166)) end;if _chi_tmp167 then
+local _chi_tmp168=__P_.uncertainTypeTest();return _chi_tmp168;
+ end; end;
+do local _chi_tmp169;local _chi_tmp170 = 'primitive';local _chi_tmp173=(tested.tag == (_chi_tmp170));if _chi_tmp173 then local _chi_tmp171=__P_.firstTypeIdName(tested);local _chi_tmp172=__P_.isRuntimePrimitiveCheck(_chi_tmp171);_chi_tmp173=_chi_tmp172 end;if _chi_tmp173 then
+local _chi_tmp174=__P_.uncertainTypeTest();return _chi_tmp174;
+ end; end;
+local _chi_tmp175=__P_.neverMatchingTypeTest();return _chi_tmp175;
+ end; end;
+do local _chi_tmp176;local _chi_tmp177 = 'primitive';local _chi_tmp180=(tested.tag == (_chi_tmp177));if _chi_tmp180 then local _chi_tmp178=__P_.firstTypeIdName(tested);local _chi_tmp179=__P_.isRuntimePrimitiveCheck(_chi_tmp178);_chi_tmp180=_chi_tmp179 end;local _chi_tmp182=_chi_tmp180;if _chi_tmp182 then local _chi_tmp181 = 'primitive';_chi_tmp182=(source.tag == (_chi_tmp181)) end;if _chi_tmp182 then
+local _chi_tmp183;do local _chi_tmp184=__P_.primitiveRuntimeKind(source);_chi_tmp183=_chi_tmp184 end;local sourceKind=_chi_tmp183;
+do local _chi_tmp185;local _chi_tmp186 = 'any';local _chi_tmp188=(sourceKind == (_chi_tmp186));if not _chi_tmp188 then local _chi_tmp187 = '';_chi_tmp188=(sourceKind == (_chi_tmp187)) end;if _chi_tmp188 then local _chi_tmp189=__P_.uncertainTypeTest();return _chi_tmp189; end; end;
+local _chi_tmp190;local _chi_tmp191=sourceKind;local _chi_tmp192=__P_.firstTypeIdName(tested);if (_chi_tmp191 == _chi_tmp192) then local _chi_tmp193=__P_.alwaysMatchingTypeTest();return _chi_tmp193; end;_chi_tmp176=_chi_tmp190
+ end; end;
+local _chi_tmp194=__P_.neverMatchingTypeTest();return _chi_tmp194 end;
+ end;
+do function __P_.filterFlowType(source,tested,keepMatches)
+do local _chi_tmp195;local _chi_tmp196 = 'sum';if (source.tag == (_chi_tmp196)) then
+local _chi_tmp197;do local _chi_tmp198=__P_.filterFlowType(source.lhs,tested,keepMatches);_chi_tmp197=_chi_tmp198 end;local lhs=_chi_tmp197;
+do local _chi_tmp199=__P_.filterFlowType(source.rhs,tested,keepMatches);_chi_tmp197=_chi_tmp199 end;local rhs=_chi_tmp197;
+do local _chi_tmp200;if (lhs.hasValues and rhs.hasValues) then
+local _chi_tmp201=__chicc__types.sumType(source.ids,lhs.resultType,rhs.resultType,source.typeParams);local _chi_tmp202={hasValues=(true),resultType=_chi_tmp201};setmetatable(_chi_tmp202, record_meta_table);return _chi_tmp202;
+ end; end;
+do local _chi_tmp203;if lhs.hasValues then
+local _chi_tmp204={hasValues=(true),resultType=lhs.resultType};setmetatable(_chi_tmp204, record_meta_table);return _chi_tmp204;
+ end; end;
+do local _chi_tmp205;if rhs.hasValues then
+local _chi_tmp206={hasValues=(true),resultType=rhs.resultType};setmetatable(_chi_tmp206, record_meta_table);return _chi_tmp206;
+ end; end;
+local _chi_tmp207={hasValues=(false),resultType=__chicc__types.tUnit};setmetatable(_chi_tmp207, record_meta_table);return _chi_tmp207;
+ end; end;
+local _chi_tmp208;do local _chi_tmp209=__P_.runtimeTestOutcome(source,tested);_chi_tmp208=_chi_tmp209 end;local outcome=_chi_tmp208;
+do local _chi_tmp210;if keepMatches then _chi_tmp210=outcome.mayMatch else _chi_tmp210=outcome.mayMiss end;_chi_tmp208=_chi_tmp210 end;local keep=_chi_tmp208;
+local _chi_tmp211;if keep then
+local _chi_tmp212={hasValues=(true),resultType=source};setmetatable(_chi_tmp212, record_meta_table);_chi_tmp211=_chi_tmp212
+ else
+local _chi_tmp213={hasValues=(false),resultType=__chicc__types.tUnit};setmetatable(_chi_tmp213, record_meta_table);_chi_tmp211=_chi_tmp213
+ end;return _chi_tmp211 end;
+ end;
+do function __P_.refinedFlowType(source,tested,keepMatches)
+local _chi_tmp214;do local _chi_tmp215=__P_.filterFlowType(source,tested,keepMatches);_chi_tmp214=_chi_tmp215 end;local filtered=_chi_tmp214;
+local _chi_tmp216;if filtered.hasValues then _chi_tmp216=filtered.resultType else _chi_tmp216=source end;return _chi_tmp216 end;
+ end;
+do function __P_.simpleBindingTarget(expr)
+do local _chi_tmp217;local _chi_tmp218 = 'variable_access';if (expr.kind ~= (_chi_tmp218)) then return (nil); end; end;
+local _chi_tmp219;do _chi_tmp219=expr.target end;local target=_chi_tmp219;
+do local _chi_tmp220;local _chi_tmp224=target.isMutable;if not _chi_tmp224 then local _chi_tmp221 = 'local';local _chi_tmp223=(target.tag ~= (_chi_tmp221));if _chi_tmp223 then local _chi_tmp222 = 'package';_chi_tmp223=(target.tag ~= (_chi_tmp222)) end;_chi_tmp224=_chi_tmp223 end;if _chi_tmp224 then return (nil); end; end;
+return target end;
+ end;
+do function __P_.isUnitLiteral(expr)
+local _chi_tmp225 = 'atom';local _chi_tmp227=((expr.kind == (_chi_tmp225)) and (expr.exprType ~= (nil)));if _chi_tmp227 then local _chi_tmp226 = 'primitive';_chi_tmp227=(expr.exprType.tag == (_chi_tmp226)) end;local _chi_tmp230=_chi_tmp227;if _chi_tmp230 then local _chi_tmp228=__P_.primitiveRuntimeKind(expr.exprType);local _chi_tmp229 = 'unit';_chi_tmp230=(_chi_tmp228 == (_chi_tmp229)) end;return _chi_tmp230 end;
+ end;
+do function __P_.guardForCondition(condition)
+do local _chi_tmp231;local _chi_tmp232 = 'is';if (condition.kind == (_chi_tmp232)) then
+local _chi_tmp233;do _chi_tmp233=condition.castExpr end;local source=_chi_tmp233;
+do local _chi_tmp234=__P_.simpleBindingTarget(source);_chi_tmp233=_chi_tmp234 end;local target=_chi_tmp233;
+do local _chi_tmp235;if (((target == (nil)) or (source.exprType == (nil))) or (condition.checkedType == (nil))) then return (nil); end; end;
+local _chi_tmp236={target=target,sourceType=source.exprType,testedType=condition.checkedType,matchesWhenTrue=(true)};setmetatable(_chi_tmp236, record_meta_table);return _chi_tmp236;
+ end; end;
+do local _chi_tmp237;local _chi_tmp238 = 'infix_op';if (condition.kind ~= (_chi_tmp238)) then return (nil); end; end;
+local _chi_tmp239;do _chi_tmp239=condition.op end;local op=_chi_tmp239;
+do local _chi_tmp240;local _chi_tmp241 = '==';local _chi_tmp243=(op ~= (_chi_tmp241));if _chi_tmp243 then local _chi_tmp242 = '!=';_chi_tmp243=(op ~= (_chi_tmp242)) end;if _chi_tmp243 then return (nil); end; end;
+do _chi_tmp239=condition.left end;local left=_chi_tmp239;
+do _chi_tmp239=condition.right end;local right=_chi_tmp239;
+do local _chi_tmp244=__P_.simpleBindingTarget(left);_chi_tmp239=_chi_tmp244 end;local leftTarget=_chi_tmp239;
+do local _chi_tmp245=__P_.simpleBindingTarget(right);_chi_tmp239=_chi_tmp245 end;local rightTarget=_chi_tmp239;
+do _chi_tmp239=(nil) end;local source=_chi_tmp239;
+do _chi_tmp239=(nil) end;local target=_chi_tmp239;
+do local _chi_tmp246;local _chi_tmp248=(leftTarget ~= (nil));if _chi_tmp248 then local _chi_tmp247=__P_.isUnitLiteral(right);_chi_tmp248=_chi_tmp247 end;if _chi_tmp248 then
+do source=left; end;
+target=leftTarget;_chi_tmp246=target
+ else local _chi_tmp249;local _chi_tmp251=(rightTarget ~= (nil));if _chi_tmp251 then local _chi_tmp250=__P_.isUnitLiteral(left);_chi_tmp251=_chi_tmp250 end;if _chi_tmp251 then
+do source=right; end;
+target=rightTarget;_chi_tmp249=target
+ end;_chi_tmp246=_chi_tmp249 end; end;
+do local _chi_tmp252;if (source == (nil)) then return (nil); end; end;
+local _chi_tmp253 = '==';local _chi_tmp254={target=target,sourceType=source.exprType,testedType=__chicc__types.tUnit,matchesWhenTrue=(op == (_chi_tmp253))};setmetatable(_chi_tmp254, record_meta_table);return _chi_tmp254 end;
+ end;
+do function __P_.resolveFlowType(t,constraints)
+local _chi_tmp255;if (__P_.typerUf ~= (nil)) then
+do local _chi_tmp256=__chicc__unification.unifyWithUf(constraints,__P_.typerUf); end;
+do local _chi_tmp257=__P_.clearConstraints(constraints); end;
+local _chi_tmp258=__chicc__unification.ufResolve(__P_.typerUf,t);_chi_tmp255=_chi_tmp258
+ else
+local _chi_tmp259=t;local _chi_tmp260=__chicc__unification.unify(constraints);local _chi_tmp261=__chicc__types.mapType(_chi_tmp259,_chi_tmp260);_chi_tmp255=_chi_tmp261
+ end;return _chi_tmp255 end;
+ end;
+do function __P_.flowRefinementForBranch(condition,branchIsTrue,constraints)
+local _chi_tmp262;do local _chi_tmp263=__P_.guardForCondition(condition);_chi_tmp262=_chi_tmp263 end;local guard=_chi_tmp262;
+do local _chi_tmp264;if (guard == (nil)) then return (nil); end; end;
+do _chi_tmp262=(guard.matchesWhenTrue == branchIsTrue) end;local matches=_chi_tmp262;
+do local _chi_tmp265=__P_.resolveFlowType(guard.sourceType,constraints);_chi_tmp262=_chi_tmp265 end;local sourceType=_chi_tmp262;
+do local _chi_tmp266=__P_.resolveFlowType(guard.testedType,constraints);_chi_tmp262=_chi_tmp266 end;local testedType=_chi_tmp262;
+do local _chi_tmp267=__P_.refinedFlowType(sourceType,testedType,matches);_chi_tmp262=_chi_tmp267 end;local refined=_chi_tmp262;
+local _chi_tmp268={target=guard.target,narrowedType=refined};setmetatable(_chi_tmp268, record_meta_table);return _chi_tmp268 end;
+ end;
+do function __P_.defineFlowRefinement(refinement)
+local _chi_tmp269;do _chi_tmp269=refinement.target end;local target=_chi_tmp269;
+do _chi_tmp269=refinement.narrowedType end;local narrowedType=_chi_tmp269;
+local _chi_tmp270;local _chi_tmp271 = 'local';if (target.tag == (_chi_tmp271)) then
+local _chi_tmp272=__chicc__inference_context.icDefineLocalSymbol(target.name,narrowedType);_chi_tmp270=_chi_tmp272
+ else
+local _chi_tmp273 = '/';local _chi_tmp274 = '/';local _chi_tmp275=chi_tostring(target.moduleName) .. chi_tostring((_chi_tmp273)) .. chi_tostring(target.packageName) .. chi_tostring((_chi_tmp274)) .. chi_tostring(target.name);local _chi_tmp276=__chicc__inference_context.icDefineLocalSymbol(_chi_tmp275,narrowedType);_chi_tmp270=_chi_tmp276
+ end;local _chi_tmp277=_chi_tmp270;return; end;
+ end;
 do function __P_.defaultArgTypes(calleeType,given)
-local _chi_tmp62;do local _chi_tmp63={};setmetatable(_chi_tmp63, array_meta_table);_chi_tmp62=_chi_tmp63 end;local result=_chi_tmp62;
-do local _chi_tmp64;local _chi_tmp65 = 'fn';if (calleeType.tag ~= (_chi_tmp65)) then return result; end; end;
-do local _chi_tmp66=__std__lang_array.size(calleeType.types);_chi_tmp62=(_chi_tmp66 - (1)) end;local paramCount=_chi_tmp62;
-do local _chi_tmp67;if (given < (paramCount - calleeType.defaults)) then return result; end; end;
-do _chi_tmp62=(given + (1)) end;local idx=_chi_tmp62;
-do local function _chi_tmp68() return idx end;local function _chi_tmp69() return paramCount end;while (_chi_tmp68() <= _chi_tmp69()) do do
-do local _chi_tmp70=calleeType.types[idx];local _chi_tmp71=__std__lang_array.push(result,_chi_tmp70); end;
-idx=(idx + (1)); end ::__continue_5:: end;
+local _chi_tmp278;do local _chi_tmp279={};setmetatable(_chi_tmp279, array_meta_table);_chi_tmp278=_chi_tmp279 end;local result=_chi_tmp278;
+do local _chi_tmp280;local _chi_tmp281 = 'fn';if (calleeType.tag ~= (_chi_tmp281)) then return result; end; end;
+do local _chi_tmp282=__std__lang_array.size(calleeType.types);_chi_tmp278=(_chi_tmp282 - (1)) end;local paramCount=_chi_tmp278;
+do local _chi_tmp283;if (given < (paramCount - calleeType.defaults)) then return result; end; end;
+do _chi_tmp278=(given + (1)) end;local idx=_chi_tmp278;
+do local function _chi_tmp284() return idx end;local function _chi_tmp285() return paramCount end;while (_chi_tmp284() <= _chi_tmp285()) do do
+do local _chi_tmp286=calleeType.types[idx];local _chi_tmp287=__std__lang_array.push(result,_chi_tmp286); end;
+idx=(idx + (1)); end ::__continue_6:: end;
  end;
 return result end;
  end;
 do function __P_.withoutDefaults(t)
-local _chi_tmp72;local _chi_tmp73 = 'fn';if ((t.tag == (_chi_tmp73)) and (t.defaults > (0))) then local _chi_tmp74=__chicc__types.functionType(t.types,t.typeParams,(0));_chi_tmp72=_chi_tmp74 else _chi_tmp72=t end;return _chi_tmp72 end;
+local _chi_tmp288;local _chi_tmp289 = 'fn';if ((t.tag == (_chi_tmp289)) and (t.defaults > (0))) then local _chi_tmp290=__chicc__types.functionType(t.types,t.typeParams,(0));_chi_tmp288=_chi_tmp290 else _chi_tmp288=t end;return _chi_tmp288 end;
  end;
 do function __P_.addConstraint(constraints,expected,actual,section)
-local _chi_tmp75;do local _chi_tmp76=expected;local _chi_tmp77=actual;local _chi_tmp78=section;local _chi_tmp79={};local _chi_tmp80=__chicc__unification.newConstraint(_chi_tmp76,_chi_tmp77,_chi_tmp78,_chi_tmp79);_chi_tmp75=_chi_tmp80 end;local c=_chi_tmp75;
-local _chi_tmp81=__std__lang_array.push(constraints,c);local _chi_tmp82=_chi_tmp81;return; end;
+local _chi_tmp291;do local _chi_tmp292=expected;local _chi_tmp293=actual;local _chi_tmp294=section;local _chi_tmp295={};local _chi_tmp296=__chicc__unification.newConstraint(_chi_tmp292,_chi_tmp293,_chi_tmp294,_chi_tmp295);_chi_tmp291=_chi_tmp296 end;local c=_chi_tmp291;
+local _chi_tmp297=__std__lang_array.push(constraints,c);local _chi_tmp298=_chi_tmp297;return; end;
  end;
 do function __P_.clearConstraints(constraints)
-local _chi_tmp83;do _chi_tmp83=constraints end;local c=_chi_tmp83;
-local function _chi_tmp84() local _chi_tmp85=__std__lang_array.size(c);return _chi_tmp85 end;local function _chi_tmp86() return (0) end;while (_chi_tmp84() > _chi_tmp86()) do do
-local _chi_tmp87=__std__lang_array.removeLast(c); end ::__continue_6:: end;
-local _chi_tmp88=nil;return; end;
+local _chi_tmp299;do _chi_tmp299=constraints end;local c=_chi_tmp299;
+local function _chi_tmp300() local _chi_tmp301=__std__lang_array.size(c);return _chi_tmp301 end;local function _chi_tmp302() return (0) end;while (_chi_tmp300() > _chi_tmp302()) do do
+local _chi_tmp303=__std__lang_array.removeLast(c); end ::__continue_7:: end;
+local _chi_tmp304=nil;return; end;
  end;
 do function __P_.isIntType(t)
-local _chi_tmp89;do _chi_tmp89=t end;local typ=_chi_tmp89;
-do local _chi_tmp90;local _chi_tmp91 = 'primitive';if (typ.tag == (_chi_tmp91)) then
-local _chi_tmp92;do _chi_tmp92=typ.ids end;local ids=_chi_tmp92;
-do local _chi_tmp93=#ids;_chi_tmp92=_chi_tmp93 end;local count=_chi_tmp92;
-do _chi_tmp92=(1) end;local i=_chi_tmp92;
-local function _chi_tmp94() return i end;local function _chi_tmp95() return count end;while (_chi_tmp94() <= _chi_tmp95()) do do
-do local _chi_tmp96;local _chi_tmp97=ids[i];local _chi_tmp98=__chicc__types.typeIdEquals(_chi_tmp97,__chicc__types.intTypeId);if _chi_tmp98 then return (true); end; end;
-i=(i + (1)); end ::__continue_7:: end;
-_chi_tmp90=nil
+local _chi_tmp305;do _chi_tmp305=t end;local typ=_chi_tmp305;
+do local _chi_tmp306;local _chi_tmp307 = 'primitive';if (typ.tag == (_chi_tmp307)) then
+local _chi_tmp308;do _chi_tmp308=typ.ids end;local ids=_chi_tmp308;
+do local _chi_tmp309=#ids;_chi_tmp308=_chi_tmp309 end;local count=_chi_tmp308;
+do _chi_tmp308=(1) end;local i=_chi_tmp308;
+local function _chi_tmp310() return i end;local function _chi_tmp311() return count end;while (_chi_tmp310() <= _chi_tmp311()) do do
+do local _chi_tmp312;local _chi_tmp313=ids[i];local _chi_tmp314=__chicc__types.typeIdEquals(_chi_tmp313,__chicc__types.intTypeId);if _chi_tmp314 then return (true); end; end;
+i=(i + (1)); end ::__continue_8:: end;
+_chi_tmp306=nil
  end; end;
 return (false) end;
  end;
 do function __P_.isFloatType(t)
-local _chi_tmp99;do _chi_tmp99=t end;local typ=_chi_tmp99;
-do local _chi_tmp100;local _chi_tmp101 = 'primitive';if (typ.tag == (_chi_tmp101)) then
-local _chi_tmp102;do _chi_tmp102=typ.ids end;local ids=_chi_tmp102;
-do local _chi_tmp103=#ids;_chi_tmp102=_chi_tmp103 end;local count=_chi_tmp102;
-do _chi_tmp102=(1) end;local i=_chi_tmp102;
-local function _chi_tmp104() return i end;local function _chi_tmp105() return count end;while (_chi_tmp104() <= _chi_tmp105()) do do
-do local _chi_tmp106;local _chi_tmp107=ids[i];local _chi_tmp108=__chicc__types.typeIdEquals(_chi_tmp107,__chicc__types.floatTypeId);if _chi_tmp108 then return (true); end; end;
-i=(i + (1)); end ::__continue_8:: end;
-_chi_tmp100=nil
+local _chi_tmp315;do _chi_tmp315=t end;local typ=_chi_tmp315;
+do local _chi_tmp316;local _chi_tmp317 = 'primitive';if (typ.tag == (_chi_tmp317)) then
+local _chi_tmp318;do _chi_tmp318=typ.ids end;local ids=_chi_tmp318;
+do local _chi_tmp319=#ids;_chi_tmp318=_chi_tmp319 end;local count=_chi_tmp318;
+do _chi_tmp318=(1) end;local i=_chi_tmp318;
+local function _chi_tmp320() return i end;local function _chi_tmp321() return count end;while (_chi_tmp320() <= _chi_tmp321()) do do
+do local _chi_tmp322;local _chi_tmp323=ids[i];local _chi_tmp324=__chicc__types.typeIdEquals(_chi_tmp323,__chicc__types.floatTypeId);if _chi_tmp324 then return (true); end; end;
+i=(i + (1)); end ::__continue_9:: end;
+_chi_tmp316=nil
  end; end;
 return (false) end;
  end;
 do __P_.typerUf=(nil); end;
 do function __P_.typerSetUf(uf)
-__P_.typerUf=uf;local _chi_tmp109=__P_.typerUf;return; end;
+__P_.typerUf=uf;local _chi_tmp325=__P_.typerUf;return; end;
  end;
 do function __P_.typerGetUf()
 return __P_.typerUf end;
  end;
 do function __P_.branchTerminates(term)
-do local _chi_tmp110;if (term == (nil)) then return (false); end; end;
-local _chi_tmp111;do _chi_tmp111=term.kind end;local kind=_chi_tmp111;
-local _chi_tmp112;local _chi_tmp113 = 'return';local _chi_tmp115=(kind == (_chi_tmp113));if not _chi_tmp115 then local _chi_tmp114 = 'break';_chi_tmp115=(kind == (_chi_tmp114)) end;local _chi_tmp117=_chi_tmp115;if not _chi_tmp117 then local _chi_tmp116 = 'continue';_chi_tmp117=(kind == (_chi_tmp116)) end;if _chi_tmp117 then
-_chi_tmp112=(true)
- else local _chi_tmp118;local _chi_tmp119 = 'block';if (kind == (_chi_tmp119)) then
-local _chi_tmp120;do _chi_tmp120=term.blockBody end;local body=_chi_tmp120;
-do local _chi_tmp121=__std__lang_array.size(body);_chi_tmp120=_chi_tmp121 end;local count=_chi_tmp120;
-do _chi_tmp120=(1) end;local i=_chi_tmp120;
-do _chi_tmp120=(false) end;local terminated=_chi_tmp120;
-do local function _chi_tmp122() return i end;local function _chi_tmp123() return count end;while (_chi_tmp122() <= _chi_tmp123()) do do
-do local _chi_tmp124;local _chi_tmp125=body[i];local _chi_tmp126=__P_.branchTerminates(_chi_tmp125);if _chi_tmp126 then terminated=(true);_chi_tmp124=terminated end; end;
-i=(i + (1)); end ::__continue_9:: end;
+do local _chi_tmp326;if (term == (nil)) then return (false); end; end;
+local _chi_tmp327;do _chi_tmp327=term.kind end;local kind=_chi_tmp327;
+local _chi_tmp328;local _chi_tmp329 = 'return';local _chi_tmp331=(kind == (_chi_tmp329));if not _chi_tmp331 then local _chi_tmp330 = 'break';_chi_tmp331=(kind == (_chi_tmp330)) end;local _chi_tmp333=_chi_tmp331;if not _chi_tmp333 then local _chi_tmp332 = 'continue';_chi_tmp333=(kind == (_chi_tmp332)) end;if _chi_tmp333 then
+_chi_tmp328=(true)
+ else local _chi_tmp334;local _chi_tmp335 = 'block';if (kind == (_chi_tmp335)) then
+local _chi_tmp336;do _chi_tmp336=term.blockBody end;local body=_chi_tmp336;
+do local _chi_tmp337=__std__lang_array.size(body);_chi_tmp336=_chi_tmp337 end;local count=_chi_tmp336;
+do _chi_tmp336=(1) end;local i=_chi_tmp336;
+do _chi_tmp336=(false) end;local terminated=_chi_tmp336;
+do local function _chi_tmp338() return i end;local function _chi_tmp339() return count end;while (_chi_tmp338() <= _chi_tmp339()) do do
+do local _chi_tmp340;local _chi_tmp341=body[i];local _chi_tmp342=__P_.branchTerminates(_chi_tmp341);if _chi_tmp342 then terminated=(true);_chi_tmp340=terminated end; end;
+i=(i + (1)); end ::__continue_10:: end;
  end;
-_chi_tmp118=terminated
- else local _chi_tmp127;local _chi_tmp128 = 'if_else';if (kind == (_chi_tmp128)) then
-local _chi_tmp129;do _chi_tmp129=term.thenBranch end;local thenBranch=_chi_tmp129;
-do _chi_tmp129=term.elseBranch end;local elseBranch=_chi_tmp129;
-local _chi_tmp131=(elseBranch ~= (nil));if _chi_tmp131 then local _chi_tmp130=__P_.branchTerminates(thenBranch);_chi_tmp131=_chi_tmp130 end;local _chi_tmp133=_chi_tmp131;if _chi_tmp133 then local _chi_tmp132=__P_.branchTerminates(elseBranch);_chi_tmp133=_chi_tmp132 end;_chi_tmp127=_chi_tmp133
+_chi_tmp334=terminated
+ else local _chi_tmp343;local _chi_tmp344 = 'if_else';if (kind == (_chi_tmp344)) then
+local _chi_tmp345;do _chi_tmp345=term.thenBranch end;local thenBranch=_chi_tmp345;
+do _chi_tmp345=term.elseBranch end;local elseBranch=_chi_tmp345;
+local _chi_tmp347=(elseBranch ~= (nil));if _chi_tmp347 then local _chi_tmp346=__P_.branchTerminates(thenBranch);_chi_tmp347=_chi_tmp346 end;local _chi_tmp349=_chi_tmp347;if _chi_tmp349 then local _chi_tmp348=__P_.branchTerminates(elseBranch);_chi_tmp349=_chi_tmp348 end;_chi_tmp343=_chi_tmp349
  else
-_chi_tmp127=(false)
- end;_chi_tmp118=_chi_tmp127 end;_chi_tmp112=_chi_tmp118 end;return _chi_tmp112 end;
+_chi_tmp343=(false)
+ end;_chi_tmp334=_chi_tmp343 end;_chi_tmp328=_chi_tmp334 end;return _chi_tmp328 end;
  end;
 do function __P_.typeTerm(term,level,constraints) return __chicc__types.tUnit end; end;
 do function __P_.typeTerms(terms,constraints,level)
-local _chi_tmp134;do local _chi_tmp135=#terms;_chi_tmp134=_chi_tmp135 end;local count=_chi_tmp134;
-do local _chi_tmp136={};setmetatable(_chi_tmp136, array_meta_table);_chi_tmp134=_chi_tmp136 end;local results=_chi_tmp134;
-do _chi_tmp134=(1) end;local i=_chi_tmp134;
-do local function _chi_tmp137() return i end;local function _chi_tmp138() return count end;while (_chi_tmp137() <= _chi_tmp138()) do do
-local _chi_tmp139;do local _chi_tmp140=terms[i];_chi_tmp139=_chi_tmp140 end;local term=_chi_tmp139;
-do local _chi_tmp141=__P_.typeTerm(term,level,constraints);_chi_tmp139=_chi_tmp141 end;local t=_chi_tmp139;
-do local _chi_tmp142=__std__lang_array.push(results,t); end;
-i=(i + (1)); end ::__continue_10:: end;
+local _chi_tmp350;do local _chi_tmp351=#terms;_chi_tmp350=_chi_tmp351 end;local count=_chi_tmp350;
+do local _chi_tmp352={};setmetatable(_chi_tmp352, array_meta_table);_chi_tmp350=_chi_tmp352 end;local results=_chi_tmp350;
+do _chi_tmp350=(1) end;local i=_chi_tmp350;
+do local function _chi_tmp353() return i end;local function _chi_tmp354() return count end;while (_chi_tmp353() <= _chi_tmp354()) do do
+local _chi_tmp355;do local _chi_tmp356=terms[i];_chi_tmp355=_chi_tmp356 end;local term=_chi_tmp355;
+do local _chi_tmp357=__P_.typeTerm(term,level,constraints);_chi_tmp355=_chi_tmp357 end;local t=_chi_tmp355;
+do local _chi_tmp358=__std__lang_array.push(results,t); end;
+i=(i + (1)); end ::__continue_11:: end;
  end;
 return results end;
  end;
 do function __P_.isSyntacticValue(value)
-local _chi_tmp143 = 'fn';local _chi_tmp145=(value.kind == (_chi_tmp143));if not _chi_tmp145 then local _chi_tmp144 = 'variable_access';_chi_tmp145=(value.kind == (_chi_tmp144)) end;local _chi_tmp147=_chi_tmp145;if not _chi_tmp147 then local _chi_tmp146 = 'atom';_chi_tmp147=(value.kind == (_chi_tmp146)) end;return _chi_tmp147 end;
+local _chi_tmp359 = 'fn';local _chi_tmp361=(value.kind == (_chi_tmp359));if not _chi_tmp361 then local _chi_tmp360 = 'variable_access';_chi_tmp361=(value.kind == (_chi_tmp360)) end;local _chi_tmp363=_chi_tmp361;if not _chi_tmp363 then local _chi_tmp362 = 'atom';_chi_tmp363=(value.kind == (_chi_tmp362)) end;return _chi_tmp363 end;
  end;
 do function __P_.typeTermImpl(term,level,constraints)
-local _chi_tmp148;do local _chi_tmp149=term.kind;_chi_tmp148=_chi_tmp149 end;local kind=_chi_tmp148;
-local _chi_tmp150;local _chi_tmp151 = 'atom';if (kind == (_chi_tmp151)) then
-local _chi_tmp152=term.exprType;_chi_tmp150=_chi_tmp152
- else local _chi_tmp153;local _chi_tmp154 = 'variable_access';if (kind == (_chi_tmp154)) then
-local _chi_tmp155;do local _chi_tmp156=term.target;_chi_tmp155=_chi_tmp156 end;local target=_chi_tmp155;
-do local _chi_tmp157=term.section;_chi_tmp155=_chi_tmp157 end;local section=_chi_tmp155;
-do local _chi_tmp158=__chicc__inference_context.icGetTargetType(target,level,section);_chi_tmp155=_chi_tmp158 end;local rawType=_chi_tmp155;
-local _chi_tmp159=__P_.withoutDefaults(rawType);_chi_tmp153=_chi_tmp159
- else local _chi_tmp160;local _chi_tmp161 = 'create_record';if (kind == (_chi_tmp161)) then
-local _chi_tmp162;do local _chi_tmp163=term.recordFields;_chi_tmp162=_chi_tmp163 end;local fields=_chi_tmp162;
-do local _chi_tmp164=#fields;_chi_tmp162=_chi_tmp164 end;local fieldCount=_chi_tmp162;
-do local _chi_tmp165={};setmetatable(_chi_tmp165, array_meta_table);_chi_tmp162=_chi_tmp165 end;local newFields=_chi_tmp162;
-do _chi_tmp162=(1) end;local i=_chi_tmp162;
-do local function _chi_tmp166() return i end;local function _chi_tmp167() return fieldCount end;while (_chi_tmp166() <= _chi_tmp167()) do do
-local _chi_tmp168;do local _chi_tmp169=fields[i];_chi_tmp168=_chi_tmp169 end;local f=_chi_tmp168;
-do local _chi_tmp170=f.name;_chi_tmp168=_chi_tmp170 end;local fName=_chi_tmp168;
-do local _chi_tmp171=f.value;_chi_tmp168=_chi_tmp171 end;local fValue=_chi_tmp168;
-do local _chi_tmp172=__P_.typeTerm(fValue,level,constraints);_chi_tmp168=_chi_tmp172 end;local fType=_chi_tmp168;
-do local _chi_tmp173={name=fName,fieldType=fType};setmetatable(_chi_tmp173, record_meta_table);_chi_tmp168=_chi_tmp173 end;local rf=_chi_tmp168;
-do local _chi_tmp174=__std__lang_array.push(newFields,rf); end;
-i=(i + (1)); end ::__continue_11:: end;
- end;
-local _chi_tmp175={};setmetatable(_chi_tmp175, array_meta_table);local _chi_tmp176={};setmetatable(_chi_tmp176, array_meta_table);local _chi_tmp177=__chicc__types.recordType(_chi_tmp175,newFields,_chi_tmp176);_chi_tmp160=_chi_tmp177
- else local _chi_tmp178;local _chi_tmp179 = 'create_array';if (kind == (_chi_tmp179)) then
-local _chi_tmp180;do local _chi_tmp181=__chicc__inference_context.icFreshVariable(level);_chi_tmp180=_chi_tmp181 end;local elementType=_chi_tmp180;
-do local _chi_tmp182=term.arrayValues;_chi_tmp180=_chi_tmp182 end;local values=_chi_tmp180;
-do local _chi_tmp183=__P_.typeTerms(values,constraints,level);_chi_tmp180=_chi_tmp183 end;local valueTypes=_chi_tmp180;
-do local _chi_tmp184=__std__lang_array.size(valueTypes);_chi_tmp180=_chi_tmp184 end;local vtCount=_chi_tmp180;
-do _chi_tmp180=(1) end;local i=_chi_tmp180;
-do local function _chi_tmp185() return i end;local function _chi_tmp186() return vtCount end;while (_chi_tmp185() <= _chi_tmp186()) do do
-local _chi_tmp187;do local _chi_tmp188=valueTypes[i];_chi_tmp187=_chi_tmp188 end;local vt=_chi_tmp187;
-do local _chi_tmp189=values[i];_chi_tmp187=_chi_tmp189 end;local value=_chi_tmp187;
-do local _chi_tmp190=__P_.addConstraint(constraints,elementType,vt,value.section); end;
+local _chi_tmp364;do local _chi_tmp365=term.kind;_chi_tmp364=_chi_tmp365 end;local kind=_chi_tmp364;
+local _chi_tmp366;local _chi_tmp367 = 'atom';if (kind == (_chi_tmp367)) then
+local _chi_tmp368=term.exprType;_chi_tmp366=_chi_tmp368
+ else local _chi_tmp369;local _chi_tmp370 = 'variable_access';if (kind == (_chi_tmp370)) then
+local _chi_tmp371;do local _chi_tmp372=term.target;_chi_tmp371=_chi_tmp372 end;local target=_chi_tmp371;
+do local _chi_tmp373=term.section;_chi_tmp371=_chi_tmp373 end;local section=_chi_tmp371;
+do local _chi_tmp374=__chicc__inference_context.icGetTargetType(target,level,section);_chi_tmp371=_chi_tmp374 end;local rawType=_chi_tmp371;
+local _chi_tmp375=__P_.withoutDefaults(rawType);_chi_tmp369=_chi_tmp375
+ else local _chi_tmp376;local _chi_tmp377 = 'create_record';if (kind == (_chi_tmp377)) then
+local _chi_tmp378;do local _chi_tmp379=term.recordFields;_chi_tmp378=_chi_tmp379 end;local fields=_chi_tmp378;
+do local _chi_tmp380=#fields;_chi_tmp378=_chi_tmp380 end;local fieldCount=_chi_tmp378;
+do local _chi_tmp381={};setmetatable(_chi_tmp381, array_meta_table);_chi_tmp378=_chi_tmp381 end;local newFields=_chi_tmp378;
+do _chi_tmp378=(1) end;local i=_chi_tmp378;
+do local function _chi_tmp382() return i end;local function _chi_tmp383() return fieldCount end;while (_chi_tmp382() <= _chi_tmp383()) do do
+local _chi_tmp384;do local _chi_tmp385=fields[i];_chi_tmp384=_chi_tmp385 end;local f=_chi_tmp384;
+do local _chi_tmp386=f.name;_chi_tmp384=_chi_tmp386 end;local fName=_chi_tmp384;
+do local _chi_tmp387=f.value;_chi_tmp384=_chi_tmp387 end;local fValue=_chi_tmp384;
+do local _chi_tmp388=__P_.typeTerm(fValue,level,constraints);_chi_tmp384=_chi_tmp388 end;local fType=_chi_tmp384;
+do local _chi_tmp389={name=fName,fieldType=fType};setmetatable(_chi_tmp389, record_meta_table);_chi_tmp384=_chi_tmp389 end;local rf=_chi_tmp384;
+do local _chi_tmp390=__std__lang_array.push(newFields,rf); end;
 i=(i + (1)); end ::__continue_12:: end;
  end;
-local _chi_tmp191={};setmetatable(_chi_tmp191, array_meta_table);local _chi_tmp192=__chicc__types.arrayType(elementType,_chi_tmp191);_chi_tmp178=_chi_tmp192
- else local _chi_tmp193;local _chi_tmp194 = 'fn';if (kind == (_chi_tmp194)) then
-local _chi_tmp195;do local function _chi_tmp196()
-local _chi_tmp197;do _chi_tmp197=term.expectedType end;local expectedType=_chi_tmp197;
-do local _chi_tmp199=(expectedType ~= (nil));if _chi_tmp199 then local _chi_tmp198 = 'fn';_chi_tmp199=(expectedType.tag == (_chi_tmp198)) end;_chi_tmp197=_chi_tmp199 end;local hasExpectedFnType=_chi_tmp197;
-do local _chi_tmp200;if hasExpectedFnType then _chi_tmp200=expectedType.types else local _chi_tmp201={};setmetatable(_chi_tmp201, array_meta_table);_chi_tmp200=_chi_tmp201 end;_chi_tmp197=_chi_tmp200 end;local expectedFnTypes=_chi_tmp197;
-do local _chi_tmp202=__std__lang_array.size(expectedFnTypes);_chi_tmp197=_chi_tmp202 end;local expectedTypeCount=_chi_tmp197;
-do _chi_tmp197=(expectedTypeCount - (1)) end;local expectedParamCount=_chi_tmp197;
-do local _chi_tmp203;if hasExpectedFnType then
-local _chi_tmp204=expectedFnTypes[expectedTypeCount];_chi_tmp203=_chi_tmp204
- else
-local _chi_tmp205=__chicc__inference_context.icFreshVariable(level);_chi_tmp203=_chi_tmp205
- end;_chi_tmp197=_chi_tmp203 end;local returnType=_chi_tmp197;
-do _chi_tmp197=term.parameters end;local params=_chi_tmp197;
-do local _chi_tmp206=__std__lang_array.size(params);_chi_tmp197=_chi_tmp206 end;local paramCount=_chi_tmp197;
-do local _chi_tmp207={};setmetatable(_chi_tmp207, array_meta_table);_chi_tmp197=_chi_tmp207 end;local paramTypes=_chi_tmp197;
-do _chi_tmp197=(1) end;local i=_chi_tmp197;
-do local function _chi_tmp208() return i end;local function _chi_tmp209() return paramCount end;while (_chi_tmp208() <= _chi_tmp209()) do do
-local _chi_tmp210;do local _chi_tmp211=params[i];_chi_tmp210=_chi_tmp211 end;local p=_chi_tmp210;
-do _chi_tmp210=p.name end;local pName=_chi_tmp210;
-do _chi_tmp210=p.paramType end;local pType=_chi_tmp210;
-do local _chi_tmp212;if (pType ~= (nil)) then
-_chi_tmp212=pType
- else local _chi_tmp213;if (hasExpectedFnType and (i <= expectedParamCount)) then
-local _chi_tmp214=expectedFnTypes[i];_chi_tmp213=_chi_tmp214
- else
-local _chi_tmp215=__chicc__inference_context.icFreshVariable(level);_chi_tmp213=_chi_tmp215
- end;_chi_tmp212=_chi_tmp213 end;_chi_tmp210=_chi_tmp212 end;local paramType=_chi_tmp210;
-do _chi_tmp210=term.defaultValues end;local defaultValues=_chi_tmp210;
-do local _chi_tmp216;if (defaultValues ~= (nil)) then
-local _chi_tmp217;do local _chi_tmp218=__std__lang_map.get(defaultValues,pName);_chi_tmp217=_chi_tmp218 end;local defaultVal=_chi_tmp217;
-local _chi_tmp219;if (defaultVal ~= (nil)) then
-local _chi_tmp220;do local _chi_tmp221=__P_.typeTerm(defaultVal,level,constraints);_chi_tmp220=_chi_tmp221 end;local dvType=_chi_tmp220;
-do _chi_tmp220=defaultVal.section end;local dvSection=_chi_tmp220;
-local _chi_tmp222=__P_.addConstraint(constraints,paramType,dvType,dvSection);_chi_tmp219=_chi_tmp222
- end;_chi_tmp216=_chi_tmp219
- end; end;
-do local _chi_tmp223=__chicc__inference_context.icDefineLocalSymbol(pName,paramType); end;
-do local _chi_tmp224=__std__lang_array.push(paramTypes,paramType); end;
+local _chi_tmp391={};setmetatable(_chi_tmp391, array_meta_table);local _chi_tmp392={};setmetatable(_chi_tmp392, array_meta_table);local _chi_tmp393=__chicc__types.recordType(_chi_tmp391,newFields,_chi_tmp392);_chi_tmp376=_chi_tmp393
+ else local _chi_tmp394;local _chi_tmp395 = 'create_array';if (kind == (_chi_tmp395)) then
+local _chi_tmp396;do local _chi_tmp397=__chicc__inference_context.icFreshVariable(level);_chi_tmp396=_chi_tmp397 end;local elementType=_chi_tmp396;
+do local _chi_tmp398=term.arrayValues;_chi_tmp396=_chi_tmp398 end;local values=_chi_tmp396;
+do local _chi_tmp399=__P_.typeTerms(values,constraints,level);_chi_tmp396=_chi_tmp399 end;local valueTypes=_chi_tmp396;
+do local _chi_tmp400=__std__lang_array.size(valueTypes);_chi_tmp396=_chi_tmp400 end;local vtCount=_chi_tmp396;
+do _chi_tmp396=(1) end;local i=_chi_tmp396;
+do local function _chi_tmp401() return i end;local function _chi_tmp402() return vtCount end;while (_chi_tmp401() <= _chi_tmp402()) do do
+local _chi_tmp403;do local _chi_tmp404=valueTypes[i];_chi_tmp403=_chi_tmp404 end;local vt=_chi_tmp403;
+do local _chi_tmp405=values[i];_chi_tmp403=_chi_tmp405 end;local value=_chi_tmp403;
+do local _chi_tmp406=__P_.addConstraint(constraints,elementType,vt,value.section); end;
 i=(i + (1)); end ::__continue_13:: end;
  end;
-do _chi_tmp197=term.body end;local body=_chi_tmp197;
-do local _chi_tmp225=__P_.typeTerm(body,level,constraints);_chi_tmp197=_chi_tmp225 end;local bodyType=_chi_tmp197;
-do local _chi_tmp226=__std__lang_array.push(paramTypes,returnType); end;
-do local _chi_tmp227={};setmetatable(_chi_tmp227, array_meta_table);local _chi_tmp228=__chicc__types.functionType(paramTypes,_chi_tmp227,(0));_chi_tmp197=_chi_tmp228 end;local fnType=_chi_tmp197;
-do local _chi_tmp229;local _chi_tmp233=(hasExpectedFnType == (false));if not _chi_tmp233 then local _chi_tmp230=__chicc__types.typeEquals(returnType,__chicc__types.tUnit);local _chi_tmp232=(_chi_tmp230 == (false));if _chi_tmp232 then local _chi_tmp231=__P_.branchTerminates(body);_chi_tmp232=(_chi_tmp231 == (false)) end;_chi_tmp233=_chi_tmp232 end;if _chi_tmp233 then
-local _chi_tmp234;do _chi_tmp234=body.section end;local bodySection=_chi_tmp234;
-local _chi_tmp235=__P_.addConstraint(constraints,returnType,bodyType,bodySection);_chi_tmp229=_chi_tmp235
+local _chi_tmp407={};setmetatable(_chi_tmp407, array_meta_table);local _chi_tmp408=__chicc__types.arrayType(elementType,_chi_tmp407);_chi_tmp394=_chi_tmp408
+ else local _chi_tmp409;local _chi_tmp410 = 'fn';if (kind == (_chi_tmp410)) then
+local _chi_tmp411;do local function _chi_tmp412()
+local _chi_tmp413;do _chi_tmp413=term.expectedType end;local expectedType=_chi_tmp413;
+do local _chi_tmp415=(expectedType ~= (nil));if _chi_tmp415 then local _chi_tmp414 = 'fn';_chi_tmp415=(expectedType.tag == (_chi_tmp414)) end;_chi_tmp413=_chi_tmp415 end;local hasExpectedFnType=_chi_tmp413;
+do local _chi_tmp416;if hasExpectedFnType then _chi_tmp416=expectedType.types else local _chi_tmp417={};setmetatable(_chi_tmp417, array_meta_table);_chi_tmp416=_chi_tmp417 end;_chi_tmp413=_chi_tmp416 end;local expectedFnTypes=_chi_tmp413;
+do local _chi_tmp418=__std__lang_array.size(expectedFnTypes);_chi_tmp413=_chi_tmp418 end;local expectedTypeCount=_chi_tmp413;
+do _chi_tmp413=(expectedTypeCount - (1)) end;local expectedParamCount=_chi_tmp413;
+do local _chi_tmp419;if hasExpectedFnType then
+local _chi_tmp420=expectedFnTypes[expectedTypeCount];_chi_tmp419=_chi_tmp420
+ else
+local _chi_tmp421=__chicc__inference_context.icFreshVariable(level);_chi_tmp419=_chi_tmp421
+ end;_chi_tmp413=_chi_tmp419 end;local returnType=_chi_tmp413;
+do _chi_tmp413=term.parameters end;local params=_chi_tmp413;
+do local _chi_tmp422=__std__lang_array.size(params);_chi_tmp413=_chi_tmp422 end;local paramCount=_chi_tmp413;
+do local _chi_tmp423={};setmetatable(_chi_tmp423, array_meta_table);_chi_tmp413=_chi_tmp423 end;local paramTypes=_chi_tmp413;
+do _chi_tmp413=(1) end;local i=_chi_tmp413;
+do local function _chi_tmp424() return i end;local function _chi_tmp425() return paramCount end;while (_chi_tmp424() <= _chi_tmp425()) do do
+local _chi_tmp426;do local _chi_tmp427=params[i];_chi_tmp426=_chi_tmp427 end;local p=_chi_tmp426;
+do _chi_tmp426=p.name end;local pName=_chi_tmp426;
+do _chi_tmp426=p.paramType end;local pType=_chi_tmp426;
+do local _chi_tmp428;if (pType ~= (nil)) then
+_chi_tmp428=pType
+ else local _chi_tmp429;if (hasExpectedFnType and (i <= expectedParamCount)) then
+local _chi_tmp430=expectedFnTypes[i];_chi_tmp429=_chi_tmp430
+ else
+local _chi_tmp431=__chicc__inference_context.icFreshVariable(level);_chi_tmp429=_chi_tmp431
+ end;_chi_tmp428=_chi_tmp429 end;_chi_tmp426=_chi_tmp428 end;local paramType=_chi_tmp426;
+do _chi_tmp426=term.defaultValues end;local defaultValues=_chi_tmp426;
+do local _chi_tmp432;if (defaultValues ~= (nil)) then
+local _chi_tmp433;do local _chi_tmp434=__std__lang_map.get(defaultValues,pName);_chi_tmp433=_chi_tmp434 end;local defaultVal=_chi_tmp433;
+local _chi_tmp435;if (defaultVal ~= (nil)) then
+local _chi_tmp436;do local _chi_tmp437=__P_.typeTerm(defaultVal,level,constraints);_chi_tmp436=_chi_tmp437 end;local dvType=_chi_tmp436;
+do _chi_tmp436=defaultVal.section end;local dvSection=_chi_tmp436;
+local _chi_tmp438=__P_.addConstraint(constraints,paramType,dvType,dvSection);_chi_tmp435=_chi_tmp438
+ end;_chi_tmp432=_chi_tmp435
+ end; end;
+do local _chi_tmp439=__chicc__inference_context.icDefineLocalSymbol(pName,paramType); end;
+do local _chi_tmp440=__std__lang_array.push(paramTypes,paramType); end;
+i=(i + (1)); end ::__continue_14:: end;
+ end;
+do _chi_tmp413=term.body end;local body=_chi_tmp413;
+do local _chi_tmp441=__P_.typeTerm(body,level,constraints);_chi_tmp413=_chi_tmp441 end;local bodyType=_chi_tmp413;
+do local _chi_tmp442=__std__lang_array.push(paramTypes,returnType); end;
+do local _chi_tmp443={};setmetatable(_chi_tmp443, array_meta_table);local _chi_tmp444=__chicc__types.functionType(paramTypes,_chi_tmp443,(0));_chi_tmp413=_chi_tmp444 end;local fnType=_chi_tmp413;
+do local _chi_tmp445;local _chi_tmp449=(hasExpectedFnType == (false));if not _chi_tmp449 then local _chi_tmp446=__chicc__types.typeEquals(returnType,__chicc__types.tUnit);local _chi_tmp448=(_chi_tmp446 == (false));if _chi_tmp448 then local _chi_tmp447=__P_.branchTerminates(body);_chi_tmp448=(_chi_tmp447 == (false)) end;_chi_tmp449=_chi_tmp448 end;if _chi_tmp449 then
+local _chi_tmp450;do _chi_tmp450=body.section end;local bodySection=_chi_tmp450;
+local _chi_tmp451=__P_.addConstraint(constraints,returnType,bodyType,bodySection);_chi_tmp445=_chi_tmp451
  end; end;
 return fnType end;
-local _chi_tmp236=__chicc__inference_context.icWithNewLocalScope(_chi_tmp196);_chi_tmp195=_chi_tmp236 end;local fnResult=_chi_tmp195;
-_chi_tmp193=fnResult
- else local _chi_tmp237;local _chi_tmp238 = 'block';if (kind == (_chi_tmp238)) then
-local _chi_tmp239;do local _chi_tmp240=term.blockBody;_chi_tmp239=_chi_tmp240 end;local bodyExprs=_chi_tmp239;
-do local _chi_tmp241=#bodyExprs;_chi_tmp239=_chi_tmp241 end;local bodyCount=_chi_tmp239;
-local _chi_tmp242;if (bodyCount == (0)) then
-_chi_tmp242=__chicc__types.tUnit
+local _chi_tmp452=__chicc__inference_context.icWithNewLocalScope(_chi_tmp412);_chi_tmp411=_chi_tmp452 end;local fnResult=_chi_tmp411;
+_chi_tmp409=fnResult
+ else local _chi_tmp453;local _chi_tmp454 = 'block';if (kind == (_chi_tmp454)) then
+local _chi_tmp455;do local _chi_tmp456=term.blockBody;_chi_tmp455=_chi_tmp456 end;local bodyExprs=_chi_tmp455;
+do local _chi_tmp457=#bodyExprs;_chi_tmp455=_chi_tmp457 end;local bodyCount=_chi_tmp455;
+local _chi_tmp458;if (bodyCount == (0)) then
+_chi_tmp458=__chicc__types.tUnit
  else
-local _chi_tmp243;do local function _chi_tmp244()
-local _chi_tmp245;do local _chi_tmp246=__P_.typeTerms(bodyExprs,constraints,(level + (1)));_chi_tmp245=_chi_tmp246 end;local types=_chi_tmp245;
-local _chi_tmp247=__std__lang_array.size(types);local _chi_tmp248=types[_chi_tmp247];return _chi_tmp248 end;
-local _chi_tmp249=__chicc__inference_context.icWithNewLocalScope(_chi_tmp244);_chi_tmp243=_chi_tmp249 end;local lastType=_chi_tmp243;
-_chi_tmp242=lastType
- end;_chi_tmp237=_chi_tmp242
- else local _chi_tmp250;local _chi_tmp251 = 'fn_call';if (kind == (_chi_tmp251)) then
-local _chi_tmp252;do local _chi_tmp253=term.callee;_chi_tmp252=_chi_tmp253 end;local callee=_chi_tmp252;
-do local _chi_tmp254;local _chi_tmp255 = 'variable_access';if (callee.kind == (_chi_tmp255)) then
-local _chi_tmp256;do local _chi_tmp257=__chicc__inference_context.icGetTargetType(callee.target,level,callee.section);_chi_tmp256=_chi_tmp257 end;local t=_chi_tmp256;
-do local _chi_tmp258=__chicc__ast.setExprType(callee,t); end;
-_chi_tmp254=t
+local _chi_tmp459;do local function _chi_tmp460()
+local _chi_tmp461;do local _chi_tmp462=__P_.typeTerms(bodyExprs,constraints,(level + (1)));_chi_tmp461=_chi_tmp462 end;local types=_chi_tmp461;
+local _chi_tmp463=__std__lang_array.size(types);local _chi_tmp464=types[_chi_tmp463];return _chi_tmp464 end;
+local _chi_tmp465=__chicc__inference_context.icWithNewLocalScope(_chi_tmp460);_chi_tmp459=_chi_tmp465 end;local lastType=_chi_tmp459;
+_chi_tmp458=lastType
+ end;_chi_tmp453=_chi_tmp458
+ else local _chi_tmp466;local _chi_tmp467 = 'fn_call';if (kind == (_chi_tmp467)) then
+local _chi_tmp468;do local _chi_tmp469=term.callee;_chi_tmp468=_chi_tmp469 end;local callee=_chi_tmp468;
+do local _chi_tmp470;local _chi_tmp471 = 'variable_access';if (callee.kind == (_chi_tmp471)) then
+local _chi_tmp472;do local _chi_tmp473=__chicc__inference_context.icGetTargetType(callee.target,level,callee.section);_chi_tmp472=_chi_tmp473 end;local t=_chi_tmp472;
+do local _chi_tmp474=__chicc__ast.setExprType(callee,t); end;
+_chi_tmp470=t
  else
-local _chi_tmp259=__P_.typeTerm(callee,level,constraints);_chi_tmp254=_chi_tmp259
- end;_chi_tmp252=_chi_tmp254 end;local definedFunctionType=_chi_tmp252;
-do _chi_tmp252=definedFunctionType.tag end;local calleeTag=_chi_tmp252;
-do _chi_tmp252=definedFunctionType end;local calleeType=_chi_tmp252;
-do _chi_tmp252=calleeType.ids end;local calleeIds=_chi_tmp252;
-do local _chi_tmp260 = 'primitive';local _chi_tmp262=(calleeTag == (_chi_tmp260));if _chi_tmp262 then local _chi_tmp261=__std__lang_array.size(calleeIds);_chi_tmp262=(_chi_tmp261 > (0)) end;local _chi_tmp265=_chi_tmp262;if _chi_tmp265 then local _chi_tmp263=calleeIds[(1)];local _chi_tmp264 = 'any';_chi_tmp265=(_chi_tmp263.name == (_chi_tmp264)) end;_chi_tmp252=_chi_tmp265 end;local isAnyCallee=_chi_tmp252;
-local _chi_tmp266;local _chi_tmp267 = 'fn';local _chi_tmp269=(calleeTag ~= (_chi_tmp267));if _chi_tmp269 then local _chi_tmp268 = 'var';_chi_tmp269=(calleeTag ~= (_chi_tmp268)) end;local _chi_tmp271=_chi_tmp269;if _chi_tmp271 then local _chi_tmp270 = 'sum';_chi_tmp271=(calleeTag ~= (_chi_tmp270)) end;if (_chi_tmp271 and (isAnyCallee == (false))) then
-local _chi_tmp272;do _chi_tmp272=term.callee.section end;local calleeSection=_chi_tmp272;
-do local _chi_tmp273;if (calleeSection ~= (nil)) then local _chi_tmp274=__chicc__source.toCodePoint(calleeSection);_chi_tmp273=_chi_tmp274 else _chi_tmp273=(nil) end;_chi_tmp272=_chi_tmp273 end;local cp=_chi_tmp272;
-do local _chi_tmp275=__chicc__messages.notAFunction(cp);_chi_tmp272=_chi_tmp275 end;local msg=_chi_tmp272;
-error(msg);_chi_tmp266=nil
+local _chi_tmp475=__P_.typeTerm(callee,level,constraints);_chi_tmp470=_chi_tmp475
+ end;_chi_tmp468=_chi_tmp470 end;local definedFunctionType=_chi_tmp468;
+do _chi_tmp468=definedFunctionType.tag end;local calleeTag=_chi_tmp468;
+do _chi_tmp468=definedFunctionType end;local calleeType=_chi_tmp468;
+do _chi_tmp468=calleeType.ids end;local calleeIds=_chi_tmp468;
+do local _chi_tmp476 = 'primitive';local _chi_tmp478=(calleeTag == (_chi_tmp476));if _chi_tmp478 then local _chi_tmp477=__std__lang_array.size(calleeIds);_chi_tmp478=(_chi_tmp477 > (0)) end;local _chi_tmp481=_chi_tmp478;if _chi_tmp481 then local _chi_tmp479=calleeIds[(1)];local _chi_tmp480 = 'any';_chi_tmp481=(_chi_tmp479.name == (_chi_tmp480)) end;_chi_tmp468=_chi_tmp481 end;local isAnyCallee=_chi_tmp468;
+local _chi_tmp482;local _chi_tmp483 = 'fn';local _chi_tmp485=(calleeTag ~= (_chi_tmp483));if _chi_tmp485 then local _chi_tmp484 = 'var';_chi_tmp485=(calleeTag ~= (_chi_tmp484)) end;local _chi_tmp487=_chi_tmp485;if _chi_tmp487 then local _chi_tmp486 = 'sum';_chi_tmp487=(calleeTag ~= (_chi_tmp486)) end;if (_chi_tmp487 and (isAnyCallee == (false))) then
+local _chi_tmp488;do _chi_tmp488=term.callee.section end;local calleeSection=_chi_tmp488;
+do local _chi_tmp489;if (calleeSection ~= (nil)) then local _chi_tmp490=__chicc__source.toCodePoint(calleeSection);_chi_tmp489=_chi_tmp490 else _chi_tmp489=(nil) end;_chi_tmp488=_chi_tmp489 end;local cp=_chi_tmp488;
+do local _chi_tmp491=__chicc__messages.notAFunction(cp);_chi_tmp488=_chi_tmp491 end;local msg=_chi_tmp488;
+error(msg);_chi_tmp482=nil
  end;
-do local _chi_tmp276=__chicc__inference_context.icFreshVariable(level);_chi_tmp252=_chi_tmp276 end;local fnCallResult=_chi_tmp252;
-do local _chi_tmp277=term.callee.kind;_chi_tmp252=_chi_tmp277 end;local calleeKind=_chi_tmp252;
-do local _chi_tmp278;local _chi_tmp279 = 'field_access';if (calleeKind == (_chi_tmp279)) then
-local _chi_tmp280;do local _chi_tmp281=term.callee;_chi_tmp280=_chi_tmp281 end;local dotOp=_chi_tmp280;
-do local _chi_tmp282=dotOp.dotTarget;_chi_tmp280=_chi_tmp282 end;local dotTarget=_chi_tmp280;
-local _chi_tmp283;if (dotTarget ~= (nil)) then
-local _chi_tmp284;do local _chi_tmp285=dotTarget.tag;_chi_tmp284=_chi_tmp285 end;local dtTag=_chi_tmp284;
-local _chi_tmp286;local _chi_tmp287 = 'field';if (dtTag == (_chi_tmp287)) then _chi_tmp286=nil else local _chi_tmp288;local _chi_tmp289 = 'local_binding';if (dtTag == (_chi_tmp289)) then
-do local _chi_tmp290=__std__lang_array.insertAt(term.callParams,(1),dotOp.receiver); end;
-local _chi_tmp291;do local _chi_tmp292=__chicc__ast.localTarget(dotTarget.name);local _chi_tmp293=__chicc__ast.variableAccessExpr(_chi_tmp292,dotOp.memberSection);_chi_tmp291=_chi_tmp293 end;local newCallee=_chi_tmp291;
-do local _chi_tmp294=__chicc__ast.setExprType(newCallee,dotOp.exprType); end;
-term.callee=newCallee;_chi_tmp288=newCallee
- else local _chi_tmp295;local _chi_tmp296 = 'local_fn';if (dtTag == (_chi_tmp296)) then
-local _chi_tmp297;do local _chi_tmp298=dotOp.receiver;_chi_tmp297=_chi_tmp298 end;local dotOp_receiver=_chi_tmp297;
-do local _chi_tmp299=term.callParams;local _chi_tmp300=__std__lang_array.insertAt(_chi_tmp299,(1),dotOp_receiver); end;
-do local _chi_tmp301=dotTarget.name;_chi_tmp297=_chi_tmp301 end;local dtName=_chi_tmp297;
-do local _chi_tmp302=dotOp.memberSection;_chi_tmp297=_chi_tmp302 end;local memberSec=_chi_tmp297;
-do local _chi_tmp303=require('chicc/inference_context').icPkg.moduleName;_chi_tmp297=_chi_tmp303 end;local curMod=_chi_tmp297;
-do local _chi_tmp304=require('chicc/inference_context').icPkg.packageName;_chi_tmp297=_chi_tmp304 end;local curPkg=_chi_tmp297;
-do local _chi_tmp305=__chicc__ast.packageTarget(curMod,curPkg,dtName);local _chi_tmp306=__chicc__ast.variableAccessExpr(_chi_tmp305,memberSec);_chi_tmp297=_chi_tmp306 end;local newCallee=_chi_tmp297;
-do local _chi_tmp307=dotOp.exprType;_chi_tmp297=_chi_tmp307 end;local calleeType=_chi_tmp297;
-do local _chi_tmp308=__chicc__ast.setExprType(newCallee,calleeType); end;
-term.callee=newCallee;_chi_tmp295=newCallee
- else local _chi_tmp309;local _chi_tmp310 = 'package_fn';if (dtTag == (_chi_tmp310)) then
-local _chi_tmp311;do local _chi_tmp312=dotOp.receiver;_chi_tmp311=_chi_tmp312 end;local dotOp_receiver=_chi_tmp311;
-do local _chi_tmp313=term.callParams;local _chi_tmp314=__std__lang_array.insertAt(_chi_tmp313,(1),dotOp_receiver); end;
-do local _chi_tmp315=dotTarget.moduleName;_chi_tmp311=_chi_tmp315 end;local dtMod=_chi_tmp311;
-do local _chi_tmp316=dotTarget.packageName;_chi_tmp311=_chi_tmp316 end;local dtPkg=_chi_tmp311;
-do local _chi_tmp317=dotTarget.name;_chi_tmp311=_chi_tmp317 end;local dtName=_chi_tmp311;
-do local _chi_tmp318=__chicc__ast.packageTarget(dtMod,dtPkg,dtName);_chi_tmp311=_chi_tmp318 end;local tgt=_chi_tmp311;
-do local _chi_tmp319=dotOp.memberSection;_chi_tmp311=_chi_tmp319 end;local memberSec=_chi_tmp311;
-do local _chi_tmp320=__chicc__ast.variableAccessExpr(tgt,memberSec);_chi_tmp311=_chi_tmp320 end;local newCallee=_chi_tmp311;
-do local _chi_tmp321=dotOp.exprType;_chi_tmp311=_chi_tmp321 end;local calleeType=_chi_tmp311;
-do local _chi_tmp322=__chicc__ast.setExprType(newCallee,calleeType); end;
-term.callee=newCallee;_chi_tmp309=newCallee
- end;_chi_tmp295=_chi_tmp309 end;_chi_tmp288=_chi_tmp295 end;_chi_tmp286=_chi_tmp288 end;_chi_tmp283=_chi_tmp286
- end;_chi_tmp278=_chi_tmp283
+do local _chi_tmp492=__chicc__inference_context.icFreshVariable(level);_chi_tmp468=_chi_tmp492 end;local fnCallResult=_chi_tmp468;
+do local _chi_tmp493=term.callee.kind;_chi_tmp468=_chi_tmp493 end;local calleeKind=_chi_tmp468;
+do local _chi_tmp494;local _chi_tmp495 = 'field_access';if (calleeKind == (_chi_tmp495)) then
+local _chi_tmp496;do local _chi_tmp497=term.callee;_chi_tmp496=_chi_tmp497 end;local dotOp=_chi_tmp496;
+do local _chi_tmp498=dotOp.dotTarget;_chi_tmp496=_chi_tmp498 end;local dotTarget=_chi_tmp496;
+local _chi_tmp499;if (dotTarget ~= (nil)) then
+local _chi_tmp500;do local _chi_tmp501=dotTarget.tag;_chi_tmp500=_chi_tmp501 end;local dtTag=_chi_tmp500;
+local _chi_tmp502;local _chi_tmp503 = 'field';if (dtTag == (_chi_tmp503)) then _chi_tmp502=nil else local _chi_tmp504;local _chi_tmp505 = 'local_binding';if (dtTag == (_chi_tmp505)) then
+do local _chi_tmp506=__std__lang_array.insertAt(term.callParams,(1),dotOp.receiver); end;
+local _chi_tmp507;do local _chi_tmp508=__chicc__ast.localTarget(dotTarget.name);local _chi_tmp509=__chicc__ast.variableAccessExpr(_chi_tmp508,dotOp.memberSection);_chi_tmp507=_chi_tmp509 end;local newCallee=_chi_tmp507;
+do local _chi_tmp510=__chicc__ast.setExprType(newCallee,dotOp.exprType); end;
+term.callee=newCallee;_chi_tmp504=newCallee
+ else local _chi_tmp511;local _chi_tmp512 = 'local_fn';if (dtTag == (_chi_tmp512)) then
+local _chi_tmp513;do local _chi_tmp514=dotOp.receiver;_chi_tmp513=_chi_tmp514 end;local dotOp_receiver=_chi_tmp513;
+do local _chi_tmp515=term.callParams;local _chi_tmp516=__std__lang_array.insertAt(_chi_tmp515,(1),dotOp_receiver); end;
+do local _chi_tmp517=dotTarget.name;_chi_tmp513=_chi_tmp517 end;local dtName=_chi_tmp513;
+do local _chi_tmp518=dotOp.memberSection;_chi_tmp513=_chi_tmp518 end;local memberSec=_chi_tmp513;
+do local _chi_tmp519=require('chicc/inference_context').icPkg.moduleName;_chi_tmp513=_chi_tmp519 end;local curMod=_chi_tmp513;
+do local _chi_tmp520=require('chicc/inference_context').icPkg.packageName;_chi_tmp513=_chi_tmp520 end;local curPkg=_chi_tmp513;
+do local _chi_tmp521=__chicc__ast.packageTarget(curMod,curPkg,dtName);local _chi_tmp522=__chicc__ast.variableAccessExpr(_chi_tmp521,memberSec);_chi_tmp513=_chi_tmp522 end;local newCallee=_chi_tmp513;
+do local _chi_tmp523=dotOp.exprType;_chi_tmp513=_chi_tmp523 end;local calleeType=_chi_tmp513;
+do local _chi_tmp524=__chicc__ast.setExprType(newCallee,calleeType); end;
+term.callee=newCallee;_chi_tmp511=newCallee
+ else local _chi_tmp525;local _chi_tmp526 = 'package_fn';if (dtTag == (_chi_tmp526)) then
+local _chi_tmp527;do local _chi_tmp528=dotOp.receiver;_chi_tmp527=_chi_tmp528 end;local dotOp_receiver=_chi_tmp527;
+do local _chi_tmp529=term.callParams;local _chi_tmp530=__std__lang_array.insertAt(_chi_tmp529,(1),dotOp_receiver); end;
+do local _chi_tmp531=dotTarget.moduleName;_chi_tmp527=_chi_tmp531 end;local dtMod=_chi_tmp527;
+do local _chi_tmp532=dotTarget.packageName;_chi_tmp527=_chi_tmp532 end;local dtPkg=_chi_tmp527;
+do local _chi_tmp533=dotTarget.name;_chi_tmp527=_chi_tmp533 end;local dtName=_chi_tmp527;
+do local _chi_tmp534=__chicc__ast.packageTarget(dtMod,dtPkg,dtName);_chi_tmp527=_chi_tmp534 end;local tgt=_chi_tmp527;
+do local _chi_tmp535=dotOp.memberSection;_chi_tmp527=_chi_tmp535 end;local memberSec=_chi_tmp527;
+do local _chi_tmp536=__chicc__ast.variableAccessExpr(tgt,memberSec);_chi_tmp527=_chi_tmp536 end;local newCallee=_chi_tmp527;
+do local _chi_tmp537=dotOp.exprType;_chi_tmp527=_chi_tmp537 end;local calleeType=_chi_tmp527;
+do local _chi_tmp538=__chicc__ast.setExprType(newCallee,calleeType); end;
+term.callee=newCallee;_chi_tmp525=newCallee
+ end;_chi_tmp511=_chi_tmp525 end;_chi_tmp504=_chi_tmp511 end;_chi_tmp502=_chi_tmp504 end;_chi_tmp499=_chi_tmp502
+ end;_chi_tmp494=_chi_tmp499
  end; end;
-do _chi_tmp252=term.callParams end;local callParams=_chi_tmp252;
-do local _chi_tmp323=__std__lang_array.size(callParams);_chi_tmp252=_chi_tmp323 end;local callParamCount=_chi_tmp252;
-do local _chi_tmp324;local _chi_tmp325 = 'fn';if (calleeTag == (_chi_tmp325)) then _chi_tmp324=calleeType.types else local _chi_tmp326={};setmetatable(_chi_tmp326, array_meta_table);_chi_tmp324=_chi_tmp326 end;_chi_tmp252=_chi_tmp324 end;local expectedParamTypes=_chi_tmp252;
-do local _chi_tmp327=__std__lang_array.size(expectedParamTypes);_chi_tmp252=(_chi_tmp327 - (1)) end;local expectedParamCount=_chi_tmp252;
-do local _chi_tmp328={};setmetatable(_chi_tmp328, array_meta_table);_chi_tmp252=_chi_tmp328 end;local callParamTypes=_chi_tmp252;
-do _chi_tmp252=(1) end;local cpi=_chi_tmp252;
-do local function _chi_tmp329() return cpi end;local function _chi_tmp330() return callParamCount end;while (_chi_tmp329() <= _chi_tmp330()) do do
-local _chi_tmp331;do local _chi_tmp332=callParams[cpi];_chi_tmp331=_chi_tmp332 end;local callParam=_chi_tmp331;
-do local _chi_tmp333;local _chi_tmp334 = 'fn';local _chi_tmp336=((calleeTag == (_chi_tmp334)) and (cpi <= expectedParamCount));if _chi_tmp336 then local _chi_tmp335 = 'fn';_chi_tmp336=(callParam.kind == (_chi_tmp335)) end;if _chi_tmp336 then
-local _chi_tmp337=expectedParamTypes[cpi];callParam.expectedType=_chi_tmp337;_chi_tmp333=_chi_tmp337
+do _chi_tmp468=term.callParams end;local callParams=_chi_tmp468;
+do local _chi_tmp539=__std__lang_array.size(callParams);_chi_tmp468=_chi_tmp539 end;local callParamCount=_chi_tmp468;
+do local _chi_tmp540;local _chi_tmp541 = 'fn';if (calleeTag == (_chi_tmp541)) then _chi_tmp540=calleeType.types else local _chi_tmp542={};setmetatable(_chi_tmp542, array_meta_table);_chi_tmp540=_chi_tmp542 end;_chi_tmp468=_chi_tmp540 end;local expectedParamTypes=_chi_tmp468;
+do local _chi_tmp543=__std__lang_array.size(expectedParamTypes);_chi_tmp468=(_chi_tmp543 - (1)) end;local expectedParamCount=_chi_tmp468;
+do local _chi_tmp544={};setmetatable(_chi_tmp544, array_meta_table);_chi_tmp468=_chi_tmp544 end;local callParamTypes=_chi_tmp468;
+do _chi_tmp468=(1) end;local cpi=_chi_tmp468;
+do local function _chi_tmp545() return cpi end;local function _chi_tmp546() return callParamCount end;while (_chi_tmp545() <= _chi_tmp546()) do do
+local _chi_tmp547;do local _chi_tmp548=callParams[cpi];_chi_tmp547=_chi_tmp548 end;local callParam=_chi_tmp547;
+do local _chi_tmp549;local _chi_tmp550 = 'fn';local _chi_tmp552=((calleeTag == (_chi_tmp550)) and (cpi <= expectedParamCount));if _chi_tmp552 then local _chi_tmp551 = 'fn';_chi_tmp552=(callParam.kind == (_chi_tmp551)) end;if _chi_tmp552 then
+local _chi_tmp553=expectedParamTypes[cpi];callParam.expectedType=_chi_tmp553;_chi_tmp549=_chi_tmp553
  end; end;
-do local _chi_tmp338=__P_.typeTerm(callParam,level,constraints);_chi_tmp331=_chi_tmp338 end;local callParamType=_chi_tmp331;
-do local _chi_tmp339=__std__lang_array.push(callParamTypes,callParamType); end;
-cpi=(cpi + (1)); end ::__continue_14:: end;
+do local _chi_tmp554=__P_.typeTerm(callParam,level,constraints);_chi_tmp547=_chi_tmp554 end;local callParamType=_chi_tmp547;
+do local _chi_tmp555=__std__lang_array.push(callParamTypes,callParamType); end;
+cpi=(cpi + (1)); end ::__continue_15:: end;
  end;
-do local _chi_tmp340=definedFunctionType;local _chi_tmp341=__std__lang_array.size(callParamTypes);local _chi_tmp342=__P_.defaultArgTypes(_chi_tmp340,_chi_tmp341);for _,t in ipairs(_chi_tmp342) do do local _chi_tmp343=__std__lang_array.push(callParamTypes,t); end ::__continue_15:: end; end;
-do local _chi_tmp344=__std__lang_array.push(callParamTypes,fnCallResult); end;
-do local _chi_tmp345={};setmetatable(_chi_tmp345, array_meta_table);local _chi_tmp346=__chicc__types.functionType(callParamTypes,_chi_tmp345,(0));_chi_tmp252=_chi_tmp346 end;local callType=_chi_tmp252;
-do local _chi_tmp347=term.section;_chi_tmp252=_chi_tmp347 end;local termSection=_chi_tmp252;
-do local _chi_tmp348=__P_.addConstraint(constraints,callType,definedFunctionType,termSection); end;
-_chi_tmp250=fnCallResult
- else local _chi_tmp349;local _chi_tmp350 = 'field_access';if (kind == (_chi_tmp350)) then
-local _chi_tmp351;do local _chi_tmp352=term.receiver;_chi_tmp351=_chi_tmp352 end;local receiver=_chi_tmp351;
-do local _chi_tmp353=__P_.typeTerm(receiver,level,constraints);_chi_tmp351=_chi_tmp353 end;local receiverType=_chi_tmp351;
-do local _chi_tmp354;if (__P_.typerUf ~= (nil)) then
-do local _chi_tmp355=__chicc__unification.unifyWithUf(constraints,__P_.typerUf); end;
-do local _chi_tmp356=__P_.clearConstraints(constraints); end;
-local _chi_tmp357=__chicc__unification.ufResolve(__P_.typerUf,receiverType);_chi_tmp354=_chi_tmp357
+do local _chi_tmp556=definedFunctionType;local _chi_tmp557=__std__lang_array.size(callParamTypes);local _chi_tmp558=__P_.defaultArgTypes(_chi_tmp556,_chi_tmp557);for _,t in ipairs(_chi_tmp558) do do local _chi_tmp559=__std__lang_array.push(callParamTypes,t); end ::__continue_16:: end; end;
+do local _chi_tmp560=__std__lang_array.push(callParamTypes,fnCallResult); end;
+do local _chi_tmp561={};setmetatable(_chi_tmp561, array_meta_table);local _chi_tmp562=__chicc__types.functionType(callParamTypes,_chi_tmp561,(0));_chi_tmp468=_chi_tmp562 end;local callType=_chi_tmp468;
+do local _chi_tmp563=term.section;_chi_tmp468=_chi_tmp563 end;local termSection=_chi_tmp468;
+do local _chi_tmp564=__P_.addConstraint(constraints,callType,definedFunctionType,termSection); end;
+_chi_tmp466=fnCallResult
+ else local _chi_tmp565;local _chi_tmp566 = 'field_access';if (kind == (_chi_tmp566)) then
+local _chi_tmp567;do local _chi_tmp568=term.receiver;_chi_tmp567=_chi_tmp568 end;local receiver=_chi_tmp567;
+do local _chi_tmp569=__P_.typeTerm(receiver,level,constraints);_chi_tmp567=_chi_tmp569 end;local receiverType=_chi_tmp567;
+do local _chi_tmp570;if (__P_.typerUf ~= (nil)) then
+do local _chi_tmp571=__chicc__unification.unifyWithUf(constraints,__P_.typerUf); end;
+do local _chi_tmp572=__P_.clearConstraints(constraints); end;
+local _chi_tmp573=__chicc__unification.ufResolve(__P_.typerUf,receiverType);_chi_tmp570=_chi_tmp573
  else
-local _chi_tmp358;do local _chi_tmp359=__chicc__unification.unify(constraints);_chi_tmp358=_chi_tmp359 end;local solutions=_chi_tmp358;
-local _chi_tmp360=__chicc__types.mapType(receiverType,solutions);_chi_tmp354=_chi_tmp360
- end;_chi_tmp351=_chi_tmp354 end;local finalReceiverType=_chi_tmp351;
-do local _chi_tmp361=term.fieldName;_chi_tmp351=_chi_tmp361 end;local fieldName=_chi_tmp351;
-do local _chi_tmp362=term.memberSection;_chi_tmp351=_chi_tmp362 end;local memberSection=_chi_tmp351;
-do local _chi_tmp363;local _chi_tmp364=finalReceiverType.tag == 'recursive';if _chi_tmp364 then
-local _chi_tmp365=__chicc__types.unfoldRecursive(finalReceiverType);_chi_tmp363=_chi_tmp365
+local _chi_tmp574;do local _chi_tmp575=__chicc__unification.unify(constraints);_chi_tmp574=_chi_tmp575 end;local solutions=_chi_tmp574;
+local _chi_tmp576=__chicc__types.mapType(receiverType,solutions);_chi_tmp570=_chi_tmp576
+ end;_chi_tmp567=_chi_tmp570 end;local finalReceiverType=_chi_tmp567;
+do local _chi_tmp577=term.fieldName;_chi_tmp567=_chi_tmp577 end;local fieldName=_chi_tmp567;
+do local _chi_tmp578=term.memberSection;_chi_tmp567=_chi_tmp578 end;local memberSection=_chi_tmp567;
+do local _chi_tmp579;local _chi_tmp580=finalReceiverType.tag == 'recursive';if _chi_tmp580 then
+local _chi_tmp581=__chicc__types.unfoldRecursive(finalReceiverType);_chi_tmp579=_chi_tmp581
  else
-_chi_tmp363=finalReceiverType
- end;_chi_tmp351=_chi_tmp363 end;local effectiveReceiverType=_chi_tmp351;
-do local _chi_tmp366;local _chi_tmp367=effectiveReceiverType.tag == 'sum';if _chi_tmp367 then
-local _chi_tmp368;do local _chi_tmp369=__P_.sumFieldType(effectiveReceiverType,fieldName);_chi_tmp368=_chi_tmp369 end;local sumFt=_chi_tmp368;
-local _chi_tmp370;if (sumFt ~= (nil)) then
-do local _chi_tmp371=term;local _chi_tmp372=__chicc__ast.fieldDotTarget(fieldName);local _chi_tmp373=__chicc__ast.setExprDotTarget(_chi_tmp371,_chi_tmp372); end;
-local _chi_tmp374=__chicc__types.instantiate(sumFt,level,__chicc__inference_context.icFreshVariable);return _chi_tmp374;
- end;_chi_tmp366=_chi_tmp370
+_chi_tmp579=finalReceiverType
+ end;_chi_tmp567=_chi_tmp579 end;local effectiveReceiverType=_chi_tmp567;
+do local _chi_tmp582;local _chi_tmp583=effectiveReceiverType.tag == 'sum';if _chi_tmp583 then
+local _chi_tmp584;do local _chi_tmp585=__P_.sumFieldType(effectiveReceiverType,fieldName);_chi_tmp584=_chi_tmp585 end;local sumFt=_chi_tmp584;
+local _chi_tmp586;if (sumFt ~= (nil)) then
+do local _chi_tmp587=term;local _chi_tmp588=__chicc__ast.fieldDotTarget(fieldName);local _chi_tmp589=__chicc__ast.setExprDotTarget(_chi_tmp587,_chi_tmp588); end;
+local _chi_tmp590=__chicc__types.instantiate(sumFt,level,__chicc__inference_context.icFreshVariable);return _chi_tmp590;
+ end;_chi_tmp582=_chi_tmp586
  end; end;
-do local _chi_tmp375=effectiveReceiverType.tag == 'record';_chi_tmp351=_chi_tmp375 end;local isRec=_chi_tmp351;
-do _chi_tmp351=(false) end;local foundField=_chi_tmp351;
-do local _chi_tmp376;if isRec then
-local _chi_tmp377;do local _chi_tmp378=effectiveReceiverType.fields;_chi_tmp377=_chi_tmp378 end;local recFields=_chi_tmp377;
-do local _chi_tmp379=#recFields;_chi_tmp377=_chi_tmp379 end;local recFieldCount=_chi_tmp377;
-do _chi_tmp377=(1) end;local fi=_chi_tmp377;
-local function _chi_tmp380() return fi end;local function _chi_tmp381() return recFieldCount end;while (_chi_tmp380() <= _chi_tmp381()) do do
-local _chi_tmp382;do local _chi_tmp383=recFields[fi];_chi_tmp382=_chi_tmp383 end;local f=_chi_tmp382;
-do local _chi_tmp384=f.name;_chi_tmp382=_chi_tmp384 end;local fName=_chi_tmp382;
-do local _chi_tmp385;if (fName == fieldName) then
-foundField=(true);_chi_tmp385=foundField
+do local _chi_tmp591=effectiveReceiverType.tag == 'record';_chi_tmp567=_chi_tmp591 end;local isRec=_chi_tmp567;
+do _chi_tmp567=(false) end;local foundField=_chi_tmp567;
+do local _chi_tmp592;if isRec then
+local _chi_tmp593;do local _chi_tmp594=effectiveReceiverType.fields;_chi_tmp593=_chi_tmp594 end;local recFields=_chi_tmp593;
+do local _chi_tmp595=#recFields;_chi_tmp593=_chi_tmp595 end;local recFieldCount=_chi_tmp593;
+do _chi_tmp593=(1) end;local fi=_chi_tmp593;
+local function _chi_tmp596() return fi end;local function _chi_tmp597() return recFieldCount end;while (_chi_tmp596() <= _chi_tmp597()) do do
+local _chi_tmp598;do local _chi_tmp599=recFields[fi];_chi_tmp598=_chi_tmp599 end;local f=_chi_tmp598;
+do local _chi_tmp600=f.name;_chi_tmp598=_chi_tmp600 end;local fName=_chi_tmp598;
+do local _chi_tmp601;if (fName == fieldName) then
+foundField=(true);_chi_tmp601=foundField
  end; end;
-fi=(fi + (1)); end ::__continue_16:: end;
-_chi_tmp376=nil
+fi=(fi + (1)); end ::__continue_17:: end;
+_chi_tmp592=nil
  end; end;
-local _chi_tmp386;if foundField then
-local _chi_tmp387;do local _chi_tmp388=__chicc__inference_context.icFreshVariable(level);_chi_tmp387=_chi_tmp388 end;local faResult=_chi_tmp387;
-do local _chi_tmp389=term;local _chi_tmp390=__chicc__ast.fieldDotTarget(fieldName);local _chi_tmp391=__chicc__ast.setExprDotTarget(_chi_tmp389,_chi_tmp390); end;
-do local _chi_tmp392={name=fieldName,fieldType=faResult};setmetatable(_chi_tmp392, record_meta_table);_chi_tmp387=_chi_tmp392 end;local rf=_chi_tmp387;
-do local _chi_tmp393={};setmetatable(_chi_tmp393, array_meta_table);_chi_tmp387=_chi_tmp393 end;local rfields=_chi_tmp387;
-do local _chi_tmp394=__std__lang_array.push(rfields,rf); end;
-do local _chi_tmp395={};setmetatable(_chi_tmp395, array_meta_table);local _chi_tmp396={};setmetatable(_chi_tmp396, array_meta_table);local _chi_tmp397=__chicc__types.recordType(_chi_tmp395,rfields,_chi_tmp396);_chi_tmp387=_chi_tmp397 end;local expectedRecType=_chi_tmp387;
-do local _chi_tmp398=__P_.addConstraint(constraints,expectedRecType,receiverType,memberSection); end;
-_chi_tmp386=faResult
+local _chi_tmp602;if foundField then
+local _chi_tmp603;do local _chi_tmp604=__chicc__inference_context.icFreshVariable(level);_chi_tmp603=_chi_tmp604 end;local faResult=_chi_tmp603;
+do local _chi_tmp605=term;local _chi_tmp606=__chicc__ast.fieldDotTarget(fieldName);local _chi_tmp607=__chicc__ast.setExprDotTarget(_chi_tmp605,_chi_tmp606); end;
+do local _chi_tmp608={name=fieldName,fieldType=faResult};setmetatable(_chi_tmp608, record_meta_table);_chi_tmp603=_chi_tmp608 end;local rf=_chi_tmp603;
+do local _chi_tmp609={};setmetatable(_chi_tmp609, array_meta_table);_chi_tmp603=_chi_tmp609 end;local rfields=_chi_tmp603;
+do local _chi_tmp610=__std__lang_array.push(rfields,rf); end;
+do local _chi_tmp611={};setmetatable(_chi_tmp611, array_meta_table);local _chi_tmp612={};setmetatable(_chi_tmp612, array_meta_table);local _chi_tmp613=__chicc__types.recordType(_chi_tmp611,rfields,_chi_tmp612);_chi_tmp603=_chi_tmp613 end;local expectedRecType=_chi_tmp603;
+do local _chi_tmp614=__P_.addConstraint(constraints,expectedRecType,receiverType,memberSection); end;
+_chi_tmp602=faResult
  else
-local _chi_tmp399;do local _chi_tmp400=__chicc__inference_context.icListLocalFunctionsForType(fieldName,finalReceiverType);_chi_tmp399=_chi_tmp400 end;local localFns=_chi_tmp399;
-do local _chi_tmp401=__std__lang_array.size(localFns);_chi_tmp399=_chi_tmp401 end;local localCount=_chi_tmp399;
-do local _chi_tmp402;if (localCount >= (1)) then
-local _chi_tmp403=localFns[(1)];_chi_tmp402=_chi_tmp403
+local _chi_tmp615;do local _chi_tmp616=__chicc__inference_context.icListLocalFunctionsForType(fieldName,finalReceiverType);_chi_tmp615=_chi_tmp616 end;local localFns=_chi_tmp615;
+do local _chi_tmp617=__std__lang_array.size(localFns);_chi_tmp615=_chi_tmp617 end;local localCount=_chi_tmp615;
+do local _chi_tmp618;if (localCount >= (1)) then
+local _chi_tmp619=localFns[(1)];_chi_tmp618=_chi_tmp619
  else
-local _chi_tmp404;do local _chi_tmp405=__chicc__inference_context.icListCurrentPackageFunctionsForType(fieldName,finalReceiverType);_chi_tmp404=_chi_tmp405 end;local pkgFns=_chi_tmp404;
-do local _chi_tmp406=__std__lang_array.size(pkgFns);_chi_tmp404=_chi_tmp406 end;local pkgCount=_chi_tmp404;
-local _chi_tmp407;if (pkgCount == (1)) then
-local _chi_tmp408=pkgFns[(1)];_chi_tmp407=_chi_tmp408
+local _chi_tmp620;do local _chi_tmp621=__chicc__inference_context.icListCurrentPackageFunctionsForType(fieldName,finalReceiverType);_chi_tmp620=_chi_tmp621 end;local pkgFns=_chi_tmp620;
+do local _chi_tmp622=__std__lang_array.size(pkgFns);_chi_tmp620=_chi_tmp622 end;local pkgCount=_chi_tmp620;
+local _chi_tmp623;if (pkgCount == (1)) then
+local _chi_tmp624=pkgFns[(1)];_chi_tmp623=_chi_tmp624
  else
-local _chi_tmp409;do local _chi_tmp410=__chicc__inference_context.icListTypesPackageFunctionsForType(fieldName,finalReceiverType);_chi_tmp409=_chi_tmp410 end;local typePkgFns=_chi_tmp409;
-do local _chi_tmp411=__std__lang_array.size(typePkgFns);_chi_tmp409=_chi_tmp411 end;local typePkgCount=_chi_tmp409;
-local _chi_tmp412;if (typePkgCount == (1)) then
-local _chi_tmp413=typePkgFns[(1)];_chi_tmp412=_chi_tmp413
+local _chi_tmp625;do local _chi_tmp626=__chicc__inference_context.icListTypesPackageFunctionsForType(fieldName,finalReceiverType);_chi_tmp625=_chi_tmp626 end;local typePkgFns=_chi_tmp625;
+do local _chi_tmp627=__std__lang_array.size(typePkgFns);_chi_tmp625=_chi_tmp627 end;local typePkgCount=_chi_tmp625;
+local _chi_tmp628;if (typePkgCount == (1)) then
+local _chi_tmp629=typePkgFns[(1)];_chi_tmp628=_chi_tmp629
  else
-local _chi_tmp414;do local _chi_tmp415=__chicc__inference_context.icListAllLoadedFunctionsForType(fieldName,finalReceiverType);_chi_tmp414=_chi_tmp415 end;local allFns=_chi_tmp414;
-do local _chi_tmp416=__std__lang_array.size(allFns);_chi_tmp414=_chi_tmp416 end;local allCount=_chi_tmp414;
-local _chi_tmp417;if (allCount == (1)) then
-local _chi_tmp418=allFns[(1)];_chi_tmp417=_chi_tmp418
+local _chi_tmp630;do local _chi_tmp631=__chicc__inference_context.icListAllLoadedFunctionsForType(fieldName,finalReceiverType);_chi_tmp630=_chi_tmp631 end;local allFns=_chi_tmp630;
+do local _chi_tmp632=__std__lang_array.size(allFns);_chi_tmp630=_chi_tmp632 end;local allCount=_chi_tmp630;
+local _chi_tmp633;if (allCount == (1)) then
+local _chi_tmp634=allFns[(1)];_chi_tmp633=_chi_tmp634
  else
-_chi_tmp417=(nil)
- end;_chi_tmp412=_chi_tmp417
- end;_chi_tmp407=_chi_tmp412
- end;_chi_tmp402=_chi_tmp407
- end;_chi_tmp399=_chi_tmp402 end;local fn_=_chi_tmp399;
-local _chi_tmp419;if (fn_ ~= (nil)) then
-local _chi_tmp420;do local _chi_tmp421=fn_.dotTarget;_chi_tmp420=_chi_tmp421 end;local dotTarget=_chi_tmp420;
-do local _chi_tmp422=fn_.typeScheme;_chi_tmp420=_chi_tmp422 end;local fnType=_chi_tmp420;
-do local _chi_tmp423=__chicc__ast.setExprDotTarget(term,dotTarget); end;
-local _chi_tmp424=__chicc__types.instantiate(fnType,level,__chicc__inference_context.icFreshVariable);_chi_tmp419=_chi_tmp424
+_chi_tmp633=(nil)
+ end;_chi_tmp628=_chi_tmp633
+ end;_chi_tmp623=_chi_tmp628
+ end;_chi_tmp618=_chi_tmp623
+ end;_chi_tmp615=_chi_tmp618 end;local fn_=_chi_tmp615;
+local _chi_tmp635;if (fn_ ~= (nil)) then
+local _chi_tmp636;do local _chi_tmp637=fn_.dotTarget;_chi_tmp636=_chi_tmp637 end;local dotTarget=_chi_tmp636;
+do local _chi_tmp638=fn_.typeScheme;_chi_tmp636=_chi_tmp638 end;local fnType=_chi_tmp636;
+do local _chi_tmp639=__chicc__ast.setExprDotTarget(term,dotTarget); end;
+local _chi_tmp640=__chicc__types.instantiate(fnType,level,__chicc__inference_context.icFreshVariable);_chi_tmp635=_chi_tmp640
  else
-local _chi_tmp425;do local _chi_tmp426=effectiveReceiverType.tag;_chi_tmp425=_chi_tmp426 end;local rTag=_chi_tmp425;
-do local _chi_tmp427 = 'primitive';local _chi_tmp429=(rTag == (_chi_tmp427));if _chi_tmp429 then local _chi_tmp428=(function() local ids = effectiveReceiverType.ids; return ids and #ids > 0 and ids[1] and ids[1].name == 'any' end)();_chi_tmp429=_chi_tmp428 end;_chi_tmp425=_chi_tmp429 end;local isAnyReceiver=_chi_tmp425;
-local _chi_tmp430;local _chi_tmp431 = 'var';if ((rTag == (_chi_tmp431)) or isAnyReceiver) then
-local _chi_tmp432;do local _chi_tmp433=__chicc__inference_context.icListAllLoadedFunctionsForType(fieldName,finalReceiverType);_chi_tmp432=_chi_tmp433 end;local loadedCandidates=_chi_tmp432;
-do local _chi_tmp434=__P_.ufcsCandidateQualifiers(loadedCandidates);_chi_tmp432=_chi_tmp434 end;local quals=_chi_tmp432;
-do local _chi_tmp435=__std__lang_array.size(quals);_chi_tmp432=_chi_tmp435 end;local qcount=_chi_tmp432;
-local _chi_tmp436;if (qcount > (1)) then
-local _chi_tmp437;do local _chi_tmp438=memberSection and require('chicc/source').toCodePoint(memberSection) or nil;_chi_tmp437=_chi_tmp438 end;local cp=_chi_tmp437;
-do local _chi_tmp439=table.concat(quals, ', ');_chi_tmp437=_chi_tmp439 end;local joined=_chi_tmp437;
+local _chi_tmp641;do local _chi_tmp642=effectiveReceiverType.tag;_chi_tmp641=_chi_tmp642 end;local rTag=_chi_tmp641;
+do local _chi_tmp643 = 'primitive';local _chi_tmp645=(rTag == (_chi_tmp643));if _chi_tmp645 then local _chi_tmp644=(function() local ids = effectiveReceiverType.ids; return ids and #ids > 0 and ids[1] and ids[1].name == 'any' end)();_chi_tmp645=_chi_tmp644 end;_chi_tmp641=_chi_tmp645 end;local isAnyReceiver=_chi_tmp641;
+local _chi_tmp646;local _chi_tmp647 = 'var';if ((rTag == (_chi_tmp647)) or isAnyReceiver) then
+local _chi_tmp648;do local _chi_tmp649=__chicc__inference_context.icListAllLoadedFunctionsForType(fieldName,finalReceiverType);_chi_tmp648=_chi_tmp649 end;local loadedCandidates=_chi_tmp648;
+do local _chi_tmp650=__P_.ufcsCandidateQualifiers(loadedCandidates);_chi_tmp648=_chi_tmp650 end;local quals=_chi_tmp648;
+do local _chi_tmp651=__std__lang_array.size(quals);_chi_tmp648=_chi_tmp651 end;local qcount=_chi_tmp648;
+local _chi_tmp652;if (qcount > (1)) then
+local _chi_tmp653;do local _chi_tmp654=memberSection and require('chicc/source').toCodePoint(memberSection) or nil;_chi_tmp653=_chi_tmp654 end;local cp=_chi_tmp653;
+do local _chi_tmp655=table.concat(quals, ', ');_chi_tmp653=_chi_tmp655 end;local joined=_chi_tmp653;
 error(require('chicc/messages').ambiguousMethod(fieldName, joined, cp));
-_chi_tmp436=__chicc__types.tAny
- else local _chi_tmp440;if (qcount == (1)) then
-local _chi_tmp441;do local _chi_tmp442=__P_.pickDeterministicUfcs(loadedCandidates);_chi_tmp441=_chi_tmp442 end;local ufcsCandidate=_chi_tmp441;
-do local _chi_tmp443=ufcsCandidate.dotTarget;_chi_tmp441=_chi_tmp443 end;local dotTarget2=_chi_tmp441;
-do local _chi_tmp444=ufcsCandidate.typeScheme;_chi_tmp441=_chi_tmp444 end;local fnType2=_chi_tmp441;
-do local _chi_tmp445=__chicc__ast.setExprDotTarget(term,dotTarget2); end;
-local _chi_tmp446=__chicc__types.instantiate(fnType2,level,__chicc__inference_context.icFreshVariable);_chi_tmp440=_chi_tmp446
+_chi_tmp652=__chicc__types.tAny
+ else local _chi_tmp656;if (qcount == (1)) then
+local _chi_tmp657;do local _chi_tmp658=__P_.pickDeterministicUfcs(loadedCandidates);_chi_tmp657=_chi_tmp658 end;local ufcsCandidate=_chi_tmp657;
+do local _chi_tmp659=ufcsCandidate.dotTarget;_chi_tmp657=_chi_tmp659 end;local dotTarget2=_chi_tmp657;
+do local _chi_tmp660=ufcsCandidate.typeScheme;_chi_tmp657=_chi_tmp660 end;local fnType2=_chi_tmp657;
+do local _chi_tmp661=__chicc__ast.setExprDotTarget(term,dotTarget2); end;
+local _chi_tmp662=__chicc__types.instantiate(fnType2,level,__chicc__inference_context.icFreshVariable);_chi_tmp656=_chi_tmp662
  else
-do local _chi_tmp447=term;local _chi_tmp448=__chicc__ast.fieldDotTarget(fieldName);local _chi_tmp449=__chicc__ast.setExprDotTarget(_chi_tmp447,_chi_tmp448); end;
-_chi_tmp440=__chicc__types.tAny
- end;_chi_tmp436=_chi_tmp440 end;_chi_tmp430=_chi_tmp436
+do local _chi_tmp663=term;local _chi_tmp664=__chicc__ast.fieldDotTarget(fieldName);local _chi_tmp665=__chicc__ast.setExprDotTarget(_chi_tmp663,_chi_tmp664); end;
+_chi_tmp656=__chicc__types.tAny
+ end;_chi_tmp652=_chi_tmp656 end;_chi_tmp646=_chi_tmp652
  else
-local _chi_tmp450;do local _chi_tmp451=memberSection and require('chicc/source').toCodePoint(memberSection) or nil;_chi_tmp450=_chi_tmp451 end;local cp=_chi_tmp450;
-do local _chi_tmp452=__chicc__types.typeToString(finalReceiverType);_chi_tmp450=_chi_tmp452 end;local receiverDesc=_chi_tmp450;
+local _chi_tmp666;do local _chi_tmp667=memberSection and require('chicc/source').toCodePoint(memberSection) or nil;_chi_tmp666=_chi_tmp667 end;local cp=_chi_tmp666;
+do local _chi_tmp668=__chicc__types.typeToString(finalReceiverType);_chi_tmp666=_chi_tmp668 end;local receiverDesc=_chi_tmp666;
 error(require('chicc/messages').memberDoesNotExist(receiverDesc, fieldName, cp));
-_chi_tmp430=__chicc__types.tAny
- end;_chi_tmp419=_chi_tmp430
- end;_chi_tmp386=_chi_tmp419
- end;_chi_tmp349=_chi_tmp386
- else local _chi_tmp453;local _chi_tmp454 = 'name_declaration';if (kind == (_chi_tmp454)) then
-local _chi_tmp455;do _chi_tmp455=term.expectedType end;local expType=_chi_tmp455;
-do local _chi_tmp456;if (expType ~= (nil)) then
-_chi_tmp456=expType
+_chi_tmp646=__chicc__types.tAny
+ end;_chi_tmp635=_chi_tmp646
+ end;_chi_tmp602=_chi_tmp635
+ end;_chi_tmp565=_chi_tmp602
+ else local _chi_tmp669;local _chi_tmp670 = 'name_declaration';if (kind == (_chi_tmp670)) then
+local _chi_tmp671;do _chi_tmp671=term.expectedType end;local expType=_chi_tmp671;
+do local _chi_tmp672;if (expType ~= (nil)) then
+_chi_tmp672=expType
  else
-local _chi_tmp457=__chicc__inference_context.icFreshVariable((level + (1)));_chi_tmp456=_chi_tmp457
- end;_chi_tmp455=_chi_tmp456 end;local expectedType=_chi_tmp455;
-do local _chi_tmp458;local _chi_tmp460=term.isNamedFn;if _chi_tmp460 then local _chi_tmp459 = 'local';_chi_tmp460=(term.target.tag == (_chi_tmp459)) end;if _chi_tmp460 then
-local _chi_tmp461=__chicc__inference_context.icDefineLocalSymbol(term.declName,expectedType);_chi_tmp458=_chi_tmp461
+local _chi_tmp673=__chicc__inference_context.icFreshVariable((level + (1)));_chi_tmp672=_chi_tmp673
+ end;_chi_tmp671=_chi_tmp672 end;local expectedType=_chi_tmp671;
+do local _chi_tmp674;local _chi_tmp676=term.isNamedFn;if _chi_tmp676 then local _chi_tmp675 = 'local';_chi_tmp676=(term.target.tag == (_chi_tmp675)) end;if _chi_tmp676 then
+local _chi_tmp677=__chicc__inference_context.icDefineLocalSymbol(term.declName,expectedType);_chi_tmp674=_chi_tmp677
  end; end;
-do _chi_tmp455=term.value end;local value=_chi_tmp455;
-do local _chi_tmp462;local _chi_tmp463 = 'fn';local _chi_tmp465=(value.kind == (_chi_tmp463));if _chi_tmp465 then local _chi_tmp464 = 'fn';_chi_tmp465=(expectedType.tag == (_chi_tmp464)) end;if _chi_tmp465 then
-value.expectedType=expectedType;_chi_tmp462=expectedType
+do _chi_tmp671=term.value end;local value=_chi_tmp671;
+do local _chi_tmp678;local _chi_tmp679 = 'fn';local _chi_tmp681=(value.kind == (_chi_tmp679));if _chi_tmp681 then local _chi_tmp680 = 'fn';_chi_tmp681=(expectedType.tag == (_chi_tmp680)) end;if _chi_tmp681 then
+value.expectedType=expectedType;_chi_tmp678=expectedType
  end; end;
-do local _chi_tmp466=__P_.typeTerm(value,(level + (1)),constraints);_chi_tmp455=_chi_tmp466 end;local valueType=_chi_tmp455;
-do _chi_tmp455=value.section end;local valueSection=_chi_tmp455;
-do local _chi_tmp467=__P_.addConstraint(constraints,expectedType,valueType,valueSection); end;
-do local _chi_tmp469=(term.isMutable == (false));if _chi_tmp469 then local _chi_tmp468=__P_.isSyntacticValue(value);_chi_tmp469=_chi_tmp468 end;_chi_tmp455=_chi_tmp469 end;local generalizes=_chi_tmp455;
-do local _chi_tmp470;if (__P_.typerUf ~= (nil)) then
-do local _chi_tmp471=__chicc__unification.unifyWithUf(constraints,__P_.typerUf); end;
-do local _chi_tmp472=__P_.clearConstraints(constraints); end;
-local _chi_tmp473;do local _chi_tmp474=__chicc__unification.ufResolve(__P_.typerUf,expectedType);_chi_tmp473=_chi_tmp474 end;local solved=_chi_tmp473;
-local _chi_tmp475;if generalizes then
-_chi_tmp475=solved
- else local _chi_tmp476;local _chi_tmp477=__chicc__unification.ufLowerAbove(__P_.typerUf,solved,level);if _chi_tmp477 then
-local _chi_tmp478=__chicc__unification.ufResolve(__P_.typerUf,solved);_chi_tmp476=_chi_tmp478
+do local _chi_tmp682=__P_.typeTerm(value,(level + (1)),constraints);_chi_tmp671=_chi_tmp682 end;local valueType=_chi_tmp671;
+do _chi_tmp671=value.section end;local valueSection=_chi_tmp671;
+do local _chi_tmp683=__P_.addConstraint(constraints,expectedType,valueType,valueSection); end;
+do local _chi_tmp685=(term.isMutable == (false));if _chi_tmp685 then local _chi_tmp684=__P_.isSyntacticValue(value);_chi_tmp685=_chi_tmp684 end;_chi_tmp671=_chi_tmp685 end;local generalizes=_chi_tmp671;
+do local _chi_tmp686;if (__P_.typerUf ~= (nil)) then
+do local _chi_tmp687=__chicc__unification.unifyWithUf(constraints,__P_.typerUf); end;
+do local _chi_tmp688=__P_.clearConstraints(constraints); end;
+local _chi_tmp689;do local _chi_tmp690=__chicc__unification.ufResolve(__P_.typerUf,expectedType);_chi_tmp689=_chi_tmp690 end;local solved=_chi_tmp689;
+local _chi_tmp691;if generalizes then
+_chi_tmp691=solved
+ else local _chi_tmp692;local _chi_tmp693=__chicc__unification.ufLowerAbove(__P_.typerUf,solved,level);if _chi_tmp693 then
+local _chi_tmp694=__chicc__unification.ufResolve(__P_.typerUf,solved);_chi_tmp692=_chi_tmp694
  else
-_chi_tmp476=solved
- end;_chi_tmp475=_chi_tmp476 end;_chi_tmp470=_chi_tmp475
+_chi_tmp692=solved
+ end;_chi_tmp691=_chi_tmp692 end;_chi_tmp686=_chi_tmp691
  else
-local _chi_tmp479;do local _chi_tmp480=__chicc__unification.unify(constraints);_chi_tmp479=_chi_tmp480 end;local solution=_chi_tmp479;
-do local _chi_tmp481=__chicc__types.mapType(expectedType,solution);_chi_tmp479=_chi_tmp481 end;local solved=_chi_tmp479;
-local _chi_tmp482;if generalizes then
-_chi_tmp482=solved
+local _chi_tmp695;do local _chi_tmp696=__chicc__unification.unify(constraints);_chi_tmp695=_chi_tmp696 end;local solution=_chi_tmp695;
+do local _chi_tmp697=__chicc__types.mapType(expectedType,solution);_chi_tmp695=_chi_tmp697 end;local solved=_chi_tmp695;
+local _chi_tmp698;if generalizes then
+_chi_tmp698=solved
  else
-local _chi_tmp483;do local _chi_tmp484=__chicc__unification.ufNew();_chi_tmp483=_chi_tmp484 end;local lowering=_chi_tmp483;
-do local _chi_tmp485=__chicc__unification.ufLowerAbove(lowering,solved,level); end;
-do local _chi_tmp486=__chicc__unification.ufAllBindings(lowering);_chi_tmp483=_chi_tmp486 end;local bindings=_chi_tmp483;
-do local function _chi_tmp487(b) local _chi_tmp488=__P_.addConstraint(constraints,b.replacement,b.variable,valueSection);local _chi_tmp489=_chi_tmp488;return; end;local _chi_tmp490=__std__lang_array.forEach(bindings,_chi_tmp487); end;
-local _chi_tmp491=__chicc__types.mapType(solved,bindings);_chi_tmp482=_chi_tmp491
- end;_chi_tmp470=_chi_tmp482
- end;_chi_tmp455=_chi_tmp470 end;local mappedType=_chi_tmp455;
-do local _chi_tmp492=__chicc__types.polyType(level,mappedType);_chi_tmp455=_chi_tmp492 end;local polymorphicType=_chi_tmp455;
-do local _chi_tmp493=__chicc__inference_context.icUpdateSymbolType(term.target,polymorphicType); end;
-_chi_tmp453=expectedType
- else local _chi_tmp494;local _chi_tmp495 = 'assignment';if (kind == (_chi_tmp495)) then
-local _chi_tmp496;do local _chi_tmp497=term.target;_chi_tmp496=_chi_tmp497 end;local target=_chi_tmp496;
-do local _chi_tmp498=term.section;_chi_tmp496=_chi_tmp498 end;local section=_chi_tmp496;
-do local _chi_tmp499=__chicc__inference_context.icGetTargetType(target,level,section);_chi_tmp496=_chi_tmp499 end;local variableT=_chi_tmp496;
-do local _chi_tmp500=term.value;_chi_tmp496=_chi_tmp500 end;local value=_chi_tmp496;
-do local _chi_tmp501=__P_.typeTerm(value,level,constraints);_chi_tmp496=_chi_tmp501 end;local valueType=_chi_tmp496;
-do local _chi_tmp502=value.section;_chi_tmp496=_chi_tmp502 end;local valueSection=_chi_tmp496;
-do local _chi_tmp503=__P_.addConstraint(constraints,variableT,valueType,valueSection); end;
-_chi_tmp494=variableT
- else local _chi_tmp504;local _chi_tmp505 = 'if_else';if (kind == (_chi_tmp505)) then
-local _chi_tmp506;do local _chi_tmp507=term.condition;_chi_tmp506=_chi_tmp507 end;local condition=_chi_tmp506;
-do local _chi_tmp508=__P_.typeTerm(condition,level,constraints);_chi_tmp506=_chi_tmp508 end;local conditionType=_chi_tmp506;
-do local _chi_tmp509=condition.section;_chi_tmp506=_chi_tmp509 end;local condSection=_chi_tmp506;
-do local _chi_tmp510=__P_.addConstraint(constraints,__chicc__types.tBool,conditionType,condSection); end;
-do local _chi_tmp511=term.thenBranch;_chi_tmp506=_chi_tmp511 end;local thenBranch=_chi_tmp506;
-do local function _chi_tmp512() local _chi_tmp513=__P_.typeTerm(thenBranch,level,constraints);return _chi_tmp513 end;local _chi_tmp514=__chicc__inference_context.icWithNewLocalScope(_chi_tmp512);_chi_tmp506=_chi_tmp514 end;local thenBranchType=_chi_tmp506;
-do local _chi_tmp515=term.elseBranch;_chi_tmp506=_chi_tmp515 end;local elseBranch=_chi_tmp506;
-do local _chi_tmp516=__P_.branchTerminates(thenBranch);_chi_tmp506=_chi_tmp516 end;local thenTerminates=_chi_tmp506;
-local _chi_tmp517;if (elseBranch ~= (nil)) then
-local _chi_tmp518;do local function _chi_tmp519() local _chi_tmp520=__P_.typeTerm(elseBranch,level,constraints);return _chi_tmp520 end;local _chi_tmp521=__chicc__inference_context.icWithNewLocalScope(_chi_tmp519);_chi_tmp518=_chi_tmp521 end;local elseBranchType=_chi_tmp518;
-do local _chi_tmp522=__P_.branchTerminates(elseBranch);_chi_tmp518=_chi_tmp522 end;local elseTerminates=_chi_tmp518;
-local _chi_tmp523;if (thenTerminates and elseTerminates) then
-_chi_tmp523=__chicc__types.tUnit
- else local _chi_tmp524;if thenTerminates then
-_chi_tmp524=elseBranchType
- else local _chi_tmp525;if elseTerminates then
-_chi_tmp525=thenBranchType
- else
-local _chi_tmp526={};setmetatable(_chi_tmp526, array_meta_table);local _chi_tmp527={};setmetatable(_chi_tmp527, array_meta_table);local _chi_tmp528=__chicc__types.sumCreate(_chi_tmp526,thenBranchType,elseBranchType,_chi_tmp527);_chi_tmp525=_chi_tmp528
- end;_chi_tmp524=_chi_tmp525 end;_chi_tmp523=_chi_tmp524 end;_chi_tmp517=_chi_tmp523
- else
-local _chi_tmp529;if thenTerminates then
-_chi_tmp529=__chicc__types.tUnit
- else
-local _chi_tmp530={};setmetatable(_chi_tmp530, array_meta_table);local _chi_tmp531={};setmetatable(_chi_tmp531, array_meta_table);local _chi_tmp532=__chicc__types.sumCreate(_chi_tmp530,thenBranchType,__chicc__types.tUnit,_chi_tmp531);_chi_tmp529=_chi_tmp532
- end;_chi_tmp517=_chi_tmp529
- end;_chi_tmp504=_chi_tmp517
- else local _chi_tmp533;local _chi_tmp534 = 'interpolated_string';if (kind == (_chi_tmp534)) then
-local _chi_tmp535;do local _chi_tmp536=term.parts;_chi_tmp535=_chi_tmp536 end;local parts=_chi_tmp535;
-do local _chi_tmp537=__P_.typeTerms(parts,constraints,level); end;
-_chi_tmp533=__chicc__types.tString
- else local _chi_tmp538;local _chi_tmp539 = 'cast';if (kind == (_chi_tmp539)) then
-local _chi_tmp540;do local _chi_tmp541=term.castExpr;_chi_tmp540=_chi_tmp541 end;local castExpr_=_chi_tmp540;
-do local _chi_tmp542=__P_.typeTerm(castExpr_,level,constraints); end;
-do local _chi_tmp543=term.targetType;_chi_tmp540=_chi_tmp543 end;local targetType=_chi_tmp540;
-_chi_tmp538=targetType
- else local _chi_tmp544;local _chi_tmp545 = 'break';if (kind == (_chi_tmp545)) then
-_chi_tmp544=__chicc__types.tUnit
- else local _chi_tmp546;local _chi_tmp547 = 'continue';if (kind == (_chi_tmp547)) then
-_chi_tmp546=__chicc__types.tUnit
- else local _chi_tmp548;local _chi_tmp549 = 'while_loop';if (kind == (_chi_tmp549)) then
-local _chi_tmp550;do local _chi_tmp551=term.loopCondition;_chi_tmp550=_chi_tmp551 end;local condition=_chi_tmp550;
-do local _chi_tmp552=__P_.typeTerm(condition,level,constraints);_chi_tmp550=_chi_tmp552 end;local conditionType=_chi_tmp550;
-do local _chi_tmp553=condition.section;_chi_tmp550=_chi_tmp553 end;local condSection=_chi_tmp550;
-do local _chi_tmp554=__P_.addConstraint(constraints,__chicc__types.tBool,conditionType,condSection); end;
-do local _chi_tmp555=term.loopBody;_chi_tmp550=_chi_tmp555 end;local loopBody=_chi_tmp550;
-do local _chi_tmp556=__P_.typeTerm(loopBody,level,constraints); end;
-_chi_tmp548=__chicc__types.tUnit
- else local _chi_tmp557;local _chi_tmp558 = 'for_loop';if (kind == (_chi_tmp558)) then
-local _chi_tmp559;do local _chi_tmp560=term.iterable;_chi_tmp559=_chi_tmp560 end;local iterable=_chi_tmp559;
-do local _chi_tmp561=__P_.typeTerm(iterable,level,constraints);_chi_tmp559=_chi_tmp561 end;local iterableType=_chi_tmp559;
-do local _chi_tmp562=term.forState;_chi_tmp559=_chi_tmp562 end;local forState=_chi_tmp559;
-do local _chi_tmp563=term.forInit;_chi_tmp559=_chi_tmp563 end;local forInit=_chi_tmp559;
-do _chi_tmp559=(nil) end;local stateType=_chi_tmp559;
-do _chi_tmp559=(nil) end;local initType=_chi_tmp559;
-do local _chi_tmp564;if (forState ~= (nil)) then
-local _chi_tmp565=__P_.typeTerm(forState,level,constraints);stateType=_chi_tmp565;_chi_tmp564=stateType
+local _chi_tmp699;do local _chi_tmp700=__chicc__unification.ufNew();_chi_tmp699=_chi_tmp700 end;local lowering=_chi_tmp699;
+do local _chi_tmp701=__chicc__unification.ufLowerAbove(lowering,solved,level); end;
+do local _chi_tmp702=__chicc__unification.ufAllBindings(lowering);_chi_tmp699=_chi_tmp702 end;local bindings=_chi_tmp699;
+do local function _chi_tmp703(b) local _chi_tmp704=__P_.addConstraint(constraints,b.replacement,b.variable,valueSection);local _chi_tmp705=_chi_tmp704;return; end;local _chi_tmp706=__std__lang_array.forEach(bindings,_chi_tmp703); end;
+local _chi_tmp707=__chicc__types.mapType(solved,bindings);_chi_tmp698=_chi_tmp707
+ end;_chi_tmp686=_chi_tmp698
+ end;_chi_tmp671=_chi_tmp686 end;local mappedType=_chi_tmp671;
+do local _chi_tmp708=__chicc__types.polyType(level,mappedType);_chi_tmp671=_chi_tmp708 end;local polymorphicType=_chi_tmp671;
+do local _chi_tmp709=__chicc__inference_context.icUpdateSymbolType(term.target,polymorphicType); end;
+_chi_tmp669=expectedType
+ else local _chi_tmp710;local _chi_tmp711 = 'assignment';if (kind == (_chi_tmp711)) then
+local _chi_tmp712;do local _chi_tmp713=term.target;_chi_tmp712=_chi_tmp713 end;local target=_chi_tmp712;
+do local _chi_tmp714=term.section;_chi_tmp712=_chi_tmp714 end;local section=_chi_tmp712;
+do local _chi_tmp715=__chicc__inference_context.icGetTargetType(target,level,section);_chi_tmp712=_chi_tmp715 end;local variableT=_chi_tmp712;
+do local _chi_tmp716=term.value;_chi_tmp712=_chi_tmp716 end;local value=_chi_tmp712;
+do local _chi_tmp717=__P_.typeTerm(value,level,constraints);_chi_tmp712=_chi_tmp717 end;local valueType=_chi_tmp712;
+do local _chi_tmp718=value.section;_chi_tmp712=_chi_tmp718 end;local valueSection=_chi_tmp712;
+do local _chi_tmp719=__P_.addConstraint(constraints,variableT,valueType,valueSection); end;
+_chi_tmp710=variableT
+ else local _chi_tmp720;local _chi_tmp721 = 'if_else';if (kind == (_chi_tmp721)) then
+local _chi_tmp722;do local _chi_tmp723=term.condition;_chi_tmp722=_chi_tmp723 end;local condition=_chi_tmp722;
+do local _chi_tmp724=__P_.typeTerm(condition,level,constraints);_chi_tmp722=_chi_tmp724 end;local conditionType=_chi_tmp722;
+do local _chi_tmp725=condition.section;_chi_tmp722=_chi_tmp725 end;local condSection=_chi_tmp722;
+do local _chi_tmp726=__P_.addConstraint(constraints,__chicc__types.tBool,conditionType,condSection); end;
+do local _chi_tmp727=term.thenBranch;_chi_tmp722=_chi_tmp727 end;local thenBranch=_chi_tmp722;
+do local _chi_tmp728=__P_.flowRefinementForBranch(condition,(true),constraints);_chi_tmp722=_chi_tmp728 end;local thenRefinement=_chi_tmp722;
+do local function _chi_tmp729()
+do local _chi_tmp730;if (thenRefinement ~= (nil)) then
+local _chi_tmp731=__P_.defineFlowRefinement(thenRefinement);_chi_tmp730=_chi_tmp731
  end; end;
-do local _chi_tmp566;if (forInit ~= (nil)) then
-local _chi_tmp567=__P_.typeTerm(forInit,level,constraints);initType=_chi_tmp567;_chi_tmp566=initType
+local _chi_tmp732=__P_.typeTerm(thenBranch,level,constraints);return _chi_tmp732 end;
+local _chi_tmp733=__chicc__inference_context.icWithNewLocalScope(_chi_tmp729);_chi_tmp722=_chi_tmp733 end;local thenBranchType=_chi_tmp722;
+do local _chi_tmp734=term.elseBranch;_chi_tmp722=_chi_tmp734 end;local elseBranch=_chi_tmp722;
+do local _chi_tmp735=__P_.branchTerminates(thenBranch);_chi_tmp722=_chi_tmp735 end;local thenTerminates=_chi_tmp722;
+local _chi_tmp736;if (elseBranch ~= (nil)) then
+local _chi_tmp737;do local _chi_tmp738=__P_.flowRefinementForBranch(condition,(false),constraints);_chi_tmp737=_chi_tmp738 end;local elseRefinement=_chi_tmp737;
+do local function _chi_tmp739()
+do local _chi_tmp740;if (elseRefinement ~= (nil)) then
+local _chi_tmp741=__P_.defineFlowRefinement(elseRefinement);_chi_tmp740=_chi_tmp741
  end; end;
-do local _chi_tmp568;if (__P_.typerUf ~= (nil)) then
-do local _chi_tmp569=__chicc__unification.unifyWithUf(constraints,__P_.typerUf); end;
-do local _chi_tmp570=__P_.clearConstraints(constraints); end;
-local _chi_tmp571=__chicc__unification.ufResolve(__P_.typerUf,iterableType);_chi_tmp568=_chi_tmp571
+local _chi_tmp742=__P_.typeTerm(elseBranch,level,constraints);return _chi_tmp742 end;
+local _chi_tmp743=__chicc__inference_context.icWithNewLocalScope(_chi_tmp739);_chi_tmp737=_chi_tmp743 end;local elseBranchType=_chi_tmp737;
+do local _chi_tmp744=__P_.branchTerminates(elseBranch);_chi_tmp737=_chi_tmp744 end;local elseTerminates=_chi_tmp737;
+local _chi_tmp745;if (thenTerminates and elseTerminates) then
+_chi_tmp745=__chicc__types.tUnit
+ else local _chi_tmp746;if thenTerminates then
+_chi_tmp746=elseBranchType
+ else local _chi_tmp747;if elseTerminates then
+_chi_tmp747=thenBranchType
  else
-local _chi_tmp572;do local _chi_tmp573=__chicc__unification.unify(constraints);_chi_tmp572=_chi_tmp573 end;local solution=_chi_tmp572;
-local _chi_tmp574=__chicc__types.mapType(iterableType,solution);_chi_tmp568=_chi_tmp574
- end;_chi_tmp559=_chi_tmp568 end;local finalIterableType=_chi_tmp559;
-do local _chi_tmp575=term.forVars;_chi_tmp559=_chi_tmp575 end;local forVars=_chi_tmp559;
-do local _chi_tmp576=#forVars;_chi_tmp559=_chi_tmp576 end;local varCount=_chi_tmp559;
-do local _chi_tmp577={};setmetatable(_chi_tmp577, array_meta_table);_chi_tmp559=_chi_tmp577 end;local varTypes=_chi_tmp559;
-do _chi_tmp559=(1) end;local vi=_chi_tmp559;
-do local function _chi_tmp578() return vi end;local function _chi_tmp579() return varCount end;while (_chi_tmp578() <= _chi_tmp579()) do do
-local _chi_tmp580;do local _chi_tmp581=forVars[vi];_chi_tmp580=_chi_tmp581 end;local varName=_chi_tmp580;
-do local _chi_tmp582=__chicc__inference_context.icFreshVariable(level);_chi_tmp580=_chi_tmp582 end;local varType=_chi_tmp580;
-do local _chi_tmp583={ name = varName, varType = varType };_chi_tmp580=_chi_tmp583 end;local entry=_chi_tmp580;
-do local _chi_tmp584=__std__lang_array.push(varTypes,entry); end;
-vi=(vi + (1)); end ::__continue_17:: end;
+local _chi_tmp748={};setmetatable(_chi_tmp748, array_meta_table);local _chi_tmp749={};setmetatable(_chi_tmp749, array_meta_table);local _chi_tmp750=__chicc__types.sumCreate(_chi_tmp748,thenBranchType,elseBranchType,_chi_tmp749);_chi_tmp747=_chi_tmp750
+ end;_chi_tmp746=_chi_tmp747 end;_chi_tmp745=_chi_tmp746 end;_chi_tmp736=_chi_tmp745
+ else
+local _chi_tmp751;if thenTerminates then
+_chi_tmp751=__chicc__types.tUnit
+ else
+local _chi_tmp752={};setmetatable(_chi_tmp752, array_meta_table);local _chi_tmp753={};setmetatable(_chi_tmp753, array_meta_table);local _chi_tmp754=__chicc__types.sumCreate(_chi_tmp752,thenBranchType,__chicc__types.tUnit,_chi_tmp753);_chi_tmp751=_chi_tmp754
+ end;_chi_tmp736=_chi_tmp751
+ end;_chi_tmp720=_chi_tmp736
+ else local _chi_tmp755;local _chi_tmp756 = 'interpolated_string';if (kind == (_chi_tmp756)) then
+local _chi_tmp757;do local _chi_tmp758=term.parts;_chi_tmp757=_chi_tmp758 end;local parts=_chi_tmp757;
+do local _chi_tmp759=__P_.typeTerms(parts,constraints,level); end;
+_chi_tmp755=__chicc__types.tString
+ else local _chi_tmp760;local _chi_tmp761 = 'cast';if (kind == (_chi_tmp761)) then
+local _chi_tmp762;do local _chi_tmp763=term.castExpr;_chi_tmp762=_chi_tmp763 end;local castExpr_=_chi_tmp762;
+do local _chi_tmp764=__P_.typeTerm(castExpr_,level,constraints); end;
+do local _chi_tmp765=term.targetType;_chi_tmp762=_chi_tmp765 end;local targetType=_chi_tmp762;
+_chi_tmp760=targetType
+ else local _chi_tmp766;local _chi_tmp767 = 'break';if (kind == (_chi_tmp767)) then
+_chi_tmp766=__chicc__types.tUnit
+ else local _chi_tmp768;local _chi_tmp769 = 'continue';if (kind == (_chi_tmp769)) then
+_chi_tmp768=__chicc__types.tUnit
+ else local _chi_tmp770;local _chi_tmp771 = 'while_loop';if (kind == (_chi_tmp771)) then
+local _chi_tmp772;do local _chi_tmp773=term.loopCondition;_chi_tmp772=_chi_tmp773 end;local condition=_chi_tmp772;
+do local _chi_tmp774=__P_.typeTerm(condition,level,constraints);_chi_tmp772=_chi_tmp774 end;local conditionType=_chi_tmp772;
+do local _chi_tmp775=condition.section;_chi_tmp772=_chi_tmp775 end;local condSection=_chi_tmp772;
+do local _chi_tmp776=__P_.addConstraint(constraints,__chicc__types.tBool,conditionType,condSection); end;
+do local _chi_tmp777=term.loopBody;_chi_tmp772=_chi_tmp777 end;local loopBody=_chi_tmp772;
+do local _chi_tmp778=__P_.typeTerm(loopBody,level,constraints); end;
+_chi_tmp770=__chicc__types.tUnit
+ else local _chi_tmp779;local _chi_tmp780 = 'for_loop';if (kind == (_chi_tmp780)) then
+local _chi_tmp781;do local _chi_tmp782=term.iterable;_chi_tmp781=_chi_tmp782 end;local iterable=_chi_tmp781;
+do local _chi_tmp783=__P_.typeTerm(iterable,level,constraints);_chi_tmp781=_chi_tmp783 end;local iterableType=_chi_tmp781;
+do local _chi_tmp784=term.forState;_chi_tmp781=_chi_tmp784 end;local forState=_chi_tmp781;
+do local _chi_tmp785=term.forInit;_chi_tmp781=_chi_tmp785 end;local forInit=_chi_tmp781;
+do _chi_tmp781=(nil) end;local stateType=_chi_tmp781;
+do _chi_tmp781=(nil) end;local initType=_chi_tmp781;
+do local _chi_tmp786;if (forState ~= (nil)) then
+local _chi_tmp787=__P_.typeTerm(forState,level,constraints);stateType=_chi_tmp787;_chi_tmp786=stateType
+ end; end;
+do local _chi_tmp788;if (forInit ~= (nil)) then
+local _chi_tmp789=__P_.typeTerm(forInit,level,constraints);initType=_chi_tmp789;_chi_tmp788=initType
+ end; end;
+do local _chi_tmp790;if (__P_.typerUf ~= (nil)) then
+do local _chi_tmp791=__chicc__unification.unifyWithUf(constraints,__P_.typerUf); end;
+do local _chi_tmp792=__P_.clearConstraints(constraints); end;
+local _chi_tmp793=__chicc__unification.ufResolve(__P_.typerUf,iterableType);_chi_tmp790=_chi_tmp793
+ else
+local _chi_tmp794;do local _chi_tmp795=__chicc__unification.unify(constraints);_chi_tmp794=_chi_tmp795 end;local solution=_chi_tmp794;
+local _chi_tmp796=__chicc__types.mapType(iterableType,solution);_chi_tmp790=_chi_tmp796
+ end;_chi_tmp781=_chi_tmp790 end;local finalIterableType=_chi_tmp781;
+do local _chi_tmp797=term.forVars;_chi_tmp781=_chi_tmp797 end;local forVars=_chi_tmp781;
+do local _chi_tmp798=#forVars;_chi_tmp781=_chi_tmp798 end;local varCount=_chi_tmp781;
+do local _chi_tmp799={};setmetatable(_chi_tmp799, array_meta_table);_chi_tmp781=_chi_tmp799 end;local varTypes=_chi_tmp781;
+do _chi_tmp781=(1) end;local vi=_chi_tmp781;
+do local function _chi_tmp800() return vi end;local function _chi_tmp801() return varCount end;while (_chi_tmp800() <= _chi_tmp801()) do do
+local _chi_tmp802;do local _chi_tmp803=forVars[vi];_chi_tmp802=_chi_tmp803 end;local varName=_chi_tmp802;
+do local _chi_tmp804=__chicc__inference_context.icFreshVariable(level);_chi_tmp802=_chi_tmp804 end;local varType=_chi_tmp802;
+do local _chi_tmp805={ name = varName, varType = varType };_chi_tmp802=_chi_tmp805 end;local entry=_chi_tmp802;
+do local _chi_tmp806=__std__lang_array.push(varTypes,entry); end;
+vi=(vi + (1)); end ::__continue_18:: end;
  end;
-do local _chi_tmp585=finalIterableType.tag;_chi_tmp559=_chi_tmp585 end;local fitTag=_chi_tmp559;
-do local _chi_tmp586=term.section;_chi_tmp559=_chi_tmp586 end;local termSection=_chi_tmp559;
-do local _chi_tmp587;local _chi_tmp588 = 'array';if (fitTag == (_chi_tmp588)) then
-local _chi_tmp589;do local _chi_tmp590=finalIterableType.elementType;_chi_tmp589=_chi_tmp590 end;local elemType=_chi_tmp589;
-local _chi_tmp591;if (varCount == (1)) then
-local _chi_tmp592;do local _chi_tmp593=varTypes[1].varType;_chi_tmp592=_chi_tmp593 end;local vt1=_chi_tmp592;
-local _chi_tmp594=__P_.addConstraint(constraints,elemType,vt1,termSection);_chi_tmp591=_chi_tmp594
- else local _chi_tmp595;if (varCount == (2)) then
-local _chi_tmp596;do local _chi_tmp597=varTypes[1].varType;_chi_tmp596=_chi_tmp597 end;local vt1=_chi_tmp596;
-do local _chi_tmp598=varTypes[2].varType;_chi_tmp596=_chi_tmp598 end;local vt2=_chi_tmp596;
-do local _chi_tmp599=__P_.addConstraint(constraints,__chicc__types.tInt,vt1,termSection); end;
-local _chi_tmp600=__P_.addConstraint(constraints,elemType,vt2,termSection);_chi_tmp595=_chi_tmp600
+do local _chi_tmp807=finalIterableType.tag;_chi_tmp781=_chi_tmp807 end;local fitTag=_chi_tmp781;
+do local _chi_tmp808=term.section;_chi_tmp781=_chi_tmp808 end;local termSection=_chi_tmp781;
+do local _chi_tmp809;local _chi_tmp810 = 'array';if (fitTag == (_chi_tmp810)) then
+local _chi_tmp811;do local _chi_tmp812=finalIterableType.elementType;_chi_tmp811=_chi_tmp812 end;local elemType=_chi_tmp811;
+local _chi_tmp813;if (varCount == (1)) then
+local _chi_tmp814;do local _chi_tmp815=varTypes[1].varType;_chi_tmp814=_chi_tmp815 end;local vt1=_chi_tmp814;
+local _chi_tmp816=__P_.addConstraint(constraints,elemType,vt1,termSection);_chi_tmp813=_chi_tmp816
+ else local _chi_tmp817;if (varCount == (2)) then
+local _chi_tmp818;do local _chi_tmp819=varTypes[1].varType;_chi_tmp818=_chi_tmp819 end;local vt1=_chi_tmp818;
+do local _chi_tmp820=varTypes[2].varType;_chi_tmp818=_chi_tmp820 end;local vt2=_chi_tmp818;
+do local _chi_tmp821=__P_.addConstraint(constraints,__chicc__types.tInt,vt1,termSection); end;
+local _chi_tmp822=__P_.addConstraint(constraints,elemType,vt2,termSection);_chi_tmp817=_chi_tmp822
  else
-local _chi_tmp601 = 'Too many variable names!';local _chi_tmp602=__P_.typerErr((_chi_tmp601),termSection);_chi_tmp595=_chi_tmp602
- end;_chi_tmp591=_chi_tmp595 end;_chi_tmp587=_chi_tmp591
- else local _chi_tmp603;local _chi_tmp604 = 'record';if (fitTag == (_chi_tmp604)) then
-do local _chi_tmp605;if (varCount ~= (2)) then
-local _chi_tmp606 = 'Iteration through record should have two variables';local _chi_tmp607=__P_.typerErr((_chi_tmp606),termSection);_chi_tmp605=_chi_tmp607
+local _chi_tmp823 = 'Too many variable names!';local _chi_tmp824=__P_.typerErr((_chi_tmp823),termSection);_chi_tmp817=_chi_tmp824
+ end;_chi_tmp813=_chi_tmp817 end;_chi_tmp809=_chi_tmp813
+ else local _chi_tmp825;local _chi_tmp826 = 'record';if (fitTag == (_chi_tmp826)) then
+do local _chi_tmp827;if (varCount ~= (2)) then
+local _chi_tmp828 = 'Iteration through record should have two variables';local _chi_tmp829=__P_.typerErr((_chi_tmp828),termSection);_chi_tmp827=_chi_tmp829
  end; end;
-local _chi_tmp608;do local _chi_tmp609=varTypes[1].varType;_chi_tmp608=_chi_tmp609 end;local vt1=_chi_tmp608;
-do local _chi_tmp610=varTypes[2].varType;_chi_tmp608=_chi_tmp610 end;local vt2=_chi_tmp608;
-do local _chi_tmp611=__P_.addConstraint(constraints,__chicc__types.tString,vt1,termSection); end;
-local _chi_tmp612=__P_.addConstraint(constraints,__chicc__types.tAny,vt2,termSection);_chi_tmp603=_chi_tmp612
- else local _chi_tmp613;local _chi_tmp614 = 'fn';if (fitTag == (_chi_tmp614)) then
-do local _chi_tmp615;if (varCount ~= (1)) then
-local _chi_tmp616 = 'Generator function requires only one variable';local _chi_tmp617=__P_.typerErr((_chi_tmp616),termSection);_chi_tmp615=_chi_tmp617
+local _chi_tmp830;do local _chi_tmp831=varTypes[1].varType;_chi_tmp830=_chi_tmp831 end;local vt1=_chi_tmp830;
+do local _chi_tmp832=varTypes[2].varType;_chi_tmp830=_chi_tmp832 end;local vt2=_chi_tmp830;
+do local _chi_tmp833=__P_.addConstraint(constraints,__chicc__types.tString,vt1,termSection); end;
+local _chi_tmp834=__P_.addConstraint(constraints,__chicc__types.tAny,vt2,termSection);_chi_tmp825=_chi_tmp834
+ else local _chi_tmp835;local _chi_tmp836 = 'fn';if (fitTag == (_chi_tmp836)) then
+do local _chi_tmp837;if (varCount ~= (1)) then
+local _chi_tmp838 = 'Generator function requires only one variable';local _chi_tmp839=__P_.typerErr((_chi_tmp838),termSection);_chi_tmp837=_chi_tmp839
  end; end;
-local _chi_tmp618;do local _chi_tmp619=finalIterableType.types;_chi_tmp618=_chi_tmp619 end;local fnTypes=_chi_tmp618;
-do local _chi_tmp620=#fnTypes;_chi_tmp618=_chi_tmp620 end;local fnTypesCount=_chi_tmp618;
-do local _chi_tmp621;if ((stateType ~= (nil)) and (initType ~= (nil))) then
-do local _chi_tmp622;if (fnTypesCount ~= (3)) then
-local _chi_tmp623 = 'Stateful generator function should have two arguments';local _chi_tmp624=__P_.typerErr((_chi_tmp623),termSection);_chi_tmp622=_chi_tmp624
+local _chi_tmp840;do local _chi_tmp841=finalIterableType.types;_chi_tmp840=_chi_tmp841 end;local fnTypes=_chi_tmp840;
+do local _chi_tmp842=#fnTypes;_chi_tmp840=_chi_tmp842 end;local fnTypesCount=_chi_tmp840;
+do local _chi_tmp843;if ((stateType ~= (nil)) and (initType ~= (nil))) then
+do local _chi_tmp844;if (fnTypesCount ~= (3)) then
+local _chi_tmp845 = 'Stateful generator function should have two arguments';local _chi_tmp846=__P_.typerErr((_chi_tmp845),termSection);_chi_tmp844=_chi_tmp846
  end; end;
-local _chi_tmp625;do local _chi_tmp626=fnTypes[1];_chi_tmp625=_chi_tmp626 end;local stateArgType=_chi_tmp625;
-do local _chi_tmp627=fnTypes[2];_chi_tmp625=_chi_tmp627 end;local lastArgType=_chi_tmp625;
-do local _chi_tmp628=varTypes[1].varType;_chi_tmp625=_chi_tmp628 end;local vt1=_chi_tmp625;
-do local _chi_tmp629=__P_.addConstraint(constraints,lastArgType,vt1,termSection); end;
-do local _chi_tmp630=__P_.addConstraint(constraints,initType,lastArgType,termSection); end;
-local _chi_tmp631=__P_.addConstraint(constraints,stateType,stateArgType,termSection);_chi_tmp621=_chi_tmp631
+local _chi_tmp847;do local _chi_tmp848=fnTypes[1];_chi_tmp847=_chi_tmp848 end;local stateArgType=_chi_tmp847;
+do local _chi_tmp849=fnTypes[2];_chi_tmp847=_chi_tmp849 end;local lastArgType=_chi_tmp847;
+do local _chi_tmp850=varTypes[1].varType;_chi_tmp847=_chi_tmp850 end;local vt1=_chi_tmp847;
+do local _chi_tmp851=__P_.addConstraint(constraints,lastArgType,vt1,termSection); end;
+do local _chi_tmp852=__P_.addConstraint(constraints,initType,lastArgType,termSection); end;
+local _chi_tmp853=__P_.addConstraint(constraints,stateType,stateArgType,termSection);_chi_tmp843=_chi_tmp853
  else
-local _chi_tmp632;if (fnTypesCount ~= (1)) then
-local _chi_tmp633 = 'Generator function should have no arguments';local _chi_tmp634=__P_.typerErr((_chi_tmp633),termSection);_chi_tmp632=_chi_tmp634
- end;_chi_tmp621=_chi_tmp632
+local _chi_tmp854;if (fnTypesCount ~= (1)) then
+local _chi_tmp855 = 'Generator function should have no arguments';local _chi_tmp856=__P_.typerErr((_chi_tmp855),termSection);_chi_tmp854=_chi_tmp856
+ end;_chi_tmp843=_chi_tmp854
  end; end;
-do local _chi_tmp635=fnTypes[fnTypesCount];_chi_tmp618=_chi_tmp635 end;local returnValue=_chi_tmp618;
-do local _chi_tmp636 = 'sum';local _chi_tmp642=(returnValue.tag == (_chi_tmp636));if _chi_tmp642 then local _chi_tmp637=__chicc__types.sumListTypes(returnValue);local function _chi_tmp638(t)
-local _chi_tmp639;do _chi_tmp639=t end;local variant=_chi_tmp639;
-local _chi_tmp640=__chicc__types.typeEquals(variant,__chicc__types.tUnit);return _chi_tmp640 end;
-local _chi_tmp641=__std__lang_array.any(_chi_tmp637,_chi_tmp638);_chi_tmp642=_chi_tmp641 end;_chi_tmp618=_chi_tmp642 end;local hasUnitVariant=_chi_tmp618;
-local _chi_tmp643;if hasUnitVariant then
-local _chi_tmp644;do local _chi_tmp645=__P_.sumRemoveType(returnValue,__chicc__types.tUnit);_chi_tmp644=_chi_tmp645 end;local optionalType=_chi_tmp644;
-do local _chi_tmp646=varTypes[1].varType;_chi_tmp644=_chi_tmp646 end;local vt1=_chi_tmp644;
-local _chi_tmp647=__P_.addConstraint(constraints,optionalType,vt1,termSection);_chi_tmp643=_chi_tmp647
+do local _chi_tmp857=fnTypes[fnTypesCount];_chi_tmp840=_chi_tmp857 end;local returnValue=_chi_tmp840;
+do local _chi_tmp858 = 'sum';local _chi_tmp864=(returnValue.tag == (_chi_tmp858));if _chi_tmp864 then local _chi_tmp859=__chicc__types.sumListTypes(returnValue);local function _chi_tmp860(t)
+local _chi_tmp861;do _chi_tmp861=t end;local variant=_chi_tmp861;
+local _chi_tmp862=__chicc__types.typeEquals(variant,__chicc__types.tUnit);return _chi_tmp862 end;
+local _chi_tmp863=__std__lang_array.any(_chi_tmp859,_chi_tmp860);_chi_tmp864=_chi_tmp863 end;_chi_tmp840=_chi_tmp864 end;local hasUnitVariant=_chi_tmp840;
+local _chi_tmp865;if hasUnitVariant then
+local _chi_tmp866;do local _chi_tmp867=__P_.sumRemoveType(returnValue,__chicc__types.tUnit);_chi_tmp866=_chi_tmp867 end;local optionalType=_chi_tmp866;
+do local _chi_tmp868=varTypes[1].varType;_chi_tmp866=_chi_tmp868 end;local vt1=_chi_tmp866;
+local _chi_tmp869=__P_.addConstraint(constraints,optionalType,vt1,termSection);_chi_tmp865=_chi_tmp869
  else
-local _chi_tmp648 = 'Generator function should return optional value (value or unit)';local _chi_tmp649=__P_.typerErr((_chi_tmp648),termSection);_chi_tmp643=_chi_tmp649
- end;_chi_tmp613=_chi_tmp643
+local _chi_tmp870 = 'Generator function should return optional value (value or unit)';local _chi_tmp871=__P_.typerErr((_chi_tmp870),termSection);_chi_tmp865=_chi_tmp871
+ end;_chi_tmp835=_chi_tmp865
  else
-local _chi_tmp650 = 'Unsupported iterable type in for loop';local _chi_tmp651=__P_.typerErr((_chi_tmp650),termSection);_chi_tmp613=_chi_tmp651
- end;_chi_tmp603=_chi_tmp613 end;_chi_tmp587=_chi_tmp603 end; end;
-do local function _chi_tmp652()
-local _chi_tmp653;do local _chi_tmp654=#varTypes;_chi_tmp653=_chi_tmp654 end;local vtCount=_chi_tmp653;
-do _chi_tmp653=(1) end;local vti=_chi_tmp653;
-do local function _chi_tmp655() return vti end;local function _chi_tmp656() return vtCount end;while (_chi_tmp655() <= _chi_tmp656()) do do
-local _chi_tmp657;do local _chi_tmp658=varTypes[vti];_chi_tmp657=_chi_tmp658 end;local vte=_chi_tmp657;
-do local _chi_tmp659=vte.name;_chi_tmp657=_chi_tmp659 end;local vteName=_chi_tmp657;
-do local _chi_tmp660=vte.varType;_chi_tmp657=_chi_tmp660 end;local vteType=_chi_tmp657;
-do local _chi_tmp661=__chicc__inference_context.icDefineLocalSymbol(vteName,vteType); end;
-vti=(vti + (1)); end ::__continue_18:: end;
+local _chi_tmp872 = 'Unsupported iterable type in for loop';local _chi_tmp873=__P_.typerErr((_chi_tmp872),termSection);_chi_tmp835=_chi_tmp873
+ end;_chi_tmp825=_chi_tmp835 end;_chi_tmp809=_chi_tmp825 end; end;
+do local function _chi_tmp874()
+local _chi_tmp875;do local _chi_tmp876=#varTypes;_chi_tmp875=_chi_tmp876 end;local vtCount=_chi_tmp875;
+do _chi_tmp875=(1) end;local vti=_chi_tmp875;
+do local function _chi_tmp877() return vti end;local function _chi_tmp878() return vtCount end;while (_chi_tmp877() <= _chi_tmp878()) do do
+local _chi_tmp879;do local _chi_tmp880=varTypes[vti];_chi_tmp879=_chi_tmp880 end;local vte=_chi_tmp879;
+do local _chi_tmp881=vte.name;_chi_tmp879=_chi_tmp881 end;local vteName=_chi_tmp879;
+do local _chi_tmp882=vte.varType;_chi_tmp879=_chi_tmp882 end;local vteType=_chi_tmp879;
+do local _chi_tmp883=__chicc__inference_context.icDefineLocalSymbol(vteName,vteType); end;
+vti=(vti + (1)); end ::__continue_19:: end;
  end;
-do local _chi_tmp662=term.forBody;_chi_tmp653=_chi_tmp662 end;local forBody=_chi_tmp653;
-do local _chi_tmp663=__P_.typeTerm(forBody,level,constraints); end;
+do local _chi_tmp884=term.forBody;_chi_tmp875=_chi_tmp884 end;local forBody=_chi_tmp875;
+do local _chi_tmp885=__P_.typeTerm(forBody,level,constraints); end;
 return (nil) end;
-local _chi_tmp664=__chicc__inference_context.icWithNewLocalScope(_chi_tmp652); end;
-_chi_tmp557=__chicc__types.tUnit
- else local _chi_tmp665;local _chi_tmp666 = 'field_assignment';if (kind == (_chi_tmp666)) then
-local _chi_tmp667;do _chi_tmp667=term.receiver end;local receiver=_chi_tmp667;
-do local _chi_tmp668=__P_.typeTerm(receiver,level,constraints);_chi_tmp667=_chi_tmp668 end;local receiverType=_chi_tmp667;
-do _chi_tmp667=term.value end;local value=_chi_tmp667;
-do local _chi_tmp669=__P_.typeTerm(value,level,constraints);_chi_tmp667=_chi_tmp669 end;local valueType=_chi_tmp667;
-do _chi_tmp667=term.fieldName end;local fieldName=_chi_tmp667;
-do local _chi_tmp670=__chicc__inference_context.icFreshVariable(level);_chi_tmp667=_chi_tmp670 end;local fieldExpectedType=_chi_tmp667;
-do local _chi_tmp671={name=fieldName,fieldType=fieldExpectedType};setmetatable(_chi_tmp671, record_meta_table);_chi_tmp667=_chi_tmp671 end;local rf=_chi_tmp667;
-do local _chi_tmp672={rf};setmetatable(_chi_tmp672, array_meta_table);_chi_tmp667=_chi_tmp672 end;local rfields=_chi_tmp667;
-do local _chi_tmp673={};setmetatable(_chi_tmp673, array_meta_table);local _chi_tmp674={};setmetatable(_chi_tmp674, array_meta_table);local _chi_tmp675=__chicc__types.recordType(_chi_tmp673,rfields,_chi_tmp674);_chi_tmp667=_chi_tmp675 end;local expectedRecType=_chi_tmp667;
-do local _chi_tmp676=__chicc__inference_context.icFreshVariable(level);_chi_tmp667=_chi_tmp676 end;local faResult=_chi_tmp667;
-do _chi_tmp667=value.section end;local valueSection=_chi_tmp667;
-do _chi_tmp667=receiver.section end;local receiverSection=_chi_tmp667;
-do local _chi_tmp677=__P_.addConstraint(constraints,expectedRecType,receiverType,receiverSection); end;
-do local _chi_tmp678=__P_.addConstraint(constraints,fieldExpectedType,valueType,valueSection); end;
-do local _chi_tmp679=__P_.addConstraint(constraints,faResult,valueType,valueSection); end;
-_chi_tmp665=faResult
- else local _chi_tmp680;local _chi_tmp681 = 'effect_definition';if (kind == (_chi_tmp681)) then
-local _chi_tmp682;do local _chi_tmp683=term.exprType;_chi_tmp682=_chi_tmp683 end;local t=_chi_tmp682;
-_chi_tmp680=t
- else local _chi_tmp684;local _chi_tmp685 = 'handle';if (kind == (_chi_tmp685)) then
-local _chi_tmp686;do local _chi_tmp687=__chicc__inference_context.icFreshVariable(level);_chi_tmp686=_chi_tmp687 end;local handleResult=_chi_tmp686;
-do local _chi_tmp688=term.handleBody;_chi_tmp686=_chi_tmp688 end;local handleBody=_chi_tmp686;
-do local _chi_tmp689=__P_.typeTerm(handleBody,level,constraints);_chi_tmp686=_chi_tmp689 end;local bodyType=_chi_tmp686;
-do local _chi_tmp690=handleBody.section;_chi_tmp686=_chi_tmp690 end;local bodySection=_chi_tmp686;
-do local _chi_tmp691=__P_.addConstraint(constraints,handleResult,bodyType,bodySection); end;
-do local _chi_tmp692=term.handleCases;_chi_tmp686=_chi_tmp692 end;local cases=_chi_tmp686;
-do local _chi_tmp693=#cases;_chi_tmp686=_chi_tmp693 end;local caseCount=_chi_tmp686;
-do _chi_tmp686=(1) end;local ci=_chi_tmp686;
-do local function _chi_tmp694() return ci end;local function _chi_tmp695() return caseCount end;while (_chi_tmp694() <= _chi_tmp695()) do do
-local _chi_tmp696;do local _chi_tmp697=cases[ci];_chi_tmp696=_chi_tmp697 end;local case_=_chi_tmp696;
-do local _chi_tmp698=case_.moduleName;_chi_tmp696=_chi_tmp698 end;local caseMod=_chi_tmp696;
-do local _chi_tmp699=case_.packageName;_chi_tmp696=_chi_tmp699 end;local casePkg=_chi_tmp696;
-do local _chi_tmp700=case_.effectName;_chi_tmp696=_chi_tmp700 end;local caseEffName=_chi_tmp696;
-do local _chi_tmp701=__chicc__ast.packageTarget(caseMod,casePkg,caseEffName);_chi_tmp696=_chi_tmp701 end;local caseTgt=_chi_tmp696;
-do local _chi_tmp702=term.section;_chi_tmp696=_chi_tmp702 end;local termSection=_chi_tmp696;
-do local _chi_tmp703=__chicc__inference_context.icGetTargetType(caseTgt,level,termSection);_chi_tmp696=_chi_tmp703 end;local effectType=_chi_tmp696;
-do local _chi_tmp704=effectType.tag;_chi_tmp696=_chi_tmp704 end;local etTag=_chi_tmp696;
-do local _chi_tmp705;local _chi_tmp706 = 'fn';if (etTag == (_chi_tmp706)) then
-local function _chi_tmp707()
-local _chi_tmp708;do local _chi_tmp709=case_.argumentNames;_chi_tmp708=_chi_tmp709 end;local argNames=_chi_tmp708;
-do local _chi_tmp710=effectType.types;_chi_tmp708=_chi_tmp710 end;local etTypes=_chi_tmp708;
-do local _chi_tmp711=#etTypes;_chi_tmp708=_chi_tmp711 end;local etTypesCount=_chi_tmp708;
-do local _chi_tmp712=#argNames;_chi_tmp708=_chi_tmp712 end;local argCount=_chi_tmp708;
-do _chi_tmp708=(1) end;local ai=_chi_tmp708;
-do local function _chi_tmp713() return ai end;local function _chi_tmp714() return argCount end;while (_chi_tmp713() <= _chi_tmp714()) do do
-local _chi_tmp715;do local _chi_tmp716=argNames[ai];_chi_tmp715=_chi_tmp716 end;local argName=_chi_tmp715;
-do local _chi_tmp717=etTypes[ai];_chi_tmp715=_chi_tmp717 end;local argType=_chi_tmp715;
-do local _chi_tmp718=__chicc__inference_context.icDefineLocalSymbol(argName,argType); end;
-ai=(ai + (1)); end ::__continue_20:: end;
+local _chi_tmp886=__chicc__inference_context.icWithNewLocalScope(_chi_tmp874); end;
+_chi_tmp779=__chicc__types.tUnit
+ else local _chi_tmp887;local _chi_tmp888 = 'field_assignment';if (kind == (_chi_tmp888)) then
+local _chi_tmp889;do _chi_tmp889=term.receiver end;local receiver=_chi_tmp889;
+do local _chi_tmp890=__P_.typeTerm(receiver,level,constraints);_chi_tmp889=_chi_tmp890 end;local receiverType=_chi_tmp889;
+do _chi_tmp889=term.value end;local value=_chi_tmp889;
+do local _chi_tmp891=__P_.typeTerm(value,level,constraints);_chi_tmp889=_chi_tmp891 end;local valueType=_chi_tmp889;
+do _chi_tmp889=term.fieldName end;local fieldName=_chi_tmp889;
+do local _chi_tmp892=__chicc__inference_context.icFreshVariable(level);_chi_tmp889=_chi_tmp892 end;local fieldExpectedType=_chi_tmp889;
+do local _chi_tmp893={name=fieldName,fieldType=fieldExpectedType};setmetatable(_chi_tmp893, record_meta_table);_chi_tmp889=_chi_tmp893 end;local rf=_chi_tmp889;
+do local _chi_tmp894={rf};setmetatable(_chi_tmp894, array_meta_table);_chi_tmp889=_chi_tmp894 end;local rfields=_chi_tmp889;
+do local _chi_tmp895={};setmetatable(_chi_tmp895, array_meta_table);local _chi_tmp896={};setmetatable(_chi_tmp896, array_meta_table);local _chi_tmp897=__chicc__types.recordType(_chi_tmp895,rfields,_chi_tmp896);_chi_tmp889=_chi_tmp897 end;local expectedRecType=_chi_tmp889;
+do local _chi_tmp898=__chicc__inference_context.icFreshVariable(level);_chi_tmp889=_chi_tmp898 end;local faResult=_chi_tmp889;
+do _chi_tmp889=value.section end;local valueSection=_chi_tmp889;
+do _chi_tmp889=receiver.section end;local receiverSection=_chi_tmp889;
+do local _chi_tmp899=__P_.addConstraint(constraints,expectedRecType,receiverType,receiverSection); end;
+do local _chi_tmp900=__P_.addConstraint(constraints,fieldExpectedType,valueType,valueSection); end;
+do local _chi_tmp901=__P_.addConstraint(constraints,faResult,valueType,valueSection); end;
+_chi_tmp887=faResult
+ else local _chi_tmp902;local _chi_tmp903 = 'effect_definition';if (kind == (_chi_tmp903)) then
+local _chi_tmp904;do local _chi_tmp905=term.exprType;_chi_tmp904=_chi_tmp905 end;local t=_chi_tmp904;
+_chi_tmp902=t
+ else local _chi_tmp906;local _chi_tmp907 = 'handle';if (kind == (_chi_tmp907)) then
+local _chi_tmp908;do local _chi_tmp909=__chicc__inference_context.icFreshVariable(level);_chi_tmp908=_chi_tmp909 end;local handleResult=_chi_tmp908;
+do local _chi_tmp910=term.handleBody;_chi_tmp908=_chi_tmp910 end;local handleBody=_chi_tmp908;
+do local _chi_tmp911=__P_.typeTerm(handleBody,level,constraints);_chi_tmp908=_chi_tmp911 end;local bodyType=_chi_tmp908;
+do local _chi_tmp912=handleBody.section;_chi_tmp908=_chi_tmp912 end;local bodySection=_chi_tmp908;
+do local _chi_tmp913=__P_.addConstraint(constraints,handleResult,bodyType,bodySection); end;
+do local _chi_tmp914=term.handleCases;_chi_tmp908=_chi_tmp914 end;local cases=_chi_tmp908;
+do local _chi_tmp915=#cases;_chi_tmp908=_chi_tmp915 end;local caseCount=_chi_tmp908;
+do _chi_tmp908=(1) end;local ci=_chi_tmp908;
+do local function _chi_tmp916() return ci end;local function _chi_tmp917() return caseCount end;while (_chi_tmp916() <= _chi_tmp917()) do do
+local _chi_tmp918;do local _chi_tmp919=cases[ci];_chi_tmp918=_chi_tmp919 end;local case_=_chi_tmp918;
+do local _chi_tmp920=case_.moduleName;_chi_tmp918=_chi_tmp920 end;local caseMod=_chi_tmp918;
+do local _chi_tmp921=case_.packageName;_chi_tmp918=_chi_tmp921 end;local casePkg=_chi_tmp918;
+do local _chi_tmp922=case_.effectName;_chi_tmp918=_chi_tmp922 end;local caseEffName=_chi_tmp918;
+do local _chi_tmp923=__chicc__ast.packageTarget(caseMod,casePkg,caseEffName);_chi_tmp918=_chi_tmp923 end;local caseTgt=_chi_tmp918;
+do local _chi_tmp924=term.section;_chi_tmp918=_chi_tmp924 end;local termSection=_chi_tmp918;
+do local _chi_tmp925=__chicc__inference_context.icGetTargetType(caseTgt,level,termSection);_chi_tmp918=_chi_tmp925 end;local effectType=_chi_tmp918;
+do local _chi_tmp926=effectType.tag;_chi_tmp918=_chi_tmp926 end;local etTag=_chi_tmp918;
+do local _chi_tmp927;local _chi_tmp928 = 'fn';if (etTag == (_chi_tmp928)) then
+local function _chi_tmp929()
+local _chi_tmp930;do local _chi_tmp931=case_.argumentNames;_chi_tmp930=_chi_tmp931 end;local argNames=_chi_tmp930;
+do local _chi_tmp932=effectType.types;_chi_tmp930=_chi_tmp932 end;local etTypes=_chi_tmp930;
+do local _chi_tmp933=#etTypes;_chi_tmp930=_chi_tmp933 end;local etTypesCount=_chi_tmp930;
+do local _chi_tmp934=#argNames;_chi_tmp930=_chi_tmp934 end;local argCount=_chi_tmp930;
+do _chi_tmp930=(1) end;local ai=_chi_tmp930;
+do local function _chi_tmp935() return ai end;local function _chi_tmp936() return argCount end;while (_chi_tmp935() <= _chi_tmp936()) do do
+local _chi_tmp937;do local _chi_tmp938=argNames[ai];_chi_tmp937=_chi_tmp938 end;local argName=_chi_tmp937;
+do local _chi_tmp939=etTypes[ai];_chi_tmp937=_chi_tmp939 end;local argType=_chi_tmp937;
+do local _chi_tmp940=__chicc__inference_context.icDefineLocalSymbol(argName,argType); end;
+ai=(ai + (1)); end ::__continue_21:: end;
  end;
-do local _chi_tmp719=etTypes[#etTypes];_chi_tmp708=_chi_tmp719 end;local effectReturnType=_chi_tmp708;
-do local _chi_tmp720=__chicc__inference_context.icFreshVariable(level);_chi_tmp708=_chi_tmp720 end;local resumeRetType=_chi_tmp708;
-do local _chi_tmp721={};setmetatable(_chi_tmp721, array_meta_table);_chi_tmp708=_chi_tmp721 end;local resumeTypes=_chi_tmp708;
-do local _chi_tmp722=__std__lang_array.push(resumeTypes,effectReturnType); end;
-do local _chi_tmp723=__std__lang_array.push(resumeTypes,resumeRetType); end;
-do local _chi_tmp724={};setmetatable(_chi_tmp724, array_meta_table);local _chi_tmp725=__chicc__types.functionType(resumeTypes,_chi_tmp724,(0));_chi_tmp708=_chi_tmp725 end;local resumeType=_chi_tmp708;
-do local _chi_tmp726 = 'resume';local _chi_tmp727=__chicc__inference_context.icDefineLocalSymbol((_chi_tmp726),resumeType); end;
-do local _chi_tmp728=case_.body;_chi_tmp708=_chi_tmp728 end;local caseBody=_chi_tmp708;
-do local _chi_tmp729=__P_.typeTerm(caseBody,level,constraints);_chi_tmp708=_chi_tmp729 end;local caseBodyType=_chi_tmp708;
-do local _chi_tmp730=case_.body.section;_chi_tmp708=_chi_tmp730 end;local caseBodySection=_chi_tmp708;
-do local _chi_tmp731=__P_.addConstraint(constraints,handleResult,caseBodyType,caseBodySection); end;
+do local _chi_tmp941=etTypes[#etTypes];_chi_tmp930=_chi_tmp941 end;local effectReturnType=_chi_tmp930;
+do local _chi_tmp942=__chicc__inference_context.icFreshVariable(level);_chi_tmp930=_chi_tmp942 end;local resumeRetType=_chi_tmp930;
+do local _chi_tmp943={};setmetatable(_chi_tmp943, array_meta_table);_chi_tmp930=_chi_tmp943 end;local resumeTypes=_chi_tmp930;
+do local _chi_tmp944=__std__lang_array.push(resumeTypes,effectReturnType); end;
+do local _chi_tmp945=__std__lang_array.push(resumeTypes,resumeRetType); end;
+do local _chi_tmp946={};setmetatable(_chi_tmp946, array_meta_table);local _chi_tmp947=__chicc__types.functionType(resumeTypes,_chi_tmp946,(0));_chi_tmp930=_chi_tmp947 end;local resumeType=_chi_tmp930;
+do local _chi_tmp948 = 'resume';local _chi_tmp949=__chicc__inference_context.icDefineLocalSymbol((_chi_tmp948),resumeType); end;
+do local _chi_tmp950=case_.body;_chi_tmp930=_chi_tmp950 end;local caseBody=_chi_tmp930;
+do local _chi_tmp951=__P_.typeTerm(caseBody,level,constraints);_chi_tmp930=_chi_tmp951 end;local caseBodyType=_chi_tmp930;
+do local _chi_tmp952=case_.body.section;_chi_tmp930=_chi_tmp952 end;local caseBodySection=_chi_tmp930;
+do local _chi_tmp953=__P_.addConstraint(constraints,handleResult,caseBodyType,caseBodySection); end;
 return (nil) end;
-local _chi_tmp732=__chicc__inference_context.icWithNewLocalScope(_chi_tmp707);_chi_tmp705=_chi_tmp732
+local _chi_tmp954=__chicc__inference_context.icWithNewLocalScope(_chi_tmp929);_chi_tmp927=_chi_tmp954
  else
-local _chi_tmp733;do local _chi_tmp734=case_.section;_chi_tmp733=_chi_tmp734 end;local caseSection=_chi_tmp733;
-local _chi_tmp735 = 'Effect has non-function type';local _chi_tmp736=__P_.typerErr((_chi_tmp735),caseSection);_chi_tmp705=_chi_tmp736
+local _chi_tmp955;do local _chi_tmp956=case_.section;_chi_tmp955=_chi_tmp956 end;local caseSection=_chi_tmp955;
+local _chi_tmp957 = 'Effect has non-function type';local _chi_tmp958=__P_.typerErr((_chi_tmp957),caseSection);_chi_tmp927=_chi_tmp958
  end; end;
-ci=(ci + (1)); end ::__continue_19:: end;
+ci=(ci + (1)); end ::__continue_20:: end;
  end;
-_chi_tmp684=handleResult
- else local _chi_tmp737;local _chi_tmp738 = 'index_op';if (kind == (_chi_tmp738)) then
-local _chi_tmp739;do local _chi_tmp740=__chicc__inference_context.icFreshVariable(level);_chi_tmp739=_chi_tmp740 end;local elementType=_chi_tmp739;
-do local _chi_tmp741=term.indexVariable;_chi_tmp739=_chi_tmp741 end;local variable=_chi_tmp739;
-do local _chi_tmp742=__P_.typeTerm(variable,level,constraints);_chi_tmp739=_chi_tmp742 end;local variableType_=_chi_tmp739;
-do local _chi_tmp743=term.indexExpr;_chi_tmp739=_chi_tmp743 end;local index=_chi_tmp739;
-do local _chi_tmp744=__P_.typeTerm(index,level,constraints);_chi_tmp739=_chi_tmp744 end;local indexType=_chi_tmp739;
-do local _chi_tmp745=variable.section;_chi_tmp739=_chi_tmp745 end;local variableSection=_chi_tmp739;
-do local _chi_tmp746=index.section;_chi_tmp739=_chi_tmp746 end;local indexSection=_chi_tmp739;
-do local _chi_tmp747=constraints;local _chi_tmp748=variableType_;local _chi_tmp749=elementType;local _chi_tmp750={};local _chi_tmp751=__chicc__types.arrayType(_chi_tmp749,_chi_tmp750);local _chi_tmp752=__P_.addConstraint(_chi_tmp747,_chi_tmp748,_chi_tmp751,variableSection); end;
-do local _chi_tmp753=__P_.addConstraint(constraints,__chicc__types.tInt,indexType,indexSection); end;
-_chi_tmp737=elementType
- else local _chi_tmp754;local _chi_tmp755 = 'indexed_assignment';if (kind == (_chi_tmp755)) then
-local _chi_tmp756;do local _chi_tmp757=__chicc__inference_context.icFreshVariable(level);_chi_tmp756=_chi_tmp757 end;local elementType=_chi_tmp756;
-do local _chi_tmp758=term.indexVariable;_chi_tmp756=_chi_tmp758 end;local variable=_chi_tmp756;
-do local _chi_tmp759=__P_.typeTerm(variable,level,constraints);_chi_tmp756=_chi_tmp759 end;local variableType_=_chi_tmp756;
-do local _chi_tmp760=term.indexValue;_chi_tmp756=_chi_tmp760 end;local value=_chi_tmp756;
-do local _chi_tmp761=__P_.typeTerm(value,level,constraints);_chi_tmp756=_chi_tmp761 end;local valueType=_chi_tmp756;
-do local _chi_tmp762=term.indexExpr;_chi_tmp756=_chi_tmp762 end;local index=_chi_tmp756;
-do local _chi_tmp763=__P_.typeTerm(index,level,constraints);_chi_tmp756=_chi_tmp763 end;local indexType=_chi_tmp756;
-do local _chi_tmp764=value.section;_chi_tmp756=_chi_tmp764 end;local valueSection=_chi_tmp756;
-do local _chi_tmp765=variable.section;_chi_tmp756=_chi_tmp765 end;local variableSection=_chi_tmp756;
-do local _chi_tmp766=index.section;_chi_tmp756=_chi_tmp766 end;local indexSection=_chi_tmp756;
-do local _chi_tmp767=__P_.addConstraint(constraints,elementType,valueType,valueSection); end;
-do local _chi_tmp768=constraints;local _chi_tmp769=variableType_;local _chi_tmp770=elementType;local _chi_tmp771={};local _chi_tmp772=__chicc__types.arrayType(_chi_tmp770,_chi_tmp771);local _chi_tmp773=__P_.addConstraint(_chi_tmp768,_chi_tmp769,_chi_tmp772,variableSection); end;
-do local _chi_tmp774=__P_.addConstraint(constraints,__chicc__types.tInt,indexType,indexSection); end;
-_chi_tmp754=elementType
- else local _chi_tmp775;local _chi_tmp776 = 'infix_op';if (kind == (_chi_tmp776)) then
-local _chi_tmp777;do local _chi_tmp778=term.op;_chi_tmp777=_chi_tmp778 end;local op=_chi_tmp777;
-do local _chi_tmp779=term.left;_chi_tmp777=_chi_tmp779 end;local left=_chi_tmp777;
-do local _chi_tmp780=term.right;_chi_tmp777=_chi_tmp780 end;local right=_chi_tmp777;
-do local _chi_tmp781=__P_.typeTerm(left,level,constraints);_chi_tmp777=_chi_tmp781 end;local lhsType=_chi_tmp777;
-do local _chi_tmp782=__P_.typeTerm(right,level,constraints);_chi_tmp777=_chi_tmp782 end;local rhsType=_chi_tmp777;
-do local _chi_tmp783=left.section;_chi_tmp777=_chi_tmp783 end;local leftSection=_chi_tmp777;
-do local _chi_tmp784=right.section;_chi_tmp777=_chi_tmp784 end;local rightSection=_chi_tmp777;
-local _chi_tmp785;local _chi_tmp786 = '&&';local _chi_tmp788=(op == (_chi_tmp786));if not _chi_tmp788 then local _chi_tmp787 = '||';_chi_tmp788=(op == (_chi_tmp787)) end;if _chi_tmp788 then
-do local _chi_tmp789=__P_.addConstraint(constraints,__chicc__types.tBool,lhsType,leftSection); end;
-do local _chi_tmp790=__P_.addConstraint(constraints,__chicc__types.tBool,rhsType,rightSection); end;
-_chi_tmp785=__chicc__types.tBool
- else local _chi_tmp791;local _chi_tmp792 = '<';local _chi_tmp794=(op == (_chi_tmp792));if not _chi_tmp794 then local _chi_tmp793 = '<=';_chi_tmp794=(op == (_chi_tmp793)) end;local _chi_tmp796=_chi_tmp794;if not _chi_tmp796 then local _chi_tmp795 = '>';_chi_tmp796=(op == (_chi_tmp795)) end;local _chi_tmp798=_chi_tmp796;if not _chi_tmp798 then local _chi_tmp797 = '>=';_chi_tmp798=(op == (_chi_tmp797)) end;local _chi_tmp800=_chi_tmp798;if not _chi_tmp800 then local _chi_tmp799 = '==';_chi_tmp800=(op == (_chi_tmp799)) end;local _chi_tmp802=_chi_tmp800;if not _chi_tmp802 then local _chi_tmp801 = '!=';_chi_tmp802=(op == (_chi_tmp801)) end;if _chi_tmp802 then
-do local _chi_tmp803=__P_.addConstraint(constraints,lhsType,rhsType,rightSection); end;
-_chi_tmp791=__chicc__types.tBool
+_chi_tmp906=handleResult
+ else local _chi_tmp959;local _chi_tmp960 = 'index_op';if (kind == (_chi_tmp960)) then
+local _chi_tmp961;do local _chi_tmp962=__chicc__inference_context.icFreshVariable(level);_chi_tmp961=_chi_tmp962 end;local elementType=_chi_tmp961;
+do local _chi_tmp963=term.indexVariable;_chi_tmp961=_chi_tmp963 end;local variable=_chi_tmp961;
+do local _chi_tmp964=__P_.typeTerm(variable,level,constraints);_chi_tmp961=_chi_tmp964 end;local variableType_=_chi_tmp961;
+do local _chi_tmp965=term.indexExpr;_chi_tmp961=_chi_tmp965 end;local index=_chi_tmp961;
+do local _chi_tmp966=__P_.typeTerm(index,level,constraints);_chi_tmp961=_chi_tmp966 end;local indexType=_chi_tmp961;
+do local _chi_tmp967=variable.section;_chi_tmp961=_chi_tmp967 end;local variableSection=_chi_tmp961;
+do local _chi_tmp968=index.section;_chi_tmp961=_chi_tmp968 end;local indexSection=_chi_tmp961;
+do local _chi_tmp969=constraints;local _chi_tmp970=variableType_;local _chi_tmp971=elementType;local _chi_tmp972={};local _chi_tmp973=__chicc__types.arrayType(_chi_tmp971,_chi_tmp972);local _chi_tmp974=__P_.addConstraint(_chi_tmp969,_chi_tmp970,_chi_tmp973,variableSection); end;
+do local _chi_tmp975=__P_.addConstraint(constraints,__chicc__types.tInt,indexType,indexSection); end;
+_chi_tmp959=elementType
+ else local _chi_tmp976;local _chi_tmp977 = 'indexed_assignment';if (kind == (_chi_tmp977)) then
+local _chi_tmp978;do local _chi_tmp979=__chicc__inference_context.icFreshVariable(level);_chi_tmp978=_chi_tmp979 end;local elementType=_chi_tmp978;
+do local _chi_tmp980=term.indexVariable;_chi_tmp978=_chi_tmp980 end;local variable=_chi_tmp978;
+do local _chi_tmp981=__P_.typeTerm(variable,level,constraints);_chi_tmp978=_chi_tmp981 end;local variableType_=_chi_tmp978;
+do local _chi_tmp982=term.indexValue;_chi_tmp978=_chi_tmp982 end;local value=_chi_tmp978;
+do local _chi_tmp983=__P_.typeTerm(value,level,constraints);_chi_tmp978=_chi_tmp983 end;local valueType=_chi_tmp978;
+do local _chi_tmp984=term.indexExpr;_chi_tmp978=_chi_tmp984 end;local index=_chi_tmp978;
+do local _chi_tmp985=__P_.typeTerm(index,level,constraints);_chi_tmp978=_chi_tmp985 end;local indexType=_chi_tmp978;
+do local _chi_tmp986=value.section;_chi_tmp978=_chi_tmp986 end;local valueSection=_chi_tmp978;
+do local _chi_tmp987=variable.section;_chi_tmp978=_chi_tmp987 end;local variableSection=_chi_tmp978;
+do local _chi_tmp988=index.section;_chi_tmp978=_chi_tmp988 end;local indexSection=_chi_tmp978;
+do local _chi_tmp989=__P_.addConstraint(constraints,elementType,valueType,valueSection); end;
+do local _chi_tmp990=constraints;local _chi_tmp991=variableType_;local _chi_tmp992=elementType;local _chi_tmp993={};local _chi_tmp994=__chicc__types.arrayType(_chi_tmp992,_chi_tmp993);local _chi_tmp995=__P_.addConstraint(_chi_tmp990,_chi_tmp991,_chi_tmp994,variableSection); end;
+do local _chi_tmp996=__P_.addConstraint(constraints,__chicc__types.tInt,indexType,indexSection); end;
+_chi_tmp976=elementType
+ else local _chi_tmp997;local _chi_tmp998 = 'infix_op';if (kind == (_chi_tmp998)) then
+local _chi_tmp999;do local _chi_tmp1000=term.op;_chi_tmp999=_chi_tmp1000 end;local op=_chi_tmp999;
+do local _chi_tmp1001=term.left;_chi_tmp999=_chi_tmp1001 end;local left=_chi_tmp999;
+do local _chi_tmp1002=term.right;_chi_tmp999=_chi_tmp1002 end;local right=_chi_tmp999;
+do local _chi_tmp1003=__P_.typeTerm(left,level,constraints);_chi_tmp999=_chi_tmp1003 end;local lhsType=_chi_tmp999;
+do local _chi_tmp1004=__P_.typeTerm(right,level,constraints);_chi_tmp999=_chi_tmp1004 end;local rhsType=_chi_tmp999;
+do local _chi_tmp1005=left.section;_chi_tmp999=_chi_tmp1005 end;local leftSection=_chi_tmp999;
+do local _chi_tmp1006=right.section;_chi_tmp999=_chi_tmp1006 end;local rightSection=_chi_tmp999;
+local _chi_tmp1007;local _chi_tmp1008 = '&&';local _chi_tmp1010=(op == (_chi_tmp1008));if not _chi_tmp1010 then local _chi_tmp1009 = '||';_chi_tmp1010=(op == (_chi_tmp1009)) end;if _chi_tmp1010 then
+do local _chi_tmp1011=__P_.addConstraint(constraints,__chicc__types.tBool,lhsType,leftSection); end;
+do local _chi_tmp1012=__P_.addConstraint(constraints,__chicc__types.tBool,rhsType,rightSection); end;
+_chi_tmp1007=__chicc__types.tBool
+ else local _chi_tmp1013;local _chi_tmp1014 = '<';local _chi_tmp1016=(op == (_chi_tmp1014));if not _chi_tmp1016 then local _chi_tmp1015 = '<=';_chi_tmp1016=(op == (_chi_tmp1015)) end;local _chi_tmp1018=_chi_tmp1016;if not _chi_tmp1018 then local _chi_tmp1017 = '>';_chi_tmp1018=(op == (_chi_tmp1017)) end;local _chi_tmp1020=_chi_tmp1018;if not _chi_tmp1020 then local _chi_tmp1019 = '>=';_chi_tmp1020=(op == (_chi_tmp1019)) end;local _chi_tmp1022=_chi_tmp1020;if not _chi_tmp1022 then local _chi_tmp1021 = '==';_chi_tmp1022=(op == (_chi_tmp1021)) end;local _chi_tmp1024=_chi_tmp1022;if not _chi_tmp1024 then local _chi_tmp1023 = '!=';_chi_tmp1024=(op == (_chi_tmp1023)) end;if _chi_tmp1024 then
+do local _chi_tmp1025=__P_.addConstraint(constraints,lhsType,rhsType,rightSection); end;
+_chi_tmp1013=__chicc__types.tBool
  else
-local _chi_tmp804;do local _chi_tmp805;if (__P_.typerUf ~= (nil)) then
-do local _chi_tmp806=__chicc__unification.unifyWithUf(constraints,__P_.typerUf); end;
-do local _chi_tmp807=__P_.clearConstraints(constraints); end;
-local _chi_tmp808=__chicc__unification.ufResolve(__P_.typerUf,lhsType);_chi_tmp805=_chi_tmp808
+local _chi_tmp1026;do local _chi_tmp1027;if (__P_.typerUf ~= (nil)) then
+do local _chi_tmp1028=__chicc__unification.unifyWithUf(constraints,__P_.typerUf); end;
+do local _chi_tmp1029=__P_.clearConstraints(constraints); end;
+local _chi_tmp1030=__chicc__unification.ufResolve(__P_.typerUf,lhsType);_chi_tmp1027=_chi_tmp1030
  else
-_chi_tmp805=lhsType
- end;_chi_tmp804=_chi_tmp805 end;local resolvedLhs=_chi_tmp804;
-do local _chi_tmp809;if (__P_.typerUf ~= (nil)) then
-local _chi_tmp810=__chicc__unification.ufResolve(__P_.typerUf,rhsType);_chi_tmp809=_chi_tmp810
+_chi_tmp1027=lhsType
+ end;_chi_tmp1026=_chi_tmp1027 end;local resolvedLhs=_chi_tmp1026;
+do local _chi_tmp1031;if (__P_.typerUf ~= (nil)) then
+local _chi_tmp1032=__chicc__unification.ufResolve(__P_.typerUf,rhsType);_chi_tmp1031=_chi_tmp1032
  else
-_chi_tmp809=rhsType
- end;_chi_tmp804=_chi_tmp809 end;local resolvedRhs=_chi_tmp804;
-do local _chi_tmp811=__P_.isIntType(resolvedLhs);_chi_tmp804=_chi_tmp811 end;local lhsIsInt=_chi_tmp804;
-do local _chi_tmp812=__P_.isFloatType(resolvedLhs);_chi_tmp804=_chi_tmp812 end;local lhsIsFloat=_chi_tmp804;
-do local _chi_tmp813=__P_.isIntType(resolvedRhs);_chi_tmp804=_chi_tmp813 end;local rhsIsInt=_chi_tmp804;
-do local _chi_tmp814=__P_.isFloatType(resolvedRhs);_chi_tmp804=_chi_tmp814 end;local rhsIsFloat=_chi_tmp804;
-local _chi_tmp815;if (lhsIsInt and rhsIsFloat) then
-_chi_tmp815=__chicc__types.tFloat
- else local _chi_tmp816;if (lhsIsFloat and rhsIsInt) then
-_chi_tmp816=__chicc__types.tFloat
+_chi_tmp1031=rhsType
+ end;_chi_tmp1026=_chi_tmp1031 end;local resolvedRhs=_chi_tmp1026;
+do local _chi_tmp1033=__P_.isIntType(resolvedLhs);_chi_tmp1026=_chi_tmp1033 end;local lhsIsInt=_chi_tmp1026;
+do local _chi_tmp1034=__P_.isFloatType(resolvedLhs);_chi_tmp1026=_chi_tmp1034 end;local lhsIsFloat=_chi_tmp1026;
+do local _chi_tmp1035=__P_.isIntType(resolvedRhs);_chi_tmp1026=_chi_tmp1035 end;local rhsIsInt=_chi_tmp1026;
+do local _chi_tmp1036=__P_.isFloatType(resolvedRhs);_chi_tmp1026=_chi_tmp1036 end;local rhsIsFloat=_chi_tmp1026;
+local _chi_tmp1037;if (lhsIsInt and rhsIsFloat) then
+_chi_tmp1037=__chicc__types.tFloat
+ else local _chi_tmp1038;if (lhsIsFloat and rhsIsInt) then
+_chi_tmp1038=__chicc__types.tFloat
  else
-local _chi_tmp817;do local _chi_tmp818=__chicc__inference_context.icFreshVariable(level);_chi_tmp817=_chi_tmp818 end;local infixResult=_chi_tmp817;
-do local _chi_tmp819=__P_.addConstraint(constraints,infixResult,lhsType,leftSection); end;
-do local _chi_tmp820=__P_.addConstraint(constraints,infixResult,rhsType,rightSection); end;
-_chi_tmp816=infixResult
- end;_chi_tmp815=_chi_tmp816 end;_chi_tmp791=_chi_tmp815
- end;_chi_tmp785=_chi_tmp791 end;_chi_tmp775=_chi_tmp785
- else local _chi_tmp821;local _chi_tmp822 = 'is';if (kind == (_chi_tmp822)) then
-local _chi_tmp823;do local _chi_tmp824=term.castExpr;_chi_tmp823=_chi_tmp824 end;local isExpr_=_chi_tmp823;
-do local _chi_tmp825=__P_.typeTerm(isExpr_,level,constraints); end;
-_chi_tmp821=__chicc__types.tBool
- else local _chi_tmp826;local _chi_tmp827 = 'prefix_op';if (kind == (_chi_tmp827)) then
-local _chi_tmp828;do local _chi_tmp829=term.op;_chi_tmp828=_chi_tmp829 end;local prefixOp=_chi_tmp828;
-do local _chi_tmp830=term.prefixExpr;_chi_tmp828=_chi_tmp830 end;local prefixExpr_=_chi_tmp828;
-do local _chi_tmp831=__P_.typeTerm(prefixExpr_,level,constraints);_chi_tmp828=_chi_tmp831 end;local valueType=_chi_tmp828;
-do local _chi_tmp832=prefixExpr_.section;_chi_tmp828=_chi_tmp832 end;local exprSection=_chi_tmp828;
-local _chi_tmp833;local _chi_tmp834 = '-';if (prefixOp == (_chi_tmp834)) then
-local _chi_tmp835;do local _chi_tmp836=__chicc__inference_context.icFreshVariable(level);_chi_tmp835=_chi_tmp836 end;local prefixResult=_chi_tmp835;
-do local _chi_tmp837=__P_.addConstraint(constraints,prefixResult,valueType,exprSection); end;
-_chi_tmp833=prefixResult
+local _chi_tmp1039;do local _chi_tmp1040=__chicc__inference_context.icFreshVariable(level);_chi_tmp1039=_chi_tmp1040 end;local infixResult=_chi_tmp1039;
+do local _chi_tmp1041=__P_.addConstraint(constraints,infixResult,lhsType,leftSection); end;
+do local _chi_tmp1042=__P_.addConstraint(constraints,infixResult,rhsType,rightSection); end;
+_chi_tmp1038=infixResult
+ end;_chi_tmp1037=_chi_tmp1038 end;_chi_tmp1013=_chi_tmp1037
+ end;_chi_tmp1007=_chi_tmp1013 end;_chi_tmp997=_chi_tmp1007
+ else local _chi_tmp1043;local _chi_tmp1044 = 'is';if (kind == (_chi_tmp1044)) then
+local _chi_tmp1045;do local _chi_tmp1046=term.castExpr;_chi_tmp1045=_chi_tmp1046 end;local isExpr_=_chi_tmp1045;
+do local _chi_tmp1047=__P_.typeTerm(isExpr_,level,constraints); end;
+_chi_tmp1043=__chicc__types.tBool
+ else local _chi_tmp1048;local _chi_tmp1049 = 'prefix_op';if (kind == (_chi_tmp1049)) then
+local _chi_tmp1050;do local _chi_tmp1051=term.op;_chi_tmp1050=_chi_tmp1051 end;local prefixOp=_chi_tmp1050;
+do local _chi_tmp1052=term.prefixExpr;_chi_tmp1050=_chi_tmp1052 end;local prefixExpr_=_chi_tmp1050;
+do local _chi_tmp1053=__P_.typeTerm(prefixExpr_,level,constraints);_chi_tmp1050=_chi_tmp1053 end;local valueType=_chi_tmp1050;
+do local _chi_tmp1054=prefixExpr_.section;_chi_tmp1050=_chi_tmp1054 end;local exprSection=_chi_tmp1050;
+local _chi_tmp1055;local _chi_tmp1056 = '-';if (prefixOp == (_chi_tmp1056)) then
+local _chi_tmp1057;do local _chi_tmp1058=__chicc__inference_context.icFreshVariable(level);_chi_tmp1057=_chi_tmp1058 end;local prefixResult=_chi_tmp1057;
+do local _chi_tmp1059=__P_.addConstraint(constraints,prefixResult,valueType,exprSection); end;
+_chi_tmp1055=prefixResult
  else
-do local _chi_tmp838=__P_.addConstraint(constraints,__chicc__types.tBool,valueType,exprSection); end;
-_chi_tmp833=__chicc__types.tBool
- end;_chi_tmp826=_chi_tmp833
- else local _chi_tmp839;local _chi_tmp840 = 'return';if (kind == (_chi_tmp840)) then
-local _chi_tmp841;do local _chi_tmp842=term.returnValue;_chi_tmp841=_chi_tmp842 end;local returnValue=_chi_tmp841;
-local _chi_tmp843;if (returnValue ~= (nil)) then
-local _chi_tmp844=__P_.typeTerm(returnValue,level,constraints);_chi_tmp843=_chi_tmp844
+do local _chi_tmp1060=__P_.addConstraint(constraints,__chicc__types.tBool,valueType,exprSection); end;
+_chi_tmp1055=__chicc__types.tBool
+ end;_chi_tmp1048=_chi_tmp1055
+ else local _chi_tmp1061;local _chi_tmp1062 = 'return';if (kind == (_chi_tmp1062)) then
+local _chi_tmp1063;do local _chi_tmp1064=term.returnValue;_chi_tmp1063=_chi_tmp1064 end;local returnValue=_chi_tmp1063;
+local _chi_tmp1065;if (returnValue ~= (nil)) then
+local _chi_tmp1066=__P_.typeTerm(returnValue,level,constraints);_chi_tmp1065=_chi_tmp1066
  else
-_chi_tmp843=__chicc__types.tUnit
- end;_chi_tmp839=_chi_tmp843
+_chi_tmp1065=__chicc__types.tUnit
+ end;_chi_tmp1061=_chi_tmp1065
  else
-do local _chi_tmp845 = 'Unknown expression kind: ';local _chi_tmp846=chi_tostring((_chi_tmp845)) .. chi_tostring(kind);local _chi_tmp847=term.section;local _chi_tmp848=__P_.typerErr(_chi_tmp846,_chi_tmp847); end;
-_chi_tmp839=__chicc__types.tUnit
- end;_chi_tmp826=_chi_tmp839 end;_chi_tmp821=_chi_tmp826 end;_chi_tmp775=_chi_tmp821 end;_chi_tmp754=_chi_tmp775 end;_chi_tmp737=_chi_tmp754 end;_chi_tmp684=_chi_tmp737 end;_chi_tmp680=_chi_tmp684 end;_chi_tmp665=_chi_tmp680 end;_chi_tmp557=_chi_tmp665 end;_chi_tmp548=_chi_tmp557 end;_chi_tmp546=_chi_tmp548 end;_chi_tmp544=_chi_tmp546 end;_chi_tmp538=_chi_tmp544 end;_chi_tmp533=_chi_tmp538 end;_chi_tmp504=_chi_tmp533 end;_chi_tmp494=_chi_tmp504 end;_chi_tmp453=_chi_tmp494 end;_chi_tmp349=_chi_tmp453 end;_chi_tmp250=_chi_tmp349 end;_chi_tmp237=_chi_tmp250 end;_chi_tmp193=_chi_tmp237 end;_chi_tmp178=_chi_tmp193 end;_chi_tmp160=_chi_tmp178 end;_chi_tmp153=_chi_tmp160 end;_chi_tmp150=_chi_tmp153 end;local result=_chi_tmp150;
-do local _chi_tmp849=__chicc__ast.setExprType(term,result); end;
+do local _chi_tmp1067 = 'Unknown expression kind: ';local _chi_tmp1068=chi_tostring((_chi_tmp1067)) .. chi_tostring(kind);local _chi_tmp1069=term.section;local _chi_tmp1070=__P_.typerErr(_chi_tmp1068,_chi_tmp1069); end;
+_chi_tmp1061=__chicc__types.tUnit
+ end;_chi_tmp1048=_chi_tmp1061 end;_chi_tmp1043=_chi_tmp1048 end;_chi_tmp997=_chi_tmp1043 end;_chi_tmp976=_chi_tmp997 end;_chi_tmp959=_chi_tmp976 end;_chi_tmp906=_chi_tmp959 end;_chi_tmp902=_chi_tmp906 end;_chi_tmp887=_chi_tmp902 end;_chi_tmp779=_chi_tmp887 end;_chi_tmp770=_chi_tmp779 end;_chi_tmp768=_chi_tmp770 end;_chi_tmp766=_chi_tmp768 end;_chi_tmp760=_chi_tmp766 end;_chi_tmp755=_chi_tmp760 end;_chi_tmp720=_chi_tmp755 end;_chi_tmp710=_chi_tmp720 end;_chi_tmp669=_chi_tmp710 end;_chi_tmp565=_chi_tmp669 end;_chi_tmp466=_chi_tmp565 end;_chi_tmp453=_chi_tmp466 end;_chi_tmp409=_chi_tmp453 end;_chi_tmp394=_chi_tmp409 end;_chi_tmp376=_chi_tmp394 end;_chi_tmp369=_chi_tmp376 end;_chi_tmp366=_chi_tmp369 end;local result=_chi_tmp366;
+do local _chi_tmp1071=__chicc__ast.setExprType(term,result); end;
 return result end;
  end;
 __P_.typeTerm=__P_.typeTermImpl;return __P_
- end;local _chi_info=debug.getinfo(_chi_run,'S');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;if string.sub(_chi_source,1,1)=='@' then _chi_source=string.sub(_chi_source,2) end;_chi_line_map[2]=13;_chi_line_map[3]=14;_chi_line_map[4]=15;_chi_line_map[5]=16;_chi_line_map[6]=15;_chi_line_map[7]=18;_chi_line_map[8]=19;_chi_line_map[9]=15;_chi_line_map[10]=13;_chi_line_map[11]=28;_chi_line_map[12]=29;_chi_line_map[13]=30;_chi_line_map[14]=31;_chi_line_map[15]=30;_chi_line_map[16]=33;_chi_line_map[17]=34;_chi_line_map[18]=35;_chi_line_map[19]=36;_chi_line_map[20]=37;_chi_line_map[21]=38;_chi_line_map[22]=39;_chi_line_map[23]=40;_chi_line_map[24]=41;_chi_line_map[25]=39;_chi_line_map[26]=43;_chi_line_map[27]=36;_chi_line_map[28]=45;_chi_line_map[29]=28;_chi_line_map[30]=53;_chi_line_map[31]=54;_chi_line_map[32]=53;_chi_line_map[33]=62;_chi_line_map[34]=63;_chi_line_map[35]=64;_chi_line_map[36]=65;_chi_line_map[37]=66;_chi_line_map[38]=67;_chi_line_map[39]=68;_chi_line_map[40]=69;_chi_line_map[41]=70;_chi_line_map[42]=71;_chi_line_map[43]=72;_chi_line_map[44]=73;_chi_line_map[45]=74;_chi_line_map[46]=75;_chi_line_map[47]=76;_chi_line_map[48]=77;_chi_line_map[49]=76;_chi_line_map[50]=79;_chi_line_map[51]=74;_chi_line_map[52]=70;_chi_line_map[53]=82;_chi_line_map[54]=67;_chi_line_map[55]=84;_chi_line_map[56]=62;_chi_line_map[57]=90;_chi_line_map[58]=91;_chi_line_map[59]=92;_chi_line_map[60]=93;_chi_line_map[61]=94;_chi_line_map[62]=95;_chi_line_map[63]=96;_chi_line_map[64]=97;_chi_line_map[65]=98;_chi_line_map[66]=97;_chi_line_map[67]=100;_chi_line_map[68]=95;_chi_line_map[69]=102;_chi_line_map[70]=103;_chi_line_map[71]=104;_chi_line_map[72]=103;_chi_line_map[73]=106;_chi_line_map[74]=107;_chi_line_map[75]=108;_chi_line_map[76]=109;_chi_line_map[77]=110;_chi_line_map[78]=111;_chi_line_map[79]=112;_chi_line_map[80]=109;_chi_line_map[81]=114;_chi_line_map[82]=90;_chi_line_map[83]=123;_chi_line_map[84]=124;_chi_line_map[85]=125;_chi_line_map[86]=126;_chi_line_map[87]=127;_chi_line_map[88]=128;_chi_line_map[89]=129;_chi_line_map[90]=130;_chi_line_map[91]=131;_chi_line_map[92]=129;_chi_line_map[93]=133;_chi_line_map[94]=123;_chi_line_map[95]=138;_chi_line_map[96]=139;_chi_line_map[97]=138;_chi_line_map[98]=144;_chi_line_map[99]=145;_chi_line_map[100]=146;_chi_line_map[101]=144;_chi_line_map[102]=153;_chi_line_map[103]=154;_chi_line_map[104]=155;_chi_line_map[105]=156;_chi_line_map[106]=155;_chi_line_map[107]=153;_chi_line_map[108]=162;_chi_line_map[109]=163;_chi_line_map[110]=164;_chi_line_map[111]=165;_chi_line_map[112]=166;_chi_line_map[113]=167;_chi_line_map[114]=168;_chi_line_map[115]=169;_chi_line_map[116]=170;_chi_line_map[117]=168;_chi_line_map[118]=164;_chi_line_map[119]=173;_chi_line_map[120]=162;_chi_line_map[121]=176;_chi_line_map[122]=177;_chi_line_map[123]=178;_chi_line_map[124]=179;_chi_line_map[125]=180;_chi_line_map[126]=181;_chi_line_map[127]=182;_chi_line_map[128]=183;_chi_line_map[129]=184;_chi_line_map[130]=182;_chi_line_map[131]=178;_chi_line_map[132]=187;_chi_line_map[133]=176;_chi_line_map[134]=193;_chi_line_map[135]=195;_chi_line_map[136]=196;_chi_line_map[137]=195;_chi_line_map[138]=199;_chi_line_map[139]=200;_chi_line_map[140]=199;_chi_line_map[141]=205;_chi_line_map[142]=206;_chi_line_map[143]=207;_chi_line_map[144]=208;_chi_line_map[145]=209;_chi_line_map[146]=208;_chi_line_map[147]=211;_chi_line_map[148]=212;_chi_line_map[149]=213;_chi_line_map[150]=214;_chi_line_map[151]=215;_chi_line_map[152]=216;_chi_line_map[153]=217;_chi_line_map[154]=215;_chi_line_map[155]=219;_chi_line_map[156]=208;_chi_line_map[157]=221;_chi_line_map[158]=222;_chi_line_map[159]=223;_chi_line_map[160]=208;_chi_line_map[161]=225;_chi_line_map[162]=208;_chi_line_map[163]=205;_chi_line_map[164]=230;_chi_line_map[165]=234;_chi_line_map[166]=235;_chi_line_map[167]=236;_chi_line_map[168]=237;_chi_line_map[169]=238;_chi_line_map[170]=239;_chi_line_map[171]=240;_chi_line_map[172]=241;_chi_line_map[173]=242;_chi_line_map[174]=238;_chi_line_map[175]=244;_chi_line_map[176]=234;_chi_line_map[177]=248;_chi_line_map[178]=249;_chi_line_map[179]=248;_chi_line_map[180]=252;_chi_line_map[181]=253;_chi_line_map[182]=255;_chi_line_map[183]=257;_chi_line_map[184]=255;_chi_line_map[185]=260;_chi_line_map[186]=261;_chi_line_map[187]=262;_chi_line_map[188]=263;_chi_line_map[189]=255;_chi_line_map[190]=266;_chi_line_map[191]=267;_chi_line_map[192]=268;_chi_line_map[193]=269;_chi_line_map[194]=270;_chi_line_map[195]=271;_chi_line_map[196]=272;_chi_line_map[197]=273;_chi_line_map[198]=274;_chi_line_map[199]=275;_chi_line_map[200]=276;_chi_line_map[201]=277;_chi_line_map[202]=270;_chi_line_map[203]=279;_chi_line_map[204]=255;_chi_line_map[205]=282;_chi_line_map[206]=283;_chi_line_map[207]=284;_chi_line_map[208]=285;_chi_line_map[209]=286;_chi_line_map[210]=287;_chi_line_map[211]=288;_chi_line_map[212]=289;_chi_line_map[213]=290;_chi_line_map[214]=291;_chi_line_map[215]=287;_chi_line_map[216]=293;_chi_line_map[217]=255;_chi_line_map[218]=296;_chi_line_map[219]=297;_chi_line_map[220]=298;_chi_line_map[221]=299;_chi_line_map[222]=300;_chi_line_map[223]=301;_chi_line_map[224]=302;_chi_line_map[225]=303;_chi_line_map[226]=302;_chi_line_map[227]=305;_chi_line_map[228]=302;_chi_line_map[229]=307;_chi_line_map[230]=308;_chi_line_map[231]=309;_chi_line_map[232]=310;_chi_line_map[233]=311;_chi_line_map[234]=312;_chi_line_map[235]=313;_chi_line_map[236]=314;_chi_line_map[237]=315;_chi_line_map[238]=316;_chi_line_map[239]=315;_chi_line_map[240]=318;_chi_line_map[241]=315;_chi_line_map[242]=320;_chi_line_map[243]=315;_chi_line_map[244]=323;_chi_line_map[245]=324;_chi_line_map[246]=325;_chi_line_map[247]=326;_chi_line_map[248]=327;_chi_line_map[249]=328;_chi_line_map[250]=329;_chi_line_map[251]=326;_chi_line_map[252]=324;_chi_line_map[253]=332;_chi_line_map[254]=333;_chi_line_map[255]=334;_chi_line_map[256]=311;_chi_line_map[257]=336;_chi_line_map[258]=337;_chi_line_map[259]=338;_chi_line_map[260]=339;_chi_line_map[261]=340;_chi_line_map[262]=341;_chi_line_map[263]=342;_chi_line_map[264]=340;_chi_line_map[265]=344;_chi_line_map[266]=296;_chi_line_map[267]=346;_chi_line_map[268]=255;_chi_line_map[269]=349;_chi_line_map[270]=350;_chi_line_map[271]=351;_chi_line_map[272]=352;_chi_line_map[273]=351;_chi_line_map[274]=354;_chi_line_map[275]=355;_chi_line_map[276]=356;_chi_line_map[277]=354;_chi_line_map[278]=358;_chi_line_map[279]=351;_chi_line_map[280]=255;_chi_line_map[281]=362;_chi_line_map[282]=364;_chi_line_map[283]=365;_chi_line_map[284]=366;_chi_line_map[285]=367;_chi_line_map[286]=364;_chi_line_map[287]=369;_chi_line_map[288]=364;_chi_line_map[289]=371;_chi_line_map[290]=372;_chi_line_map[291]=373;_chi_line_map[292]=374;_chi_line_map[293]=375;_chi_line_map[294]=376;_chi_line_map[295]=377;_chi_line_map[296]=378;_chi_line_map[297]=379;_chi_line_map[298]=375;_chi_line_map[299]=381;_chi_line_map[300]=384;_chi_line_map[301]=385;_chi_line_map[302]=386;_chi_line_map[303]=387;_chi_line_map[304]=388;_chi_line_map[305]=389;_chi_line_map[306]=390;_chi_line_map[307]=393;_chi_line_map[308]=394;_chi_line_map[309]=395;_chi_line_map[310]=396;_chi_line_map[311]=390;_chi_line_map[312]=400;_chi_line_map[313]=401;_chi_line_map[314]=402;_chi_line_map[315]=403;_chi_line_map[316]=404;_chi_line_map[317]=405;_chi_line_map[318]=406;_chi_line_map[319]=407;_chi_line_map[320]=408;_chi_line_map[321]=409;_chi_line_map[322]=390;_chi_line_map[323]=411;_chi_line_map[324]=412;_chi_line_map[325]=413;_chi_line_map[326]=414;_chi_line_map[327]=415;_chi_line_map[328]=416;_chi_line_map[329]=417;_chi_line_map[330]=418;_chi_line_map[331]=419;_chi_line_map[332]=420;_chi_line_map[333]=421;_chi_line_map[334]=390;_chi_line_map[335]=388;_chi_line_map[336]=385;_chi_line_map[337]=427;_chi_line_map[338]=428;_chi_line_map[339]=429;_chi_line_map[340]=430;_chi_line_map[341]=431;_chi_line_map[342]=432;_chi_line_map[343]=433;_chi_line_map[344]=434;_chi_line_map[345]=435;_chi_line_map[346]=436;_chi_line_map[347]=435;_chi_line_map[348]=438;_chi_line_map[349]=439;_chi_line_map[350]=440;_chi_line_map[351]=433;_chi_line_map[352]=442;_chi_line_map[353]=443;_chi_line_map[354]=444;_chi_line_map[355]=445;_chi_line_map[356]=447;_chi_line_map[357]=448;_chi_line_map[358]=255;_chi_line_map[359]=451;_chi_line_map[360]=452;_chi_line_map[361]=453;_chi_line_map[362]=454;_chi_line_map[363]=455;_chi_line_map[364]=456;_chi_line_map[365]=453;_chi_line_map[366]=458;_chi_line_map[367]=459;_chi_line_map[368]=453;_chi_line_map[369]=461;_chi_line_map[370]=462;_chi_line_map[371]=465;_chi_line_map[372]=466;_chi_line_map[373]=465;_chi_line_map[374]=468;_chi_line_map[375]=465;_chi_line_map[376]=472;_chi_line_map[377]=473;_chi_line_map[378]=474;_chi_line_map[379]=475;_chi_line_map[380]=476;_chi_line_map[381]=474;_chi_line_map[382]=472;_chi_line_map[383]=479;_chi_line_map[384]=480;_chi_line_map[385]=481;_chi_line_map[386]=483;_chi_line_map[387]=484;_chi_line_map[388]=485;_chi_line_map[389]=486;_chi_line_map[390]=487;_chi_line_map[391]=488;_chi_line_map[392]=489;_chi_line_map[393]=490;_chi_line_map[394]=489;_chi_line_map[395]=492;_chi_line_map[396]=486;_chi_line_map[397]=481;_chi_line_map[398]=496;_chi_line_map[399]=498;_chi_line_map[400]=499;_chi_line_map[401]=501;_chi_line_map[402]=502;_chi_line_map[403]=503;_chi_line_map[404]=504;_chi_line_map[405]=505;_chi_line_map[406]=506;_chi_line_map[407]=496;_chi_line_map[408]=509;_chi_line_map[409]=510;_chi_line_map[410]=512;_chi_line_map[411]=513;_chi_line_map[412]=512;_chi_line_map[413]=515;_chi_line_map[414]=516;_chi_line_map[415]=517;_chi_line_map[416]=518;_chi_line_map[417]=517;_chi_line_map[418]=520;_chi_line_map[419]=521;_chi_line_map[420]=522;_chi_line_map[421]=523;_chi_line_map[422]=522;_chi_line_map[423]=525;_chi_line_map[424]=526;_chi_line_map[425]=527;_chi_line_map[426]=528;_chi_line_map[427]=527;_chi_line_map[428]=530;_chi_line_map[429]=527;_chi_line_map[430]=522;_chi_line_map[431]=517;_chi_line_map[432]=512;_chi_line_map[433]=535;_chi_line_map[434]=536;_chi_line_map[435]=537;_chi_line_map[436]=538;_chi_line_map[437]=539;_chi_line_map[438]=535;_chi_line_map[439]=546;_chi_line_map[440]=547;_chi_line_map[441]=548;_chi_line_map[442]=556;_chi_line_map[443]=557;_chi_line_map[444]=558;_chi_line_map[445]=559;_chi_line_map[446]=560;_chi_line_map[447]=561;_chi_line_map[448]=562;_chi_line_map[449]=563;_chi_line_map[450]=559;_chi_line_map[451]=565;_chi_line_map[452]=566;_chi_line_map[453]=567;_chi_line_map[454]=568;_chi_line_map[455]=569;_chi_line_map[456]=559;_chi_line_map[457]=571;_chi_line_map[458]=575;_chi_line_map[459]=559;_chi_line_map[460]=548;_chi_line_map[461]=579;_chi_line_map[462]=580;_chi_line_map[463]=581;_chi_line_map[464]=582;_chi_line_map[465]=548;_chi_line_map[466]=535;_chi_line_map[467]=496;_chi_line_map[468]=255;_chi_line_map[469]=588;_chi_line_map[470]=589;_chi_line_map[471]=590;_chi_line_map[472]=589;_chi_line_map[473]=592;_chi_line_map[474]=589;_chi_line_map[475]=596;_chi_line_map[476]=597;_chi_line_map[477]=596;_chi_line_map[478]=599;_chi_line_map[479]=600;_chi_line_map[480]=601;_chi_line_map[481]=600;_chi_line_map[482]=603;_chi_line_map[483]=604;_chi_line_map[484]=605;_chi_line_map[485]=609;_chi_line_map[486]=610;_chi_line_map[487]=611;_chi_line_map[488]=612;_chi_line_map[489]=613;_chi_line_map[490]=614;_chi_line_map[491]=615;_chi_line_map[492]=614;_chi_line_map[493]=617;_chi_line_map[494]=614;_chi_line_map[495]=619;_chi_line_map[496]=614;_chi_line_map[497]=610;_chi_line_map[498]=622;_chi_line_map[499]=623;_chi_line_map[500]=624;_chi_line_map[501]=625;_chi_line_map[502]=624;_chi_line_map[503]=628;_chi_line_map[504]=629;_chi_line_map[505]=630;_chi_line_map[506]=631;_chi_line_map[507]=632;_chi_line_map[508]=624;_chi_line_map[509]=610;_chi_line_map[510]=635;_chi_line_map[511]=638;_chi_line_map[512]=639;_chi_line_map[513]=255;_chi_line_map[514]=642;_chi_line_map[515]=643;_chi_line_map[516]=644;_chi_line_map[517]=645;_chi_line_map[518]=646;_chi_line_map[519]=647;_chi_line_map[520]=648;_chi_line_map[521]=649;_chi_line_map[522]=255;_chi_line_map[523]=652;_chi_line_map[524]=653;_chi_line_map[525]=654;_chi_line_map[526]=655;_chi_line_map[527]=658;_chi_line_map[528]=659;_chi_line_map[529]=660;_chi_line_map[530]=661;_chi_line_map[531]=662;_chi_line_map[532]=663;_chi_line_map[533]=664;_chi_line_map[534]=665;_chi_line_map[535]=666;_chi_line_map[536]=665;_chi_line_map[537]=668;_chi_line_map[538]=665;_chi_line_map[539]=670;_chi_line_map[540]=665;_chi_line_map[541]=672;_chi_line_map[542]=665;_chi_line_map[543]=662;_chi_line_map[544]=675;_chi_line_map[545]=676;_chi_line_map[546]=675;_chi_line_map[547]=678;_chi_line_map[548]=675;_chi_line_map[549]=662;_chi_line_map[550]=255;_chi_line_map[551]=683;_chi_line_map[552]=684;_chi_line_map[553]=685;_chi_line_map[554]=255;_chi_line_map[555]=688;_chi_line_map[556]=689;_chi_line_map[557]=690;_chi_line_map[558]=691;_chi_line_map[559]=255;_chi_line_map[560]=694;_chi_line_map[561]=255;_chi_line_map[562]=697;_chi_line_map[563]=255;_chi_line_map[564]=700;_chi_line_map[565]=701;_chi_line_map[566]=702;_chi_line_map[567]=703;_chi_line_map[568]=704;_chi_line_map[569]=705;_chi_line_map[570]=706;_chi_line_map[571]=255;_chi_line_map[572]=709;_chi_line_map[573]=710;_chi_line_map[574]=711;_chi_line_map[575]=712;_chi_line_map[576]=713;_chi_line_map[577]=714;_chi_line_map[578]=715;_chi_line_map[579]=716;_chi_line_map[580]=715;_chi_line_map[581]=718;_chi_line_map[582]=719;_chi_line_map[583]=718;_chi_line_map[584]=721;_chi_line_map[585]=722;_chi_line_map[586]=723;_chi_line_map[587]=724;_chi_line_map[588]=721;_chi_line_map[589]=726;_chi_line_map[590]=727;_chi_line_map[591]=721;_chi_line_map[592]=729;_chi_line_map[593]=730;_chi_line_map[594]=731;_chi_line_map[595]=732;_chi_line_map[596]=733;_chi_line_map[597]=734;_chi_line_map[598]=735;_chi_line_map[599]=736;_chi_line_map[600]=737;_chi_line_map[601]=738;_chi_line_map[602]=733;_chi_line_map[603]=741;_chi_line_map[604]=742;_chi_line_map[605]=744;_chi_line_map[606]=746;_chi_line_map[607]=747;_chi_line_map[608]=748;_chi_line_map[609]=749;_chi_line_map[610]=747;_chi_line_map[611]=751;_chi_line_map[612]=752;_chi_line_map[613]=753;_chi_line_map[614]=754;_chi_line_map[615]=747;_chi_line_map[616]=756;_chi_line_map[617]=747;_chi_line_map[618]=744;_chi_line_map[619]=760;_chi_line_map[620]=761;_chi_line_map[621]=760;_chi_line_map[622]=763;_chi_line_map[623]=764;_chi_line_map[624]=765;_chi_line_map[625]=766;_chi_line_map[626]=744;_chi_line_map[627]=769;_chi_line_map[628]=770;_chi_line_map[629]=769;_chi_line_map[630]=772;_chi_line_map[631]=773;_chi_line_map[632]=775;_chi_line_map[633]=777;_chi_line_map[634]=778;_chi_line_map[635]=777;_chi_line_map[636]=780;_chi_line_map[637]=781;_chi_line_map[638]=782;_chi_line_map[639]=783;_chi_line_map[640]=784;_chi_line_map[641]=785;_chi_line_map[642]=775;_chi_line_map[643]=788;_chi_line_map[644]=789;_chi_line_map[645]=788;_chi_line_map[646]=775;_chi_line_map[647]=794;_chi_line_map[648]=795;_chi_line_map[649]=796;_chi_line_map[650]=797;_chi_line_map[651]=795;_chi_line_map[652]=799;_chi_line_map[653]=800;_chi_line_map[654]=801;_chi_line_map[655]=802;_chi_line_map[656]=799;_chi_line_map[657]=804;_chi_line_map[658]=799;_chi_line_map[659]=744;_chi_line_map[660]=807;_chi_line_map[661]=744;_chi_line_map[662]=811;_chi_line_map[663]=812;_chi_line_map[664]=813;_chi_line_map[665]=814;_chi_line_map[666]=815;_chi_line_map[667]=816;_chi_line_map[668]=817;_chi_line_map[669]=818;_chi_line_map[670]=819;_chi_line_map[671]=814;_chi_line_map[672]=821;_chi_line_map[673]=822;_chi_line_map[674]=823;_chi_line_map[675]=811;_chi_line_map[676]=825;_chi_line_map[677]=255;_chi_line_map[678]=828;_chi_line_map[679]=829;_chi_line_map[680]=830;_chi_line_map[681]=831;_chi_line_map[682]=832;_chi_line_map[683]=834;_chi_line_map[684]=835;_chi_line_map[685]=836;_chi_line_map[686]=837;_chi_line_map[687]=839;_chi_line_map[688]=840;_chi_line_map[689]=841;_chi_line_map[690]=842;_chi_line_map[691]=843;_chi_line_map[692]=844;_chi_line_map[693]=845;_chi_line_map[694]=255;_chi_line_map[695]=848;_chi_line_map[696]=849;_chi_line_map[697]=255;_chi_line_map[698]=852;_chi_line_map[699]=853;_chi_line_map[700]=854;_chi_line_map[701]=855;_chi_line_map[702]=856;_chi_line_map[703]=858;_chi_line_map[704]=859;_chi_line_map[705]=860;_chi_line_map[706]=861;_chi_line_map[707]=862;_chi_line_map[708]=863;_chi_line_map[709]=864;_chi_line_map[710]=865;_chi_line_map[711]=866;_chi_line_map[712]=867;_chi_line_map[713]=868;_chi_line_map[714]=870;_chi_line_map[715]=871;_chi_line_map[716]=872;_chi_line_map[717]=873;_chi_line_map[718]=874;_chi_line_map[719]=875;_chi_line_map[720]=877;_chi_line_map[721]=878;_chi_line_map[722]=879;_chi_line_map[723]=880;_chi_line_map[724]=881;_chi_line_map[725]=882;_chi_line_map[726]=883;_chi_line_map[727]=879;_chi_line_map[728]=886;_chi_line_map[729]=887;_chi_line_map[730]=888;_chi_line_map[731]=889;_chi_line_map[732]=890;_chi_line_map[733]=891;_chi_line_map[734]=892;_chi_line_map[735]=893;_chi_line_map[736]=894;_chi_line_map[737]=895;_chi_line_map[738]=896;_chi_line_map[739]=897;_chi_line_map[740]=872;_chi_line_map[741]=871;_chi_line_map[742]=900;_chi_line_map[743]=901;_chi_line_map[744]=871;_chi_line_map[745]=903;_chi_line_map[746]=861;_chi_line_map[747]=905;_chi_line_map[748]=255;_chi_line_map[749]=908;_chi_line_map[750]=909;_chi_line_map[751]=910;_chi_line_map[752]=911;_chi_line_map[753]=912;_chi_line_map[754]=913;_chi_line_map[755]=914;_chi_line_map[756]=915;_chi_line_map[757]=916;_chi_line_map[758]=917;_chi_line_map[759]=255;_chi_line_map[760]=920;_chi_line_map[761]=921;_chi_line_map[762]=922;_chi_line_map[763]=923;_chi_line_map[764]=924;_chi_line_map[765]=925;_chi_line_map[766]=926;_chi_line_map[767]=927;_chi_line_map[768]=928;_chi_line_map[769]=929;_chi_line_map[770]=930;_chi_line_map[771]=931;_chi_line_map[772]=932;_chi_line_map[773]=933;_chi_line_map[774]=255;_chi_line_map[775]=936;_chi_line_map[776]=937;_chi_line_map[777]=938;_chi_line_map[778]=939;_chi_line_map[779]=940;_chi_line_map[780]=941;_chi_line_map[781]=942;_chi_line_map[782]=943;_chi_line_map[783]=944;_chi_line_map[784]=945;_chi_line_map[785]=946;_chi_line_map[786]=943;_chi_line_map[787]=948;_chi_line_map[788]=949;_chi_line_map[789]=943;_chi_line_map[790]=953;_chi_line_map[791]=954;_chi_line_map[792]=955;_chi_line_map[793]=956;_chi_line_map[794]=953;_chi_line_map[795]=957;_chi_line_map[796]=953;_chi_line_map[797]=958;_chi_line_map[798]=959;_chi_line_map[799]=958;_chi_line_map[800]=960;_chi_line_map[801]=958;_chi_line_map[802]=961;_chi_line_map[803]=962;_chi_line_map[804]=963;_chi_line_map[805]=964;_chi_line_map[806]=965;_chi_line_map[807]=967;_chi_line_map[808]=965;_chi_line_map[809]=970;_chi_line_map[810]=965;_chi_line_map[811]=973;_chi_line_map[812]=974;_chi_line_map[813]=975;_chi_line_map[814]=976;_chi_line_map[815]=965;_chi_line_map[816]=943;_chi_line_map[817]=255;_chi_line_map[818]=981;_chi_line_map[819]=982;_chi_line_map[820]=983;_chi_line_map[821]=255;_chi_line_map[822]=986;_chi_line_map[823]=987;_chi_line_map[824]=988;_chi_line_map[825]=989;_chi_line_map[826]=990;_chi_line_map[827]=992;_chi_line_map[828]=993;_chi_line_map[829]=994;_chi_line_map[830]=990;_chi_line_map[831]=997;_chi_line_map[832]=998;_chi_line_map[833]=990;_chi_line_map[834]=255;_chi_line_map[835]=1002;_chi_line_map[836]=1003;_chi_line_map[837]=1004;_chi_line_map[838]=1003;_chi_line_map[839]=1006;_chi_line_map[840]=1003;_chi_line_map[841]=255;_chi_line_map[842]=1009;_chi_line_map[843]=1010;_chi_line_map[844]=255;_chi_line_map[845]=1014;_chi_line_map[846]=1015;_chi_line_map[847]=252;_chi_line_map[848]=1017;local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..':'.._chi_generated..':'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..':'.._chi_source_line..':'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;return _chi_result end;m17();function m18() local _chi_line_map={};local function _chi_run()local __P_ = package.loaded['chicc/compiler'] or {_package={},_types={}};package.loaded['chicc/compiler'] = __P_;local __S_ = __P_._package;local __T_ = __P_._types;__S_.newCompilationResult={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}},{tag="any"},{tag="typeref",ids={{"chicc","compiler","CompilationResult"}}}},typeParams={},defaults=0}'};__S_.hasErrors={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","compiler","CompilationResult"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.newLuaCompilationEnv={public=true,mutable=false,type='{tag="fn",types={{tag="any"}},typeParams={},defaults=0}'};__S_.mergeImports={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.typeParamNames={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.splitExprs={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="record",ids={},fields={{"functions",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"code",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}}},typeParams={}}},typeParams={},defaults=0}'};__S_.convertImports={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Import"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.convertTypeAliases={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="array",elem={tag="typeref",ids={{"chicc","ast","TypeAlias"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.markUsedWalk={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.markUsed={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.markUsedWalkImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.replaceTypes={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.thrownMessage={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="typeref",ids={{"chicc","messages","Message"}}}},typeParams={},defaults=0}'};__S_.variantTypeAliases={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","parse_ast","ParseVariantTypeDefinition"}}},{tag="typeref",ids={{"chicc","symbols","CompileTables"}}},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.parseSource={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"}},typeParams={},defaults=0}'};__S_.compile={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="typeref",ids={{"chicc","compiler","CompilationResult"}}}},typeParams={},defaults=0}'};__S_.compileToLua={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="any"}},typeParams={},defaults=0}'};__S_.replAutoImports={public=false,mutable=false,type='{tag="array",elem={tag="typeref",ids={{"chicc","compiler","ReplAutoImport"}}},typeParams={},ids={{"std","lang.array","array"}}}'};__S_.luaTableKeys={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.replUserNames={public=false,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.newReplCompilationEnv={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","compiler","ReplSession"}}}},typeParams={},defaults=0}'};__S_.replPrelude={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","compiler","ReplSession"}}},{tag="array",elem={tag="typeref",ids={{"chicc","parse_ast","ParseImport"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.replDefinedNames={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Program"}}},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.compileReplLine={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="typeref",ids={{"chicc","compiler","ReplSession"}}},{tag="typeref",ids={{"chicc","compiler","ReplLine"}}}},typeParams={},defaults=0}'};__S_.commitReplLine={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","compiler","ReplSession"}}},{tag="typeref",ids={{"chicc","compiler","ReplLine"}}},{tag="unit"}},typeParams={},defaults=0}'};__S_.saveReplMetadata={public=true,mutable=false,type='{tag="fn",types={{tag="any"}},typeParams={},defaults=0}'};__S_.restoreReplMetadata={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.formatMessage={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="string"}},typeParams={},defaults=0}'};__T_.CompilationResult='{tag="record",ids={{"chicc","compiler","CompilationResult"}},fields={{"messages",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"program",{tag="any"}}},typeParams={}}';__T_.ReplAutoImport='{tag="record",ids={{"chicc","compiler","ReplAutoImport"}},fields={{"moduleName",{tag="string"}},{"packageName",{tag="string"}},{"names",{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}}},typeParams={}}';__T_.ReplSession='{tag="record",ids={{"chicc","compiler","ReplSession"}},fields={{"imports",{tag="any"}}},typeParams={}}';__T_.ReplNamedFn='{tag="record",ids={{"chicc","compiler","ReplNamedFn"}},fields={{"name",{tag="string"}},{"paramNames",{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},{"fnType",{tag="typeref",ids={{"chicc","types","Type"}}}}},typeParams={}}';__T_.ReplLine='{tag="record",ids={{"chicc","compiler","ReplLine"}},fields={{"messages",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"luaCode",{tag="sum",ids={},lhs={tag="string"},rhs={tag="unit"},typeParams={}}},{"shouldPrint",{tag="bool"}},{"valueType",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},{"namedFns",{tag="array",elem={tag="typeref",ids={{"chicc","compiler","ReplNamedFn"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"definedNames",{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},{"imports",{tag="array",elem={tag="typeref",ids={{"chicc","parse_ast","ParseImport"}}},typeParams={},ids={{"std","lang.array","array"}}}}},typeParams={}}';local __std__lang_array = require("std/lang.array");local __std__lang = require("std/lang");local __chicc__ast = require("chicc/ast");local __chicc__messages = require("chicc/messages");local __chicc__symbols = require("chicc/symbols");local __chicc__ast_converter = require("chicc/ast_converter");local __chicc__source = require("chicc/source");local __chicc__checks = require("chicc/checks");local __chicc__inference_context = require("chicc/inference_context");local __chicc__emitter = require("chicc/emitter");local __std__lang_map = require("std/lang.map");local __chicc__parse_ast = require("chicc/parse_ast");
+ end;local _chi_info=debug.getinfo(_chi_run,'S');local _chi_source=_chi_info.source;local _chi_short_source=_chi_info.short_src;if string.sub(_chi_source,1,1)=='@' then _chi_source=string.sub(_chi_source,2) end;_chi_line_map[2]=13;_chi_line_map[3]=14;_chi_line_map[4]=15;_chi_line_map[5]=16;_chi_line_map[6]=15;_chi_line_map[7]=18;_chi_line_map[8]=19;_chi_line_map[9]=15;_chi_line_map[10]=13;_chi_line_map[11]=28;_chi_line_map[12]=29;_chi_line_map[13]=30;_chi_line_map[14]=31;_chi_line_map[15]=30;_chi_line_map[16]=33;_chi_line_map[17]=34;_chi_line_map[18]=35;_chi_line_map[19]=36;_chi_line_map[20]=37;_chi_line_map[21]=38;_chi_line_map[22]=39;_chi_line_map[23]=40;_chi_line_map[24]=41;_chi_line_map[25]=39;_chi_line_map[26]=43;_chi_line_map[27]=36;_chi_line_map[28]=45;_chi_line_map[29]=28;_chi_line_map[30]=53;_chi_line_map[31]=54;_chi_line_map[32]=53;_chi_line_map[33]=62;_chi_line_map[34]=63;_chi_line_map[35]=64;_chi_line_map[36]=65;_chi_line_map[37]=66;_chi_line_map[38]=67;_chi_line_map[39]=68;_chi_line_map[40]=69;_chi_line_map[41]=70;_chi_line_map[42]=71;_chi_line_map[43]=72;_chi_line_map[44]=73;_chi_line_map[45]=74;_chi_line_map[46]=75;_chi_line_map[47]=76;_chi_line_map[48]=77;_chi_line_map[49]=76;_chi_line_map[50]=79;_chi_line_map[51]=74;_chi_line_map[52]=70;_chi_line_map[53]=82;_chi_line_map[54]=67;_chi_line_map[55]=84;_chi_line_map[56]=62;_chi_line_map[57]=90;_chi_line_map[58]=91;_chi_line_map[59]=92;_chi_line_map[60]=93;_chi_line_map[61]=94;_chi_line_map[62]=95;_chi_line_map[63]=96;_chi_line_map[64]=97;_chi_line_map[65]=98;_chi_line_map[66]=97;_chi_line_map[67]=100;_chi_line_map[68]=95;_chi_line_map[69]=102;_chi_line_map[70]=103;_chi_line_map[71]=104;_chi_line_map[72]=103;_chi_line_map[73]=106;_chi_line_map[74]=107;_chi_line_map[75]=108;_chi_line_map[76]=109;_chi_line_map[77]=110;_chi_line_map[78]=111;_chi_line_map[79]=112;_chi_line_map[80]=109;_chi_line_map[81]=114;_chi_line_map[82]=90;_chi_line_map[83]=121;_chi_line_map[84]=122;_chi_line_map[85]=123;_chi_line_map[86]=121;_chi_line_map[87]=126;_chi_line_map[88]=127;_chi_line_map[89]=128;_chi_line_map[90]=129;_chi_line_map[91]=130;_chi_line_map[92]=131;_chi_line_map[93]=132;_chi_line_map[94]=133;_chi_line_map[95]=134;_chi_line_map[96]=133;_chi_line_map[97]=136;_chi_line_map[98]=137;_chi_line_map[99]=131;_chi_line_map[100]=139;_chi_line_map[101]=126;_chi_line_map[102]=142;_chi_line_map[103]=143;_chi_line_map[104]=142;_chi_line_map[105]=146;_chi_line_map[106]=147;_chi_line_map[107]=146;_chi_line_map[108]=151;_chi_line_map[109]=152;_chi_line_map[110]=151;_chi_line_map[111]=155;_chi_line_map[112]=156;_chi_line_map[113]=155;_chi_line_map[114]=159;_chi_line_map[115]=160;_chi_line_map[116]=159;_chi_line_map[117]=166;_chi_line_map[118]=167;_chi_line_map[119]=168;_chi_line_map[120]=169;_chi_line_map[121]=170;_chi_line_map[122]=167;_chi_line_map[123]=173;_chi_line_map[124]=174;_chi_line_map[125]=175;_chi_line_map[126]=176;_chi_line_map[127]=177;_chi_line_map[128]=178;_chi_line_map[129]=179;_chi_line_map[130]=175;_chi_line_map[131]=181;_chi_line_map[132]=182;_chi_line_map[133]=174;_chi_line_map[134]=185;_chi_line_map[135]=186;_chi_line_map[136]=187;_chi_line_map[137]=188;_chi_line_map[138]=189;_chi_line_map[139]=190;_chi_line_map[140]=191;_chi_line_map[141]=192;_chi_line_map[142]=193;_chi_line_map[143]=190;_chi_line_map[144]=195;_chi_line_map[145]=185;_chi_line_map[146]=198;_chi_line_map[147]=199;_chi_line_map[148]=200;_chi_line_map[149]=199;_chi_line_map[150]=202;_chi_line_map[151]=203;_chi_line_map[152]=202;_chi_line_map[153]=205;_chi_line_map[154]=198;_chi_line_map[155]=208;_chi_line_map[156]=209;_chi_line_map[157]=210;_chi_line_map[158]=211;_chi_line_map[159]=208;_chi_line_map[160]=213;_chi_line_map[161]=166;_chi_line_map[162]=216;_chi_line_map[163]=217;_chi_line_map[164]=218;_chi_line_map[165]=219;_chi_line_map[166]=220;_chi_line_map[167]=221;_chi_line_map[168]=220;_chi_line_map[169]=226;_chi_line_map[170]=227;_chi_line_map[171]=226;_chi_line_map[172]=229;_chi_line_map[173]=230;_chi_line_map[174]=229;_chi_line_map[175]=232;_chi_line_map[176]=217;_chi_line_map[177]=235;_chi_line_map[178]=236;_chi_line_map[179]=237;_chi_line_map[180]=238;_chi_line_map[181]=237;_chi_line_map[182]=240;_chi_line_map[183]=237;_chi_line_map[184]=216;_chi_line_map[185]=244;_chi_line_map[186]=245;_chi_line_map[187]=248;_chi_line_map[188]=244;_chi_line_map[189]=251;_chi_line_map[190]=252;_chi_line_map[191]=253;_chi_line_map[192]=254;_chi_line_map[193]=255;_chi_line_map[194]=251;_chi_line_map[195]=258;_chi_line_map[196]=259;_chi_line_map[197]=258;_chi_line_map[198]=263;_chi_line_map[199]=264;_chi_line_map[200]=265;_chi_line_map[201]=266;_chi_line_map[202]=267;_chi_line_map[203]=268;_chi_line_map[204]=264;_chi_line_map[205]=275;_chi_line_map[206]=276;_chi_line_map[207]=277;_chi_line_map[208]=278;_chi_line_map[209]=279;_chi_line_map[210]=280;_chi_line_map[211]=281;_chi_line_map[212]=282;_chi_line_map[213]=283;_chi_line_map[214]=284;_chi_line_map[215]=285;_chi_line_map[216]=286;_chi_line_map[217]=284;_chi_line_map[218]=288;_chi_line_map[219]=289;_chi_line_map[220]=284;_chi_line_map[221]=291;_chi_line_map[222]=292;_chi_line_map[223]=263;_chi_line_map[224]=300;_chi_line_map[225]=301;_chi_line_map[226]=302;_chi_line_map[227]=303;_chi_line_map[228]=304;_chi_line_map[229]=301;_chi_line_map[230]=306;_chi_line_map[231]=301;_chi_line_map[232]=300;_chi_line_map[233]=310;_chi_line_map[234]=311;_chi_line_map[235]=312;_chi_line_map[236]=313;_chi_line_map[237]=314;_chi_line_map[238]=315;_chi_line_map[239]=316;_chi_line_map[240]=317;_chi_line_map[241]=310;_chi_line_map[242]=320;_chi_line_map[243]=321;_chi_line_map[244]=322;_chi_line_map[245]=323;_chi_line_map[246]=324;_chi_line_map[247]=323;_chi_line_map[248]=326;_chi_line_map[249]=323;_chi_line_map[250]=320;_chi_line_map[251]=336;_chi_line_map[252]=337;_chi_line_map[253]=338;_chi_line_map[254]=339;_chi_line_map[255]=340;_chi_line_map[256]=341;_chi_line_map[257]=342;_chi_line_map[258]=343;_chi_line_map[259]=344;_chi_line_map[260]=342;_chi_line_map[261]=346;_chi_line_map[262]=336;_chi_line_map[263]=351;_chi_line_map[264]=352;_chi_line_map[265]=351;_chi_line_map[266]=357;_chi_line_map[267]=358;_chi_line_map[268]=359;_chi_line_map[269]=357;_chi_line_map[270]=366;_chi_line_map[271]=367;_chi_line_map[272]=368;_chi_line_map[273]=369;_chi_line_map[274]=368;_chi_line_map[275]=366;_chi_line_map[276]=375;_chi_line_map[277]=376;_chi_line_map[278]=377;_chi_line_map[279]=378;_chi_line_map[280]=379;_chi_line_map[281]=380;_chi_line_map[282]=381;_chi_line_map[283]=382;_chi_line_map[284]=383;_chi_line_map[285]=381;_chi_line_map[286]=377;_chi_line_map[287]=386;_chi_line_map[288]=375;_chi_line_map[289]=389;_chi_line_map[290]=390;_chi_line_map[291]=391;_chi_line_map[292]=392;_chi_line_map[293]=393;_chi_line_map[294]=394;_chi_line_map[295]=395;_chi_line_map[296]=396;_chi_line_map[297]=397;_chi_line_map[298]=395;_chi_line_map[299]=391;_chi_line_map[300]=400;_chi_line_map[301]=389;_chi_line_map[302]=406;_chi_line_map[303]=408;_chi_line_map[304]=409;_chi_line_map[305]=408;_chi_line_map[306]=412;_chi_line_map[307]=413;_chi_line_map[308]=412;_chi_line_map[309]=418;_chi_line_map[310]=419;_chi_line_map[311]=420;_chi_line_map[312]=421;_chi_line_map[313]=422;_chi_line_map[314]=421;_chi_line_map[315]=424;_chi_line_map[316]=425;_chi_line_map[317]=426;_chi_line_map[318]=427;_chi_line_map[319]=428;_chi_line_map[320]=429;_chi_line_map[321]=430;_chi_line_map[322]=428;_chi_line_map[323]=432;_chi_line_map[324]=421;_chi_line_map[325]=434;_chi_line_map[326]=435;_chi_line_map[327]=436;_chi_line_map[328]=421;_chi_line_map[329]=438;_chi_line_map[330]=421;_chi_line_map[331]=418;_chi_line_map[332]=443;_chi_line_map[333]=447;_chi_line_map[334]=448;_chi_line_map[335]=449;_chi_line_map[336]=450;_chi_line_map[337]=451;_chi_line_map[338]=452;_chi_line_map[339]=453;_chi_line_map[340]=454;_chi_line_map[341]=455;_chi_line_map[342]=451;_chi_line_map[343]=457;_chi_line_map[344]=447;_chi_line_map[345]=461;_chi_line_map[346]=462;_chi_line_map[347]=461;_chi_line_map[348]=465;_chi_line_map[349]=466;_chi_line_map[350]=468;_chi_line_map[351]=470;_chi_line_map[352]=468;_chi_line_map[353]=473;_chi_line_map[354]=474;_chi_line_map[355]=475;_chi_line_map[356]=476;_chi_line_map[357]=468;_chi_line_map[358]=479;_chi_line_map[359]=480;_chi_line_map[360]=481;_chi_line_map[361]=482;_chi_line_map[362]=483;_chi_line_map[363]=484;_chi_line_map[364]=485;_chi_line_map[365]=486;_chi_line_map[366]=487;_chi_line_map[367]=488;_chi_line_map[368]=489;_chi_line_map[369]=490;_chi_line_map[370]=483;_chi_line_map[371]=492;_chi_line_map[372]=468;_chi_line_map[373]=495;_chi_line_map[374]=496;_chi_line_map[375]=497;_chi_line_map[376]=498;_chi_line_map[377]=499;_chi_line_map[378]=500;_chi_line_map[379]=501;_chi_line_map[380]=502;_chi_line_map[381]=503;_chi_line_map[382]=504;_chi_line_map[383]=500;_chi_line_map[384]=506;_chi_line_map[385]=468;_chi_line_map[386]=509;_chi_line_map[387]=510;_chi_line_map[388]=511;_chi_line_map[389]=512;_chi_line_map[390]=513;_chi_line_map[391]=514;_chi_line_map[392]=515;_chi_line_map[393]=516;_chi_line_map[394]=515;_chi_line_map[395]=518;_chi_line_map[396]=515;_chi_line_map[397]=520;_chi_line_map[398]=521;_chi_line_map[399]=522;_chi_line_map[400]=523;_chi_line_map[401]=524;_chi_line_map[402]=525;_chi_line_map[403]=526;_chi_line_map[404]=527;_chi_line_map[405]=528;_chi_line_map[406]=529;_chi_line_map[407]=528;_chi_line_map[408]=531;_chi_line_map[409]=528;_chi_line_map[410]=533;_chi_line_map[411]=528;_chi_line_map[412]=536;_chi_line_map[413]=537;_chi_line_map[414]=538;_chi_line_map[415]=539;_chi_line_map[416]=540;_chi_line_map[417]=541;_chi_line_map[418]=542;_chi_line_map[419]=539;_chi_line_map[420]=537;_chi_line_map[421]=545;_chi_line_map[422]=546;_chi_line_map[423]=547;_chi_line_map[424]=524;_chi_line_map[425]=549;_chi_line_map[426]=550;_chi_line_map[427]=551;_chi_line_map[428]=552;_chi_line_map[429]=553;_chi_line_map[430]=554;_chi_line_map[431]=555;_chi_line_map[432]=553;_chi_line_map[433]=557;_chi_line_map[434]=509;_chi_line_map[435]=559;_chi_line_map[436]=468;_chi_line_map[437]=562;_chi_line_map[438]=563;_chi_line_map[439]=564;_chi_line_map[440]=565;_chi_line_map[441]=564;_chi_line_map[442]=567;_chi_line_map[443]=568;_chi_line_map[444]=569;_chi_line_map[445]=567;_chi_line_map[446]=571;_chi_line_map[447]=564;_chi_line_map[448]=468;_chi_line_map[449]=575;_chi_line_map[450]=577;_chi_line_map[451]=578;_chi_line_map[452]=579;_chi_line_map[453]=580;_chi_line_map[454]=577;_chi_line_map[455]=582;_chi_line_map[456]=577;_chi_line_map[457]=584;_chi_line_map[458]=585;_chi_line_map[459]=586;_chi_line_map[460]=587;_chi_line_map[461]=588;_chi_line_map[462]=589;_chi_line_map[463]=590;_chi_line_map[464]=591;_chi_line_map[465]=592;_chi_line_map[466]=588;_chi_line_map[467]=594;_chi_line_map[468]=597;_chi_line_map[469]=598;_chi_line_map[470]=599;_chi_line_map[471]=600;_chi_line_map[472]=601;_chi_line_map[473]=602;_chi_line_map[474]=603;_chi_line_map[475]=606;_chi_line_map[476]=607;_chi_line_map[477]=608;_chi_line_map[478]=609;_chi_line_map[479]=603;_chi_line_map[480]=613;_chi_line_map[481]=614;_chi_line_map[482]=615;_chi_line_map[483]=616;_chi_line_map[484]=617;_chi_line_map[485]=618;_chi_line_map[486]=619;_chi_line_map[487]=620;_chi_line_map[488]=621;_chi_line_map[489]=622;_chi_line_map[490]=603;_chi_line_map[491]=624;_chi_line_map[492]=625;_chi_line_map[493]=626;_chi_line_map[494]=627;_chi_line_map[495]=628;_chi_line_map[496]=629;_chi_line_map[497]=630;_chi_line_map[498]=631;_chi_line_map[499]=632;_chi_line_map[500]=633;_chi_line_map[501]=634;_chi_line_map[502]=603;_chi_line_map[503]=601;_chi_line_map[504]=598;_chi_line_map[505]=640;_chi_line_map[506]=641;_chi_line_map[507]=642;_chi_line_map[508]=643;_chi_line_map[509]=644;_chi_line_map[510]=645;_chi_line_map[511]=646;_chi_line_map[512]=647;_chi_line_map[513]=648;_chi_line_map[514]=649;_chi_line_map[515]=648;_chi_line_map[516]=651;_chi_line_map[517]=652;_chi_line_map[518]=653;_chi_line_map[519]=646;_chi_line_map[520]=655;_chi_line_map[521]=656;_chi_line_map[522]=657;_chi_line_map[523]=658;_chi_line_map[524]=660;_chi_line_map[525]=661;_chi_line_map[526]=468;_chi_line_map[527]=664;_chi_line_map[528]=665;_chi_line_map[529]=666;_chi_line_map[530]=667;_chi_line_map[531]=668;_chi_line_map[532]=669;_chi_line_map[533]=666;_chi_line_map[534]=671;_chi_line_map[535]=672;_chi_line_map[536]=666;_chi_line_map[537]=674;_chi_line_map[538]=675;_chi_line_map[539]=678;_chi_line_map[540]=679;_chi_line_map[541]=678;_chi_line_map[542]=681;_chi_line_map[543]=678;_chi_line_map[544]=685;_chi_line_map[545]=686;_chi_line_map[546]=687;_chi_line_map[547]=688;_chi_line_map[548]=689;_chi_line_map[549]=687;_chi_line_map[550]=685;_chi_line_map[551]=692;_chi_line_map[552]=693;_chi_line_map[553]=694;_chi_line_map[554]=696;_chi_line_map[555]=697;_chi_line_map[556]=698;_chi_line_map[557]=699;_chi_line_map[558]=700;_chi_line_map[559]=701;_chi_line_map[560]=702;_chi_line_map[561]=703;_chi_line_map[562]=702;_chi_line_map[563]=705;_chi_line_map[564]=699;_chi_line_map[565]=694;_chi_line_map[566]=709;_chi_line_map[567]=711;_chi_line_map[568]=712;_chi_line_map[569]=714;_chi_line_map[570]=715;_chi_line_map[571]=716;_chi_line_map[572]=717;_chi_line_map[573]=718;_chi_line_map[574]=719;_chi_line_map[575]=709;_chi_line_map[576]=722;_chi_line_map[577]=723;_chi_line_map[578]=725;_chi_line_map[579]=726;_chi_line_map[580]=725;_chi_line_map[581]=728;_chi_line_map[582]=729;_chi_line_map[583]=730;_chi_line_map[584]=731;_chi_line_map[585]=730;_chi_line_map[586]=733;_chi_line_map[587]=734;_chi_line_map[588]=735;_chi_line_map[589]=736;_chi_line_map[590]=735;_chi_line_map[591]=738;_chi_line_map[592]=739;_chi_line_map[593]=740;_chi_line_map[594]=741;_chi_line_map[595]=740;_chi_line_map[596]=743;_chi_line_map[597]=740;_chi_line_map[598]=735;_chi_line_map[599]=730;_chi_line_map[600]=725;_chi_line_map[601]=748;_chi_line_map[602]=749;_chi_line_map[603]=750;_chi_line_map[604]=751;_chi_line_map[605]=752;_chi_line_map[606]=748;_chi_line_map[607]=759;_chi_line_map[608]=760;_chi_line_map[609]=761;_chi_line_map[610]=769;_chi_line_map[611]=770;_chi_line_map[612]=771;_chi_line_map[613]=772;_chi_line_map[614]=773;_chi_line_map[615]=774;_chi_line_map[616]=775;_chi_line_map[617]=776;_chi_line_map[618]=772;_chi_line_map[619]=778;_chi_line_map[620]=779;_chi_line_map[621]=780;_chi_line_map[622]=781;_chi_line_map[623]=782;_chi_line_map[624]=772;_chi_line_map[625]=784;_chi_line_map[626]=788;_chi_line_map[627]=772;_chi_line_map[628]=761;_chi_line_map[629]=792;_chi_line_map[630]=793;_chi_line_map[631]=794;_chi_line_map[632]=795;_chi_line_map[633]=761;_chi_line_map[634]=748;_chi_line_map[635]=709;_chi_line_map[636]=468;_chi_line_map[637]=801;_chi_line_map[638]=802;_chi_line_map[639]=803;_chi_line_map[640]=802;_chi_line_map[641]=805;_chi_line_map[642]=802;_chi_line_map[643]=809;_chi_line_map[644]=810;_chi_line_map[645]=809;_chi_line_map[646]=812;_chi_line_map[647]=813;_chi_line_map[648]=814;_chi_line_map[649]=813;_chi_line_map[650]=816;_chi_line_map[651]=817;_chi_line_map[652]=818;_chi_line_map[653]=822;_chi_line_map[654]=823;_chi_line_map[655]=824;_chi_line_map[656]=825;_chi_line_map[657]=826;_chi_line_map[658]=827;_chi_line_map[659]=828;_chi_line_map[660]=827;_chi_line_map[661]=830;_chi_line_map[662]=827;_chi_line_map[663]=832;_chi_line_map[664]=827;_chi_line_map[665]=823;_chi_line_map[666]=835;_chi_line_map[667]=836;_chi_line_map[668]=837;_chi_line_map[669]=838;_chi_line_map[670]=837;_chi_line_map[671]=841;_chi_line_map[672]=842;_chi_line_map[673]=843;_chi_line_map[674]=844;_chi_line_map[675]=845;_chi_line_map[676]=837;_chi_line_map[677]=823;_chi_line_map[678]=848;_chi_line_map[679]=851;_chi_line_map[680]=852;_chi_line_map[681]=468;_chi_line_map[682]=855;_chi_line_map[683]=856;_chi_line_map[684]=857;_chi_line_map[685]=858;_chi_line_map[686]=859;_chi_line_map[687]=860;_chi_line_map[688]=861;_chi_line_map[689]=862;_chi_line_map[690]=468;_chi_line_map[691]=865;_chi_line_map[692]=866;_chi_line_map[693]=867;_chi_line_map[694]=868;_chi_line_map[695]=871;_chi_line_map[696]=872;_chi_line_map[697]=873;_chi_line_map[698]=874;_chi_line_map[699]=875;_chi_line_map[700]=874;_chi_line_map[701]=877;_chi_line_map[702]=873;_chi_line_map[703]=879;_chi_line_map[704]=880;_chi_line_map[705]=881;_chi_line_map[706]=882;_chi_line_map[707]=883;_chi_line_map[708]=884;_chi_line_map[709]=885;_chi_line_map[710]=884;_chi_line_map[711]=887;_chi_line_map[712]=883;_chi_line_map[713]=889;_chi_line_map[714]=890;_chi_line_map[715]=891;_chi_line_map[716]=890;_chi_line_map[717]=893;_chi_line_map[718]=890;_chi_line_map[719]=895;_chi_line_map[720]=890;_chi_line_map[721]=897;_chi_line_map[722]=890;_chi_line_map[723]=881;_chi_line_map[724]=900;_chi_line_map[725]=901;_chi_line_map[726]=900;_chi_line_map[727]=903;_chi_line_map[728]=900;_chi_line_map[729]=881;_chi_line_map[730]=468;_chi_line_map[731]=908;_chi_line_map[732]=909;_chi_line_map[733]=910;_chi_line_map[734]=468;_chi_line_map[735]=913;_chi_line_map[736]=914;_chi_line_map[737]=915;_chi_line_map[738]=916;_chi_line_map[739]=468;_chi_line_map[740]=919;_chi_line_map[741]=468;_chi_line_map[742]=922;_chi_line_map[743]=468;_chi_line_map[744]=925;_chi_line_map[745]=926;_chi_line_map[746]=927;_chi_line_map[747]=928;_chi_line_map[748]=929;_chi_line_map[749]=930;_chi_line_map[750]=931;_chi_line_map[751]=468;_chi_line_map[752]=934;_chi_line_map[753]=935;_chi_line_map[754]=936;_chi_line_map[755]=937;_chi_line_map[756]=938;_chi_line_map[757]=939;_chi_line_map[758]=940;_chi_line_map[759]=941;_chi_line_map[760]=940;_chi_line_map[761]=943;_chi_line_map[762]=944;_chi_line_map[763]=943;_chi_line_map[764]=946;_chi_line_map[765]=947;_chi_line_map[766]=948;_chi_line_map[767]=949;_chi_line_map[768]=946;_chi_line_map[769]=951;_chi_line_map[770]=952;_chi_line_map[771]=946;_chi_line_map[772]=954;_chi_line_map[773]=955;_chi_line_map[774]=956;_chi_line_map[775]=957;_chi_line_map[776]=958;_chi_line_map[777]=959;_chi_line_map[778]=960;_chi_line_map[779]=961;_chi_line_map[780]=962;_chi_line_map[781]=963;_chi_line_map[782]=958;_chi_line_map[783]=966;_chi_line_map[784]=967;_chi_line_map[785]=969;_chi_line_map[786]=971;_chi_line_map[787]=972;_chi_line_map[788]=973;_chi_line_map[789]=974;_chi_line_map[790]=972;_chi_line_map[791]=976;_chi_line_map[792]=977;_chi_line_map[793]=978;_chi_line_map[794]=979;_chi_line_map[795]=972;_chi_line_map[796]=981;_chi_line_map[797]=972;_chi_line_map[798]=969;_chi_line_map[799]=985;_chi_line_map[800]=986;_chi_line_map[801]=985;_chi_line_map[802]=988;_chi_line_map[803]=989;_chi_line_map[804]=990;_chi_line_map[805]=991;_chi_line_map[806]=969;_chi_line_map[807]=994;_chi_line_map[808]=995;_chi_line_map[809]=994;_chi_line_map[810]=997;_chi_line_map[811]=998;_chi_line_map[812]=1000;_chi_line_map[813]=1002;_chi_line_map[814]=1003;_chi_line_map[815]=1002;_chi_line_map[816]=1005;_chi_line_map[817]=1006;_chi_line_map[818]=1007;_chi_line_map[819]=1008;_chi_line_map[820]=1009;_chi_line_map[821]=1010;_chi_line_map[822]=1000;_chi_line_map[823]=1013;_chi_line_map[824]=1014;_chi_line_map[825]=1013;_chi_line_map[826]=1000;_chi_line_map[827]=1019;_chi_line_map[828]=1020;_chi_line_map[829]=1021;_chi_line_map[830]=1022;_chi_line_map[831]=1020;_chi_line_map[832]=1024;_chi_line_map[833]=1025;_chi_line_map[834]=1026;_chi_line_map[835]=1027;_chi_line_map[836]=1024;_chi_line_map[837]=1029;_chi_line_map[838]=1024;_chi_line_map[839]=969;_chi_line_map[840]=1032;_chi_line_map[841]=969;_chi_line_map[842]=1036;_chi_line_map[843]=1037;_chi_line_map[844]=1038;_chi_line_map[845]=1039;_chi_line_map[846]=1040;_chi_line_map[847]=1041;_chi_line_map[848]=1042;_chi_line_map[849]=1043;_chi_line_map[850]=1044;_chi_line_map[851]=1039;_chi_line_map[852]=1046;_chi_line_map[853]=1047;_chi_line_map[854]=1048;_chi_line_map[855]=1036;_chi_line_map[856]=1050;_chi_line_map[857]=468;_chi_line_map[858]=1053;_chi_line_map[859]=1054;_chi_line_map[860]=1055;_chi_line_map[861]=1056;_chi_line_map[862]=1057;_chi_line_map[863]=1059;_chi_line_map[864]=1060;_chi_line_map[865]=1061;_chi_line_map[866]=1062;_chi_line_map[867]=1064;_chi_line_map[868]=1065;_chi_line_map[869]=1066;_chi_line_map[870]=1067;_chi_line_map[871]=1068;_chi_line_map[872]=1069;_chi_line_map[873]=1070;_chi_line_map[874]=468;_chi_line_map[875]=1073;_chi_line_map[876]=1074;_chi_line_map[877]=468;_chi_line_map[878]=1077;_chi_line_map[879]=1078;_chi_line_map[880]=1079;_chi_line_map[881]=1080;_chi_line_map[882]=1081;_chi_line_map[883]=1083;_chi_line_map[884]=1084;_chi_line_map[885]=1085;_chi_line_map[886]=1086;_chi_line_map[887]=1087;_chi_line_map[888]=1088;_chi_line_map[889]=1089;_chi_line_map[890]=1090;_chi_line_map[891]=1091;_chi_line_map[892]=1092;_chi_line_map[893]=1093;_chi_line_map[894]=1095;_chi_line_map[895]=1096;_chi_line_map[896]=1097;_chi_line_map[897]=1098;_chi_line_map[898]=1099;_chi_line_map[899]=1100;_chi_line_map[900]=1102;_chi_line_map[901]=1103;_chi_line_map[902]=1104;_chi_line_map[903]=1105;_chi_line_map[904]=1106;_chi_line_map[905]=1107;_chi_line_map[906]=1108;_chi_line_map[907]=1104;_chi_line_map[908]=1111;_chi_line_map[909]=1112;_chi_line_map[910]=1113;_chi_line_map[911]=1114;_chi_line_map[912]=1115;_chi_line_map[913]=1116;_chi_line_map[914]=1117;_chi_line_map[915]=1118;_chi_line_map[916]=1119;_chi_line_map[917]=1120;_chi_line_map[918]=1121;_chi_line_map[919]=1122;_chi_line_map[920]=1097;_chi_line_map[921]=1096;_chi_line_map[922]=1125;_chi_line_map[923]=1126;_chi_line_map[924]=1096;_chi_line_map[925]=1128;_chi_line_map[926]=1086;_chi_line_map[927]=1130;_chi_line_map[928]=468;_chi_line_map[929]=1133;_chi_line_map[930]=1134;_chi_line_map[931]=1135;_chi_line_map[932]=1136;_chi_line_map[933]=1137;_chi_line_map[934]=1138;_chi_line_map[935]=1139;_chi_line_map[936]=1140;_chi_line_map[937]=1141;_chi_line_map[938]=1142;_chi_line_map[939]=468;_chi_line_map[940]=1145;_chi_line_map[941]=1146;_chi_line_map[942]=1147;_chi_line_map[943]=1148;_chi_line_map[944]=1149;_chi_line_map[945]=1150;_chi_line_map[946]=1151;_chi_line_map[947]=1152;_chi_line_map[948]=1153;_chi_line_map[949]=1154;_chi_line_map[950]=1155;_chi_line_map[951]=1156;_chi_line_map[952]=1157;_chi_line_map[953]=1158;_chi_line_map[954]=468;_chi_line_map[955]=1161;_chi_line_map[956]=1162;_chi_line_map[957]=1163;_chi_line_map[958]=1164;_chi_line_map[959]=1165;_chi_line_map[960]=1166;_chi_line_map[961]=1167;_chi_line_map[962]=1168;_chi_line_map[963]=1169;_chi_line_map[964]=1170;_chi_line_map[965]=1171;_chi_line_map[966]=1168;_chi_line_map[967]=1173;_chi_line_map[968]=1174;_chi_line_map[969]=1168;_chi_line_map[970]=1178;_chi_line_map[971]=1179;_chi_line_map[972]=1180;_chi_line_map[973]=1181;_chi_line_map[974]=1178;_chi_line_map[975]=1182;_chi_line_map[976]=1178;_chi_line_map[977]=1183;_chi_line_map[978]=1184;_chi_line_map[979]=1183;_chi_line_map[980]=1185;_chi_line_map[981]=1183;_chi_line_map[982]=1186;_chi_line_map[983]=1187;_chi_line_map[984]=1188;_chi_line_map[985]=1189;_chi_line_map[986]=1190;_chi_line_map[987]=1192;_chi_line_map[988]=1190;_chi_line_map[989]=1195;_chi_line_map[990]=1190;_chi_line_map[991]=1198;_chi_line_map[992]=1199;_chi_line_map[993]=1200;_chi_line_map[994]=1201;_chi_line_map[995]=1190;_chi_line_map[996]=1168;_chi_line_map[997]=468;_chi_line_map[998]=1206;_chi_line_map[999]=1207;_chi_line_map[1000]=1208;_chi_line_map[1001]=468;_chi_line_map[1002]=1211;_chi_line_map[1003]=1212;_chi_line_map[1004]=1213;_chi_line_map[1005]=1214;_chi_line_map[1006]=1215;_chi_line_map[1007]=1217;_chi_line_map[1008]=1218;_chi_line_map[1009]=1219;_chi_line_map[1010]=1215;_chi_line_map[1011]=1222;_chi_line_map[1012]=1223;_chi_line_map[1013]=1215;_chi_line_map[1014]=468;_chi_line_map[1015]=1227;_chi_line_map[1016]=1228;_chi_line_map[1017]=1229;_chi_line_map[1018]=1228;_chi_line_map[1019]=1231;_chi_line_map[1020]=1228;_chi_line_map[1021]=468;_chi_line_map[1022]=1234;_chi_line_map[1023]=1235;_chi_line_map[1024]=468;_chi_line_map[1025]=1239;_chi_line_map[1026]=1240;_chi_line_map[1027]=465;_chi_line_map[1028]=1242;local function _chi_error(err) local _chi_message=tostring(err); for _chi_generated,_chi_source_line in pairs(_chi_line_map) do local _chi_token=_chi_short_source..':'.._chi_generated..':'; local _chi_start,_chi_end=string.find(_chi_message,_chi_token,1,true); if _chi_start then return string.sub(_chi_message,1,_chi_start-1).._chi_source..':'.._chi_source_line..':'..string.sub(_chi_message,_chi_end+1) end end; return _chi_message end;local _chi_ok,_chi_result=xpcall(_chi_run,_chi_error);if not _chi_ok then error(_chi_result,0) end;return _chi_result end;m17();function m18() local _chi_line_map={};local function _chi_run()local __P_ = package.loaded['chicc/compiler'] or {_package={},_types={}};package.loaded['chicc/compiler'] = __P_;local __S_ = __P_._package;local __T_ = __P_._types;__S_.newCompilationResult={public=true,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}},{tag="any"},{tag="typeref",ids={{"chicc","compiler","CompilationResult"}}}},typeParams={},defaults=0}'};__S_.hasErrors={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","compiler","CompilationResult"}}},{tag="bool"}},typeParams={},defaults=0}'};__S_.newLuaCompilationEnv={public=true,mutable=false,type='{tag="fn",types={{tag="any"}},typeParams={},defaults=0}'};__S_.mergeImports={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.typeParamNames={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.splitExprs={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="record",ids={},fields={{"functions",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"code",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}}},typeParams={}}},typeParams={},defaults=0}'};__S_.convertImports={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="array",elem={tag="typeref",ids={{"chicc","ast","Import"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.convertTypeAliases={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="array",elem={tag="typeref",ids={{"chicc","ast","TypeAlias"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.markUsedWalk={public=false,mutable=true,type='{tag="fn",types={{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.markUsed={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.markUsedWalkImpl={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.replaceTypes={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.thrownMessage={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="typeref",ids={{"chicc","messages","Message"}}}},typeParams={},defaults=0}'};__S_.variantTypeAliases={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","parse_ast","ParseVariantTypeDefinition"}}},{tag="typeref",ids={{"chicc","symbols","CompileTables"}}},{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.parseSource={public=false,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"}},typeParams={},defaults=0}'};__S_.compile={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="typeref",ids={{"chicc","compiler","CompilationResult"}}}},typeParams={},defaults=0}'};__S_.compileToLua={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="any"},{tag="any"}},typeParams={},defaults=0}'};__S_.replAutoImports={public=false,mutable=false,type='{tag="array",elem={tag="typeref",ids={{"chicc","compiler","ReplAutoImport"}}},typeParams={},ids={{"std","lang.array","array"}}}'};__S_.luaTableKeys={public=false,mutable=false,type='{tag="fn",types={{tag="any"},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.replUserNames={public=false,mutable=false,type='{tag="fn",types={{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.newReplCompilationEnv={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","compiler","ReplSession"}}}},typeParams={},defaults=0}'};__S_.replPrelude={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","compiler","ReplSession"}}},{tag="array",elem={tag="typeref",ids={{"chicc","parse_ast","ParseImport"}}},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.replDefinedNames={public=false,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","ast","Program"}}},{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},typeParams={},defaults=0}'};__S_.compileReplLine={public=true,mutable=false,type='{tag="fn",types={{tag="string"},{tag="typeref",ids={{"chicc","compiler","ReplSession"}}},{tag="typeref",ids={{"chicc","compiler","ReplLine"}}}},typeParams={},defaults=0}'};__S_.commitReplLine={public=true,mutable=false,type='{tag="fn",types={{tag="typeref",ids={{"chicc","compiler","ReplSession"}}},{tag="typeref",ids={{"chicc","compiler","ReplLine"}}},{tag="unit"}},typeParams={},defaults=0}'};__S_.saveReplMetadata={public=true,mutable=false,type='{tag="fn",types={{tag="any"}},typeParams={},defaults=0}'};__S_.restoreReplMetadata={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="unit"}},typeParams={},defaults=0}'};__S_.formatMessage={public=true,mutable=false,type='{tag="fn",types={{tag="any"},{tag="string"}},typeParams={},defaults=0}'};__T_.CompilationResult='{tag="record",ids={{"chicc","compiler","CompilationResult"}},fields={{"messages",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"program",{tag="any"}}},typeParams={}}';__T_.ReplAutoImport='{tag="record",ids={{"chicc","compiler","ReplAutoImport"}},fields={{"moduleName",{tag="string"}},{"packageName",{tag="string"}},{"names",{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}}},typeParams={}}';__T_.ReplSession='{tag="record",ids={{"chicc","compiler","ReplSession"}},fields={{"imports",{tag="any"}}},typeParams={}}';__T_.ReplNamedFn='{tag="record",ids={{"chicc","compiler","ReplNamedFn"}},fields={{"name",{tag="string"}},{"paramNames",{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},{"fnType",{tag="typeref",ids={{"chicc","types","Type"}}}}},typeParams={}}';__T_.ReplLine='{tag="record",ids={{"chicc","compiler","ReplLine"}},fields={{"messages",{tag="array",elem={tag="any"},typeParams={},ids={{"std","lang.array","array"}}}},{"luaCode",{tag="sum",ids={},lhs={tag="string"},rhs={tag="unit"},typeParams={}}},{"shouldPrint",{tag="bool"}},{"valueType",{tag="sum",ids={},lhs={tag="typeref",ids={{"chicc","types","Type"}}},rhs={tag="unit"},typeParams={}}},{"namedFns",{tag="array",elem={tag="typeref",ids={{"chicc","compiler","ReplNamedFn"}}},typeParams={},ids={{"std","lang.array","array"}}}},{"definedNames",{tag="array",elem={tag="string"},typeParams={},ids={{"std","lang.array","array"}}}},{"imports",{tag="array",elem={tag="typeref",ids={{"chicc","parse_ast","ParseImport"}}},typeParams={},ids={{"std","lang.array","array"}}}}},typeParams={}}';local __std__lang_array = require("std/lang.array");local __std__lang = require("std/lang");local __chicc__ast = require("chicc/ast");local __chicc__messages = require("chicc/messages");local __chicc__symbols = require("chicc/symbols");local __chicc__ast_converter = require("chicc/ast_converter");local __chicc__source = require("chicc/source");local __chicc__checks = require("chicc/checks");local __chicc__inference_context = require("chicc/inference_context");local __chicc__emitter = require("chicc/emitter");local __std__lang_map = require("std/lang.map");local __chicc__parse_ast = require("chicc/parse_ast");
 do function __P_.newCompilationResult(msgs,prog)
 local _chi_tmp0={messages=msgs,program=prog};setmetatable(_chi_tmp0, record_meta_table);return _chi_tmp0 end;
  end;
