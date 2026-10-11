@@ -18,7 +18,8 @@ fn messageCodes(src: string): string {
 // not seen by the next.
 fn runR(src: string): any {
     val result: any = compileToLua(src, newLuaCompilationEnv())
-    assertEqual(messageCodes(src), "")
+    val messages = result.messages as array[any]
+    assertEqual(messages.map { m -> m.code as string }.joinToStringWithSeparator(","), "")
     if result.luaCode == unit { return unit }
     val run = loadLuaCode(result.luaCode as string) as () -> any
     run().r
@@ -67,6 +68,16 @@ test("a nested fn uses its own defaults via UFCS") {
 test("a local lambda does not take the defaults of a same-named package fn") {
     val src = "package t39/s1\nfn f(a: int, b: int = 2): int { a + b }\nfn g(): int {\n    val f = { a: int -> a * 10 }\n    f(1)\n}\nval r = g()\n"
     assertEqual(runR(src), 10)
+}
+
+test("a fn value does not keep the defaults of the fn it was taken from") {
+    val src = "package t39/v1\nfn h(a: int, b: int = 1): int { a + b }\nfn run(): int {\n    var g = h\n    g = { a: int, b: int -> a * b }\n    g(3)\n}\nval r = run()\n"
+    assertEqual(messageCodes(src), "FUNCTION_ARITY_ERROR")
+}
+
+test("a fn value from an if does not keep the defaults of a branch") {
+    val src = "package t39/v2\nfn h(a: int, b: int = 1): int { a + b }\nfn mk(): (int, int) -> int { { a: int, b: int -> a * b } }\nfn run(c: bool): int {\n    val g = if c { h } else { mk() }\n    g(3)\n}\nval r = run(false)\n"
+    assertEqual(messageCodes(src), "FUNCTION_ARITY_ERROR")
 }
 
 test("the string literal @ is passed as an argument") {
