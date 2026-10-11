@@ -137,17 +137,11 @@ test("unify: function arity mismatch throws error") {
     assertEqual(code, "FUNCTION_ARITY_ERROR")
 }
 
-test("unify: void return accepts anything") {
-    // Function with unit return type should accept any actual return type
+test("tryUnify: unit return rejects a non-unit function return") {
     val expected = functionType([tInt, tUnit], [], 0)
     val actual = functionType([tInt, tString], [], 0)
-    val c = newConstraint(expected, actual, testSection, [])
-    val constraints: array[any] = luaExpr("{}")
-    embedLua("table.insert(constraints, c)")
-    val solutions = unify(constraints)
-    // Should succeed - no error
-    val count: int = luaExpr("#solutions")
-    assertEqual(count, 0)
+    val result = tryUnify([newConstraint(expected, actual, testSection, [])])
+    assertTrue(result == unit)
 }
 
 test("unify: void return does NOT skip if actual is variable") {
@@ -236,6 +230,13 @@ test("unify: sum type falls back to lhs") {
     val solutions = unify(constraints)
     val count: int = luaExpr("#solutions")
     assertEqual(count, 0)
+}
+
+test("tryUnify: every branch of an actual sum must fit the expected sum") {
+    val expected = sumType([], tInt, tString, [])
+    val actual = sumType([], tInt, tBool, [])
+    val result = tryUnify([newConstraint(expected, actual, testSection, [])])
+    assertTrue(result == unit)
 }
 
 test("unify: sum type with variable") {
@@ -366,16 +367,10 @@ test("unify: a pair met in sibling branches is unfolded once") {
 
 // --- unify: not a function ---
 
-test("unify: function expected but non-function actual throws notAFunction") {
+test("tryUnify: function expectation with a non-function value fails") {
     val expected = functionType([tInt, tString], [], 0)
-    val c = newConstraint(expected, tInt, testSection, [])
-    val constraints: array[any] = luaExpr("{}")
-    embedLua("table.insert(constraints, c)")
-    embedLua("local ok, err = pcall(unify, constraints)")
-    val ok: bool = luaExpr("ok")
-    assertFalse(ok)
-    val code: string = luaExpr("err.code")
-    assertEqual(code, "NOT_A_FUNCTION")
+    val result = tryUnify([newConstraint(expected, tInt, testSection, [])])
+    assertTrue(result == unit)
 }
 
 // --- unify: infinite type ---

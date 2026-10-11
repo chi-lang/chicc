@@ -1,9 +1,10 @@
 // chicc/chicc/typer.chi
 package chicc/typer
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tFloat, tString, tAny, sumCreate, recordType, arrayType, functionType, polyType, mapType, intTypeId, floatTypeId, unfoldRecursive, typeToString, instantiate, sumListTypes }
+import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tFloat, tString, tAny, typeEquals, sumCreate, recordType, arrayType, functionType, polyType, mapType, intTypeId, floatTypeId, unfoldRecursive, typeToString, instantiate, sumListTypes }
 import chicc/source { Section, toCodePoint }
 import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget }
+import chicc/messages { notAFunction }
 import chicc/unification { unify, unifyWithUf, ufNew, ufResolve, ufAllBindings, ufLowerAbove, newConstraint }
 import chicc/inference_context { icFreshVariable, icGetTargetType, icWithNewLocalScope, icDefineLocalSymbol, icUpdateSymbolType, icListLocalFunctionsForType, icListCurrentPackageFunctionsForType, icListTypesPackageFunctionsForType, icListAllLoadedFunctionsForType }
 
@@ -199,6 +200,32 @@ pub fn typerGetUf(): any {
     typerUf
 }
 
+// A branch that always exits contributes no value to its enclosing
+// expression. Keep early returns out of the value's inferred sum type.
+fn branchTerminates(term: any): bool {
+    if term == unit { return false }
+    val kind = term.kind as string
+    if kind == "return" || kind == "break" || kind == "continue" {
+        true
+    } else if kind == "block" {
+        val body = term.blockBody as array[any]
+        val count = body.size()
+        var i = 1
+        var terminated = false
+        while i <= count {
+            if branchTerminates(body[i]) { terminated = true }
+            i = i + 1
+        }
+        terminated
+    } else if kind == "if_else" {
+        val thenBranch = term.thenBranch as any
+        val elseBranch = term.elseBranch as any
+        elseBranch != unit && branchTerminates(thenBranch) && branchTerminates(elseBranch)
+    } else {
+        false
+    }
+}
+
 // --- Forward declaration for typeTerm (needed before typeTerms references it) ---
 pub var typeTerm: (any, int, any) -> Type = { term: any, level: int, constraints: any -> tUnit }
 
@@ -267,17 +294,28 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
     } else if kind == "fn" {
         // 5. fn: process params, type body in new scope
         val fnResult: any = icWithNewLocalScope({
-            val returnType = icFreshVariable(level)
-            val params = luaExpr("term.parameters") as any
-            val paramCount = luaExpr("#params") as int
+            val expectedType: any = term.expectedType
+            val hasExpectedFnType = expectedType != unit && expectedType.tag == "fn"
+            val expectedFnTypes: array[Type] = if hasExpectedFnType { expectedType.types } else { [] }
+            val expectedTypeCount = expectedFnTypes.size()
+            val expectedParamCount = expectedTypeCount - 1
+            val returnType: any = if hasExpectedFnType {
+                expectedFnTypes[expectedTypeCount]
+            } else {
+                icFreshVariable(level)
+            }
+            val params = term.parameters as array[any]
+            val paramCount = params.size()
             val paramTypes: array[Type] = []
             var i = 1
             while i <= paramCount {
-                val p = luaExpr("params[i]") as any
-                val pName = luaExpr("p.name") as string
-                val pType = luaExpr("p.paramType") as any
+                val p = params[i]
+                val pName = p.name as string
+                val pType = p.paramType
                 val paramType: any = if pType != unit {
                     pType
+                } else if hasExpectedFnType && i <= expectedParamCount {
+                    expectedFnTypes[i]
                 } else {
                     icFreshVariable(level)
                 }
@@ -287,7 +325,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
                     val defaultVal: any = defaultValues.get(pName)
                     if defaultVal != unit {
                         val dvType = typeTerm(defaultVal, level, constraints)
-                        val dvSection = luaExpr("defaultVal.section") as any
+                        val dvSection = defaultVal.section
                         addConstraint(constraints, paramType, dvType, dvSection)
                     }
                 }
@@ -295,12 +333,14 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
                 paramTypes.push(paramType as Type)
                 i = i + 1
             }
-            val body = luaExpr("term.body") as any
+            val body = term.body as any
             val bodyType = typeTerm(body, level, constraints)
             paramTypes.push(returnType as Type)
             val fnType = functionType(paramTypes, [] as array[string], 0)
-            val bodySection = luaExpr("body.section") as any
-            addConstraint(constraints, returnType, bodyType, bodySection)
+            if hasExpectedFnType == false || (typeEquals(returnType as Type, tUnit) == false && branchTerminates(body) == false) {
+                val bodySection = body.section
+                addConstraint(constraints, returnType, bodyType, bodySection)
+            }
             fnType
         })
         fnResult
@@ -327,6 +367,16 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
             t
         } else {
             typeTerm(callee, level, constraints)
+        }
+        val calleeTag = (definedFunctionType as Type).tag
+        val calleeType = definedFunctionType as Type
+        val calleeIds = calleeType.ids
+        val isAnyCallee = calleeTag == "primitive" && calleeIds.size() > 0 && calleeIds[1].name == "any"
+        if calleeTag != "fn" && calleeTag != "var" && calleeTag != "sum" && isAnyCallee == false {
+            val calleeSection = term.callee.section as Section | unit
+            val cp = if calleeSection != unit { toCodePoint(calleeSection as Section) } else { unit }
+            val msg = notAFunction(cp)
+            embedLua("error(msg)")
         }
         val fnCallResult = icFreshVariable(level)
 
@@ -374,8 +424,21 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         }
 
         // Type all call params and build callType
-        val callParams = luaExpr("term.callParams") as any
-        val callParamTypes = typeTerms(callParams, constraints, level)
+        val callParams = term.callParams as array[any]
+        val callParamCount = callParams.size()
+        val expectedParamTypes: array[Type] = if calleeTag == "fn" { calleeType.types } else { [] }
+        val expectedParamCount = expectedParamTypes.size() - 1
+        val callParamTypes: array[any] = []
+        var cpi = 1
+        while cpi <= callParamCount {
+            val callParam = callParams[cpi]
+            if calleeTag == "fn" && cpi <= expectedParamCount && callParam.kind == "fn" {
+                callParam.expectedType = expectedParamTypes[cpi]
+            }
+            val callParamType = typeTerm(callParam, level, constraints)
+            callParamTypes.push(callParamType)
+            cpi = cpi + 1
+        }
         for t in defaultArgTypes(definedFunctionType, callParamTypes.size()) { callParamTypes.push(t) }
         callParamTypes.push(fnCallResult as Type)
         val callType = functionType(callParamTypes as array[Type], [] as array[string], 0)
@@ -497,7 +560,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
                         val cp = luaExpr("memberSection and require('chicc/source').toCodePoint(memberSection) or nil") as any
                         val joined = luaExpr("table.concat(quals, ', ')") as string
                         embedLua("error(require('chicc/messages').ambiguousMethod(fieldName, joined, cp))")
-                        unit // unreachable
+                        tAny // unreachable
                     } else if qcount == 1 {
                         val ufcsCandidate = pickDeterministicUfcs(loadedCandidates)
                         val dotTarget2 = luaExpr("ufcsCandidate.dotTarget") as DotTarget | unit
@@ -516,13 +579,13 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
                     val cp = luaExpr("memberSection and require('chicc/source').toCodePoint(memberSection) or nil") as any
                     val receiverDesc = typeToString(finalReceiverType as Type)
                     embedLua("error(require('chicc/messages').memberDoesNotExist(receiverDesc, fieldName, cp))")
-                    unit // unreachable
+                    tAny // unreachable
                 }
             }
         }
     } else if kind == "name_declaration" {
         // 9. name_declaration: type value, create poly type, define symbol
-        val expType = luaExpr("term.expectedType") as any
+        val expType = term.expectedType
         val expectedType: any = if expType != unit {
             expType
         } else {
@@ -533,9 +596,12 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         if term.isNamedFn && term.target.tag == "local" {
             icDefineLocalSymbol(term.declName, expectedType)
         }
-        val value = luaExpr("term.value") as any
+        val value = term.value as any
+        if value.kind == "fn" && expectedType.tag == "fn" {
+            value.expectedType = expectedType
+        }
         val valueType = typeTerm(value, level + 1, constraints)
-        val valueSection = luaExpr("value.section") as any
+        val valueSection = value.section
         addConstraint(constraints, expectedType, valueType, valueSection)
         // Any other binding's unknowns are fixed by later uses; they move down
         // to the declaration's level, so that a later declaration does not
@@ -592,11 +658,25 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         val thenBranch = luaExpr("term.thenBranch") as any
         val thenBranchType = icWithNewLocalScope({ typeTerm(thenBranch, level, constraints) }) as Type
         val elseBranch = luaExpr("term.elseBranch") as any
+        val thenTerminates = branchTerminates(thenBranch)
         if elseBranch != unit {
             val elseBranchType = icWithNewLocalScope({ typeTerm(elseBranch, level, constraints) }) as Type
-            sumCreate(luaExpr("{}") as array[TypeId], thenBranchType, elseBranchType, luaExpr("{}") as array[string])
+            val elseTerminates = branchTerminates(elseBranch)
+            if thenTerminates && elseTerminates {
+                tUnit
+            } else if thenTerminates {
+                elseBranchType
+            } else if elseTerminates {
+                thenBranchType
+            } else {
+                sumCreate([] as array[TypeId], thenBranchType, elseBranchType, [] as array[string])
+            }
         } else {
-            sumCreate(luaExpr("{}") as array[TypeId], thenBranchType, tUnit, luaExpr("{}") as array[string])
+            if thenTerminates {
+                tUnit
+            } else {
+                sumCreate([] as array[TypeId], thenBranchType, tUnit, [] as array[string])
+            }
         }
     } else if kind == "interpolated_string" {
         // 12. interpolated_string: type parts, return string
@@ -745,22 +825,23 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         tUnit
     } else if kind == "field_assignment" {
         // 18. field_assignment: type receiver, type value, constrain
-        val receiver = luaExpr("term.receiver") as any
+        val receiver = term.receiver as any
         val receiverType = typeTerm(receiver, level, constraints)
-        val value = luaExpr("term.value") as any
+        val value = term.value as any
         val valueType = typeTerm(value, level, constraints)
-        val fieldName = luaExpr("term.fieldName") as string
-        // Build expected record type
-        val rf = luaExpr("{ name = fieldName, fieldType = valueType }") as RecordField
-        val rfields = luaExpr("{}") as array[RecordField]
-        rfields.push(rf)
-        val expectedRecType = recordType(luaExpr("{}") as array[TypeId], rfields, luaExpr("{}") as array[string])
+        val fieldName = term.fieldName as string
+        // Find the receiver's field type, then check the assigned value against it.
+        val fieldExpectedType = icFreshVariable(level)
+        val rf: RecordField = { name: fieldName, fieldType: fieldExpectedType as Type }
+        val rfields: array[RecordField] = [rf]
+        val expectedRecType = recordType([] as array[TypeId], rfields, [] as array[string])
 
         val faResult = icFreshVariable(level)
-        val valueSection = luaExpr("value.section") as any
-        val receiverSection = luaExpr("receiver.section") as any
-        addConstraint(constraints, valueType, faResult, valueSection)
+        val valueSection = value.section
+        val receiverSection = receiver.section
         addConstraint(constraints, expectedRecType, receiverType, receiverSection)
+        addConstraint(constraints, fieldExpectedType, valueType, valueSection)
+        addConstraint(constraints, faResult, valueType, valueSection)
         faResult
     } else if kind == "effect_definition" {
         // 19. effect_definition: return pre-set type

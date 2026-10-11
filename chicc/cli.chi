@@ -5,7 +5,7 @@
 package chicc/cli
 import std/lang { luaExpr, embedLua }
 import std/os { getEnv }
-import std/io.file { readString, open, close, write }
+import std/io.file { File, readString, open, close, write }
 import std/lang.map { Map, emptyMap, fromRecord, remove }
 import chicc/compiler { newLuaCompilationEnv, newReplCompilationEnv, compileToLua, compileReplLine, commitReplLine, saveReplMetadata, restoreReplMetadata, formatMessage, ReplNamedFn }
 import chicc/emitter { luaName }
@@ -80,7 +80,7 @@ fn readSource(path: string): string | unit {
     if f == unit {
         return unit
     }
-    close(f)
+    close(f as File)
     readString(path)
 }
 
@@ -118,8 +118,8 @@ pub fn compileFile(inputPath: string, outputPath: string): int {
         eprintln("Error: cannot write $outputPath")
         return 1
     }
-    write(out, luaCode as string)
-    close(out)
+    write(out as File, luaCode as string)
+    close(out as File)
     println("Compiled: $inputPath -> $outputPath")
     0
 }
@@ -351,7 +351,8 @@ fn replValueFits(v: any, t: Type): bool {
         if variant != unit {
             // Instantiating a generic type (Option[Shape]) drops the variant
             // name from the type; the type id is the constructor's.
-            ty.ids.size() > 0 && ty.ids[1].name == variant
+            val variantName = variant as string
+            ty.ids.size() > 0 && ty.ids[1].name == variantName
         } else if kind != "table" || variantNameOf(ty) != unit {
             false
         } else {

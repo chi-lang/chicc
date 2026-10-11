@@ -2,7 +2,7 @@
 package chicc/inference_context
 import std/lang { luaExpr, embedLua }
 import std/lang.map { emptyMap, forEach }
-import chicc/types { Type, TypeId, variableType, polyType, instantiate }
+import chicc/types { Type, TypeId, tAny, variableType, polyType, instantiate }
 import chicc/ast { DotTarget, localBindingDotTarget }
 import chicc/unification { tryUnify, newConstraint }
 
@@ -125,7 +125,7 @@ pub fn icGetTargetType(tgt: any, level: int, section: any): Type {
         val scheme = icLocalSymbolsGet(icLocalSymbols, name)
         if scheme == unit {
             embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Identifier ' .. tgt.name .. ' not found!' })")
-            unit // unreachable
+            tAny // unreachable
         } else {
             (scheme as Type).instantiate(level, icFreshVariable)
         }
@@ -140,7 +140,7 @@ pub fn icGetTargetType(tgt: any, level: int, section: any): Type {
             val scheme = icLocalSymbolsGet(icPackageSymbols, name)
             if scheme == unit {
                 embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Identifier ' .. tgt.name .. ' not found!' })")
-                unit // unreachable
+                tAny // unreachable
             } else {
                 (scheme as Type).instantiate(level, icFreshVariable)
             }
@@ -149,12 +149,12 @@ pub fn icGetTargetType(tgt: any, level: int, section: any): Type {
             val sym: any = luaExpr("__P_.icNs and __P_.icNs.getSymbol and __P_.icNs.getSymbol(tgtMod, tgtPkg, name) or nil")
             if sym == unit {
                 embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Identifier ' .. tgt.name .. ' not found!' })")
-                unit // unreachable
+                tAny // unreachable
             } else {
                 val symType: any = luaExpr("sym.symbolType")
                 if symType == unit {
                     embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Type not found for identifier ' .. tgt.name })")
-                    unit // unreachable
+                    tAny // unreachable
                 } else {
                     (symType as Type).instantiate(level, icFreshVariable)
                 }
@@ -162,7 +162,7 @@ pub fn icGetTargetType(tgt: any, level: int, section: any): Type {
         }
     } else {
         embedLua("error({ code = 'UNRECOGNIZED_NAME', text = 'Unknown target tag: ' .. tag })")
-        unit // unreachable
+        tAny // unreachable
     }
 }
 

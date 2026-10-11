@@ -13,15 +13,15 @@ test("newImportEntry with alias") {
     val sec = newSection(1, 1, 1, 10)
     val entry = newImportEntry("map", "m", sec)
     assertEqual(entry.name, "map")
-    assertEqual(entry.alias, "m")
+    assertEqual(entry.alias as string, "m")
     assertTrue(entry.section != unit)
 }
 
 test("newImportEntry without alias") {
     val entry = newImportEntry("fold", unit, unit)
     assertEqual(entry.name, "fold")
-    assertEqual(entry.alias, unit)
-    assertEqual(entry.section, unit)
+    assertTrue(entry.alias == unit)
+    assertTrue(entry.section == unit)
 }
 
 test("newImport") {
@@ -30,7 +30,7 @@ test("newImport") {
     val imp = newImport("std", "lang.array", "arr", [e1, e2], unit)
     assertEqual(imp.moduleName, "std")
     assertEqual(imp.packageName, "lang.array")
-    assertEqual(imp.packageAlias, "arr")
+    assertEqual(imp.packageAlias as string, "arr")
     assertEqual(imp.entries.size(), 2)
 }
 

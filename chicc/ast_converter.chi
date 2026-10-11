@@ -571,6 +571,7 @@ fn convertFuncWithNameImpl(node: any, pkg: any, tables: any): Expr {
                     val lambdaSec = luaExpr("lastExpr.section") as any
                     val lambdaFn: any = fnExpr(lambdaParams, unit, lastExpr as Expr, lambdaSec as Section | unit)
                     setExprType(lambdaFn as Expr, lambdaType as Type | unit)
+                    lambdaFn.expectedType = returnType
                     embedLua("body.blockBody[bodyCount] = lambdaFn")
                 }
             }

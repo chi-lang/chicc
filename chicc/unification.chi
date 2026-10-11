@@ -1,9 +1,9 @@
 // chicc/chicc/unification.chi
 package chicc/unification
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, TypeId, RecordField, tAny, tUnit, functionType, recordType, sumCreate, arrayType, recursiveType, polyType, variableType, typeIdEquals }
+import chicc/types { Type, TypeId, RecordField, tAny, tUnit, functionType, recordType, sumCreate, arrayType, recursiveType, polyType, variableType, typeIdEquals, typeToString }
 import std/lang.map { emptyMap, remove }
-import chicc/messages { Message, typeMismatch, notAFunction, functionArityError, infiniteType }
+import chicc/messages { Message, typeMismatch, functionArityError, infiniteType }
 import chicc/source { Section, toCodePoint }
 
 // Constraint type
@@ -422,17 +422,13 @@ fn unifyCore(constraints: array[any], uf: any, outerAssumed: Assumed | unit): Me
             while fi <= expLen {
                 val expParam = expTypes[fi]
                 val actParam = actTypes[fi]
-                if fi == lastIndex && expParam.typeEquals(tUnit) && actParam.tag != "var" {
-                    // void return accepts anything - skip
+                val newHistory = copyHistoryWith(history, constraint)
+                val nc = if fi == lastIndex {
+                    newConstraint(expParam, actParam, section, newHistory)
                 } else {
-                    val newHistory = copyHistoryWith(history, constraint)
-                    val nc = if fi == lastIndex {
-                        newConstraint(expParam, actParam, section, newHistory)
-                    } else {
-                        newConstraint(actParam, expParam, section, newHistory)
-                    }
-                    queue.insertAt(pos, nc)
+                    newConstraint(actParam, expParam, section, newHistory)
                 }
+                queue.insertAt(pos, nc)
                 fi = fi + 1
             }
         } else if expected.tag == "record" && actual.tag == "record" {
@@ -471,6 +467,14 @@ fn unifyCore(constraints: array[any], uf: any, outerAssumed: Assumed | unit): Me
             val newHistory = copyHistoryWith(history, constraint)
             val nc = newConstraint(expElem, actElem, section, newHistory)
             queue.insertAt(pos, nc)
+        } else if actual.tag == "sum" {
+            // Every value represented by an actual sum must fit the expected
+            // type, so check both branches before considering expected unions.
+            val actLhs = actual.lhs
+            val actRhs = actual.rhs
+            val newHistory = copyHistoryWith(history, constraint)
+            queue.insertAt(pos, newConstraint(expected, actLhs, section, newHistory))
+            queue.insertAt(pos + 1, newConstraint(expected, actRhs, section, newHistory))
         } else if expected.tag == "sum" {
             // Try unifying with rhs first, fall back to lhs. The probe is a
             // self-recursive call on a FRESH union-find: a failed probe leaks
@@ -498,35 +502,9 @@ fn unifyCore(constraints: array[any], uf: any, outerAssumed: Assumed | unit): Me
                 val lhsConstraint = newConstraint(expLhs, actual, section, newHistory)
                 queue.insertAt(pos, lhsConstraint)
             }
-        } else if actual.tag == "sum" {
-            // Width subtyping: a sum actual matches expected if ANY branch matches.
-            // Try lhs first, fall back to rhs (mirrors expected-sum handling).
-            val actLhs = actual.lhs
-            val actRhs = actual.rhs
-            val newHistory = copyHistoryWith(history, constraint)
-            val lhsConstraint = newConstraint(expected, actLhs, section, newHistory)
-            val lhsConstraints: array[any] = []
-            lhsConstraints.push(lhsConstraint)
-
-            val probeUf = ufNew()
-            val probeFailure = unifyCore(lhsConstraints, probeUf, assumed)
-            if probeFailure == unit {
-                // Merge the probe's solutions into our union-find
-                val bindings = ufAllBindings(probeUf)
-                val bLen = bindings.size()
-                var si = 1
-                while si <= bLen {
-                    ufBind(uf, bindings[si].variable, bindings[si].replacement)
-                    si = si + 1
-                }
-            } else {
-                // lhs failed, try rhs
-                val rhsConstraint = newConstraint(expected, actRhs, section, newHistory)
-                queue.insertAt(pos, rhsConstraint)
-            }
         } else if expected.tag == "fn" && actual.tag != "fn" {
             val cp = sectionToCodePoint(section)
-            return notAFunction(cp)
+            return typeMismatch(typeToString(expected), typeToString(actual), cp)
         } else {
             val cp = sectionToCodePoint(section)
             return typeMismatch(typeDescr(expected), typeDescr(actual), cp)

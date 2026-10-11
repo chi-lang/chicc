@@ -81,4 +81,26 @@ test("a return in a top-level lambda assigned to an any-typed val is inside a fu
     }
 }
 
+test("implicit and explicit unit functions discard return values after one evaluation") {
+    withinLimits(30) {
+        val src = "package t38/unit_returns\nvar calls = 0\nfn next(): int {\n    calls = calls + 1\n    calls\n}\nfn implicit() { return next() }\nfn explicit(): unit { return next() }\nfn trailing() { next() }\nfn explicitTrailing(): unit { next() }\nval implicitResult = implicit()\nval explicitResult = explicit()\nval trailingResult = trailing()\nval explicitTrailingResult = explicitTrailing()\nval resultsAreUnit = implicitResult == unit && explicitResult == unit && trailingResult == unit && explicitTrailingResult == unit\nval observed = calls\n"
+        val result = compileAndRun(src)
+        assertEqual(result.resultsAreUnit as bool, true)
+        assertEqual(result.observed as int, 4)
+    }
+}
+
+test("an unannotated named function does not infer its result from the body") {
+    withinLimits(30) {
+        assertOnlyMessage("fn one() { 1 }\nval x: int = one()", "TYPE_MISMATCH", "Expected type is 'int' but got 'unit'")
+    }
+}
+
+test("a nested non-unit function keeps its result inside an implicit unit function") {
+    withinLimits(30) {
+        val src = "package t38/nested_unit\nvar observed = 0\nfn outer() {\n    fn inner(): int { return 9 }\n    observed = inner()\n}\nouter()\nval result = observed\n"
+        assertEqual(compileAndRun(src).result as int, 9)
+    }
+}
+
 summary()

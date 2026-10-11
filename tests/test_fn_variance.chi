@@ -68,6 +68,64 @@ test("calling a value that is not a function is reported as such") {
     }
 }
 
+test("contextual unit lambdas discard results after one evaluation") {
+    withinLimits(30) {
+        val src = "package t/unit_callback\nvar calls = 0\nfn touch(): int {\n    calls = calls + 1\n    calls\n}\nfn returnsUnit(f: () -> unit): bool { f() == unit }\nval trailingResult = returnsUnit({ -> touch() })\nval explicitResult = returnsUnit({ -> return touch() })\nval assignmentResult = returnsUnit({ -> calls = calls + 1 })\nval ignored: () -> unit = { -> touch() }\nval directResult = ignored() == unit\nval observed = calls\n"
+        val result = compileAndRun(src)
+        assertEqual(result.trailingResult as bool, true)
+        assertEqual(result.explicitResult as bool, true)
+        assertEqual(result.assignmentResult as bool, true)
+        assertEqual(result.directResult as bool, true)
+        assertEqual(result.observed as int, 4)
+    }
+}
+
+test("a non-unit function cannot fill a unit callback slot") {
+    withinLimits(30) {
+        val src = "fn value(): int { 1 }\nval f: () -> unit = value"
+        assertOnlyMessage(src, "TYPE_MISMATCH", "Expected type is 'unit' but got 'int'")
+        assertEqual(messageCodes("fn apply(f: () -> unit): unit { f() }\nfn value(): int { 1 }\napply(value)"), "TYPE_MISMATCH")
+        assertEqual(messageCodes("val one = { -> 1 }\nval f: () -> unit = one"), "TYPE_MISMATCH")
+        assertEqual(messageCodes("fn apply(f: () -> unit): unit { f() }\nval one = { -> 1 }\napply(one)"), "TYPE_MISMATCH")
+    }
+}
+
+test("unit is a type mismatch when a function value is expected") {
+    withinLimits(30) {
+        assertOnlyMessage("val f: (int) -> int = unit", "TYPE_MISMATCH", "Expected type is '(int) -> int' but got 'unit'")
+        assertOnlyMessage("val f: (int) -> int = 5", "TYPE_MISMATCH", "Expected type is '(int) -> int' but got 'int'")
+    }
+}
+
+test("an actual sum must fit every branch of the expected sum") {
+    withinLimits(30) {
+        val src = "fn accept(x: int | string): unit { }\nval value: int | bool = true\naccept(value)"
+        assertEqual(messageCodes(src), "TYPE_MISMATCH")
+        assertEqual(messageCodes("var o: int | unit = unit\nval i: int = o"), "TYPE_MISMATCH")
+        assertEqual(messageCodes("fn find(): int | unit { unit }\nval i: int = find()"), "TYPE_MISMATCH")
+        assertEqual(messageCodes("fn inc(x: int): int { x + 1 }\nval y: int | string = \"abc\"\ninc(y)"), "TYPE_MISMATCH")
+        assertEqual(messageCodes("var o: int | unit = unit\nval p: unit | int = o"), "")
+        val casted = compileAndRun("package t/explicit_sum_cast\nvar o: int | unit = 5\nval result = (o as int) + 1")
+        assertEqual(casted.result as int, 6)
+    }
+}
+
+test("an uncontextualized lambda still infers its result") {
+    withinLimits(30) {
+        val src = "package t/inferred_lambda\nval f = { -> 7 }\nval result: int = f()"
+        assertEqual(compileAndRun(src).result as int, 7)
+    }
+}
+
+test("field assignment checks the value against the receiver field type") {
+    withinLimits(30) {
+        val src = "fn setName(r: { name: string }): unit { r.name = 1 }"
+        assertOnlyMessage(src, "TYPE_MISMATCH", "Expected type is 'string' but got 'int'")
+        assertEqual(messageCodes("val r = { value: 1 }\nvar o: int | unit = unit\nr.value = o"), "TYPE_MISMATCH")
+        assertEqual(messageCodes("var r: { value: int | unit } = { value: 1 }\nr.value = 2"), "")
+    }
+}
+
 test("a plain call with too few arguments reports the declared arity first") {
     withinLimits(30) {
         // Nested, so the call is not padded with unit arguments (#39).

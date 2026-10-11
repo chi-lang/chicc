@@ -1,7 +1,7 @@
 // chicc/chicc/checks.chi
 package chicc/checks
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, tUnit, typeEquals, sumListTypes }
+import chicc/types { Type, tUnit, typeEquals }
 import chicc/unification { newConstraint, tryUnify }
 import chicc/messages { unrecognizedName, ambiguousName, cannotAccessInternalName, notAFunction, cannotChangeImmutableVariable, typeMismatch, genericError }
 import chicc/ast { exprChildren }
@@ -627,47 +627,36 @@ fn rtWalkExprImpl(expr: any, messages: any) {
             if actualType == unit {
                 actualType = tUnit
             }
-            // Check if actualType is a subtype of a sum-typed expRet
-            var sumMatch = false
-            if (expRet as Type).tag == "sum" {
-                val branches = (expRet as Type).sumListTypes()
-                val branchCount = luaExpr("#branches") as int
-                var bi = 1
-                while bi <= branchCount {
-                    val branch = luaExpr("branches[bi]") as Type
-                    if typeEquals(actualType as Type, branch) {
-                        sumMatch = true
-                    }
-                    bi = bi + 1
-                }
-            }
-            if typeEquals(actualType as Type, expRet as Type) == false && sumMatch == false {
-                // Try unification to see if types are compatible
-                val constraint = newConstraint(expRet, actualType, luaExpr("expr.section") as any, [])
-                val unifyOk = tryUnify([constraint]) != unit
-                if unifyOk == false {
-                    val expTag = luaExpr("expRet.tag") as string
-                    val actTag = luaExpr("actualType.tag") as string
-                    var expDescr: string = expTag
-                    var actDescr: string = actTag
-                    if expTag == "primitive" {
-                        val expIds = luaExpr("expRet.ids") as any
-                        val expIdCount = luaExpr("#expIds") as int
-                        if expIdCount > 0 {
-                            expDescr = luaExpr("expIds[1].name") as string
+            // Unit-returning functions evaluate returns for effects and discard
+            // their values. Other returns use strict sum-aware unification.
+            if typeEquals(expRet as Type, tUnit) == false {
+                if typeEquals(actualType as Type, expRet as Type) == false {
+                    val constraint = newConstraint(expRet, actualType, luaExpr("expr.section") as any, [])
+                    val unifyOk = tryUnify([constraint]) != unit
+                    if unifyOk == false {
+                        val expTag = luaExpr("expRet.tag") as string
+                        val actTag = luaExpr("actualType.tag") as string
+                        var expDescr: string = expTag
+                        var actDescr: string = actTag
+                        if expTag == "primitive" {
+                            val expIds = luaExpr("expRet.ids") as any
+                            val expIdCount = luaExpr("#expIds") as int
+                            if expIdCount > 0 {
+                                expDescr = luaExpr("expIds[1].name") as string
+                            }
                         }
-                    }
-                    if actTag == "primitive" {
-                        val actIds = luaExpr("actualType.ids") as any
-                        val actIdCount = luaExpr("#actIds") as int
-                        if actIdCount > 0 {
-                            actDescr = luaExpr("actIds[1].name") as string
+                        if actTag == "primitive" {
+                            val actIds = luaExpr("actualType.ids") as any
+                            val actIdCount = luaExpr("#actIds") as int
+                            if actIdCount > 0 {
+                                actDescr = luaExpr("actIds[1].name") as string
+                            }
                         }
+                        val sec = luaExpr("expr.section") as any
+                        val cp = rtSectionToCp(sec)
+                        val msg = typeMismatch(expDescr, actDescr, cp)
+                        (messages as array[any]).push(msg)
                     }
-                    val sec = luaExpr("expr.section") as any
-                    val cp = rtSectionToCp(sec)
-                    val msg = typeMismatch(expDescr, actDescr, cp)
-                    (messages as array[any]).push(msg)
                 }
             }
         }

@@ -3,6 +3,7 @@ package chicc/emitter
 import std/lang { luaExpr, embedLua }
 import chicc/util { newStringBuilder, StringBuilder, append, toString }
 import chicc/ast { Program, Expr, Target, DotTarget, HandleCase, FnParam, ExprField, exprChildren }
+import chicc/types { Type, tUnit, typeEquals }
 import std/lang.map { emptyMap, Map }
 
 type EmitterState = {
@@ -10,11 +11,12 @@ type EmitterState = {
     nextTmpId: int,
     nextLoopId: int,
     currentLoopId: int,
+    discardReturnValues: bool,
     program: Program
 }
 
 pub fn newState(prog: Program): EmitterState {
-    { sb: newStringBuilder(), nextTmpId: 0, nextLoopId: 0, currentLoopId: 0, program: prog }
+    { sb: newStringBuilder(), nextTmpId: 0, nextLoopId: 0, currentLoopId: 0, discardReturnValues: false, program: prog }
 }
 
 pub fn emit(st: EmitterState, code: string) {
@@ -279,12 +281,28 @@ pub fn emitFn(st: EmitterState, expr: Expr, name: string, isTopLevel: bool): str
             }
         }
     }
+    val previousDiscardReturnValues = st.discardReturnValues
+    val exprType: any = expr.exprType
+    var discardReturnValues = false
+    if exprType != unit && exprType.tag == "fn" {
+        val fnTypes = exprType.types as array[Type]
+        if fnTypes.size() > 0 {
+            discardReturnValues = typeEquals(fnTypes[fnTypes.size()], tUnit)
+        }
+    }
+    st.discardReturnValues = discardReturnValues
     val fnBody = expr.body as Expr
     val bodyResult = emitExpr(st, fnBody)
     if !isBlockTerminator(fnBody) {
-        emit(st, "return $bodyResult")
+        if st.discardReturnValues {
+            val ignored = nextTmpName(st)
+            emit(st, "local $ignored=$bodyResult;return;")
+        } else {
+            emit(st, "return $bodyResult")
+        }
     }
     emit(st, " end;")
+    st.discardReturnValues = previousDiscardReturnValues
     safeTmpName
 }
 
@@ -475,7 +493,12 @@ pub fn emitReturn(st: EmitterState, expr: Expr): string {
     val retVal = expr.returnValue
     if retVal != unit {
         val result = emitExpr(st, retVal as Expr)
-        emit(st, "return $result;")
+        if st.discardReturnValues {
+            val ignored = nextTmpName(st)
+            emit(st, "local $ignored=$result;return;")
+        } else {
+            emit(st, "return $result;")
+        }
     } else {
         emit(st, "return;")
     }
