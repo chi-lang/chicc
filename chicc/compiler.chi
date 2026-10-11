@@ -7,8 +7,8 @@ import std/lang { luaExpr, embedLua }
 import chicc/source { Section }
 import chicc/ast { Expr, Import, ImportEntry, TypeAlias, Program, newPackage, newProgram, newImport, newImportEntry, newTypeAlias }
 import chicc/types { Type, TypeId }
-import chicc/messages { Message, invalidModuleName, invalidPackageName, cannotAccessInternalName, unrecognizedName, internalError }
-import chicc/symbols { CompileTables, newCompileTables, ctDefineTypeAlias, ttGet }
+import chicc/messages { Message, invalidModuleName, invalidPackageName, cannotAccessInternalName, unrecognizedName, packageNotFound, internalError }
+import chicc/symbols { CompileTables, newCompileTables, ctDefineTypeAlias, ctMarkFailedName, ttGet }
 import chicc/checks { checkNames, importConflictCheck, visibilityCheck, fnCallCheck, immutabilityCheck, returnTypeCheck }
 import chicc/inference_context { icInit, icDefineLocalSymbol }
 import chicc/emitter { emitProgram }
@@ -37,7 +37,7 @@ pub fn hasErrors(result: CompilationResult): bool {
 // ============================================================================
 
 // Define the Lua-side env factory at module init time
-embedLua("__chicc_mkEnv = function() local _tw = require('chicc/type_writer'); local _types = require('chicc/types'); local env = {}; local cache = {}; local aliasCache = {}; function env.getSymbol(mod, pkg, name) local qualifier = mod .. '/' .. pkg; local pkgSymbols = cache[qualifier]; if pkgSymbols == nil then local loaded = package.loaded[qualifier]; if loaded == nil or loaded._package == nil then return nil end; pkgSymbols = {}; for symName, props in pairs(loaded._package) do if type(props) == 'table' then local symType = nil; if props.type then local ok, decoded = pcall(function() return _tw.decodeType(props.type) end); if ok then symType = decoded; if symType and symType.typeParams and #symType.typeParams > 0 then symType = _types.polyType(0, symType) end end end; pkgSymbols[symName] = { moduleName = mod, packageName = pkg, name = symName, symbolType = symType, isPublic = props.public == true, isMutable = props.mutable == true } end end; cache[qualifier] = pkgSymbols end; return pkgSymbols[name] end; function env.getTypeAlias(mod, pkg, name) local qualifier = mod .. '/' .. pkg; local pkgAliases = aliasCache[qualifier]; if pkgAliases == nil then local loaded = package.loaded[qualifier]; if loaded == nil or loaded._types == nil then return nil end; pkgAliases = {}; require('chicc/type_writer').clearTyperefCache(); for aliasName, spec in pairs(loaded._types) do if type(spec) == 'string' then local ok, decoded = pcall(function() return _tw.decodeType(spec) end); if ok then pkgAliases[aliasName] = { typeId = { moduleName = mod, packageName = pkg, name = aliasName }, aliasType = decoded } end end end; aliasCache[qualifier] = pkgAliases end; return pkgAliases[name] end; function env.getPreludeImports() return { { moduleName = 'std', packageName = 'lang', packageAlias = nil, entries = { { name = 'println', alias = nil, section = nil }, { name = 'print', alias = nil, section = nil }, { name = 'eval', alias = nil, section = nil } }, section = nil } } end; return env end")
+embedLua("__chicc_mkEnv = function() local _tw = require('chicc/type_writer'); local _types = require('chicc/types'); local env = {}; local cache = {}; local aliasCache = {}; function env.getSymbol(mod, pkg, name) local qualifier = mod .. '/' .. pkg; local pkgSymbols = cache[qualifier]; if pkgSymbols == nil then local loaded = package.loaded[qualifier]; if loaded == nil or loaded._package == nil then return nil end; pkgSymbols = {}; for symName, props in pairs(loaded._package) do if type(props) == 'table' then local symType = nil; if props.type then local ok, decoded = pcall(function() return _tw.decodeType(props.type) end); if ok then symType = decoded; if symType and symType.typeParams and #symType.typeParams > 0 then symType = _types.polyType(0, symType) end end end; pkgSymbols[symName] = { moduleName = mod, packageName = pkg, name = symName, symbolType = symType, isPublic = props.public == true, isMutable = props.mutable == true } end end; cache[qualifier] = pkgSymbols end; return pkgSymbols[name] end; function env.getTypeAlias(mod, pkg, name) local qualifier = mod .. '/' .. pkg; local pkgAliases = aliasCache[qualifier]; if pkgAliases == nil then local loaded = package.loaded[qualifier]; if loaded == nil or loaded._types == nil then return nil end; pkgAliases = {}; require('chicc/type_writer').clearTyperefCache(); for aliasName, spec in pairs(loaded._types) do if type(spec) == 'string' then local ok, decoded = pcall(function() return _tw.decodeType(spec) end); if ok then pkgAliases[aliasName] = { typeId = { moduleName = mod, packageName = pkg, name = aliasName }, aliasType = decoded } end end end; aliasCache[qualifier] = pkgAliases end; return pkgAliases[name] end; function env.hasPackage(mod, pkg) local loaded = package.loaded[mod .. '/' .. pkg]; return loaded ~= nil and loaded._package ~= nil end; function env.getPreludeImports() return { { moduleName = 'std', packageName = 'lang', packageAlias = nil, entries = { { name = 'println', alias = nil, section = nil }, { name = 'print', alias = nil, section = nil }, { name = 'eval', alias = nil, section = nil } }, section = nil } } end; return env end")
 
 pub fn newLuaCompilationEnv(): any {
     val ns: any = luaExpr("__chicc_mkEnv()")
@@ -427,17 +427,15 @@ fn thrownMessage(err: any): Message {
     if isMsg { err as Message } else { internalError("$err") }
 }
 
-// The type aliases lowerVariantTypes registered for each `data` type and its
+// The type aliases lowerVariantType registered for a `data` type and its
 // constructors, so they are emitted to `_types` like source type aliases.
-fn variantTypeAliases(parsedProgram: any, tables: CompileTables): array[any] {
+fn variantTypeAliases(vdef: ParseVariantTypeDefinition, tables: CompileTables): array[any] {
     val aliases: array[any] = []
-    for vdef in parsedProgram.variantTypes as array[ParseVariantTypeDefinition] {
-        val typeName = vdef.typeName
-        aliases.push(ttGet(tables.localTypeTable, typeName))
-        for ctor in vdef.constructors as array[VariantConstructor] {
-            if ctor.name != typeName {
-                aliases.push(ttGet(tables.localTypeTable, ctor.name))
-            }
+    val typeName = vdef.typeName
+    aliases.push(ttGet(tables.localTypeTable, typeName))
+    for ctor in vdef.constructors as array[VariantConstructor] {
+        if ctor.name != typeName {
+            aliases.push(ttGet(tables.localTypeTable, ctor.name))
         }
     }
     aliases
@@ -517,8 +515,11 @@ pub fn compile(source: string, ns: any): CompilationResult {
         resultMessages.push(msg)
     }
 
-    // Validate imported names exist and are public
+    // Validate imported names exist and are public. An entry that does not
+    // resolve is reported here, once per entry, or once per import when the
+    // package itself is missing; the name it binds is marked failed below.
     val sourceImports = luaExpr("parsedProgram.imports") as any
+    val failedImportNames: array[string] = []
     val importCount = luaExpr("#sourceImports") as int
     var ii = 1
     while ii <= importCount {
@@ -527,6 +528,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
         val impPkg = luaExpr("imp.packageName") as string
         val entries = luaExpr("imp.entries") as any
         val entryCount = luaExpr("#entries") as int
+        var pkgMissingReported = false
         var ei = 1
         while ei <= entryCount {
             val entry = luaExpr("entries[ei]") as any
@@ -546,13 +548,24 @@ pub fn compile(source: string, ns: any): CompilationResult {
                     resultMessages.push(msg)
                 }
             } else if sym == unit && typeAlias == unit {
-                val cp = if entrySec != unit {
-                    val line = luaExpr("entrySec.startLine") as int
-                    val col = luaExpr("entrySec.startCol") as int
-                    luaExpr("{ line = line, column = col }") as any
-                } else { unit }
-                val msg = unrecognizedName(entryName, cp as {line: int, column: int} | unit)
-                resultMessages.push(msg)
+                val entryAlias = entry.alias as string
+                failedImportNames.push(if entryAlias != "" { entryAlias } else { entryName })
+                val pkgMissing = luaExpr("ns ~= nil and ns.hasPackage ~= nil and not ns.hasPackage(impMod, impPkg)") as bool
+                if pkgMissing {
+                    if pkgMissingReported == false {
+                        val impSec = imp.section as Section
+                        resultMessages.push(packageNotFound("$impMod/$impPkg", { line: impSec.startLine, column: impSec.startCol }))
+                        pkgMissingReported = true
+                    }
+                } else {
+                    val cp = if entrySec != unit {
+                        val line = luaExpr("entrySec.startLine") as int
+                        val col = luaExpr("entrySec.startCol") as int
+                        luaExpr("{ line = line, column = col }") as any
+                    } else { unit }
+                    val msg = unrecognizedName(entryName, cp as {line: int, column: int} | unit)
+                    resultMessages.push(msg)
+                }
             }
             ei = ei + 1
         }
@@ -565,6 +578,9 @@ pub fn compile(source: string, ns: any): CompilationResult {
     val preludeImports = luaExpr("ns ~= nil and ns.getPreludeImports and ns.getPreludeImports() or {}") as any
     val allImports = mergeImports(preludeImports, sourceImports)
     val tables = newCompileTables(pkg, ns, allImports)
+    for name in failedImportNames {
+        ctMarkFailedName(tables, name)
+    }
 
     // Resolve type aliases from source
     val definedTypeAliases = luaExpr("{}") as any
@@ -592,18 +608,26 @@ pub fn compile(source: string, ns: any): CompilationResult {
     // Materialise variant (`data`) constructors: register their types + the
     // data sum + a constructor function symbol per variant into `tables`, and
     // capture the constructor declarations. MUST run before checkNames so that
-    // constructor calls in user code resolve. Wrapped in pcall to surface the
-    // generic-variant rejection (and any other lowering error) as a message.
-    embedLua("__chicc_var_ok, __chicc_var_result = pcall(function() local _ac = require('chicc/ast_converter'); return _ac.lowerVariantTypes(parsedProgram, pkg, tables) end)")
-    var variantCtorDecls: any = luaExpr("{}")
-    val varOk = luaExpr("__chicc_var_ok") as bool
-    if varOk {
-        variantCtorDecls = luaExpr("__chicc_var_result") as any
-        for alias in variantTypeAliases(parsedProgram, tables) {
-            (definedTypeAliases as array[any]).push(alias)
+    // constructor calls in user code resolve. Each declaration is lowered under
+    // its own pcall: a rejected one (and any other lowering error) becomes a
+    // message and its constructor names are marked failed, the others stay.
+    val variantCtorDecls: array[any] = []
+    for vdef in parsedProgram.variantTypes as array[ParseVariantTypeDefinition] {
+        embedLua("__chicc_var_ok, __chicc_var_result = pcall(function() local _ac = require('chicc/ast_converter'); return _ac.lowerVariantType(vdef, pkg, tables) end)")
+        val varOk = luaExpr("__chicc_var_ok") as bool
+        if varOk {
+            for decl in luaExpr("__chicc_var_result") as array[any] {
+                variantCtorDecls.push(decl)
+            }
+            for alias in variantTypeAliases(vdef, tables) {
+                (definedTypeAliases as array[any]).push(alias)
+            }
+        } else {
+            resultMessages.push(thrownMessage(luaExpr("__chicc_var_result") as any))
+            for ctor in vdef.constructors as array[VariantConstructor] {
+                ctMarkFailedName(tables, ctor.name)
+            }
         }
-    } else {
-        resultMessages.push(thrownMessage(luaExpr("__chicc_var_result") as any))
     }
 
     embedLua("if __prof then __ts[3] = os.clock() end")

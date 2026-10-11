@@ -54,6 +54,11 @@ pub fn unrecognizedName(name: string, cp: { line: int, column: int } | unit): Me
     newMessage("UNRECOGNIZED_NAME", "Name '$name' was not recognized", cp)
 }
 
+// `qualifier` is the imported `module/package`.
+pub fn packageNotFound(qualifier: string, cp: { line: int, column: int } | unit): Message {
+    newMessage("PACKAGE_NOT_FOUND", "Package '$qualifier' was not found", cp)
+}
+
 // Reported when a name resolves to a public symbol in more than one package
 // (either imported from several packages, or reachable import-free in several
 // loaded packages). `candidates` is a human-readable list like

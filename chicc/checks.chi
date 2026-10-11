@@ -5,6 +5,7 @@ import chicc/types { Type, tUnit, typeEquals, sumListTypes }
 import chicc/unification { newConstraint, tryUnify }
 import chicc/messages { unrecognizedName, ambiguousName, cannotAccessInternalName, notAFunction, cannotChangeImmutableVariable, typeMismatch, genericError }
 import chicc/ast { exprChildren }
+import chicc/symbols { CompileTables, ctIsFailedName }
 
 // --- Module-level state for checkNames ---
 
@@ -56,15 +57,15 @@ fn cnSectionToCp(sec: any): { line: int, column: int } | unit {
     }
 }
 
-// Reports `varName` at `sec` unless it is in scope or resolves to exactly one
-// symbol through the compile tables.
+// Reports `varName` at `sec` unless it is in scope, resolves to exactly one
+// symbol through the compile tables, or already failed with its own message.
 fn cnCheckName(varName: string, sec: any) {
     if cnHasName(varName) == false {
         val ct = cnCtRef
         val aliased = luaExpr("ct ~= nil and require('chicc/symbols').ctGetAliasedPackage(ct, varName) or nil") as any
         if aliased == unit {
             val localSym = luaExpr("ct ~= nil and require('chicc/symbols').ctGetLocalSymbol(ct, varName) or nil") as any
-            if localSym == unit {
+            if localSym == unit && ctIsFailedName(ct as CompileTables, varName) == false {
                 // Fallback: a public symbol from any loaded package is
                 // reachable without an explicit import (JVM-style). When more
                 // than one loaded package exports the name we must not pick

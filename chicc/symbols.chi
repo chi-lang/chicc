@@ -147,7 +147,8 @@ type CompileTables = {
     packageAliasTable: any,
     importedSymbols: any,
     localSymbolTable: SymbolTable,
-    localTypeTable: TypeTable
+    localTypeTable: TypeTable,
+    failedNames: any
 }
 
 pub fn newCompileTables(pkg: any, ns: any, imports: any): CompileTables {
@@ -199,7 +200,7 @@ pub fn newCompileTables(pkg: any, ns: any, imports: any): CompileTables {
 
     { currentPackage: pkg, ns: ns, packageAliasTable: packageAliasTable,
       importedSymbols: importedSymbols, localSymbolTable: localST,
-      localTypeTable: localTT }
+      localTypeTable: localTT, failedNames: emptyMap[string, bool]() }
 }
 
 pub fn ctGetLocalSymbol(ct: CompileTables, name: string): Symbol | unit {
@@ -237,6 +238,18 @@ pub fn ctDefineSymbol(ct: CompileTables, sym: Symbol): unit {
 
 pub fn ctRemoveSymbol(ct: CompileTables, name: string): unit {
     stRemove(ct.localSymbolTable, name)
+}
+
+// A name whose declaration or import already failed with its own message:
+// its uses are not reported again.
+pub fn ctMarkFailedName(ct: CompileTables, name: string): unit {
+    val failed = ct.failedNames
+    failed.put(name, true)
+}
+
+pub fn ctIsFailedName(ct: CompileTables, name: string): bool {
+    val failed = ct.failedNames
+    failed.get(name) == true
 }
 
 pub fn ctGetAliasedPackage(ct: CompileTables, name: string): any {

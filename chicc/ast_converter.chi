@@ -965,29 +965,20 @@ convertHandle = convertHandleImpl
 
 // --- Variant lowering ---
 
-// Register each `data` declaration's constructor types and sum type into the
+// Register a `data` declaration's constructor types and sum type into the
 // type table, and materialise one constructor function declaration per variant
 // (a named fn whose body is a createVariantExpr; a variant without fields is a
-// value declaration of the data type instead). Runs in convertProgram after
-// type aliases and before code, so casts/annotations resolve regardless of
-// source order. Returns the constructor declarations to prepend to the program.
-// Contract: registers each variant's constructor types + the data type into
-// the type table, registers a symbol per variant, and returns the variant
-// declarations (to prepend to the program).
-// Rejects generic variants by throwing a structured error (caught by the
-// pcall around it in compiler.chi).
+// value declaration of the data type instead). Returns the constructor
+// declarations to prepend to the program.
+// Rejects generic and recursive variants by throwing a structured error; the
+// caller lowers each declaration under its own pcall (compiler.chi).
 //
 // MUST run before checkNames in compile() (compiler.chi) — otherwise the
 // constructor calls in user code (`Circle(2)`) fail name resolution and the
 // compile bails before conversion. So it is called from compile() directly,
 // not from convertProgram, and its result is prepended to the converted code.
-pub fn lowerVariantTypes(parseProg: any, pkg: any, tables: any): array[Expr] {
-    val variantDefs = luaExpr("parseProg.variantTypes") as array[any]
+pub fn lowerVariantType(vdef: any, pkg: any, tables: any): array[Expr] {
     var decls: array[any] = []
-    val defCount = variantDefs.size()
-    if defCount == 0 {
-        return decls as array[Expr]
-    }
 
     val tt = getTypeTable(tables)
     val modName = luaExpr("pkg.moduleName") as string
@@ -1000,141 +991,135 @@ pub fn lowerVariantTypes(parseProg: any, pkg: any, tables: any): array[Expr] {
     // type the typer cannot fold (stack overflow). Recursion is out of scope.
     embedLua("__chicc_trMentions = function(tr, names) if type(tr) ~= 'table' then return false end; local t = tr.tag; if t == 'TypeNameRef' or t == 'TypeParameterRef' then return names[tr.name] == true end; if __chicc_trMentions(tr.lhs, names) or __chicc_trMentions(tr.rhs, names) or __chicc_trMentions(tr.returnType, names) or __chicc_trMentions(tr.baseType, names) then return true end; for _,a in ipairs(tr.argumentTypeRefs or {}) do if __chicc_trMentions(a, names) then return true end end; for _,a in ipairs(tr.typeParameters or {}) do if __chicc_trMentions(a, names) then return true end end; for _,f in ipairs(tr.fields or {}) do if __chicc_trMentions(f.typeRef, names) then return true end end; return false end")
 
-    var di = 1
-    while di <= defCount {
-        val vdef = variantDefs[di]
-        val typeName = luaExpr("vdef.typeName") as string
-        val typeParams = luaExpr("vdef.typeParameters") as array[any]
-        val ctors = luaExpr("vdef.constructors") as array[any]
+    val typeName = luaExpr("vdef.typeName") as string
+    val typeParams = luaExpr("vdef.typeParameters") as array[any]
+    val ctors = luaExpr("vdef.constructors") as array[any]
 
-        // Generic variants are out of scope (#14): reject cleanly rather than
-        // silently degrade type parameters to `any` and miscompile.
-        if typeParams.size() > 0 {
-            embedLua("error({ code = 'UNSUPPORTED_FEATURE', text = 'generic data types are not supported yet (data ' .. vdef.typeName .. ')' })")
+    // Generic variants are out of scope (#14): reject cleanly rather than
+    // silently degrade type parameters to `any` and miscompile.
+    if typeParams.size() > 0 {
+        embedLua("error({ code = 'UNSUPPORTED_FEATURE', text = 'generic data types are not supported yet (data ' .. vdef.typeName .. ')' })")
+    }
+
+    // The names this declaration introduces (the data type + every
+    // constructor). A field referencing any of them is a recursive variant.
+    embedLua("__chicc_vnames = {}; __chicc_vnames[vdef.typeName] = true; for _, c in ipairs(vdef.constructors) do __chicc_vnames[c.name] = true end")
+
+    val ctorCount = ctors.size()
+
+    // Loop 1: resolve each constructor's fields and build its nominal record
+    // (marked with `name` = the variant name). No pre-registration, so no
+    // cyclic type can form; recursive references are rejected up front.
+    var ctorRecords: array[any] = []
+    var ctorParamTypes: array[any] = []
+    var ci = 1
+    while ci <= ctorCount {
+        val ctor = ctors[ci]
+        val ctorName = luaExpr("ctor.name") as string
+        val fields = luaExpr("ctor.fields") as array[any]
+        val fieldCount = fields.size()
+
+        var recFields: array[any] = []
+        var paramTypes: array[any] = []
+        var fi = 1
+        while fi <= fieldCount {
+            val field = fields[fi]
+            val fieldName = luaExpr("field.name") as string
+            val recursive = luaExpr("__chicc_trMentions(field.typeRef, __chicc_vnames)") as bool
+            if recursive {
+                embedLua("error({ code = 'UNSUPPORTED_FEATURE', text = 'recursive data types are not supported yet (data ' .. vdef.typeName .. ')' })")
+            }
+            val fieldType: any = resolveType(tt, [] as array[string], luaExpr("field.typeRef"), effectiveTypeLevel())
+            recFields.push(luaExpr("{ name = fieldName, fieldType = fieldType }") as any)
+            paramTypes.push(fieldType)
+            fi = fi + 1
         }
 
-        // The names this declaration introduces (the data type + every
-        // constructor). A field referencing any of them is a recursive variant.
-        embedLua("__chicc_vnames = {}; __chicc_vnames[vdef.typeName] = true; for _, c in ipairs(vdef.constructors) do __chicc_vnames[c.name] = true end")
+        val ctorId = newTypeId(modName, pkgName, ctorName)
+        val rec: any = recordType([ctorId], recFields as array[RecordField], [] as array[string])
+        // Mark as a variant: `name` is the discriminator variantNameOf /
+        // emitIs key on (`ids` can't tell a variant from a type alias —
+        // both carry ids; record `name` is "" everywhere except variants).
+        embedLua("rec.name = ctorName")
+        ctorRecords.push(rec)
+        ctorParamTypes.push(paramTypes)
+        val ctorAlias = luaExpr("{ typeId = { moduleName = modName, packageName = pkgName, name = ctorName }, aliasType = rec }") as any
+        aliasesMap.put(ctorName, ctorAlias)
+        ci = ci + 1
+    }
 
-        val ctorCount = ctors.size()
+    // Data type: the single record for a one-constructor `data`, else the
+    // sum of all constructor records. Raw sumType, NOT sumCreate — sumCreate
+    // dedups via typeEquals (which ignores ids) and would collapse two
+    // structurally-identical variants into one branch.
+    var dataType: any = ctorRecords[1]
+    if ctorCount > 1 {
+        var si = 2
+        while si <= ctorCount {
+            dataType = sumType([] as array[TypeId], dataType as Type, ctorRecords[si] as Type, [] as array[string])
+            si = si + 1
+        }
+    }
+    val dataAlias = luaExpr("{ typeId = { moduleName = modName, packageName = pkgName, name = typeName }, aliasType = dataType }") as any
+    aliasesMap.put(typeName, dataAlias)
 
-        // Loop 1: resolve each constructor's fields and build its nominal record
-        // (marked with `name` = the variant name). No pre-registration, so no
-        // cyclic type can form; recursive references are rejected up front.
-        var ctorRecords: array[any] = []
-        var ctorParamTypes: array[any] = []
-        var ci = 1
-        while ci <= ctorCount {
-            val ctor = ctors[ci]
-            val ctorName = luaExpr("ctor.name") as string
-            val fields = luaExpr("ctor.fields") as array[any]
-            val fieldCount = fields.size()
+    // Loop 2: build a constructor function per variant: a named fn whose
+    // type is (fieldTypes...) -> dataType and whose body is a tagged record.
+    ci = 1
+    while ci <= ctorCount {
+        val ctor = ctors[ci]
+        val ctorName = luaExpr("ctor.name") as string
+        val ctorIsPub = luaExpr("ctor.isPublic") as bool
+        val fields = luaExpr("ctor.fields") as array[any]
+        val ctorSec = luaExpr("ctor.section") as any
+        val paramTypes = ctorParamTypes[ci] as array[any]
+        val fieldCount = fields.size()
 
-            var recFields: array[any] = []
-            var paramTypes: array[any] = []
-            var fi = 1
-            while fi <= fieldCount {
-                val field = fields[fi]
-                val fieldName = luaExpr("field.name") as string
-                val recursive = luaExpr("__chicc_trMentions(field.typeRef, __chicc_vnames)") as bool
-                if recursive {
-                    embedLua("error({ code = 'UNSUPPORTED_FEATURE', text = 'recursive data types are not supported yet (data ' .. vdef.typeName .. ')' })")
-                }
-                val fieldType: any = resolveType(tt, [] as array[string], luaExpr("field.typeRef"), effectiveTypeLevel())
-                recFields.push(luaExpr("{ name = fieldName, fieldType = fieldType }") as any)
-                paramTypes.push(fieldType)
-                fi = fi + 1
-            }
-
-            val ctorId = newTypeId(modName, pkgName, ctorName)
-            val rec: any = recordType([ctorId], recFields as array[RecordField], [] as array[string])
-            // Mark as a variant: `name` is the discriminator variantNameOf /
-            // emitIs key on (`ids` can't tell a variant from a type alias —
-            // both carry ids; record `name` is "" everywhere except variants).
-            embedLua("rec.name = ctorName")
-            ctorRecords.push(rec)
-            ctorParamTypes.push(paramTypes)
-            val ctorAlias = luaExpr("{ typeId = { moduleName = modName, packageName = pkgName, name = ctorName }, aliasType = rec }") as any
-            aliasesMap.put(ctorName, ctorAlias)
+        if fieldCount == 0 {
+            val valueTarget = addLocalSymbol(ctorName, false, ctorIsPub, dataType, pkg, tables)
+            val value = createVariantExpr([] as array[ExprField], ctorName, ctorSec as Section | unit)
+            decls.push(declarationExpr(ctorIsPub, valueTarget, false, dataType as Type | unit, value, ctorSec as Section | unit))
             ci = ci + 1
+            continue
         }
 
-        // Data type: the single record for a one-constructor `data`, else the
-        // sum of all constructor records. Raw sumType, NOT sumCreate — sumCreate
-        // dedups via typeEquals (which ignores ids) and would collapse two
-        // structurally-identical variants into one branch.
-        var dataType: any = ctorRecords[1]
-        if ctorCount > 1 {
-            var si = 2
-            while si <= ctorCount {
-                dataType = sumType([] as array[TypeId], dataType as Type, ctorRecords[si] as Type, [] as array[string])
-                si = si + 1
-            }
+        var fnTypeArr: array[any] = []
+        var fi = 1
+        while fi <= fieldCount {
+            fnTypeArr.push(paramTypes[fi])
+            fi = fi + 1
         }
-        val dataAlias = luaExpr("{ typeId = { moduleName = modName, packageName = pkgName, name = typeName }, aliasType = dataType }") as any
-        aliasesMap.put(typeName, dataAlias)
+        fnTypeArr.push(dataType)
+        val funcType = functionType(fnTypeArr as array[Type], [] as array[string], 0)
+        val ctorTarget = addLocalSymbol(ctorName, false, ctorIsPub, funcType, pkg, tables)
 
-        // Loop 2: build a constructor function per variant: a named fn whose
-        // type is (fieldTypes...) -> dataType and whose body is a tagged record.
-        ci = 1
-        while ci <= ctorCount {
-            val ctor = ctors[ci]
-            val ctorName = luaExpr("ctor.name") as string
-            val ctorIsPub = luaExpr("ctor.isPublic") as bool
-            val fields = luaExpr("ctor.fields") as array[any]
-            val ctorSec = luaExpr("ctor.section") as any
-            val paramTypes = ctorParamTypes[ci] as array[any]
-            val fieldCount = fields.size()
+        // Body: createVariantExpr binding each field to its parameter.
+        // A FnSymbolTable makes the parameter reads resolve as locals.
+        val parentFst = currentFnSymbolTable
+        val fst = newFnSymbolTable(parentFst)
+        currentFnSymbolTable = fst
 
-            if fieldCount == 0 {
-                val valueTarget = addLocalSymbol(ctorName, false, ctorIsPub, dataType, pkg, tables)
-                val value = createVariantExpr([] as array[ExprField], ctorName, ctorSec as Section | unit)
-                decls.push(declarationExpr(ctorIsPub, valueTarget, false, dataType as Type | unit, value, ctorSec as Section | unit))
-                ci = ci + 1
-                continue
-            }
-
-            var fnTypeArr: array[any] = []
-            var fi = 1
-            while fi <= fieldCount {
-                fnTypeArr.push(paramTypes[fi])
-                fi = fi + 1
-            }
-            fnTypeArr.push(dataType)
-            val funcType = functionType(fnTypeArr as array[Type], [] as array[string], 0)
-            val ctorTarget = addLocalSymbol(ctorName, false, ctorIsPub, funcType, pkg, tables)
-
-            // Body: createVariantExpr binding each field to its parameter.
-            // A FnSymbolTable makes the parameter reads resolve as locals.
-            val parentFst = currentFnSymbolTable
-            val fst = newFnSymbolTable(parentFst)
-            currentFnSymbolTable = fst
-
-            var params: array[any] = []
-            var exprFields: array[any] = []
-            fi = 1
-            while fi <= fieldCount {
-                val field = fields[fi]
-                val fieldName = luaExpr("field.name") as string
-                val argType = paramTypes[fi]
-                fstAddArgument(fst, fieldName, argType)
-                params.push(newFnParam(fieldName, argType as Type | unit, ctorSec as Section | unit) as any)
-                val fieldRead = variableAccessExpr(localTarget(fieldName), ctorSec as Section | unit)
-                exprFields.push(newExprField(fieldName, fieldRead as Expr) as any)
-                fi = fi + 1
-            }
-
-            currentFnSymbolTable = parentFst
-
-            val body = createVariantExpr(exprFields as array[ExprField], ctorName, ctorSec as Section | unit)
-            val fnBody = fnExpr(params as array[FnParam], unit, body as Expr, ctorSec as Section | unit)
-            val decl = declarationExpr(ctorIsPub, ctorTarget, false, funcType as Type | unit, fnBody as Expr, ctorSec as Section | unit)
-            decls.push(decl)
-            ci = ci + 1
+        var params: array[any] = []
+        var exprFields: array[any] = []
+        fi = 1
+        while fi <= fieldCount {
+            val field = fields[fi]
+            val fieldName = luaExpr("field.name") as string
+            val argType = paramTypes[fi]
+            fstAddArgument(fst, fieldName, argType)
+            params.push(newFnParam(fieldName, argType as Type | unit, ctorSec as Section | unit) as any)
+            val fieldRead = variableAccessExpr(localTarget(fieldName), ctorSec as Section | unit)
+            exprFields.push(newExprField(fieldName, fieldRead as Expr) as any)
+            fi = fi + 1
         }
 
-        di = di + 1
+        currentFnSymbolTable = parentFst
+
+        val body = createVariantExpr(exprFields as array[ExprField], ctorName, ctorSec as Section | unit)
+        val fnBody = fnExpr(params as array[FnParam], unit, body as Expr, ctorSec as Section | unit)
+        val decl = declarationExpr(ctorIsPub, ctorTarget, false, funcType as Type | unit, fnBody as Expr, ctorSec as Section | unit)
+        decls.push(decl)
+        ci = ci + 1
     }
 
     decls as array[Expr]
