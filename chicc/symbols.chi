@@ -2,7 +2,8 @@ package chicc/symbols
 import std/lang { luaExpr, embedLua }
 import std/lang.map { emptyMap, remove }
 import chicc/types { Type, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType }
-import chicc/parse_ast { TypeRef, trArgumentTypeRefs, trBaseType, trFields, trLhs, trName, trReturnType, trRhs, trTag, trTypeParameters }
+import chicc/parse_ast { TypeRef, trArgumentTypeRefs, trBaseType, trFields, trLhs, trName, trReturnType, trRhs, trSection, trTag, trTypeParameters }
+import chicc/messages { Message, unknownType }
 import chicc/source { Section }
 
 // --- Symbol: package-level symbol ---
@@ -106,11 +107,13 @@ pub fn fstRemove(fst: FnSymbolTable, name: string): unit {
 
 // --- TypeTable: type alias storage ---
 
-type TypeTable = { aliases: any, parentPkg: any }
+// `messages` receives the unknown type names resolveType reports; compile()
+// points it at the compilation's message list.
+type TypeTable = { aliases: any, parentPkg: any, messages: array[Message] }
 
 pub fn newTypeTable(parentPkg: any): TypeTable {
     val aliases = emptyMap[string, any]()
-    { aliases: aliases, parentPkg: parentPkg }
+    { aliases: aliases, parentPkg: parentPkg, messages: [] }
 }
 
 pub fn ttAdd(tt: TypeTable, alias: any): unit {
@@ -341,7 +344,7 @@ pub fn resolveType(typeTable: TypeTable, typeSchemeVars: array[string], ref: any
                 val aliasType = luaExpr("alias.aliasType") as any
                 aliasType
             } else {
-                println("ERROR: Unknown type '$name'")
+                typeTable.messages.push(unknownType(name, sectionCodePoint(ref.trSection())))
                 tAny
             }
         }

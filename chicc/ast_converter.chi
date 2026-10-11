@@ -533,10 +533,9 @@ fn convertFuncWithNameImpl(node: any, pkg: any, tables: any): Expr {
         val argDefValue = luaExpr("arg.defaultValue") as any
         val argSec = luaExpr("arg.section") as any
 
-        var argType: any = unit
-        if argTypeRef != unit {
-            argType = resolveType(tt, currentTypeSchemeVars, argTypeRef, effectiveTypeLevel())
-        }
+        // Resolved above for the function type; resolving again would report
+        // an unknown type twice.
+        val argType: any = if argTypeRef != unit { paramTypes[i] } else { unit }
 
         if argDefValue != unit {
             val defExpr: any = convert(argDefValue, pkg, tables)

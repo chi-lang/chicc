@@ -3,7 +3,7 @@ import chicc/compiler { compileToLua, newLuaCompilationEnv, formatMessage }
 import std/lang { loadLuaCode }
 
 // Type declarations (`type` aliases and `data` types) see each other whatever
-// their source order (#42).
+// their source order, and an unknown type name is a compile error (#42).
 //
 // Programs are compiled by the chicc modules under test, not eval(): eval()
 // compiles with the prebuilt chicc.lua.
@@ -26,6 +26,37 @@ fn compileAndRun(src: string): any {
     assertEqual(compileErrors(src), "compiled")
     val run = loadLuaCode(result.luaCode as string) as () -> any
     run()
+}
+
+fn unknownType(name: string, line: int, col: int): string {
+    "[UNKNOWN_TYPE] Unknown type '$name' (line $line, col $col)"
+}
+
+// --- Unknown type names ---
+
+test("each unknown type name is reported at its position") {
+    assertEqual(compileErrors("val x: Foo = 5\nval y: Strin = 6\nval z: Foo[int] = 7\n"),
+        "${unknownType("Foo", 1, 8)} | ${unknownType("Strin", 2, 8)} | ${unknownType("Foo", 3, 8)}")
+}
+
+test("an unknown parameter type of a named function is reported once") {
+    assertEqual(compileErrors("fn f(x: Foo): int { 1 }\n"), unknownType("Foo", 1, 9))
+}
+
+test("an unknown return type of a named function is reported") {
+    assertEqual(compileErrors("fn f(x: int): Foo { x }\n"), unknownType("Foo", 1, 15))
+}
+
+test("an unknown data field type is reported") {
+    assertEqual(compileErrors("data A = A1(b: Nope)\n"), unknownType("Nope", 1, 16))
+}
+
+test("an unknown type in a type alias is reported") {
+    assertEqual(compileErrors("type T = { b: Nope }\n"), unknownType("Nope", 1, 15))
+}
+
+test("an unknown type in a cast is reported") {
+    assertEqual(compileErrors("val x = 5 as Nope\n"), unknownType("Nope", 1, 14))
 }
 
 // --- Declaration order ---
@@ -69,6 +100,18 @@ test("mutually referencing type aliases are rejected with one message") {
 test("mutually referencing data types are rejected with one message") {
     assertEqual(compileErrors("data A = A1(b: B)\ndata B = B1(a: A)\n"),
         "[UNSUPPORTED_FEATURE] mutually recursive type declarations are not supported yet (A, B) (line 1, col 1)")
+}
+
+// --- No cascades from declarations that already failed ---
+
+test("a rejected data named by another type declaration is not reported again") {
+    assertEqual(compileErrors("data Opt[T] = S(v: T) | N\ntype W = { o: Opt[int] }\ndata D = D1(o: Opt[int])\n"),
+        "[UNSUPPORTED_FEATURE] generic data types are not supported yet (data Opt)")
+}
+
+test("a type imported from a missing package is not reported again") {
+    assertEqual(compileErrors("import no/such { Foo }\ntype T = { f: Foo }\n"),
+        "[PACKAGE_NOT_FOUND] Package 'no/such' was not found (line 1, col 1)")
 }
 
 summary()

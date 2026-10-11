@@ -42,6 +42,10 @@ pub fn typeMismatch(expected: string, actual: string, cp: { line: int, column: i
     newMessage("TYPE_MISMATCH", "Expected type is '$expected' but got '$actual'", cp)
 }
 
+pub fn unknownType(name: string, cp: { line: int, column: int } | unit): Message {
+    newMessage("UNKNOWN_TYPE", "Unknown type '$name'", cp)
+}
+
 // `names` lists the declarations that name each other, like "A, B".
 pub fn mutuallyRecursiveTypes(names: string, cp: { line: int, column: int } | unit): Message {
     newMessage("UNSUPPORTED_FEATURE", "mutually recursive type declarations are not supported yet ($names)", cp)

@@ -578,6 +578,7 @@ pub fn compile(source: string, ns: any): CompilationResult {
     val preludeImports = luaExpr("ns ~= nil and ns.getPreludeImports and ns.getPreludeImports() or {}") as any
     val allImports = mergeImports(preludeImports, sourceImports)
     val tables = newCompileTables(pkg, ns, allImports)
+    tables.localTypeTable.messages = resultMessages
     for name in failedImportNames {
         ctMarkFailedName(tables, name)
     }
