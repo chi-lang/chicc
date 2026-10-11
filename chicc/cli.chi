@@ -6,9 +6,10 @@ package chicc/cli
 import std/lang { luaExpr, embedLua }
 import std/os { getEnv }
 import std/io.file { readString, open, close, write }
-import std/lang.map { emptyMap, fromRecord, remove }
+import std/lang.map { Map, emptyMap, fromRecord, remove }
 import chicc/compiler { newLuaCompilationEnv, newReplCompilationEnv, compileToLua, compileReplLine, commitReplLine, saveReplMetadata, restoreReplMetadata, formatMessage, ReplNamedFn }
-import chicc/types { Type, sumListTypes, typeEquals, typeToStringByName, variantNameOf, tAny, tInt, tFloat, tBool, tString, tUnit }
+import chicc/emitter { luaName }
+import chicc/types { Type, sumListTypes, typeEquals, typeToStringByName, unfoldRecursive, variantNameOf, tAny, tInt, tFloat, tBool, tString, tUnit }
 
 // ============================================================================
 // Diagnostics output
@@ -264,11 +265,11 @@ fn parseFileArgs(command: string, args: array[string]): FileArgs | unit {
 // Function values declared with `fn` to their signature with parameter names.
 val replFnSignatures = emptyMap[any, string]()
 
-// `t` without the poly and recursive wrappers, which say nothing about values.
+// `t` without the poly wrapper and with a recursive type unfolded one level.
 fn replStrip(t: Type): Type {
     var result = t
     while result.tag == "poly" || result.tag == "recursive" {
-        result = if result.tag == "poly" { result.body as Type } else { result.innerType as Type }
+        result = if result.tag == "poly" { result.body as Type } else { unfoldRecursive(result) }
     }
     result
 }
@@ -284,7 +285,7 @@ fn registerReplFns(fns: array[ReplNamedFn]) {
             params.push("$name: ${typeToStringByName(types[i])}")
         }
         val returnType = typeToStringByName(types[types.size()])
-        replFnSignatures.put(pkg.get(f.name), "${f.name}(${params.joinToStringWithSeparator(", ")}): $returnType")
+        replFnSignatures.put(pkg.get(luaName(f.name)), "${f.name}(${params.joinToStringWithSeparator(", ")}): $returnType")
     }
 }
 
@@ -353,7 +354,8 @@ fn replValueFits(v: any, t: Type): bool {
             ty.ids.size() > 0 && ty.ids[1].name == variant
         } else {
             val record = fromRecord[string, any](v)
-            kind == "table" && variantNameOf(ty) == unit && ty.fields.all { f -> record.has(f.name) }
+            // A field holding unit is absent from the table.
+            kind == "table" && variantNameOf(ty) == unit && ty.fields.all { f -> record.has(f.name) || replValueFits(unit, f.fieldType) }
         }
     } else if tag == "sum" {
         ty.sumListTypes().any { m -> replValueFits(v, m as Type) }
@@ -384,7 +386,7 @@ fn replNarrowType(v: any, t: Type | unit): Type | unit {
 // How the REPL prints a value. `t` is its static type; where that does not
 // say what the value is, the runtime value decides. `seen` holds the tables
 // being printed, to cut cycles.
-fn replShow(v: any, t: Type | unit, seen: any): string {
+fn replShow(v: any, t: Type | unit, seen: Map[any, bool]): string {
     val ty = replNarrowType(v, t)
     val tag = if ty != unit { (ty as Type).tag } else { "" }
     val kind = luaTypeOf(v)

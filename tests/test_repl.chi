@@ -100,6 +100,12 @@ test("a named function keeps its name when bound to another name or nested") {
     assertEqual(out, "<function inc(n: int): int>\n{ g: <function inc(n: int): int> }")
 }
 
+test("a named function whose name Lua reserves prints its signature") {
+    // Lua keeps such a function under a mangled name.
+    val out = repl("fn next(n: int): int { n + 1 }\nimport std/lang { luaExpr }\nluaExpr(\"package.loaded['user/default']._chi_next\")\n")
+    assertEqual(out, "<function next(n: int): int>")
+}
+
 test("an anonymous function prints its type") {
     assertEqual(repl("{ x: int -> x * 2 }\n"), "<function (int) -> int>")
 }
@@ -132,6 +138,11 @@ test("an Option value prints as its underlying value") {
 
 test("a variant inside an Option keeps its field types") {
     assertEqual(repl("data Shape = Circle(radius: float) | Square(side: float)\nval o: Option[Shape] = Square(1.0)\no\n"), "Square(side: 1.0)")
+}
+
+test("a value of a recursive type keeps its field types at every level") {
+    val out = repl("type L = { v: float, next: L | unit }\nval l: L = { v: 1.0, next: { v: 2.0, next: unit } }\nl\n")
+    assertEqual(out, "{ v: 1.0, next: { v: 2.0, next: unit } }")
 }
 
 test("a value of a sum of records prints as the member it has the fields of") {
