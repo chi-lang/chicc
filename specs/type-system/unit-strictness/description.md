@@ -31,6 +31,23 @@ During unification, `unit` is an ordinary primitive type:
   in both directions.
 - A type variable unifies with `unit` like with any other type.
 
+An actual sum fits an expected type only when every actual variant fits
+the whole expected type. Thus `int | unit` does not fit `int`, but it does
+fit `unit | int`. Field assignments check the assigned value against the
+declared field type in the same direction.
+
+This rule does not depend on flow narrowing (#22). Until narrowing is
+available, using a sum value as one of its branch types requires an explicit
+cast even inside an `is`-checked branch.
+
+Functions with a `unit` result evaluate return expressions for their effects
+and discard their values; the call result is always `unit`. This applies to
+named functions with an omitted result annotation and to lambdas whose
+expected function type returns `unit`. It does not make `unit` a supertype
+of other results or allow an existing non-unit-returning function to be
+used as a unit-returning function. See
+[Unit function results](../../../docs/adr/0001-unit-function-results.md).
+
 Consequences users see:
 
 ```chi
