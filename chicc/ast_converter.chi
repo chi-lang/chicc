@@ -5,7 +5,7 @@ import std/math { finf }
 import chicc/source { Section }
 import chicc/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, newTypeId, variantNameOf, sumListTypes }
 import chicc/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, packageTarget, setExprType, atomExpr, interpolatedStringExpr, createRecordExpr, createVariantExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, variableAssignmentExpr, declarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam }
-import chicc/parse_ast { ParseAst, paArguments, paArrayValues, paBody, paBoolValue, paCallee, paCondition, paEffectCases, paElseBody, paElseCase, paFloatValue, paForBody, paForInit, paForState, paForVars, paFormalArguments, paFuncBody, paHandleBody, paIndexExpr, paIndexValue, paInterpValue, paIsMutable, paIsPublic, paIterable, paLeft, paLongValue, paLoopBody, paMemberName, paMemberSection, paName, paOp, paOpTemplate, paParts, paReceiver, paReceiverName, paRecordFields, paReturnTypeRef, paReturnValue, paRight, paSection, paStringValue, paSymbolName, paTag, paThenBody, paTypeParameters, paTypeRef, paValue, paVariable, paVariableName, paWhenCases }
+import chicc/parse_ast { ParseAst, ParseProgram, ParseTypeAlias, ParseVariantTypeDefinition, VariantConstructor, paArguments, paArrayValues, paBody, paBoolValue, paCallee, paCondition, paEffectCases, paElseBody, paElseCase, paFloatValue, paForBody, paForInit, paForState, paForVars, paFormalArguments, paFuncBody, paHandleBody, paIndexExpr, paIndexValue, paInterpValue, paIsMutable, paIsPublic, paIterable, paLeft, paLongValue, paLoopBody, paMemberName, paMemberSection, paName, paOp, paOpTemplate, paParts, paReceiver, paReceiverName, paRecordFields, paReturnTypeRef, paReturnValue, paRight, paSection, paStringValue, paSymbolName, paTag, paThenBody, paTypeParameters, paTypeRef, paValue, paVariable, paVariableName, paWhenCases }
 import chicc/symbols { FnSymbolTable, Symbol, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newSymbol, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, lookupLoadedPublicSymbol, CompileTables, TypeTable, resolveType, arrayContains }
 
 // --- State (module-level mutable variables) ---
@@ -1195,8 +1195,8 @@ type TypeDeclarationOrder = { order: array[TypeDeclaration], cycles: array[array
 pub fn typeDeclarationNames(d: TypeDeclaration): array[string] {
     val names = [d.name]
     if d.kind == "data" {
-        for ctor in d.decl.constructors as array[any] {
-            names.push(ctor.name as string)
+        for ctor in (d.decl as ParseVariantTypeDefinition).constructors as array[VariantConstructor] {
+            names.push(ctor.name)
         }
     }
     names
@@ -1268,13 +1268,13 @@ fn strongConnect(g: DeclGraph, v: int) {
 // that the order is aliases, then data, each in source order. `cycles` holds
 // each group of two or more declarations that name each other; a group keeps
 // that base order inside `order`.
-pub fn orderTypeDeclarations(parseProg: any): TypeDeclarationOrder {
+pub fn orderTypeDeclarations(parseProg: ParseProgram): TypeDeclarationOrder {
     val decls: array[TypeDeclaration] = []
-    for alias in parseProg.typeAliases as array[any] {
-        decls.push({ kind: "alias", name: alias.name as string, decl: alias })
+    for alias in parseProg.typeAliases as array[ParseTypeAlias] {
+        decls.push({ kind: "alias", name: alias.name, decl: alias })
     }
-    for vdef in parseProg.variantTypes as array[any] {
-        decls.push({ kind: "data", name: vdef.typeName as string, decl: vdef })
+    for vdef in parseProg.variantTypes as array[ParseVariantTypeDefinition] {
+        decls.push({ kind: "data", name: vdef.typeName, decl: vdef })
     }
 
     val declOf = emptyMap[string, int]()
@@ -1293,9 +1293,9 @@ pub fn orderTypeDeclarations(parseProg: any): TypeDeclarationOrder {
         }
         val names: array[string] = []
         if d.kind == "alias" {
-            collectTypeRefNames(d.decl.typeRef, names)
+            collectTypeRefNames((d.decl as ParseTypeAlias).typeRef, names)
         } else {
-            for ctor in d.decl.constructors as array[any] {
+            for ctor in (d.decl as ParseVariantTypeDefinition).constructors as array[VariantConstructor] {
                 for field in ctor.fields as array[any] {
                     collectTypeRefNames(field.typeRef, names)
                 }

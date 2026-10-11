@@ -23,3 +23,7 @@ type CodePoint = { line: int, column: int }
 pub fn toCodePoint(s: Section): CodePoint {
     { line: s.startLine, column: s.startCol }
 }
+
+pub fn sectionCodePoint(s: Section | unit): CodePoint | unit {
+    if s == unit { unit } else { toCodePoint(s as Section) }
+}

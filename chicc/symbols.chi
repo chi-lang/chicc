@@ -1,10 +1,10 @@
 package chicc/symbols
 import std/lang { luaExpr, embedLua }
 import std/lang.map { emptyMap, remove }
-import chicc/types { Type, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType }
+import chicc/types { Type, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType, newTypeId }
 import chicc/parse_ast { TypeRef, trArgumentTypeRefs, trBaseType, trFields, trLhs, trName, trReturnType, trRhs, trSection, trTag, trTypeParameters }
 import chicc/messages { Message, unknownType }
-import chicc/source { Section }
+import chicc/source { sectionCodePoint }
 
 // --- Symbol: package-level symbol ---
 
@@ -247,7 +247,7 @@ pub fn ctMarkFailedName(ct: CompileTables, name: string): unit {
     val failed = ct.failedNames
     failed.put(name, true)
     val pkg = ct.currentPackage
-    val typeId = { moduleName: pkg.moduleName as string, packageName: pkg.packageName as string, name: name }
+    val typeId = newTypeId(pkg.moduleName as string, pkg.packageName as string, name)
     ttAddByName(ct.localTypeTable, name, { typeId: typeId, aliasType: tAny })
 }
 
@@ -309,12 +309,6 @@ pub fn arrayContains(arr: array[string], name: string): bool {
         i = i + 1
     }
     false
-}
-
-pub fn sectionCodePoint(sec: Section | unit): { line: int, column: int } | unit {
-    if sec == unit { return unit }
-    val s = sec as Section
-    { line: s.startLine, column: s.startCol }
 }
 
 pub fn resolveType(typeTable: TypeTable, typeSchemeVars: array[string], ref: any, level: int): Type {

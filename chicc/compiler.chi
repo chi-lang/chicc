@@ -4,11 +4,11 @@
 //   convert AST -> mark used -> type inference -> semantic checks -> build Program
 package chicc/compiler
 import std/lang { luaExpr, embedLua }
-import chicc/source { Section }
+import chicc/source { Section, sectionCodePoint }
 import chicc/ast { Expr, Import, ImportEntry, TypeAlias, Program, newPackage, newProgram, newImport, newImportEntry, newTypeAlias }
 import chicc/types { Type, TypeId }
 import chicc/messages { Message, invalidModuleName, invalidPackageName, cannotAccessInternalName, unrecognizedName, packageNotFound, internalError, mutuallyRecursiveTypes }
-import chicc/symbols { CompileTables, newCompileTables, ctDefineTypeAlias, ctMarkFailedName, ttGet, sectionCodePoint }
+import chicc/symbols { CompileTables, newCompileTables, ctDefineTypeAlias, ctMarkFailedName, ttGet }
 import chicc/ast_converter { orderTypeDeclarations, typeDeclarationNames }
 import chicc/checks { checkNames, importConflictCheck, visibilityCheck, fnCallCheck, immutabilityCheck, returnTypeCheck }
 import chicc/inference_context { icInit, icDefineLocalSymbol }
@@ -583,10 +583,10 @@ pub fn compile(source: string, ns: any): CompilationResult {
         ctMarkFailedName(tables, name)
     }
 
-    // Resolve the type declarations (aliases and `data`) in dependency order,
-    // so a declaration can name one written later. Declarations that name
-    // each other are reported once and their names marked failed before they
-    // are resolved, so they do not also report each other as unknown types.
+    // Type declarations are resolved in dependency order. Declarations that
+    // name each other are reported once and their names marked failed before
+    // they are resolved, so they do not also report each other as unknown
+    // types.
     val definedTypeAliases = luaExpr("{}") as any
     val variantCtorDecls: array[any] = []
     val declOrder = orderTypeDeclarations(parsedProgram)

@@ -23,7 +23,8 @@ fn compileErrors(src: string): string {
 // its own package so that members left by one test are not seen by the next.
 fn compileAndRun(src: string): any {
     val result: any = compileToLua(src, newLuaCompilationEnv())
-    assertEqual(compileErrors(src), "compiled")
+    val messages = result.messages as array[any]
+    assertEqual(messages.map { m -> formatMessage(m) }.joinToStringWithSeparator(" | "), "")
     val run = loadLuaCode(result.luaCode as string) as () -> any
     run()
 }
