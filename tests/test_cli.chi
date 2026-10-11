@@ -136,6 +136,15 @@ test("runFile returns 1 for invalid source") {
     embedLua("os.remove('/tmp/test_chicc_runbad.chi')")
 }
 
+test("cliMain run and compile return 1 for an unknown type, writing nothing") {
+    writeString("/tmp/test_chicc_unknown_type.chi", "val x: Foo = 5\n")
+    embedLua("os.remove('/tmp/test_chicc_unknown_type.lua')")
+    assertEqual(cliMain(["/tmp/test_chicc_unknown_type.chi"]), 1)
+    assertEqual(cliMain(["compile", "-o", "/tmp/test_chicc_unknown_type.lua", "/tmp/test_chicc_unknown_type.chi"]), 1)
+    assertTrue(open("/tmp/test_chicc_unknown_type.lua", "r") == unit)
+    embedLua("os.remove('/tmp/test_chicc_unknown_type.chi')")
+}
+
 // ============================================================================
 // Unreadable inputs, unwritable outputs, extra inputs
 // ============================================================================
