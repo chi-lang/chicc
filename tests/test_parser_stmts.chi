@@ -19,7 +19,7 @@ test("parse simple fn declaration") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseFuncWithName")
     assertEqual(result.name, "foo")
     assertFalse(result.isPublic)
@@ -52,7 +52,7 @@ test("parse fn with one arg") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseFuncWithName")
     assertEqual(result.name, "add")
     assertEqual(result.formalArguments.size(), 1)
@@ -72,7 +72,7 @@ test("parse fn with multiple args") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseFuncWithName")
     assertEqual(result.name, "add")
     assertEqual(result.formalArguments.size(), 2)
@@ -110,7 +110,7 @@ test("parse fn with type parameters") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseFuncWithName")
     assertEqual(result.name, "identity")
     assertEqual(result.typeParameters.size(), 1)
@@ -129,7 +129,7 @@ test("parse fn with multiple type parameters") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseFuncWithName")
     assertEqual(result.typeParameters.size(), 2)
     assertEqual(result.formalArguments.size(), 2)
@@ -146,7 +146,7 @@ test("parse fn with default arg value") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseFuncWithName")
     assertEqual(result.formalArguments.size(), 1)
     val arg1 = result.formalArguments[1]
@@ -305,7 +305,7 @@ test("parse empty braces as empty record") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseCreateRecord")
     assertEqual(result.recordFields.size(), 0)
 }
@@ -317,7 +317,7 @@ test("parse block with single expr") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseBlock")
     assertEqual(result.body.size(), 1)
     assertEqual((result.body[1] as ParseAst).longValue, 42)
@@ -334,7 +334,7 @@ test("parse block with multiple exprs") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseBlock")
     assertEqual(result.body.size(), 3)
 }
@@ -352,7 +352,7 @@ test("parse lambda with single arg") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseLambda")
     assertEqual(result.formalArguments.size(), 1)
     val arg1 = result.formalArguments[1]
@@ -370,7 +370,7 @@ test("parse lambda with multiple args") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseLambda")
     assertEqual(result.formalArguments.size(), 2)
     val arg1 = result.formalArguments[1]
@@ -388,7 +388,7 @@ test("parse no-arg lambda") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseLambda")
     assertEqual(result.formalArguments.size(), 0)
     assertEqual(result.body.size(), 1)
@@ -405,7 +405,7 @@ test("parse lambda with body expressions") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseLambda")
     assertEqual(result.body.size(), 2)
 }
@@ -475,7 +475,7 @@ test("parse block with newlines before content") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseBlock")
     assertEqual(result.body.size(), 1)
 }
@@ -488,7 +488,7 @@ test("parse braces with only newlines as empty record") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseCreateRecord")
     assertEqual(result.recordFields.size(), 0)
 }

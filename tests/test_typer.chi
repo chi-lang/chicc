@@ -290,7 +290,7 @@ test("typeTerm: return with value returns value type") {
 test("typeTerm: return without value returns unit") {
     initTestCtx()
     val constraints = newConstraints()
-    val expr = returnExpr(unit, testSection)
+    val expr = returnExpr(atomExpr("unit", tUnit, testSection), testSection)
     val result = typeTerm(expr, 0, constraints)
     assertTrue(result.typeEquals(tUnit))
 }

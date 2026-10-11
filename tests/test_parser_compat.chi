@@ -1,5 +1,5 @@
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import chicc/parse_ast { PackageDefinition }
+import chicc/parse_ast { PackageDefinition, ParseProgram }
 import chicc/lexer { tokenize }
 import chicc/parser { newParser, parseProgram }
 import std/io.file { readString }
@@ -40,7 +40,7 @@ fn tryParseGolden(path: string): { ok: bool, result: any, errMsg: string } {
 test("parse golden: control_flow/break") {
     val r = tryParseGolden("golden/control_flow/break.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
     assertTrue(prog.packageDefinition is unit)
 }
@@ -48,42 +48,42 @@ test("parse golden: control_flow/break") {
 test("parse golden: control_flow/if_else") {
     val r = tryParseGolden("golden/control_flow/if_else.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: control_flow/while") {
     val r = tryParseGolden("golden/control_flow/while.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: control_flow/for_array") {
     val r = tryParseGolden("golden/control_flow/for_array.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: control_flow/continue") {
     val r = tryParseGolden("golden/control_flow/continue.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: control_flow/for_indexed") {
     val r = tryParseGolden("golden/control_flow/for_indexed.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: control_flow/nested_loops") {
     val r = tryParseGolden("golden/control_flow/nested_loops.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
@@ -92,56 +92,56 @@ test("parse golden: control_flow/nested_loops") {
 test("parse golden: functions/definitions") {
     val r = tryParseGolden("golden/functions/definitions.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: functions/lambdas") {
     val r = tryParseGolden("golden/functions/lambdas.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: functions/higher_order") {
     val r = tryParseGolden("golden/functions/higher_order.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: functions/recursion") {
     val r = tryParseGolden("golden/functions/recursion.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: functions/closures") {
     val r = tryParseGolden("golden/functions/closures.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: functions/early_return") {
     val r = tryParseGolden("golden/functions/early_return.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: functions/mutual_recursion") {
     val r = tryParseGolden("golden/functions/mutual_recursion.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: functions/defaults") {
     val r = tryParseGolden("golden/functions/defaults.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
@@ -150,35 +150,35 @@ test("parse golden: functions/defaults") {
 test("parse golden: strings/basic") {
     val r = tryParseGolden("golden/strings/basic.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: strings/interpolation") {
     val r = tryParseGolden("golden/strings/interpolation.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: strings/escape") {
     val r = tryParseGolden("golden/strings/escape.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: strings/concat") {
     val r = tryParseGolden("golden/strings/concat.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: strings/operations") {
     val r = tryParseGolden("golden/strings/operations.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
@@ -187,21 +187,21 @@ test("parse golden: strings/operations") {
 test("parse golden: types/arrays") {
     val r = tryParseGolden("golden/types/arrays.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: types/records") {
     val r = tryParseGolden("golden/types/records.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: types/sum_types") {
     val r = tryParseGolden("golden/types/sum_types.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     // sum_types.chi has type aliases (type Num = int | float)
     assertTrue(prog.typeAliases.size() > 0)
     assertTrue(prog.code.size() > 0)
@@ -210,42 +210,42 @@ test("parse golden: types/sum_types") {
 test("parse golden: types/generics") {
     val r = tryParseGolden("golden/types/generics.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: types/float_and_bool") {
     val r = tryParseGolden("golden/types/float_and_bool.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: types/when_expr") {
     val r = tryParseGolden("golden/types/when_expr.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: types/option") {
     val r = tryParseGolden("golden/types/option.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: types/type_aliases") {
     val r = tryParseGolden("golden/types/type_aliases.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.typeAliases.size() > 0)
 }
 
 test("parse golden: types/generic_polymorphism") {
     val r = tryParseGolden("golden/types/generic_polymorphism.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
@@ -254,7 +254,7 @@ test("parse golden: types/generic_polymorphism") {
 test("parse golden: effects/basic") {
     val r = tryParseGolden("golden/effects/basic.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     // effects/basic.chi has 'package user/effects'
     assertTrue(prog.packageDefinition is PackageDefinition)
     assertTrue(prog.code.size() > 0)
@@ -263,14 +263,14 @@ test("parse golden: effects/basic") {
 test("parse golden: effects/logging") {
     val r = tryParseGolden("golden/effects/logging.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: effects/nested") {
     val r = tryParseGolden("golden/effects/nested.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
@@ -279,7 +279,7 @@ test("parse golden: effects/nested") {
 test("parse golden: modules/public_private") {
     val r = tryParseGolden("golden/modules/public_private.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     // This file has a package declaration
     assertTrue(prog.packageDefinition is PackageDefinition)
     val pkg = prog.packageDefinition as PackageDefinition
@@ -293,28 +293,28 @@ test("parse golden: modules/public_private") {
 test("parse golden: control_flow/for_record") {
     val r = tryParseGolden("golden/control_flow/for_record.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: functions/return_sum_type") {
     val r = tryParseGolden("golden/functions/return_sum_type.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: strings/compare") {
     val r = tryParseGolden("golden/strings/compare.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 
 test("parse golden: strings/unicode") {
     val r = tryParseGolden("golden/strings/unicode.chi")
     assertTrue(r.ok)
-    val prog = r.result
+    val prog = r.result as ParseProgram
     assertTrue(prog.code.size() > 0)
 }
 

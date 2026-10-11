@@ -1,6 +1,6 @@
 import std/lang { embedLua, luaExpr }
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
-import chicc/symbols { newSymbol, newFnSymbol, newSymbolTable, stAdd, stAddAlias, stGet, stRemove, stHas, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newTypeTable, ttAdd, ttAddByName, ttGet, newCompileTables, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, ctDefineTypeAlias, lookupLoadedPublicSymbol, lookupLoadedPublicSymbolQualifiers }
+import chicc/symbols { Symbol, FnSymbol, newSymbol, newFnSymbol, newSymbolTable, stAdd, stAddAlias, stGet, stRemove, stHas, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newTypeTable, ttAdd, ttAddByName, ttGet, newCompileTables, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, ctDefineTypeAlias, lookupLoadedPublicSymbol, lookupLoadedPublicSymbolQualifiers }
 
 // --- Symbol tests ---
 
@@ -183,8 +183,8 @@ test("ttAddByName") {
 test("newCompileTables - empty imports") {
     val pkg: any = { moduleName: "mymod", packageName: "mypkg" }
     val ct = newCompileTables(pkg, unit, [])
-    assertTrue(ct.localSymbolTable != unit)
-    assertTrue(ct.localTypeTable != unit)
+    assertTrue(ct.localSymbolTable.symbols != unit)
+    assertTrue(ct.localTypeTable.aliases != unit)
 }
 
 test("newCompileTables - with imports") {

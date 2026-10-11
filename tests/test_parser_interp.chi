@@ -17,7 +17,7 @@ test("parse interpolated string with text only") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseInterpolatedString")
     val parts = result.parts
     assertEqual(parts.size(), 1)
@@ -37,7 +37,7 @@ test("parse interpolated string with single variable") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseInterpolatedString")
     val parts = result.parts
     assertEqual(parts.size(), 2)
@@ -62,7 +62,7 @@ test("parse interpolated string with expression") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseInterpolatedString")
     val parts = result.parts
     assertEqual(parts.size(), 1)
@@ -93,7 +93,7 @@ test("parse interpolated string with text and expression") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseInterpolatedString")
     val parts = result.parts
     assertEqual(parts.size(), 5)
@@ -126,7 +126,7 @@ test("parse empty interpolated string") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseInterpolatedString")
     val parts = result.parts
     assertEqual(parts.size(), 0)
@@ -146,7 +146,7 @@ test("parse interpolated string with multiple adjacent expressions") {
         eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseInterpolatedString")
     val parts = result.parts
     assertEqual(parts.size(), 2)

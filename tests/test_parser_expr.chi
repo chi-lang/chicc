@@ -240,7 +240,7 @@ test("parse grouped expression") {
 test("parse empty array") {
     val tokens = [tk(TK_LBRACKET, "["), tk(TK_RBRACKET, "]"), eof()]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseCreateArray")
     assertEqual(result.arrayValues.size(), 0)
 }
@@ -248,7 +248,7 @@ test("parse empty array") {
 test("parse array with values") {
     val tokens = [tk(TK_LBRACKET, "["), tk(TK_INT, "1"), tk(TK_COMMA, ","), tk(TK_INT, "2"), tk(TK_COMMA, ","), tk(TK_INT, "3"), tk(TK_RBRACKET, "]"), eof()]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseCreateArray")
     assertEqual(result.arrayValues.size(), 3)
 }
@@ -263,7 +263,7 @@ test("parse record literal") {
         tk(TK_RBRACE, "}"), eof()
     ]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseCreateRecord")
     assertEqual(result.recordFields.size(), 2)
 }
@@ -310,7 +310,7 @@ test("parse function call no args") {
     // foo()
     val tokens = [tk(TK_ID, "foo"), tk(TK_LPAREN, "("), tk(TK_RPAREN, ")"), eof()]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseFnCall")
     assertEqual((result.callee as ParseAst).variableName, "foo")
     assertEqual(result.arguments.size(), 0)
@@ -320,7 +320,7 @@ test("parse function call with args") {
     // add(1, 2)
     val tokens = [tk(TK_ID, "add"), tk(TK_LPAREN, "("), tk(TK_INT, "1"), tk(TK_COMMA, ","), tk(TK_INT, "2"), tk(TK_RPAREN, ")"), eof()]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     assertEqual(result.tag, "ParseFnCall")
     assertEqual(result.arguments.size(), 2)
 }
@@ -329,7 +329,7 @@ test("parse UFCS call") {
     // x.foo(1)
     val tokens = [tk(TK_ID, "x"), tk(TK_DOT, "."), tk(TK_ID, "foo"), tk(TK_LPAREN, "("), tk(TK_INT, "1"), tk(TK_RPAREN, ")"), eof()]
     val p = newParser(tokens, "")
-    val result = parseExpression(p)
+    val result = parseExpression(p) as ParseAst
     // x.foo is parsed as field access, then (1) makes it a fn call
     assertEqual(result.tag, "ParseFnCall")
     assertEqual(result.arguments.size(), 1)
