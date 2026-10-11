@@ -550,8 +550,8 @@ fn rtWalkExprImpl(expr: any, messages: any) {
     if kind == "name_declaration" {
         val value = expr.value
         if value == unit { return unit }
-        // Only a lambda opens a new return context; any other initializer
-        // returns from the enclosing function.
+        // Only a lambda opens a new return context; a return in any other
+        // initializer belongs to the enclosing function.
         if (value.kind as string) != "fn" {
             rtWalkExpr(value, messages)
             return unit
