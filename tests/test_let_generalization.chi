@@ -1,0 +1,88 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary, withinLimits }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import chicc/ast { declarationExpr, createArrayExpr, localTarget }
+import chicc/typer { typeTerm }
+import chicc/inference_context { icInit, icGetTargetType }
+import std/lang { loadLuaCode }
+
+// Let-generalization (issue #49): an inner declaration never generalizes a
+// type variable of an enclosing scope, and only immutable bindings of
+// syntactic values are generalized.
+
+// Asserts that compiling `src` reports exactly one TYPE_MISMATCH, at `line`.
+fn assertMismatchAt(src: string, line: int) {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    assertEqual(messages.map { m -> m.code as string }.joinToStringWithSeparator(","), "TYPE_MISMATCH")
+    if messages.size() == 1 {
+        assertTrue(messages[1].codePoint != unit)
+        assertEqual(messages[1].codePoint.line as int, line)
+    }
+}
+
+// Compiles and runs `src`; returns its package table. Each source declares
+// its own package so that members left by one test are not seen by the next.
+fn compileAndRun(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    assertEqual(messages.map { m -> m.code as string }.joinToStringWithSeparator(","), "")
+    val run = loadLuaCode(result.luaCode as string) as () -> any
+    run()
+}
+
+val same = "fn same[T](a: T, b: T): T { a }\n"
+
+test("an outer lambda parameter is not generalized by an inner val") {
+    withinLimits(30) {
+        val src = "package t/outer1\n${same}val h = { x ->\n    val g = { z -> same(z, x)\n        x }\n    val k: int = g(1)\n    k + 1\n}\nval r = h(\"str\")"
+        assertMismatchAt(src, 9)
+    }
+}
+
+test("the outer parameter stays monomorphic whatever the argument order") {
+    withinLimits(30) {
+        val src = "package t/outer2\n${same}val h = { x ->\n    val g = { z -> same(x, z)\n        x }\n    val k: int = g(1)\n    k + 1\n}\nval r = h(\"str\")"
+        assertMismatchAt(src, 9)
+    }
+}
+
+test("an array literal bound by val is monomorphic") {
+    withinLimits(30) {
+        val src = "package t/arr\nval xs = []\nxs.push(1)\nxs.push(\"a\")"
+        assertMismatchAt(src, 4)
+    }
+}
+
+test("a lambda bound by var is monomorphic") {
+    withinLimits(30) {
+        val src = "package t/mut\nvar f = { x -> x }\nf = { x: int -> x + 1 }\nval s: string = f(\"abc\")"
+        assertMismatchAt(src, 4)
+    }
+}
+
+test("a later declaration does not generalize a monomorphic val's unknowns") {
+    withinLimits(30) {
+        val src = "package t/later\nval xs = []\nval f = { -> xs }\nxs.push(1)\nf().push(\"a\")"
+        assertMismatchAt(src, 5)
+    }
+}
+
+test("a val lambda inside a function is still polymorphic") {
+    withinLimits(30) {
+        val src = "package t/poly\nval h = { x: int ->\n    val id = { z -> z }\n    val s: string = id(\"a\")\n    id(x) + 1\n}\nval r = h(1)"
+        assertEqual(compileAndRun(src).r as int, 2)
+    }
+}
+
+// Typed without a union-find, as typer tests do: each solve starts afresh.
+test("without a union-find a non-generalized val keeps one type") {
+    icInit({ moduleName: "t", packageName: "nouf" }, unit, unit)
+    val decl = declarationExpr(false, localTarget("xs"), false, unit, createArrayExpr([], unit), unit)
+    val constraints: array[any] = []
+    typeTerm(decl, 0, constraints)
+    val first = icGetTargetType(localTarget("xs"), 0, unit)
+    val second = icGetTargetType(localTarget("xs"), 0, unit)
+    assertTrue(first.typeEquals(second))
+}
+
+summary()

@@ -1,7 +1,7 @@
 // chicc/chicc/unification.chi
 package chicc/unification
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, TypeId, RecordField, tAny, tUnit, functionType, recordType, sumCreate, arrayType, recursiveType, polyType, typeIdEquals }
+import chicc/types { Type, TypeId, RecordField, tAny, tUnit, functionType, recordType, sumCreate, arrayType, recursiveType, polyType, variableType, typeIdEquals }
 import std/lang.map { emptyMap, remove }
 import chicc/messages { Message, typeMismatch, notAFunction, functionArityError, infiniteType }
 import chicc/source { Section, toCodePoint }
@@ -236,6 +236,63 @@ pub fn ufAllBindings(uf: any): array[Binding] {
     result
 }
 
+// What `v` becomes when it moves down to `level`. A level is part of a
+// variable's identity, so this is a new variable, named after v's name and
+// level: unique, and the same each time v moves to that level. No source
+// identifier contains '@'.
+fn lowerVariable(v: Type, level: int): Type {
+    variableType("${v.name}@${v.level}", level)
+}
+
+// Moves every variable of `t` above `level` down to `level`; tells whether
+// there was any. `t` must be resolved through `uf`, so that its variables
+// are unbound.
+pub fn ufLowerAbove(uf: any, t: Type, level: int): bool {
+    val tag = t.tag
+    var moved = false
+    if tag == "var" {
+        if t.level > level {
+            ufBind(uf, t, lowerVariable(t, level))
+            moved = true
+        }
+    } else if tag == "fn" {
+        val types = t.types
+        var i = 1
+        while i <= types.size() {
+            if ufLowerAbove(uf, types[i], level) { moved = true }
+            i = i + 1
+        }
+    } else if tag == "record" {
+        val fields = t.fields
+        var i = 1
+        while i <= fields.size() {
+            if ufLowerAbove(uf, fields[i].fieldType, level) { moved = true }
+            i = i + 1
+        }
+    } else if tag == "sum" {
+        if ufLowerAbove(uf, t.lhs as Type, level) { moved = true }
+        if ufLowerAbove(uf, t.rhs as Type, level) { moved = true }
+    } else if tag == "array" {
+        moved = ufLowerAbove(uf, t.elementType as Type, level)
+    } else if tag == "recursive" {
+        moved = ufLowerAbove(uf, t.innerType as Type, level)
+    }
+    moved
+}
+
+// Binds an unbound `variable` to `t` so that no variable of an enclosing
+// scope is left to an inner declaration to generalize: of two variables
+// the inner one is bound, and the variables of `t` from scopes inner to
+// `variable` move down to its level.
+fn ufBindVariable(uf: any, variable: Type, t: Type) {
+    if t.tag == "var" && t.level > variable.level {
+        ufBind(uf, t, variable)
+    } else {
+        ufLowerAbove(uf, t, variable.level)
+        ufBind(uf, variable, t)
+    }
+}
+
 // Resolve a constraint's expected and actual types through the union-find
 fn ufResolveConstraint(uf: any, c: Constraint): Constraint {
     val exp = luaExpr("c.expected") as Type
@@ -339,14 +396,14 @@ fn unifyCore(constraints: array[any], uf: any, outerAssumed: Assumed | unit): Me
                 val cp = sectionToCodePoint(section)
                 return infiniteType(expected.name, typeDescr(actual), cp)
             }
-            ufBind(uf, expected, actual)
+            ufBindVariable(uf, expected, actual)
             // No queue rebuild needed — next iteration resolves via union-find
         } else if actual.tag == "var" {
             if actual.occursInExcludingSumBranches(expected) {
                 val cp = sectionToCodePoint(section)
                 return infiniteType(actual.name, typeDescr(expected), cp)
             }
-            ufBind(uf, actual, expected)
+            ufBindVariable(uf, actual, expected)
             // No queue rebuild needed — next iteration resolves via union-find
         } else if luaExpr("actual.tag == 'primitive' and actual.ids and #actual.ids > 0 and actual.ids[1].name == 'any'") as bool {
             // skip - actual is 'any' type (allows passing any-typed values to concrete params)

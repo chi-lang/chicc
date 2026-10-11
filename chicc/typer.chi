@@ -4,7 +4,7 @@ import std/lang { luaExpr, embedLua }
 import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tFloat, tString, tAny, sumCreate, recordType, arrayType, functionType, polyType, mapType, optionTypeId, intTypeId, floatTypeId, unfoldRecursive, typeToString, instantiate, sumListTypes }
 import chicc/source { Section, toCodePoint }
 import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget }
-import chicc/unification { unify, unifyWithUf, ufNew, ufResolve, ufAllBindings, newConstraint }
+import chicc/unification { unify, unifyWithUf, ufNew, ufResolve, ufAllBindings, ufLowerAbove, newConstraint }
 import chicc/inference_context { icFreshVariable, icGetTargetType, icWithNewLocalScope, icDefineLocalSymbol, icUpdateSymbolType, icListLocalFunctionsForType, icListCurrentPackageFunctionsForType, icListTypesPackageFunctionsForType, icListAllLoadedFunctionsForType }
 
 // --- Helper: throw a typer error ---
@@ -532,13 +532,33 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         val valueType = typeTerm(value, level + 1, constraints)
         val valueSection = luaExpr("value.section") as any
         addConstraint(constraints, expectedType, valueType, valueSection)
+        // Value restriction: only an immutable binding of a syntactic value is
+        // generalized. Any other binding's unknowns are fixed by later uses;
+        // they move down to the declaration's level, so that a later
+        // declaration does not generalize them either.
+        val generalizes = term.isMutable == false && (value.kind == "fn" || value.kind == "variable_access" || value.kind == "atom")
         val mappedType: any = if typerUf != unit {
             unifyWithUf(constraints as array[any], typerUf)
             clearConstraints(constraints)
-            ufResolve(typerUf, expectedType as Type)
+            val solved = ufResolve(typerUf, expectedType as Type)
+            if generalizes == false && ufLowerAbove(typerUf, solved, level) {
+                ufResolve(typerUf, solved)
+            } else {
+                solved
+            }
         } else {
             val solution = unify(constraints as array[any])
-            mapType(expectedType as Type, solution)
+            val solved = mapType(expectedType as Type, solution)
+            if generalizes {
+                solved
+            } else {
+                // Every solve starts afresh, so the lowering is kept as constraints.
+                val lowering = ufNew()
+                ufLowerAbove(lowering, solved, level)
+                val bindings = ufAllBindings(lowering)
+                bindings.forEach { b -> addConstraint(constraints, b.replacement, b.variable, valueSection) }
+                mapType(solved, bindings)
+            }
         }
         val polymorphicType = polyType(level, mappedType as Type)
         // By target: a package member declared inside a block scope (a
