@@ -80,6 +80,11 @@ test("a fn value from an if does not keep the defaults of a branch") {
     assertEqual(messageCodes(src), "FUNCTION_ARITY_ERROR")
 }
 
+test("an if called directly does not keep the defaults of a branch") {
+    val src = "package t39/v3\nfn h(a: int, b: int = 1): int { a + b }\nfn mk(): (int, int) -> int { { a: int, b: int -> a * b } }\nfn run(c: bool): int {\n    (if c { h } else { mk() })(3)\n}\nval r = run(false)\n"
+    assertEqual(messageCodes(src), "FUNCTION_ARITY_ERROR")
+}
+
 test("the string literal @ is passed as an argument") {
     val src = "package t39/at\nfn two(a: string, b: string): string { a + b }\nval r = two(\"@\", \"x\")\n"
     assertEqual(runR(src), "@x")
