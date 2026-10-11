@@ -29,9 +29,9 @@ emitExpr = { st, expr ->
     else if kind == "variable_access" { emitVariableAccess(st, expr) }
     else if kind == "name_declaration" { emitNameDeclaration(st, expr) }
     else if kind == "return" {
-        val retVal: any = luaExpr("expr.returnValue")
+        val retVal = expr.returnValue
         if retVal != unit {
-            val result = emitExpr(st, retVal)
+            val result = emitExpr(st, retVal as Expr)
             emit(st, "return $result;")
         } else {
             emit(st, "return;")

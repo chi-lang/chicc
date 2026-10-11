@@ -217,6 +217,11 @@ pub fn typeTerms(terms: any, constraints: any, level: int): array[any] {
     results
 }
 
+// The value restriction: only a binding of one of these is generalized.
+fn isSyntacticValue(value: any): bool {
+    value.kind == "fn" || value.kind == "variable_access" || value.kind == "atom"
+}
+
 fn typeTermImpl(term: any, level: int, constraints: any): Type {
     val kind = luaExpr("term.kind") as string
 
@@ -532,16 +537,17 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         val valueType = typeTerm(value, level + 1, constraints)
         val valueSection = luaExpr("value.section") as any
         addConstraint(constraints, expectedType, valueType, valueSection)
-        // Value restriction: only an immutable binding of a syntactic value is
-        // generalized. Any other binding's unknowns are fixed by later uses;
-        // they move down to the declaration's level, so that a later
-        // declaration does not generalize them either.
-        val generalizes = term.isMutable == false && (value.kind == "fn" || value.kind == "variable_access" || value.kind == "atom")
+        // Any other binding's unknowns are fixed by later uses; they move down
+        // to the declaration's level, so that a later declaration does not
+        // generalize them either.
+        val generalizes = term.isMutable == false && isSyntacticValue(value)
         val mappedType: any = if typerUf != unit {
             unifyWithUf(constraints as array[any], typerUf)
             clearConstraints(constraints)
             val solved = ufResolve(typerUf, expectedType as Type)
-            if generalizes == false && ufLowerAbove(typerUf, solved, level) {
+            if generalizes {
+                solved
+            } else if ufLowerAbove(typerUf, solved, level) {
                 ufResolve(typerUf, solved)
             } else {
                 solved

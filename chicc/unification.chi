@@ -236,10 +236,9 @@ pub fn ufAllBindings(uf: any): array[Binding] {
     result
 }
 
-// What `v` becomes when it moves down to `level`. A level is part of a
-// variable's identity, so this is a new variable, named after v's name and
-// level: unique, and the same each time v moves to that level. No source
-// identifier contains '@'.
+// A level is part of a variable's identity, so moving `v` down makes a new
+// variable, named after v's name and level: unique, and the same each time
+// v moves to that level. No source identifier contains '@'.
 fn lowerVariable(v: Type, level: int): Type {
     variableType("${v.name}@${v.level}", level)
 }
