@@ -1,0 +1,74 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv, formatMessage }
+import std/lang { loadLuaCode }
+
+// Type declarations (`type` aliases and `data` types) see each other whatever
+// their source order (#42).
+//
+// Programs are compiled by the chicc modules under test, not eval(): eval()
+// compiles with the prebuilt chicc.lua.
+
+// All compilation messages, formatted and joined; "compiled" if it compiled.
+fn compileErrors(src: string): string {
+    val result = compileToLua(src, newLuaCompilationEnv())
+    if result.luaCode != unit { return "compiled" }
+    var out = ""
+    for m in result.messages as array[any] {
+        out = if out == "" { formatMessage(m) } else { "$out | ${formatMessage(m)}" }
+    }
+    out
+}
+
+// Compiles and runs `src`; returns its package table. Each source declares
+// its own package so that members left by one test are not seen by the next.
+fn compileAndRun(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    assertEqual(compileErrors(src), "compiled")
+    val run = loadLuaCode(result.luaCode as string) as () -> any
+    run()
+}
+
+// --- Declaration order ---
+
+val recordGotInt = "[TYPE_MISMATCH] Expected type is 'record' but got 'int'"
+
+test("a data field may name a data type declared later") {
+    val later = compileErrors("data A = A1(b: B)\ndata B = B1(x: int)\nprintln(A1(5).b)\n")
+    val earlier = compileErrors("data B = B1(x: int)\ndata A = A1(b: B)\nprintln(A1(5).b)\n")
+    assertEqual(later, earlier)
+    assertTrue(later.startsWith(recordGotInt))
+    val pkg = compileAndRun("package t/dataorder\ndata A = A1(b: B)\ndata B = B1(x: int)\npub val r = A1(B1(5)).b.x\n")
+    assertEqual(pkg.r as int, 5)
+}
+
+test("a type alias may name a data type, declared before or after it") {
+    val after = compileErrors("data B = B1(x: int)\ntype T = { b: B }\nval t: T = { b: 5 }\n")
+    val before = compileErrors("type T = { b: B }\ndata B = B1(x: int)\nval t: T = { b: 5 }\n")
+    assertTrue(after.startsWith("[TYPE_MISMATCH]"))
+    assertEqual(before, after)
+    val pkgAfter = compileAndRun("package t/aliasdata1\ndata B = B1(x: int)\ntype T = { b: B }\nval t: T = { b: B1(5) }\npub val r = t.b.x\n")
+    assertEqual(pkgAfter.r as int, 5)
+    val pkgBefore = compileAndRun("package t/aliasdata2\ntype T = { b: B }\ndata B = B1(x: int)\nval t: T = { b: B1(5) }\npub val r = t.b.x\n")
+    assertEqual(pkgBefore.r as int, 5)
+}
+
+test("a type alias may name an alias declared later") {
+    val later = compileErrors("type A = { b: B }\ntype B = { x: int }\nval a: A = { b: 5 }\n")
+    val earlier = compileErrors("type B = { x: int }\ntype A = { b: B }\nval a: A = { b: 5 }\n")
+    assertTrue(later.startsWith("[TYPE_MISMATCH]"))
+    assertEqual(later, earlier)
+    val pkg = compileAndRun("package t/aliasorder\ntype A = { b: B }\ntype B = { x: int }\nval a: A = { b: { x: 5 } }\npub val r = a.b.x\n")
+    assertEqual(pkg.r as int, 5)
+}
+
+test("mutually referencing type aliases are rejected with one message") {
+    assertEqual(compileErrors("type A = { b: B | unit }\ntype B = { a: A | unit }\nval a: A = { b: unit }\n"),
+        "[UNSUPPORTED_FEATURE] mutually recursive type declarations are not supported yet (A, B) (line 1, col 1)")
+}
+
+test("mutually referencing data types are rejected with one message") {
+    assertEqual(compileErrors("data A = A1(b: B)\ndata B = B1(a: A)\n"),
+        "[UNSUPPORTED_FEATURE] mutually recursive type declarations are not supported yet (A, B) (line 1, col 1)")
+}
+
+summary()

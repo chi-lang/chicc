@@ -3,6 +3,7 @@ import std/lang { luaExpr, embedLua }
 import std/lang.map { emptyMap, remove }
 import chicc/types { Type, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType }
 import chicc/parse_ast { TypeRef, trArgumentTypeRefs, trBaseType, trFields, trLhs, trName, trReturnType, trRhs, trTag, trTypeParameters }
+import chicc/source { Section }
 
 // --- Symbol: package-level symbol ---
 
@@ -237,10 +238,14 @@ pub fn ctRemoveSymbol(ct: CompileTables, name: string): unit {
 }
 
 // A name whose declaration or import already failed with its own message:
-// its uses are not reported again.
+// its uses are not reported again, as a value or as a type (it resolves to
+// `any`).
 pub fn ctMarkFailedName(ct: CompileTables, name: string): unit {
     val failed = ct.failedNames
     failed.put(name, true)
+    val pkg = ct.currentPackage
+    val typeId = { moduleName: pkg.moduleName as string, packageName: pkg.packageName as string, name: name }
+    ttAddByName(ct.localTypeTable, name, { typeId: typeId, aliasType: tAny })
 }
 
 pub fn ctIsFailedName(ct: CompileTables, name: string): bool {
@@ -301,6 +306,12 @@ pub fn arrayContains(arr: array[string], name: string): bool {
         i = i + 1
     }
     false
+}
+
+pub fn sectionCodePoint(sec: Section | unit): { line: int, column: int } | unit {
+    if sec == unit { return unit }
+    val s = sec as Section
+    { line: s.startLine, column: s.startCol }
 }
 
 pub fn resolveType(typeTable: TypeTable, typeSchemeVars: array[string], ref: any, level: int): Type {

@@ -7,8 +7,9 @@ import std/lang { luaExpr, embedLua }
 import chicc/source { Section }
 import chicc/ast { Expr, Import, ImportEntry, TypeAlias, Program, newPackage, newProgram, newImport, newImportEntry, newTypeAlias }
 import chicc/types { Type, TypeId }
-import chicc/messages { Message, invalidModuleName, invalidPackageName, cannotAccessInternalName, unrecognizedName, packageNotFound, internalError }
-import chicc/symbols { CompileTables, newCompileTables, ctDefineTypeAlias, ctMarkFailedName, ttGet }
+import chicc/messages { Message, invalidModuleName, invalidPackageName, cannotAccessInternalName, unrecognizedName, packageNotFound, internalError, mutuallyRecursiveTypes }
+import chicc/symbols { CompileTables, newCompileTables, ctDefineTypeAlias, ctMarkFailedName, ttGet, sectionCodePoint }
+import chicc/ast_converter { orderTypeDeclarations, typeDeclarationNames }
 import chicc/checks { checkNames, importConflictCheck, visibilityCheck, fnCallCheck, immutabilityCheck, returnTypeCheck }
 import chicc/inference_context { icInit, icDefineLocalSymbol }
 import chicc/emitter { emitProgram }
@@ -581,49 +582,59 @@ pub fn compile(source: string, ns: any): CompilationResult {
         ctMarkFailedName(tables, name)
     }
 
-    // Resolve type aliases from source
+    // Resolve the type declarations (aliases and `data`) in dependency order,
+    // so a declaration can name one written later. Declarations that name
+    // each other are reported once and their names marked failed before they
+    // are resolved, so they do not also report each other as unknown types.
     val definedTypeAliases = luaExpr("{}") as any
-    val srcTypeAliases = luaExpr("parsedProgram.typeAliases") as any
-    val aliasCount = luaExpr("#srcTypeAliases") as int
-    var ai = 1
-    while ai <= aliasCount {
-        val aliasDef = luaExpr("srcTypeAliases[ai]") as any
-        val aliasName = luaExpr("aliasDef.name") as string
-        val aliasTypeRef = luaExpr("aliasDef.typeRef") as any
-        val aliasTypeParams = luaExpr("aliasDef.typeParameters") as any
-        val typeSchemeVars = typeParamNames(aliasTypeParams)
-        val typeId = luaExpr("{ moduleName = moduleName, packageName = packageName, name = aliasName }") as any
-        val resolved = luaExpr("require('chicc/symbols').resolveTypeAndWrapRecursive(tables.localTypeTable, typeSchemeVars, aliasTypeRef, typeId, 1)") as any
-        // Ensure the resolved type carries its own typeId in ids (needed for typeref encoding)
-        // For primitives, append after the well-known typeId (ids[1] must stay e.g. stringTypeId)
-        // For records/sums, prepend so ids[1] is the alias typeId
-        embedLua("local rt = resolved; if rt.tag == 'recursive' then rt = rt.innerType end; if rt.ids then if rt.tag == 'primitive' then table.insert(rt.ids, typeId) else table.insert(rt.ids, 1, typeId) end end")
-        val typeAlias = luaExpr("{ typeId = typeId, aliasType = resolved }") as any
-        (definedTypeAliases as array[any]).push(typeAlias)
-        ctDefineTypeAlias(tables, typeAlias)
-        ai = ai + 1
-    }
-
-    // Materialise variant (`data`) constructors: register their types + the
-    // data sum + a constructor function symbol per variant into `tables`, and
-    // capture the constructor declarations. MUST run before checkNames so that
-    // constructor calls in user code resolve. Each declaration gets its own
-    // pcall, so a rejected one does not unregister the others.
     val variantCtorDecls: array[any] = []
-    for vdef in parsedProgram.variantTypes as array[ParseVariantTypeDefinition] {
-        embedLua("__chicc_var_ok, __chicc_var_result = pcall(function() local _ac = require('chicc/ast_converter'); return _ac.lowerVariantType(vdef, pkg, tables) end)")
-        val varOk = luaExpr("__chicc_var_ok") as bool
-        if varOk {
-            for decl in luaExpr("__chicc_var_result") as array[any] {
-                variantCtorDecls.push(decl)
+    val declOrder = orderTypeDeclarations(parsedProgram)
+    for cycle in declOrder.cycles {
+        val names = cycle.map { d -> d.name }.joinToStringWithSeparator(", ")
+        resultMessages.push(mutuallyRecursiveTypes(names, sectionCodePoint(cycle[1].decl.section)))
+        for d in cycle {
+            for name in typeDeclarationNames(d) {
+                ctMarkFailedName(tables, name)
             }
-            for alias in variantTypeAliases(vdef, tables) {
-                (definedTypeAliases as array[any]).push(alias)
-            }
+        }
+    }
+    for decl in declOrder.order {
+        if decl.kind == "alias" {
+            val aliasDef = decl.decl
+            val aliasName = luaExpr("aliasDef.name") as string
+            val aliasTypeRef = luaExpr("aliasDef.typeRef") as any
+            val aliasTypeParams = luaExpr("aliasDef.typeParameters") as any
+            val typeSchemeVars = typeParamNames(aliasTypeParams)
+            val typeId = luaExpr("{ moduleName = moduleName, packageName = packageName, name = aliasName }") as any
+            val resolved = luaExpr("require('chicc/symbols').resolveTypeAndWrapRecursive(tables.localTypeTable, typeSchemeVars, aliasTypeRef, typeId, 1)") as any
+            // Ensure the resolved type carries its own typeId in ids (needed for typeref encoding)
+            // For primitives, append after the well-known typeId (ids[1] must stay e.g. stringTypeId)
+            // For records/sums, prepend so ids[1] is the alias typeId
+            embedLua("local rt = resolved; if rt.tag == 'recursive' then rt = rt.innerType end; if rt.ids then if rt.tag == 'primitive' then table.insert(rt.ids, typeId) else table.insert(rt.ids, 1, typeId) end end")
+            val typeAlias = luaExpr("{ typeId = typeId, aliasType = resolved }") as any
+            (definedTypeAliases as array[any]).push(typeAlias)
+            ctDefineTypeAlias(tables, typeAlias)
         } else {
-            resultMessages.push(thrownMessage(luaExpr("__chicc_var_result") as any))
-            for ctor in vdef.constructors as array[VariantConstructor] {
-                ctMarkFailedName(tables, ctor.name)
+            // Materialise variant (`data`) constructors: register their types + the
+            // data sum + a constructor function symbol per variant into `tables`, and
+            // capture the constructor declarations. MUST run before checkNames so that
+            // constructor calls in user code resolve. Each declaration gets its own
+            // pcall, so a rejected one does not unregister the others.
+            val vdef = decl.decl as ParseVariantTypeDefinition
+            embedLua("__chicc_var_ok, __chicc_var_result = pcall(function() local _ac = require('chicc/ast_converter'); return _ac.lowerVariantType(vdef, pkg, tables) end)")
+            val varOk = luaExpr("__chicc_var_ok") as bool
+            if varOk {
+                for ctorDecl in luaExpr("__chicc_var_result") as array[any] {
+                    variantCtorDecls.push(ctorDecl)
+                }
+                for alias in variantTypeAliases(vdef, tables) {
+                    (definedTypeAliases as array[any]).push(alias)
+                }
+            } else {
+                resultMessages.push(thrownMessage(luaExpr("__chicc_var_result") as any))
+                for name in typeDeclarationNames(decl) {
+                    ctMarkFailedName(tables, name)
+                }
             }
         }
     }
