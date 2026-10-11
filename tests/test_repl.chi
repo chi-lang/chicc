@@ -130,6 +130,18 @@ test("an Option value prints as its underlying value") {
     assertEqual(repl("val o: Option[float] = 2.0\no\n"), "2.0")
 }
 
+test("a variant inside an Option keeps its field types") {
+    assertEqual(repl("data Shape = Circle(radius: float) | Square(side: float)\nval o: Option[Shape] = Square(1.0)\no\n"), "Square(side: 1.0)")
+}
+
+test("a value of a sum of records prints as the member it has the fields of") {
+    assertEqual(repl("val r: { a: float } | { b: float } = { b: 1.0 }\nr\n"), "{ b: 1.0 }")
+}
+
+test("a string prints quoted and escaped") {
+    assertEqual(repl("\"a\\\"b\\\\c\\n\\td\"\n"), "\"a\\\"b\\\\c\\n\\td\"")
+}
+
 test("the spec example session") {
     val input = "val x = 42\nx + 1\nfn greet(name: string): string { \"Hello, \$name!\" }\ngreet(\"World\")\nimport std/math { sqrt }\nsqrt(16.0)\nval xs = [1, 2, 3]\nxs\nval p = { name: \"Alice\", age: 30 }\np\ngreet\nx\nval x = \"now a string\"\nx\n"
     val expected = "43\n\"Hello, World!\"\n4.0\n[1, 2, 3]\n{ name: \"Alice\", age: 30 }\n<function greet(name: string): string>\n42\n\"now a string\""

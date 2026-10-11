@@ -6,8 +6,9 @@ package chicc/cli
 import std/lang { luaExpr, embedLua }
 import std/os { getEnv }
 import std/io.file { readString, open, close, write }
+import std/lang.map { emptyMap, fromRecord, remove }
 import chicc/compiler { newLuaCompilationEnv, newReplCompilationEnv, compileToLua, compileReplLine, commitReplLine, saveReplMetadata, restoreReplMetadata, formatMessage, ReplNamedFn }
-import chicc/types { Type, sumListTypes }
+import chicc/types { Type, sumListTypes, typeEquals, typeToStringByName, variantNameOf, tAny, tInt, tFloat, tBool, tString, tUnit }
 
 // ============================================================================
 // Diagnostics output
@@ -260,66 +261,39 @@ fn parseFileArgs(command: string, args: array[string]): FileArgs | unit {
 // Printing values
 // ----------------------------------------------------------------------------
 
-// Function values declared with `fn`, by identity, to their signature with
-// parameter names.
-embedLua("local replFnSignatures = setmetatable({}, { __mode = 'k' })")
+// Function values declared with `fn` to their signature with parameter names.
+val replFnSignatures = emptyMap[any, string]()
 
-// A type as the REPL prints it: Chi syntax, named records by their name.
-fn replTypeText(t: Type): string {
-    val tag = t.tag
-    if tag == "primitive" {
-        t.ids[1].name
-    } else if tag == "fn" {
-        val params = t.types.map { p -> replTypeText(p) }
-        val ret = params.pop()
-        "(${params.joinToStringWithSeparator(", ")}) -> $ret"
-    } else if tag == "record" {
-        if t.ids.size() > 0 {
-            t.ids[1].name
-        } else if t.fields.isEmpty() {
-            "{}"
-        } else {
-            "{ ${t.fields.map { f -> "${f.name}: ${replTypeText(f.fieldType)}" }.joinToStringWithSeparator(", ")} }"
-        }
-    } else if tag == "sum" {
-        "${replTypeText(t.lhs as Type)} | ${replTypeText(t.rhs as Type)}"
-    } else if tag == "array" {
-        "array[${replTypeText(t.elementType as Type)}]"
-    } else if tag == "var" {
-        t.name
-    } else if tag == "poly" {
-        replTypeText(t.body as Type)
-    } else if tag == "recursive" {
-        replTypeText(t.innerType as Type)
-    } else {
-        tag
+// `t` without the poly and recursive wrappers, which say nothing about values.
+fn replStrip(t: Type): Type {
+    var result = t
+    while result.tag == "poly" || result.tag == "recursive" {
+        result = if result.tag == "poly" { result.body as Type } else { result.innerType as Type }
     }
+    result
 }
 
 // Remembers the signatures of the functions a line declared with `fn`, once
 // the line has run and the functions exist.
 fn registerReplFns(fns: array[ReplNamedFn]) {
+    val pkg = fromRecord[string, any](luaExpr("package.loaded['user/default']"))
     for f in fns {
-        var fnType = f.fnType
-        while fnType.tag == "poly" {
-            fnType = fnType.body as Type
-        }
-        val types = fnType.types
+        val types = replStrip(f.fnType).types
         val params: array[string] = []
         for i, name in f.paramNames {
-            params.push("$name: ${replTypeText(types[i])}")
+            params.push("$name: ${typeToStringByName(types[i])}")
         }
-        val signature = "${f.name}(${params.joinToStringWithSeparator(", ")}): ${replTypeText(types[types.size()])}"
-        val name = f.name
-        embedLua("local fn = package.loaded['user/default'][name]; if fn then replFnSignatures[fn] = signature end")
+        val returnType = typeToStringByName(types[types.size()])
+        replFnSignatures.put(pkg.get(f.name), "${f.name}(${params.joinToStringWithSeparator(", ")}): $returnType")
     }
 }
 
+// Raw Lua tables (from `luaExpr`) carry no metatable for `is` to test.
 fn luaTypeOf(v: any): string {
     luaExpr("type(v)") as string
 }
 
-// The variant whose constructor built `v`, from its metatable.
+// The variant whose constructor built `v`.
 fn replVariantOf(v: any): string | unit {
     luaExpr("(getmetatable(v) or {}).variantName") as string | unit
 }
@@ -330,7 +304,14 @@ fn replIsArray(v: any): bool {
 
 // Field names of a record value, sorted: Lua tables keep no field order.
 fn replFieldNames(v: any): array[string] {
-    luaExpr("(function() local ks = {}; for k in pairs(v) do if type(k) == 'string' and k:sub(1, 1) ~= '_' then ks[#ks + 1] = k end end; table.sort(ks); return ks end)()") as array[string]
+    val names: array[string] = []
+    for key in fromRecord[any, any](v).keys() {
+        if key is string && (key as string).startsWith("_") == false {
+            names.push(key as string)
+        }
+    }
+    names.sort()
+    names
 }
 
 // LuaJIT has one number type: only the static type tells 4.0 from 4.
@@ -338,35 +319,26 @@ fn replNumber(v: any, isFloat: bool): string {
     luaExpr("(v ~= v and 'NaN') or (v == 1/0 and 'Infinity') or (v == -1/0 and '-Infinity') or ((v % 1 == 0 and v >= -2^53 and v <= 2^53) and string.format(isFloat and '%d.0' or '%d', v)) or tostring(v)") as string
 }
 
-embedLua("local __RDQ = string.char(34); local __RBS = string.char(92); local __RNL = string.char(10); local __RCR = string.char(13); local __RTAB = string.char(9)")
-
 fn replQuote(s: string): string {
-    luaExpr("__RDQ .. s:gsub(__RBS, __RBS..__RBS):gsub(__RDQ, __RBS..__RDQ):gsub(__RNL, __RBS..'n'):gsub(__RCR, __RBS..'r'):gsub(__RTAB, __RBS..'t') .. __RDQ") as string
-}
-
-fn replPrimitiveName(t: Type): string {
-    if t.tag == "primitive" { t.ids[1].name } else { "" }
+    val escaped = s.replaceAll("\\", "\\\\").replaceAll("\"", "\\\"").replaceAll("\n", "\\n").replaceAll("\r", "\\r").replaceAll("\t", "\\t")
+    "\"$escaped\""
 }
 
 // Whether `v` can be a value of the sum member `t`.
-fn replFits(v: any, t: Type): bool {
+fn replValueFits(v: any, t: Type): bool {
     val kind = luaTypeOf(v)
-    val tag = t.tag
-    if tag == "poly" {
-        replFits(v, t.body as Type)
-    } else if tag == "recursive" {
-        replFits(v, t.innerType as Type)
-    } else if tag == "var" {
+    val ty = replStrip(t)
+    val tag = ty.tag
+    if tag == "var" {
         true
     } else if tag == "primitive" {
-        val name = replPrimitiveName(t)
         when {
-            name == "any" -> true
-            name == "int" -> v is int
-            name == "float" -> kind == "number"
-            name == "bool" -> kind == "boolean"
-            name == "string" -> kind == "string"
-            name == "unit" -> kind == "nil"
+            typeEquals(ty, tAny) -> true
+            typeEquals(ty, tInt) -> v is int
+            typeEquals(ty, tFloat) -> kind == "number"
+            typeEquals(ty, tBool) -> kind == "boolean"
+            typeEquals(ty, tString) -> kind == "string"
+            typeEquals(ty, tUnit) -> kind == "nil"
             else -> false
         }
     } else if tag == "fn" {
@@ -374,31 +346,36 @@ fn replFits(v: any, t: Type): bool {
     } else if tag == "array" {
         kind == "table" && replIsArray(v)
     } else if tag == "record" {
-        kind == "table" && replVariantOf(v) == (if t.name != "" { t.name } else { unit })
+        val variant = replVariantOf(v)
+        if variant != unit {
+            // Instantiating a generic type (Option[Shape]) drops the variant
+            // name from the type; the type id is the constructor's.
+            ty.ids.size() > 0 && ty.ids[1].name == variant
+        } else {
+            val record = fromRecord[string, any](v)
+            kind == "table" && variantNameOf(ty) == unit && ty.fields.all { f -> record.has(f.name) }
+        }
+    } else if tag == "sum" {
+        ty.sumListTypes().any { m -> replValueFits(v, m as Type) }
     } else {
         false
     }
 }
 
-// The type that describes `v`: `t` without poly and recursive wrappers and
-// narrowed to the fitting sum member. Unit when the static type does not
-// say (`any`, a type variable, no member fits).
-fn replTypeOf(v: any, t: Type | unit): Type | unit {
+// The type that describes `v`: `t` narrowed to the sum member `v` belongs
+// to. Unit when the static type does not say (`any`, a type variable, no
+// member fits).
+fn replNarrowType(v: any, t: Type | unit): Type | unit {
     if t == unit {
         return unit
     }
-    val ty = t as Type
-    val tag = ty.tag
-    if tag == "poly" {
-        replTypeOf(v, ty.body)
-    } else if tag == "recursive" {
-        replTypeOf(v, ty.innerType)
-    } else if tag == "var" || replPrimitiveName(ty) == "any" {
+    val ty = replStrip(t as Type)
+    if ty.tag == "var" || typeEquals(ty, tAny) {
         unit
-    } else if tag == "sum" {
+    } else if ty.tag == "sum" {
         val members = ty.sumListTypes()
-        val index = members.indexOf { m -> replFits(v, m as Type) }
-        if index == unit { unit } else { replTypeOf(v, members[index as int] as Type) }
+        val index = members.indexOf { m -> replValueFits(v, m as Type) }
+        if index == unit { unit } else { replNarrowType(v, members[index as int] as Type) }
     } else {
         ty
     }
@@ -408,53 +385,43 @@ fn replTypeOf(v: any, t: Type | unit): Type | unit {
 // say what the value is, the runtime value decides. `seen` holds the tables
 // being printed, to cut cycles.
 fn replShow(v: any, t: Type | unit, seen: any): string {
-    val ty = replTypeOf(v, t)
+    val ty = replNarrowType(v, t)
     val tag = if ty != unit { (ty as Type).tag } else { "" }
     val kind = luaTypeOf(v)
     if kind == "number" {
-        replNumber(v, ty != unit && replPrimitiveName(ty as Type) == "float")
+        replNumber(v, ty != unit && typeEquals(ty as Type, tFloat))
     } else if kind == "string" {
         replQuote(v as string)
     } else if kind == "function" {
-        val signature: any = luaExpr("replFnSignatures[v]")
-        if signature != unit {
-            "<function $signature>"
+        if replFnSignatures.has(v) {
+            "<function ${replFnSignatures.get(v)}>"
         } else if tag == "fn" {
-            "<function ${replTypeText(ty as Type)}>"
+            "<function ${typeToStringByName(ty as Type)}>"
         } else {
             "<function>"
         }
     } else if kind == "nil" {
         "unit"
     } else if kind != "table" {
-        luaExpr("tostring(v)") as string
-    } else if luaExpr("seen[v]") as bool {
+        "$v"
+    } else if seen.has(v) {
         "<circular>"
     } else {
-        embedLua("seen[v] = true")
+        seen.put(v, true)
         val variant = replVariantOf(v)
         var result = ""
         if tag == "array" || (tag != "record" && variant == unit && replIsArray(v)) {
             val elementType = if tag == "array" { (ty as Type).elementType } else { unit }
-            val items: array[string] = []
-            val n = luaExpr("#v") as int
-            var i = 1
-            while i <= n {
-                items.push(replShow(luaExpr("v[i]"), elementType, seen))
-                i = i + 1
-            }
+            val items = (v as array[any]).map { item -> replShow(item, elementType, seen) }
             result = "[${items.joinToStringWithSeparator(", ")}]"
         } else {
-            // Declared fields in declaration order, then any others the value has.
+            val record = fromRecord[string, any](v)
             val declared: array[{ name: string, fieldType: Type }] = if tag == "record" { (ty as Type).fields } else { [] }
-            val parts: array[string] = []
-            for f in declared {
-                val name = f.name
-                parts.push("$name: ${replShow(luaExpr("v[name]"), f.fieldType, seen)}")
-            }
+            val parts = declared.map { f -> "${f.name}: ${replShow(record.get(f.name), f.fieldType, seen)}" }
+            // A structurally narrower static type leaves fields out.
             for name in replFieldNames(v) {
                 if declared.all { f -> f.name != name } {
-                    parts.push("$name: ${replShow(luaExpr("v[name]"), unit, seen)}")
+                    parts.push("$name: ${replShow(record.get(name), unit, seen)}")
                 }
             }
             val fields = parts.joinToStringWithSeparator(", ")
@@ -466,7 +433,7 @@ fn replShow(v: any, t: Type | unit, seen: any): string {
                 "{ $fields }"
             }
         }
-        embedLua("seen[v] = nil")
+        seen.remove(v)
         result
     }
 }
@@ -514,7 +481,7 @@ pub fn runRepl(): int {
                         registerReplFns(result.namedFns)
                         val value: any = luaExpr("__repl_val")
                         if result.shouldPrint && value != unit {
-                            println(replShow(value, result.valueType, luaExpr("{}")))
+                            println(replShow(value, result.valueType, emptyMap[any, bool]()))
                         }
                     }
                 }

@@ -312,31 +312,45 @@ pub fn typeChildren(t: Type): array[any] {
     }
 }
 
-// A type written the way it appears in Chi source, for diagnostics.
-pub fn typeToString(t: Type): string {
+// A type written the way it appears in Chi source. `byName` writes a named
+// record (type alias, variant) as its name.
+fn typeText(t: Type, byName: bool): string {
     val tag = t.tag
     if tag == "primitive" {
         t.ids[1].name
     } else if tag == "record" {
-        val fields = t.fields.map { f -> "${f.name}: ${typeToString(f.fieldType)}" }
-        if fields.isEmpty() { "{}" } else { "{ ${fields.joinToStringWithSeparator(", ")} }" }
+        if byName && t.ids.size() > 0 {
+            t.ids[1].name
+        } else {
+            val fields = t.fields.map { f -> "${f.name}: ${typeText(f.fieldType, byName)}" }
+            if fields.isEmpty() { "{}" } else { "{ ${fields.joinToStringWithSeparator(", ")} }" }
+        }
     } else if tag == "array" {
-        "array[${typeToString(t.elementType as Type)}]"
+        "array[${typeText(t.elementType as Type, byName)}]"
     } else if tag == "fn" {
-        val params = t.types.map { p -> typeToString(p) }
+        val params = t.types.map { p -> typeText(p, byName) }
         val returnType = params.pop()
         "(${params.joinToStringWithSeparator(", ")}) -> $returnType"
     } else if tag == "sum" {
-        "${typeToString(t.lhs as Type)} | ${typeToString(t.rhs as Type)}"
+        "${typeText(t.lhs as Type, byName)} | ${typeText(t.rhs as Type, byName)}"
     } else if tag == "var" {
         t.name
     } else if tag == "recursive" {
-        typeToString(t.innerType as Type)
+        typeText(t.innerType as Type, byName)
     } else if tag == "poly" {
-        typeToString(t.body as Type)
+        typeText(t.body as Type, byName)
     } else {
         tag
     }
+}
+
+// For diagnostics.
+pub fn typeToString(t: Type): string {
+    typeText(t, false)
+}
+
+pub fn typeToStringByName(t: Type): string {
+    typeText(t, true)
 }
 
 // 8. Flatten nested sums into an array of leaf types (declared before sumCreate and occursInExcludingSumBranches)
