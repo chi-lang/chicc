@@ -352,10 +352,12 @@ fn replValueFits(v: any, t: Type): bool {
             // Instantiating a generic type (Option[Shape]) drops the variant
             // name from the type; the type id is the constructor's.
             ty.ids.size() > 0 && ty.ids[1].name == variant
+        } else if kind != "table" || variantNameOf(ty) != unit {
+            false
         } else {
+            // The same fields, but one holding unit is absent from the table.
             val record = fromRecord[string, any](v)
-            // A field holding unit is absent from the table.
-            kind == "table" && variantNameOf(ty) == unit && ty.fields.all { f -> record.has(f.name) || replValueFits(unit, f.fieldType) }
+            ty.fields.all { f -> record.has(f.name) || replValueFits(unit, f.fieldType) } && replFieldNames(v).all { name -> ty.fields.any { f -> f.name == name } }
         }
     } else if tag == "sum" {
         ty.sumListTypes().any { m -> replValueFits(v, m as Type) }

@@ -147,6 +147,7 @@ test("a value of a recursive type keeps its field types at every level") {
 
 test("a value of a sum of records prints as the member it has the fields of") {
     assertEqual(repl("val r: { a: float } | { b: float } = { b: 1.0 }\nr\n"), "{ b: 1.0 }")
+    assertEqual(repl("val r: { a: float | unit } | { b: float } = { b: 1.0 }\nr\n"), "{ b: 1.0 }")
 }
 
 test("a string prints quoted and escaped") {
