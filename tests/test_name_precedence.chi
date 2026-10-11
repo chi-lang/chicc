@@ -1,0 +1,69 @@
+import chicc/test_util { test, assertEqual, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { loadLuaCode }
+
+// Name resolution precedence (issue #41): a local or parameter beats a
+// package alias of the same name, an effect named in a handler case is
+// found at package level even when a local hides it, and an aliased type
+// import makes only the alias visible.
+
+fn messageCodes(src: string): string {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    messages.map { m -> m.code as string }.joinToStringWithSeparator(",")
+}
+
+// Compiles `src`, expecting no messages, runs it and returns its `r`.
+// Each source declares its own package so that members left by one test are
+// not seen by the next.
+fn runR(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    assertEqual(messages.map { m -> m.code as string }.joinToStringWithSeparator(","), "")
+    if result.luaCode == unit { return unit }
+    val run = loadLuaCode(result.luaCode as string) as () -> any
+    val pkg: any = run()
+    if pkg == unit { unit } else { pkg.r }
+}
+
+test("a parameter beats a package alias of the same name") {
+    val src = "package t41/a1\nimport std/math as m\nfn g(m: {pi: int}): int { m.pi }\nval r = g({pi: 3})\n"
+    assertEqual(runR(src), 3)
+}
+
+test("a local beats a package alias of the same name") {
+    val src = "package t41/a2\nimport std/math as m\nfn g(): int {\n    val m = {pi: 3}\n    m.pi\n}\nval r = g()\n"
+    assertEqual(runR(src), 3)
+}
+
+test("a lambda parameter beats a package alias of the same name") {
+    val src = "package t41/a3\nimport std/math as m\nval f = { m: {pi: int} -> m.pi }\nval r = f({pi: 3})\n"
+    assertEqual(runR(src), 3)
+}
+
+test("a package alias still works where no local of its name is in scope") {
+    val src = "package t41/a4\nimport std/math as m\nfn h(): int { m.abs(-2) }\nval r = h()\n"
+    assertEqual(runR(src), 2)
+}
+
+test("a local does not hide an effect named in a handler case") {
+    val src = "package t41/b1\neffect ask(prompt: string): string\nfn asker(): string { ask(\"who?\") }\nfn run(): string {\n    val ask = 3\n    handle { asker() } with { ask(prompt) -> resume(\"World\") }\n}\nval r = run()\n"
+    assertEqual(runR(src), "World")
+}
+
+test("an aliased type import does not make the original name visible") {
+    val imported = messageCodes("package t41/c1\nimport std/lang.option { Option as Opt }\nval x: Option[int] = \"s\"\n")
+    val notImported = messageCodes("package t41/c2\nval x: Option[int] = \"s\"\n")
+    assertEqual(imported, notImported)
+}
+
+test("an aliased type import is visible under the alias") {
+    assertEqual(runR("package t41/c3\nimport std/lang.option { Option as Opt }\nval r: Opt[int] = 5\n"), 5)
+    assertEqual(messageCodes("package t41/c4\nimport std/lang.option { Option as Opt }\nval x: Opt[int] = \"s\"\n"), "TYPE_MISMATCH")
+}
+
+test("a non-aliased type import is visible under the original name") {
+    assertEqual(messageCodes("package t41/c5\nimport std/lang.option { Option }\nval x: Option[int] = \"s\"\n"), "TYPE_MISMATCH")
+}
+
+summary()
