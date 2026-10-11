@@ -1,0 +1,69 @@
+import chicc/test_util { test, assertEqual, summary, withinLimits }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import chicc/types { typeToString }
+import chicc/type_writer { decodeType }
+import std/lang { loadLuaCode, luaExpr }
+
+// Field access on a sum of records (issue #53): the field is typed from
+// every record variant that declares it, variants without it stay ignored.
+
+fn codesOf(result: any): string {
+    val messages = result.messages as array[any]
+    messages.map { m -> m.code as string }.joinToStringWithSeparator(",")
+}
+
+// Compiles `src`; returns the codes of the reported messages, comma-separated.
+fn messageCodes(src: string): string {
+    codesOf(compileToLua(src, newLuaCompilationEnv()))
+}
+
+// Compiles `src`, expecting no messages, and runs it. Returns the package.
+fn compileAndRun(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    assertEqual(codesOf(result), "")
+    val run = loadLuaCode(result.luaCode as string) as () -> any
+    run()
+}
+
+fn exportedType(pkg: any, name: string): string {
+    // `type` is a keyword in Chi, so the export entry is read from Lua.
+    typeToString(decodeType(luaExpr("pkg._package[name].type") as string))
+}
+
+val getDecl = "fn get(c: bool): {a: int} | {a: string} {\n    if c { {a: 1} } else { {a: \"s\"} }\n}\n"
+
+test("a field declared by two record variants has the sum of their field types") {
+    withinLimits(30) {
+        val pkg: any = compileAndRun("package t53/sum\n${getDecl}pub val x = get(false).a")
+        assertEqual(exportedType(pkg, "x"), "int | string")
+    }
+}
+
+test("the field's value can be used as the type of a later variant") {
+    withinLimits(30) {
+        val pkg: any = compileAndRun("package t53/str\n${getDecl}pub val s: string = get(false).a")
+        assertEqual(pkg.s as string, "s")
+    }
+}
+
+test("the field's value is rejected where none of the variants' field types fit") {
+    withinLimits(30) {
+        assertEqual(messageCodes("${getDecl}val b: bool = get(false).a"), "TYPE_MISMATCH")
+    }
+}
+
+test("equal field types collapse to one type") {
+    withinLimits(30) {
+        val src = "package t53/same\nfn get(c: bool): {a: int, b: string} | {a: int} {\n    if c { {a: 1, b: \"s\"} } else { {a: 2} }\n}\npub val x = get(false).a"
+        assertEqual(exportedType(compileAndRun(src), "x"), "int")
+    }
+}
+
+test("a unit variant is ignored by field access") {
+    withinLimits(30) {
+        val src = "package t53/opt\nfn get(c: bool): {a: int} | unit {\n    if c { {a: 1} } else { unit }\n}\npub val x = get(true).a"
+        assertEqual(exportedType(compileAndRun(src), "x"), "int")
+    }
+}
+
+summary()

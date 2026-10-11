@@ -55,28 +55,27 @@ fn ufcsCandidateQualifiers(candidates: any): array[string] {
 
 // --- Helper: find a field's type within a sum type's variants ---
 // Narrows a sum (e.g. `Section | unit`) for field access by scanning its
-// variants for a record (unfolding recursive variants) that declares the
-// field. Returns the field's declared type, or unit if no variant has it.
+// variants for records (unfolding recursive variants) that declare the
+// field. Returns the sum of their field types, or unit if no variant has it.
+// Variants without the field are ignored.
 fn sumFieldType(sumT: Type, fieldName: string): Type | unit {
     val variants = sumT.sumListTypes()
     val count = variants.size()
     var result: any = unit
     var i = 1
     while i <= count {
-        if result == unit {
-            val v = variants[i] as Type
-            val uv: Type = if v.tag == "recursive" { unfoldRecursive(v) } else { v }
-            if uv.tag == "record" {
-                val flds = uv.fields
-                val fcount = flds.size()
-                var fj = 1
-                while fj <= fcount {
-                    val f = flds[fj]
-                    if luaExpr("f.name") as string == fieldName {
-                        result = luaExpr("f.fieldType")
-                    }
-                    fj = fj + 1
+        val v = variants[i] as Type
+        val uv: Type = if v.tag == "recursive" { unfoldRecursive(v) } else { v }
+        if uv.tag == "record" {
+            val flds = uv.fields
+            val fcount = flds.size()
+            var fj = 1
+            while fj <= fcount {
+                val f = flds[fj]
+                if f.name == fieldName {
+                    result = if result == unit { f.fieldType } else { sumCreate([] as array[TypeId], result as Type, f.fieldType, [] as array[string]) }
                 }
+                fj = fj + 1
             }
         }
         i = i + 1
