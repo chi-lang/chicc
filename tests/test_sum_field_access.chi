@@ -12,7 +12,6 @@ fn codesOf(result: any): string {
     messages.map { m -> m.code as string }.joinToStringWithSeparator(",")
 }
 
-// Compiles `src`; returns the codes of the reported messages, comma-separated.
 fn messageCodes(src: string): string {
     codesOf(compileToLua(src, newLuaCompilationEnv()))
 }
@@ -39,7 +38,7 @@ test("a field declared by two record variants has the sum of their field types")
     }
 }
 
-test("the field's value can be used as the type of a later variant") {
+test("the field's value is accepted where one variant's field type is expected") {
     withinLimits(30) {
         val pkg: any = compileAndRun("package t53/str\n${getDecl}pub val s: string = get(false).a")
         assertEqual(pkg.s as string, "s")
