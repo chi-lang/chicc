@@ -1,0 +1,92 @@
+import chicc/test_util { test, assertEqual, assertTrue, summary }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { loadLuaCode }
+
+// A call may omit only trailing parameters that have defaults; how many the
+// callee has comes from its resolved fn type, for package and nested fns
+// alike (issue #39).
+
+// Comma-separated message codes of compiling `src`.
+fn messageCodes(src: string): string {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    messages.map { m -> m.code as string }.joinToStringWithSeparator(",")
+}
+
+// Compiles `src`, expecting no messages, runs it and returns its `r`.
+// Each source declares its own package so that members left by one test are
+// not seen by the next.
+fn runR(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    assertEqual(messageCodes(src), "")
+    if result.luaCode == unit { return unit }
+    val run = loadLuaCode(result.luaCode as string) as () -> any
+    run().r
+}
+
+test("a missing argument without a default is an arity error") {
+    val src = "package t39/a1\nfn add(a: int, b: int): int { a + b }\nval r = add(1)\n"
+    assertEqual(messageCodes(src), "FUNCTION_ARITY_ERROR")
+}
+
+test("a missing argument before the defaulted ones is an arity error") {
+    val src = "package t39/a2\nfn h(a: int, b: int = 1): int { a + b }\nval r = h()\n"
+    assertEqual(messageCodes(src), "FUNCTION_ARITY_ERROR")
+}
+
+test("a missing argument before the defaulted ones is an arity error via UFCS") {
+    val src = "package t39/a3\nfn h(a: int, b: int, c: int = 1): int { a + b + c }\nval r = 1.h()\n"
+    assertEqual(messageCodes(src), "FUNCTION_ARITY_ERROR")
+}
+
+test("an omitted trailing argument takes its default") {
+    val src = "package t39/d1\nfn h(a: int, b: int = 1): int { a + b }\nval r = h(2)\n"
+    assertEqual(runR(src), 3)
+}
+
+test("a given argument overrides the default") {
+    val src = "package t39/d2\nfn h(a: int, b: int = 1): int { a + b }\nval r = h(2, 3)\n"
+    assertEqual(runR(src), 5)
+}
+
+test("an omitted string argument takes its default") {
+    val src = "package t39/d3\nfn h(a: int, s: string = \"x\"): string { \"\$a\$s\" }\nval r = h(1) + 2.h()\n"
+    assertEqual(runR(src), "1x2x")
+}
+
+test("a nested fn uses its own defaults") {
+    val src = "package t39/n1\nfn outer(): int {\n    fn inner(a: int, b: int = 5): int { a + b }\n    inner(1)\n}\nval r = outer()\n"
+    assertEqual(runR(src), 6)
+}
+
+test("a nested fn uses its own defaults via UFCS") {
+    val src = "package t39/n2\nfn outer(): int {\n    fn inner(a: int, b: int = 5): int { a + b }\n    1.inner()\n}\nval r = outer()\n"
+    assertEqual(runR(src), 6)
+}
+
+test("a local lambda does not take the defaults of a same-named package fn") {
+    val src = "package t39/s1\nfn f(a: int, b: int = 2): int { a + b }\nfn g(): int {\n    val f = { a: int -> a * 10 }\n    f(1)\n}\nval r = g()\n"
+    assertEqual(runR(src), 10)
+}
+
+test("the string literal @ is passed as an argument") {
+    val src = "package t39/at\nfn two(a: string, b: string): string { a + b }\nval r = two(\"@\", \"x\")\n"
+    assertEqual(runR(src), "@x")
+}
+
+test("default value guards are emitted in parameter order") {
+    val src = "package t39/o1\nfn h(z: int = 1, y: int = 2, x: int = 3, w: int = 4, v: int = 5, u: int = 6): int { z }\n"
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    val code = result.luaCode as string
+    val positions = ["z", "y", "x", "w", "v", "u"].map { p -> code.find("if $p == nil then") }
+    assertEqual(positions.map { p -> "${p != unit}" }.joinToStringWithSeparator(","), "true,true,true,true,true,true")
+    var ordered = true
+    var i = 2
+    while i <= positions.size() {
+        if (positions[i] as int) < (positions[i - 1] as int) { ordered = false }
+        i = i + 1
+    }
+    assertTrue(ordered)
+}
+
+summary()

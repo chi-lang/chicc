@@ -633,30 +633,7 @@ fn convertFnCallImpl(node: any, pkg: any, tables: any): Expr {
         i = i + 1
     }
 
-    // Try to fill default arguments: look up the callee symbol
     val calleeTag = calleeNode.paTag()
-    if calleeTag == "ParseVariableRead" {
-        val calleeName = calleeNode.paVariableName()
-        // Skip default-arg fill if callee is a local variable in function scope
-        // (local variables are closures/lambdas and don't have default-arg info)
-        val sym: any = packageSymbol(calleeName, tables)
-        if sym != unit {
-            val symType = luaExpr("sym.symbolType") as any
-            if symType != unit {
-                val stTag = luaExpr("symType.tag") as string
-                if stTag == "fn" {
-                    val totalTypes = luaExpr("#symType.types") as int
-                    val defCount = luaExpr("symType.defaults") as int
-                    // number of params = totalTypes - 1 (last is return type)
-                    val paramCount = totalTypes - 1
-                    // fill with "@" atoms for missing default args
-                    while convertedArgs.size() < paramCount {
-                        convertedArgs.push(atomExpr("@", unit, unit))
-                    }
-                }
-            }
-        }
-    }
 
     // Wrap block arguments in zero-arg lambdas
     // When a block { ... } is passed as a function argument, it should be treated

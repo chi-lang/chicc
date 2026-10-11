@@ -3,7 +3,7 @@ package chicc/typer
 import std/lang { luaExpr, embedLua }
 import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tFloat, tString, tAny, sumCreate, recordType, arrayType, functionType, polyType, mapType, optionTypeId, intTypeId, floatTypeId, unfoldRecursive, typeToString, instantiate, sumListTypes }
 import chicc/source { Section, toCodePoint }
-import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget, atomExpr }
+import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget }
 import chicc/unification { unify, unifyWithUf, ufNew, ufResolve, ufAllBindings, newConstraint }
 import chicc/inference_context { icFreshVariable, icGetTargetType, icWithNewLocalScope, icDefineLocalSymbol, icUpdateSymbolType, icListLocalFunctionsForType, icListCurrentPackageFunctionsForType, icListTypesPackageFunctionsForType, icListAllLoadedFunctionsForType }
 
@@ -114,37 +114,23 @@ fn sumRemoveType(sumT: any, toRemove: any): Type {
     result
 }
 
-// --- Helper: fill default arguments for UFCS calls ---
+// --- Helper: types of omitted default arguments ---
 
-fn fillDefaultArgs(callParams: any, symbol: any) {
-    if symbol == unit { return unit }
-    val symType = luaExpr("symbol.symbolType") as any
-    if symType == unit { return unit }
-    val symTag = luaExpr("symType.tag or ''") as string
-    // Unwrap poly if needed
-    var bodyType: any = symType
-    if symTag == "poly" {
-        bodyType = luaExpr("symType.body") as any
-    }
-    val bodyTag = luaExpr("bodyType.tag or ''") as string
-    if bodyTag != "fn" { return unit }
-    val defs = luaExpr("bodyType.defaults or 0") as int
-    if defs <= 0 { return unit }
-    val types = luaExpr("bodyType.types") as any
-    val typesCount = luaExpr("#types") as int
-    // paramCount is typesCount - 1 (last is return type)
-    val paramCount = typesCount - 1
-    val callParamsCount = luaExpr("#callParams") as int
-    if callParamsCount >= paramCount { return unit }
-    // Fill missing params with atom exprs that have variable types
-    var idx = callParamsCount + 1
+// A call may omit trailing parameters that have defaults: they are typed as
+// the callee's parameters and passed as nil, which the callee's default
+// guards replace. Fewer arguments than the required ones get no types, so the
+// call fails the arity check.
+fn defaultArgTypes(calleeType: Type, given: int): array[Type] {
+    val result: array[Type] = []
+    if calleeType.tag != "fn" { return result }
+    val paramCount = calleeType.types.size() - 1
+    if given < paramCount - calleeType.defaults { return result }
+    var idx = given + 1
     while idx <= paramCount {
-        val paramType = luaExpr("types[idx]") as any
-        val filler = atomExpr("unit", paramType as Type, unit)
-        (callParams as array[any]).push(filler)
+        result.push(calleeType.types[idx])
         idx = idx + 1
     }
-    unit
+    result
 }
 
 // --- Helper: add a constraint to constraints list ---
@@ -195,16 +181,6 @@ fn isFloatType(t: any): bool {
     false
 }
 
-// --- Shared '@' placeholder type variable for default-arg type inference ---
-// All '@' atoms within one type-check batch share this variable so that
-// constraints from different calls (e.g. greet("x") and repeatStr("y")) are
-// linked, replicating real chi compiler's behavior that causes TYPE_MISMATCH.
-var typerDefaultPlaceholder: any = unit
-
-pub fn typerResetDefaultPlaceholder() {
-    typerDefaultPlaceholder = unit
-}
-
 // --- Shared union-find for incremental mid-typing solves ---
 // When set (non-unit), mid-typing unify() calls use this union-find incrementally
 // instead of re-solving all constraints from scratch.
@@ -241,17 +217,7 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
 
     val result: any = if kind == "atom" {
         // 1. atom: return pre-set type
-        val t = luaExpr("term.exprType") as any
-        // If type is nil (e.g. '@' default placeholder), use shared placeholder
-        // variable so all '@' atoms in the same constraint batch share one type.
-        if t == unit {
-            if typerDefaultPlaceholder == unit {
-                typerDefaultPlaceholder = icFreshVariable(level)
-            }
-            typerDefaultPlaceholder
-        } else {
-            t
-        }
+        luaExpr("term.exprType") as any
     } else if kind == "variable_access" {
         // 2. variable_access: get target type, instantiate
         val target = luaExpr("term.target") as any
@@ -357,21 +323,17 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
                 if dtTag == "field" {
                     // field: leave callee as-is
                 } else if dtTag == "local_binding" {
-                    // No default args: looked up by name they would be those of
-                    // a same-named package function.
                     (term.callParams as array[any]).insertAt(1, dotOp.receiver)
                     val newCallee = variableAccessExpr(localTarget(dotTarget.name as string), dotOp.memberSection as Section | unit)
                     newCallee.setExprType(dotOp.exprType as Type | unit)
                     term.callee = newCallee
                 } else if dtTag == "local_fn" {
-                    // local_fn: prepend receiver, look up symbol, fill defaults
+                    // local_fn: prepend receiver
                     // Use packageTarget (not localTarget) because UFCS functions are
                     // package-level and need __P_ prefix when accessed inside functions.
                     val dotOp_receiver = luaExpr("dotOp.receiver") as any
                     (luaExpr("term.callParams") as array[any]).insertAt(1, dotOp_receiver)
                     val dtName = luaExpr("dotTarget.name") as string
-                    val symbol = luaExpr("require('chicc/symbols').ctGetLocalSymbol(require('chicc/inference_context').icCompileTables, dtName)") as any
-                     fillDefaultArgs(luaExpr("term.callParams") as any, symbol)
                      val memberSec = luaExpr("dotOp.memberSection") as Section | unit
                      val curMod = luaExpr("require('chicc/inference_context').icPkg.moduleName") as string
                      val curPkg = luaExpr("require('chicc/inference_context').icPkg.packageName") as string
@@ -380,15 +342,13 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
                      newCallee.setExprType(calleeType)
                      term.callee = newCallee
                  } else if dtTag == "package_fn" {
-                     // package_fn: prepend receiver, look up via ns, fill defaults
+                     // package_fn: prepend receiver
                      val dotOp_receiver = luaExpr("dotOp.receiver") as any
                      (luaExpr("term.callParams") as array[any]).insertAt(1, dotOp_receiver)
                      val dtMod = luaExpr("dotTarget.moduleName") as string
                      val dtPkg = luaExpr("dotTarget.packageName") as string
                      val dtName = luaExpr("dotTarget.name") as string
                      val tgt = packageTarget(dtMod, dtPkg, dtName)
-                     val symbol = luaExpr("(function() local _ic = require('chicc/inference_context'); return _ic.icNs and _ic.icNs.getSymbol and _ic.icNs.getSymbol(dtMod, dtPkg, dtName) or nil end)()") as any
-                    fillDefaultArgs(luaExpr("term.callParams") as any, symbol)
                     val memberSec = luaExpr("dotOp.memberSection") as Section | unit
                     val newCallee = variableAccessExpr(tgt, memberSec)
                     val calleeType = luaExpr("dotOp.exprType") as Type | unit
@@ -398,18 +358,10 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
             }
         }
 
-        // Fill default args for direct function calls (variable_access callee)
-        if calleeKind == "variable_access" {
-            val calleeName = luaExpr("term.callee.target.name") as string
-            // icCompileTables may be unset (e.g. when typing in isolation); guard
-            // the lookup so a missing symbol simply means "no default args".
-            val symbol = luaExpr("(function() local ct = require('chicc/inference_context').icCompileTables; return ct and require('chicc/symbols').ctGetLocalSymbol(ct, calleeName) or nil end)()") as any
-            fillDefaultArgs(luaExpr("term.callParams") as any, symbol)
-        }
-
         // Type all call params and build callType
         val callParams = luaExpr("term.callParams") as any
         val callParamTypes = typeTerms(callParams, constraints, level)
+        for t in defaultArgTypes(definedFunctionType, callParamTypes.size()) { callParamTypes.push(t) }
         callParamTypes.push(fnCallResult as Type)
         val callType = functionType(callParamTypes as array[Type], [] as array[string], 0)
         val termSection = luaExpr("term.section") as any

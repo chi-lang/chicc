@@ -264,19 +264,19 @@ pub fn emitFn(st: EmitterState, expr: Expr, name: string, isTopLevel: bool): str
     }
     emit(st, "$paramStr) ")
     // Emit `if <param> == nil then <param> = <default> end` guards for
-    // default parameter values (a std/lang.map keyed by param name).
+    // default parameter values (a std/lang.map keyed by param name), in
+    // parameter order: a default may have side effects.
     val defaultValues: any = expr.defaultValues
     if defaultValues != unit {
-        val dnames: array[string] = defaultValues.keys()
-        val dnameCount = dnames.size()
-        var di = 1
-        while di <= dnameCount {
-            val dname = dnames[di]
-            val sname = luaName(dname)
-            emit(st, "if $sname == nil then ")
-            val dResult = emitExpr(st, defaultValues.get(dname) as Expr)
-            emit(st, "$sname=$dResult;end;")
-            di = di + 1
+        for p in params {
+            val dname = (p as FnParam).name
+            val defaultValue: any = defaultValues.get(dname)
+            if defaultValue != unit {
+                val sname = luaName(dname)
+                emit(st, "if $sname == nil then ")
+                val dResult = emitExpr(st, defaultValue as Expr)
+                emit(st, "$sname=$dResult;end;")
+            }
         }
     }
     val fnBody = expr.body as Expr
@@ -445,18 +445,7 @@ pub fn emitFnCall(st: EmitterState, expr: Expr): string {
         }
     }
     val fnName = emitExpr(st, callee)
-    val callParams = expr.callParams
-    val paramCount = luaExpr("#callParams") as int
-    val args: array[Expr] = []
-    var pi = 1
-    while pi <= paramCount {
-        val param = callParams[pi] as Expr
-        if param.kind != "atom" || param.atomValue != "@" {
-            args.push(param)
-        }
-        pi = pi + 1
-    }
-    val argValues = emitOperands(st, args)
+    val argValues = emitOperands(st, expr.callParams as array[Expr])
     var paramList = ""
     var ai = 1
     while ai <= argValues.size() {

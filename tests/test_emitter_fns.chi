@@ -154,20 +154,13 @@ test("emitFnCall - luaExpr special case") {
     assertEqual(st.sb.toString(), "local _chi_tmp0=os.time();")
 }
 
-test("emitFnCall - call with default param @ placeholder") {
+test("emitFnCall - the string literal @ is an argument") {
     val st = freshState()
     val callee = variableAccessExpr(packageTarget("mymod", "mypkg", "bar"), unit)
-    val arg1 = atomExpr("1", tInt, unit)
-    val arg2 = atomExpr("3", tInt, unit)
-    // "@" can't be passed as a string literal - it's intercepted as default param marker by the Chi compiler.
-    // Build the call expression with placeholder directly via embedLua to avoid type issues.
-    embedLua("__placeholder = {kind='atom', atomValue='@', exprType=nil, used=false}")
-    embedLua("__fn_test_call = {kind='fn_call', callee=callee, callParams={arg1, __placeholder, arg2}, exprType=nil, section=nil, used=false}")
-    val call = luaExpr("__fn_test_call")
+    val call = fnCallExpr(callee, [atomExpr("@", tString, unit), atomExpr("3", tInt, unit)], unit)
     val result = emitFnCall(st, call)
-    assertEqual(result, "_chi_tmp0")
-    // Should skip the "@" placeholder
-    assertEqual(st.sb.toString(), "local _chi_tmp0=__P_.bar((1),(3));")
+    assertEqual(result, "_chi_tmp1")
+    assertEqual(st.sb.toString(), "local _chi_tmp0 = '@';local _chi_tmp1=__P_.bar((_chi_tmp0),(3));")
 }
 
 // --- emitNameDeclaration with fn shortcut ---
