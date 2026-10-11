@@ -67,4 +67,18 @@ test("a return in a lambda assigned to a val is checked against the lambda, not 
     }
 }
 
+test("a return in a lambda assigned to an any-typed val is checked against the lambda") {
+    withinLimits(30) {
+        val src = "package t38/f\nfn outer(c: bool): int {\n    val f: any = { -> return \"s\" }\n    1\n}\nval r = outer(true)\n"
+        assertEqual(compileAndRun(src).r as int, 1)
+    }
+}
+
+test("a return in a top-level lambda assigned to an any-typed val is inside a function body") {
+    withinLimits(30) {
+        val src = "package t38/g\nval f: any = { -> return 1 }\nval r = 2\n"
+        assertEqual(compileAndRun(src).r as int, 2)
+    }
+}
+
 summary()

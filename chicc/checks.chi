@@ -556,10 +556,10 @@ fn rtWalkExprImpl(expr: any, messages: any) {
             rtWalkExpr(value, messages)
             return unit
         }
-        // Prefer the declared expectedType (preserves sum types like int | unit)
+        // Prefer a declared fn type (preserves sum types like int | unit)
         // over the inferred exprType (which may resolve to just unit after unification)
         val declaredType = luaExpr("expr.expectedType") as any
-        val exprType = if declaredType != unit {
+        val exprType = if declaredType != unit && (declaredType.tag as string) == "fn" {
             declaredType
         } else {
             value.exprType
