@@ -515,9 +515,8 @@ pub fn compile(source: string, ns: any): CompilationResult {
         resultMessages.push(msg)
     }
 
-    // Validate imported names exist and are public. An entry that does not
-    // resolve is reported here, once per entry, or once per import when the
-    // package itself is missing; the name it binds is marked failed below.
+    // Validate imported names exist and are public. The name an unresolved
+    // entry binds is marked failed below, so its uses are not reported again.
     val sourceImports = luaExpr("parsedProgram.imports") as any
     val failedImportNames: array[string] = []
     val importCount = luaExpr("#sourceImports") as int
@@ -608,9 +607,8 @@ pub fn compile(source: string, ns: any): CompilationResult {
     // Materialise variant (`data`) constructors: register their types + the
     // data sum + a constructor function symbol per variant into `tables`, and
     // capture the constructor declarations. MUST run before checkNames so that
-    // constructor calls in user code resolve. Each declaration is lowered under
-    // its own pcall: a rejected one (and any other lowering error) becomes a
-    // message and its constructor names are marked failed, the others stay.
+    // constructor calls in user code resolve. Each declaration gets its own
+    // pcall, so a rejected one does not unregister the others.
     val variantCtorDecls: array[any] = []
     for vdef in parsedProgram.variantTypes as array[ParseVariantTypeDefinition] {
         embedLua("__chicc_var_ok, __chicc_var_result = pcall(function() local _ac = require('chicc/ast_converter'); return _ac.lowerVariantType(vdef, pkg, tables) end)")

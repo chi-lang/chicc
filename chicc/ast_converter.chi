@@ -604,7 +604,7 @@ fn packageSymbol(name: string, tables: any): Symbol | unit {
     ctGetLocalSymbol(tables as CompileTables, name)
 }
 
-// Is `name` a package-level nullary variant value (see lowerVariantTypes)?
+// Is `name` a package-level nullary variant value (see lowerVariantType)?
 fn isNullaryVariant(name: string, tables: any): bool {
     val sym = packageSymbol(name, tables)
     if sym == unit { return false }
@@ -970,8 +970,8 @@ convertHandle = convertHandleImpl
 // (a named fn whose body is a createVariantExpr; a variant without fields is a
 // value declaration of the data type instead). Returns the constructor
 // declarations to prepend to the program.
-// Rejects generic and recursive variants by throwing a structured error; the
-// caller lowers each declaration under its own pcall (compiler.chi).
+// Rejects generic and recursive variants by throwing a structured error
+// (caught in compiler.chi).
 //
 // MUST run before checkNames in compile() (compiler.chi) — otherwise the
 // constructor calls in user code (`Circle(2)`) fail name resolution and the
@@ -1170,7 +1170,7 @@ pub fn convertProgram(parseProg: any, pkg: any, tables: any): array[Expr] {
     }
 
     // Convert code expressions. (Variant constructor declarations are produced
-    // by lowerVariantTypes, called from compile() before checkNames, and
+    // by lowerVariantType, called from compile() before checkNames, and
     // prepended to this result there.)
     val codeExprs = luaExpr("parseProg.code") as array[any]
     var converted: array[any] = []
