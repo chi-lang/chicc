@@ -190,7 +190,7 @@ fn hasExtension(path: string, ext: string): bool {
 // Usage help
 // ============================================================================
 
-val CHI_VERSION = "0.1.0"
+val CHI_VERSION = "0.2.0"
 
 fn printUsage(out: (string) -> unit) {
     out("Usage: chi <command> [options] [file]")

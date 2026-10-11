@@ -5,7 +5,7 @@ type: product
 version: 1
 status: draft
 created_at: "2026-04-04T12:00:00+02:00"
-updated_at: "2026-10-10T12:00:00+02:00"
+updated_at: "2026-10-11T12:00:00+02:00"
 ---
 # Chi Compiler CLI
 
@@ -85,8 +85,8 @@ This is the primary way to run Chi programs.
 
 `--version` prints the compiler version:
 
-- `chi 0.1.0 (native)` — when running the native binary
-- `chi 0.1.0` — when running via LuaJIT directly
+- `chi 0.2.0 (native)` — when running the native binary
+- `chi 0.2.0` — when running via LuaJIT directly
 
 The version is defined in `cli.chi`. The native C launcher sets a `_CHI_NATIVE` global that controls the suffix.
 
