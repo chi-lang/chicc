@@ -149,9 +149,10 @@ fn writeLuaTypeImpl(sb: StringBuilder, t: Type) {
             sb.append("}")
         }
     } else if tag == "sum" {
-        // Sums always encode structurally with ids={} because the JVM compiler
-        // adds optionTypeId to T|unit sums but chicc doesn't. Stripping ids
-        // normalizes the encoding so __S_ and __T_ entries are consistent.
+        // Sums always encode structurally with ids={} because the same T|unit
+        // sum may or may not carry optionTypeId: sumCreate adds it, annotated
+        // sums built in symbols don't. Stripping ids normalizes the encoding
+        // so __S_ and __T_ entries are consistent.
         sb.append("{tag=\"sum\",ids={}")
         sb.append(",lhs=")
         val lhs = luaExpr("t.lhs") as Type

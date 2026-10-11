@@ -1,7 +1,7 @@
 // chicc/chicc/typer.chi
 package chicc/typer
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tFloat, tString, tAny, sumCreate, recordType, arrayType, functionType, polyType, mapType, optionTypeId, intTypeId, floatTypeId, unfoldRecursive, typeToString, instantiate, sumListTypes }
+import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tFloat, tString, tAny, sumCreate, recordType, arrayType, functionType, polyType, mapType, intTypeId, floatTypeId, unfoldRecursive, typeToString, instantiate, sumListTypes }
 import chicc/source { Section, toCodePoint }
 import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget }
 import chicc/unification { unify, unifyWithUf, ufNew, ufResolve, ufAllBindings, ufLowerAbove, newConstraint }
@@ -710,20 +710,13 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
                 }
             }
 
-            // Verify return type is an option (has optionTypeId)
-            val returnValue = luaExpr("fnTypes[#fnTypes]") as any
-            val returnIds = luaExpr("returnValue.ids or {}") as any
-            val returnIdsCount = luaExpr("#returnIds") as int
-            var hasOptionId = false
-            var ri = 1
-            while ri <= returnIdsCount {
-                val rid = luaExpr("returnIds[ri]") as TypeId
-                if rid.typeIdEquals(optionTypeId) {
-                    hasOptionId = true
-                }
-                ri = ri + 1
+            // Annotated `T | unit` sums carry no optionTypeId, so the unit variant is checked directly.
+            val returnValue = luaExpr("fnTypes[#fnTypes]") as Type
+            val hasUnitVariant = returnValue.tag == "sum" && returnValue.sumListTypes().any { t ->
+                val variant = t as Type
+                variant.typeEquals(tUnit)
             }
-            if hasOptionId {
+            if hasUnitVariant {
                 val optionalType = sumRemoveType(returnValue, tUnit)
                 val vt1 = luaExpr("varTypes[1].varType") as any
                 addConstraint(constraints, optionalType, vt1, termSection)

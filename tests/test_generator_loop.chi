@@ -1,0 +1,44 @@
+import chicc/test_util { test, assertEqual, summary, withinLimits }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { loadLuaCode }
+
+// `for v in gen` accepts a generator whose return type is a sum with a
+// `unit` variant however it is written (issue #55).
+
+fn messagesOf(result: any): string {
+    val messages = result.messages as array[any]
+    messages.map { m -> "${m.code}: ${m.text}" }.joinToStringWithSeparator(",")
+}
+
+// Compiles `src`, expecting no messages, runs it and returns `pkg.out` joined.
+fn runOut(src: string): string {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    assertEqual(messagesOf(result), "")
+    val run = loadLuaCode(result.luaCode as string) as () -> any
+    val pkg: any = run()
+    (pkg.out as array[int]).map { n -> "$n" }.joinToStringWithSeparator(",")
+}
+
+test("a generator annotated with T | unit yields its values") {
+    withinLimits(30) {
+        val src = "package t55/basic\nvar i = 0\nfn gen(): int | unit {\n    i = i + 1\n    if i <= 3 { i } else { unit }\n}\npub val out: array[int] = []\nfor v in gen { out.push(v) }"
+        assertEqual(runOut(src), "1,2,3")
+    }
+}
+
+test("a stateful generator annotated with T | unit yields its values") {
+    withinLimits(30) {
+        val src = "package t55/stateful\nfn step(limit: int, last: int): int | unit {\n    if last < limit { last + 1 } else { unit }\n}\npub val out: array[int] = []\nfor v in step, 3, 0 { out.push(v) }"
+        assertEqual(runOut(src), "1,2,3")
+    }
+}
+
+test("a generator without a unit variant is rejected") {
+    withinLimits(30) {
+        val src = "package t55/plain\nfn gen(): int { 1 }\nfor v in gen { println(v) }"
+        val result: any = compileToLua(src, newLuaCompilationEnv())
+        assertEqual(messagesOf(result), "ERROR: Generator function should return optional value (value or unit)")
+    }
+}
+
+summary()
