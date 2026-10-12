@@ -3,7 +3,7 @@ import std/lang { luaExpr, embedLua }
 import std/lang.map { emptyMap }
 import std/math { finf }
 import chicc/source { Section }
-import chicc/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, newTypeId, variantNameOf, sumListTypes }
+import chicc/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType, polyType, occursIn, newTypeId, variantNameOf, sumListTypes }
 import chicc/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, packageTarget, setExprType, atomExpr, interpolatedStringExpr, createRecordExpr, createVariantExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, variableAssignmentExpr, declarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam }
 import chicc/parse_ast { ParseAst, ParseProgram, ParseTypeAlias, ParseVariantTypeDefinition, VariantConstructor, paArguments, paArrayValues, paBody, paBoolValue, paCallee, paCondition, paEffectCases, paElseBody, paElseCase, paFloatValue, paForBody, paForInit, paForState, paForVars, paFormalArguments, paFuncBody, paHandleBody, paIndexExpr, paIndexValue, paInterpValue, paIsMutable, paIsPublic, paIterable, paLeft, paLongValue, paLoopBody, paMemberName, paMemberSection, paName, paOp, paOpTemplate, paParts, paReceiver, paReceiverName, paRecordFields, paReturnTypeRef, paReturnValue, paRight, paSection, paStringValue, paSymbolName, paTag, paThenBody, paTypeParameters, paTypeRef, paValue, paVariable, paVariableName, paWhenCases }
 import chicc/symbols { FnSymbolTable, Symbol, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newSymbol, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, lookupLoadedPublicSymbol, CompileTables, TypeTable, resolveType, arrayContains }
@@ -39,6 +39,63 @@ fn getTypeTable(tables: any): any {
 
 fn formatSignificant(v: float, digits: int): string {
     luaExpr("string.format('%.' .. digits .. 'g', v)") as string
+}
+
+fn closeVariantType(t: Type, placeholders: array[Type], definitions: array[Type], stack: array[int]): Type {
+    if t.tag == "var" {
+        var i = 1
+        while i <= placeholders.size() {
+            val placeholder = placeholders[i]
+            if t.name == placeholder.name && t.level == placeholder.level {
+                var j = 1
+                while j <= stack.size() {
+                    if stack[j] == i { return t }
+                    j = j + 1
+                }
+                stack.push(i)
+                val body = closeVariantType(definitions[i], placeholders, definitions, stack)
+                stack.pop()
+                if occursIn(placeholder, body) {
+                    return recursiveType(placeholder, body)
+                }
+                return body
+            }
+            i = i + 1
+        }
+        return t
+    }
+
+    if t.tag == "fn" {
+        var types: array[any] = []
+        var i = 1
+        while i <= t.types.size() {
+            types.push(closeVariantType(t.types[i] as Type, placeholders, definitions, stack))
+            i = i + 1
+        }
+        functionType(types as array[Type], t.typeParams, t.defaults)
+    } else if t.tag == "record" {
+        var fields: array[any] = []
+        var i = 1
+        while i <= t.fields.size() {
+            val field = t.fields[i]
+            val fieldType = closeVariantType(field.fieldType, placeholders, definitions, stack)
+            fields.push({ name: field.name, fieldType: fieldType })
+            i = i + 1
+        }
+        val result = recordType(t.ids, fields as array[RecordField], t.typeParams)
+        result.name = t.name
+        result
+    } else if t.tag == "sum" {
+        sumType(t.ids, closeVariantType(t.lhs as Type, placeholders, definitions, stack), closeVariantType(t.rhs as Type, placeholders, definitions, stack), t.typeParams)
+    } else if t.tag == "array" {
+        arrayType(closeVariantType(t.elementType as Type, placeholders, definitions, stack), t.typeParams)
+    } else if t.tag == "recursive" {
+        recursiveType(t.variable as Type, closeVariantType(t.innerType as Type, placeholders, definitions, stack))
+    } else if t.tag == "poly" {
+        polyType(t.level, closeVariantType(t.body as Type, placeholders, definitions, stack))
+    } else {
+        t
+    }
 }
 
 // Lua text that reads back as exactly `v`. A source literal is never negative
@@ -983,12 +1040,6 @@ pub fn lowerVariantType(vdef: any, pkg: any, tables: any): array[Expr] {
     val pkgName = luaExpr("pkg.packageName") as string
     val aliasesMap: any = luaExpr("tt.aliases")
 
-    // Does a typeRef transitively mention any name in the `names` set? Used to
-    // reject recursive variants (a field referencing the data type or a sibling
-    // constructor): we register plain records/sums, which would form a cyclic
-    // type the typer cannot fold (stack overflow). Recursion is out of scope.
-    embedLua("__chicc_trMentions = function(tr, names) if type(tr) ~= 'table' then return false end; local t = tr.tag; if t == 'TypeNameRef' or t == 'TypeParameterRef' then return names[tr.name] == true end; if __chicc_trMentions(tr.lhs, names) or __chicc_trMentions(tr.rhs, names) or __chicc_trMentions(tr.returnType, names) or __chicc_trMentions(tr.baseType, names) then return true end; for _,a in ipairs(tr.argumentTypeRefs or {}) do if __chicc_trMentions(a, names) then return true end end; for _,a in ipairs(tr.typeParameters or {}) do if __chicc_trMentions(a, names) then return true end end; for _,f in ipairs(tr.fields or {}) do if __chicc_trMentions(f.typeRef, names) then return true end end; return false end")
-
     val typeName = luaExpr("vdef.typeName") as string
     val typeParams = luaExpr("vdef.typeParameters") as array[any]
     val ctors = luaExpr("vdef.constructors") as array[any]
@@ -999,18 +1050,36 @@ pub fn lowerVariantType(vdef: any, pkg: any, tables: any): array[Expr] {
         embedLua("error({ code = 'UNSUPPORTED_FEATURE', text = 'generic data types are not supported yet (data ' .. vdef.typeName .. ')' })")
     }
 
-    // The names this declaration introduces (the data type + every
-    // constructor). A field referencing any of them is a recursive variant.
-    embedLua("__chicc_vnames = {}; __chicc_vnames[vdef.typeName] = true; for _, c in ipairs(vdef.constructors) do __chicc_vnames[c.name] = true end")
-
     val ctorCount = ctors.size()
 
-    // Loop 1: resolve each constructor's fields and build its nominal record
-    // (marked with `name` = the variant name). No pre-registration, so no
-    // cyclic type can form; recursive references are rejected up front.
-    var ctorRecords: array[any] = []
-    var ctorParamTypes: array[any] = []
+    // Pre-register distinct placeholders so every field can refer to this
+    // data type or any constructor, including constructors declared later.
+    var placeholders: array[Type] = []
+    var definitions: array[Type] = []
+    val dataPlaceholder = variableType(nextTempVarName(), -1)
+    placeholders.push(dataPlaceholder)
+    definitions.push(tAny)
+    val dataPlaceholderAlias = luaExpr("{ typeId = { moduleName = modName, packageName = pkgName, name = typeName }, aliasType = dataPlaceholder }") as any
+    aliasesMap.put(typeName, dataPlaceholderAlias)
+
     var ci = 1
+    while ci <= ctorCount {
+        val ctor = ctors[ci]
+        val ctorName = luaExpr("ctor.name") as string
+        val placeholder = variableType(nextTempVarName(), -1)
+        placeholders.push(placeholder)
+        definitions.push(tAny)
+        if ctorName != typeName {
+            val ctorPlaceholderAlias = luaExpr("{ typeId = { moduleName = modName, packageName = pkgName, name = ctorName }, aliasType = placeholder }") as any
+            aliasesMap.put(ctorName, ctorPlaceholderAlias)
+        }
+        ci = ci + 1
+    }
+
+    // Resolve fields into finite records that point only at placeholders.
+    var ctorRecords: array[Type] = []
+    var ctorParamTypes: array[any] = []
+    ci = 1
     while ci <= ctorCount {
         val ctor = ctors[ci]
         val ctorName = luaExpr("ctor.name") as string
@@ -1023,26 +1092,21 @@ pub fn lowerVariantType(vdef: any, pkg: any, tables: any): array[Expr] {
         while fi <= fieldCount {
             val field = fields[fi]
             val fieldName = luaExpr("field.name") as string
-            val recursive = luaExpr("__chicc_trMentions(field.typeRef, __chicc_vnames)") as bool
-            if recursive {
-                embedLua("error({ code = 'UNSUPPORTED_FEATURE', text = 'recursive data types are not supported yet (data ' .. vdef.typeName .. ')' })")
-            }
-            val fieldType: any = resolveType(tt, [] as array[string], luaExpr("field.typeRef"), effectiveTypeLevel())
-            recFields.push(luaExpr("{ name = fieldName, fieldType = fieldType }") as any)
+            val fieldType = resolveType(tt, [] as array[string], luaExpr("field.typeRef"), effectiveTypeLevel())
+            recFields.push({ name: fieldName, fieldType: fieldType })
             paramTypes.push(fieldType)
             fi = fi + 1
         }
 
         val ctorId = newTypeId(modName, pkgName, ctorName)
-        val rec: any = recordType([ctorId], recFields as array[RecordField], [] as array[string])
+        val rec = recordType([ctorId], recFields as array[RecordField], [] as array[string])
         // Mark as a variant: `name` is the discriminator variantNameOf /
         // emitIs key on (`ids` can't tell a variant from a type alias —
         // both carry ids; record `name` is "" everywhere except variants).
-        embedLua("rec.name = ctorName")
+        rec.name = ctorName
         ctorRecords.push(rec)
         ctorParamTypes.push(paramTypes)
-        val ctorAlias = luaExpr("{ typeId = { moduleName = modName, packageName = pkgName, name = ctorName }, aliasType = rec }") as any
-        aliasesMap.put(ctorName, ctorAlias)
+        definitions[ci + 1] = rec
         ci = ci + 1
     }
 
@@ -1050,19 +1114,75 @@ pub fn lowerVariantType(vdef: any, pkg: any, tables: any): array[Expr] {
     // sum of all constructor records. Raw sumType, NOT sumCreate — sumCreate
     // dedups via typeEquals (which ignores ids) and would collapse two
     // structurally-identical variants into one branch.
-    var dataType: any = ctorRecords[1]
+    var dataType: Type = ctorRecords[1]
     if ctorCount > 1 {
         var si = 2
         while si <= ctorCount {
-            dataType = sumType([] as array[TypeId], dataType as Type, ctorRecords[si] as Type, [] as array[string])
+            dataType = sumType([] as array[TypeId], dataType, ctorRecords[si], [] as array[string])
             si = si + 1
         }
     }
+    definitions[1] = dataType
+
+    // A constructor needs its closed branch type as its result only when a
+    // field explicitly refers to that constructor as a type.
+    var ctorIsFieldType: array[bool] = []
+    ci = 1
+    while ci <= ctorCount {
+        val placeholder = placeholders[ci + 1]
+        var referenced = false
+        var ownerIndex = 1
+        while ownerIndex <= ctorCount && !referenced {
+            val paramTypes = ctorParamTypes[ownerIndex] as array[any]
+            var fi = 1
+            while fi <= paramTypes.size() && !referenced {
+                if occursIn(placeholder, paramTypes[fi] as Type) { referenced = true }
+                fi = fi + 1
+            }
+            ownerIndex = ownerIndex + 1
+        }
+        ctorIsFieldType.push(referenced)
+        ci = ci + 1
+    }
+
+    // Constructor arguments and aliases must expose closed types, so a
+    // placeholder cannot be inferred as an arbitrary value at a call site.
+    var closedCtorRecords: array[Type] = []
+    ci = 1
+    while ci <= ctorCount {
+        val ctor = ctors[ci]
+        val ctorName = luaExpr("ctor.name") as string
+        val fields = luaExpr("ctor.fields") as array[any]
+        val paramTypes = ctorParamTypes[ci] as array[any]
+        var closedParamTypes: array[any] = []
+        var closedFields: array[any] = []
+        var fi = 1
+        while fi <= fields.size() {
+            val field = fields[fi]
+            val fieldName = luaExpr("field.name") as string
+            val closedFieldType = closeVariantType(paramTypes[fi] as Type, placeholders, definitions, [] as array[int])
+            closedParamTypes.push(closedFieldType)
+            closedFields.push({ name: fieldName, fieldType: closedFieldType })
+            fi = fi + 1
+        }
+        ctorParamTypes[ci] = closedParamTypes
+        val ctorId = newTypeId(modName, pkgName, ctorName)
+        val rec = recordType([ctorId], closedFields as array[RecordField], [] as array[string])
+        rec.name = ctorName
+        closedCtorRecords.push(rec)
+        if ctorName != typeName {
+            val ctorAlias = luaExpr("{ typeId = { moduleName = modName, packageName = pkgName, name = ctorName }, aliasType = rec }") as any
+            aliasesMap.put(ctorName, ctorAlias)
+        }
+        ci = ci + 1
+    }
+
+    dataType = closeVariantType(dataPlaceholder, placeholders, definitions, [] as array[int])
     val dataAlias = luaExpr("{ typeId = { moduleName = modName, packageName = pkgName, name = typeName }, aliasType = dataType }") as any
     aliasesMap.put(typeName, dataAlias)
 
-    // Loop 2: build a constructor function per variant: a named fn whose
-    // type is (fieldTypes...) -> dataType and whose body is a tagged record.
+    // Loop 2: build a constructor function per variant. Use the parent data
+    // type unless another constructor declares this variant as a field type.
     ci = 1
     while ci <= ctorCount {
         val ctor = ctors[ci]
@@ -1087,7 +1207,11 @@ pub fn lowerVariantType(vdef: any, pkg: any, tables: any): array[Expr] {
             fnTypeArr.push(paramTypes[fi])
             fi = fi + 1
         }
-        fnTypeArr.push(dataType)
+        if ctorIsFieldType[ci] {
+            fnTypeArr.push(closedCtorRecords[ci])
+        } else {
+            fnTypeArr.push(dataType)
+        }
         val funcType = functionType(fnTypeArr as array[Type], [] as array[string], 0)
         val ctorTarget = addLocalSymbol(ctorName, false, ctorIsPub, funcType, pkg, tables)
 
