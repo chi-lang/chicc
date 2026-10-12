@@ -1,5 +1,5 @@
 import std/lang { embedLua, luaExpr }
-import std/io.file { writeString, open }
+import std/io.file { writeString, readString, open }
 import std/os { getEnv }
 import chicc/test_util { test, assertEqual, assertTrue, assertFalse, summary }
 import chicc/cli { cliMain, loadStdlib, compileFile, runFile }
@@ -134,6 +134,64 @@ test("runFile returns 1 for invalid source") {
     assertEqual(result, 1)
 
     embedLua("os.remove('/tmp/test_chicc_runbad.chi')")
+}
+
+fn runCapturedCli(path: string, source: string): string {
+    val outputPath = "$path.out"
+    writeString(path, source)
+    embedLua("local outputFile = io.open(outputPath, 'w'); __cli_saved_output = io.output(); __cli_saved_stderr = io.stderr; io.output(outputFile); io.stderr = outputFile")
+    val result = cliMain([path])
+    embedLua("io.output():flush(); io.output():close(); io.output(__cli_saved_output); io.stderr = __cli_saved_stderr; __cli_saved_output = nil; __cli_saved_stderr = nil")
+    val output = readString(outputPath)
+    embedLua("os.remove(path); os.remove(outputPath)")
+    assertEqual(result, 1)
+    output
+}
+
+test("CLI runtime errors report Chi lines for direct, top-level and nested code") {
+    val directPath = "/tmp/test_chicc_runtime_line3.chi"
+    val direct = runCapturedCli(directPath, "fn boom(x: any): int {\n    val r = x as { a: int }\n    r.a + 1\n}\nprintln(1)\nprintln(boom(unit))\n")
+    assertTrue(direct.startsWith("1\nRuntime error: $directPath:3:"))
+    assertFalse(direct.contains("[string"))
+
+    val topLevelPath = "/tmp/test_chicc_runtime_line2.chi"
+    val topLevel = runCapturedCli(topLevelPath, "val r = unit as { a: int }\nprintln(r.a)\n")
+    assertTrue(topLevel.startsWith("Runtime error: $topLevelPath:2:"))
+    assertFalse(topLevel.contains("[string"))
+
+    val nestedPath = "/tmp/test_chicc_runtime_nested.chi"
+    val nested = runCapturedCli(nestedPath, "fn boom(x: any): int {\n    val r = x as { a: int }\n    if true {\n        if true {\n            r.a + 1\n        } else {\n            0\n        }\n    } else {\n        0\n    }\n}\nprintln(boom(unit))\n")
+    assertTrue(nested.startsWith("Runtime error: $nestedPath:5:"))
+    assertFalse(nested.contains("[string"))
+
+    val multilinePath = "/tmp/test_chicc_runtime_multiline.chi"
+    val multiline = runCapturedCli(multilinePath, "fn maybe(): any { unit }\nprintln(\n    (if true {\n        maybe()\n    } else {\n        maybe()\n    }).field\n)\n")
+    assertTrue(multiline.startsWith("Runtime error: $multilinePath:2:"))
+    assertFalse(multiline.contains("[string"))
+
+    val effectPath = "/tmp/test_chicc_runtime_effect.chi"
+    val effectError = runCapturedCli(effectPath, "effect ask(): int\nfn work(): int {\n    val a = ask()\n    val r = unit as { a: int }\n    r.a\n}\nval result = handle { work() } with {\n    ask() -> resume(0)\n}\n")
+    assertTrue(effectError.contains("$effectPath:5:"))
+    assertFalse(effectError.contains("[string"))
+
+    val shortCircuitPath = "/tmp/test_chicc_runtime_short_circuit.chi"
+    val shortCircuitError = runCapturedCli(shortCircuitPath, "fn boom(): bool {\n    val r = unit as { a: int }\n    true && if true {\n        r.a == 1\n    } else {\n        false\n    }\n}\nprintln(boom())\n")
+    assertTrue(shortCircuitError.contains("$shortCircuitPath:4:"))
+    assertFalse(shortCircuitError.contains("[string"))
+}
+
+test("CLI runtime errors keep source lines when Lua shortens a long chunk name") {
+    val source = "println((if true {\n    unit as any\n} else {\n    unit as any\n}).field)\n"
+
+    val shortPath = "/tmp/field_any.chi"
+    val shortPathError = runCapturedCli(shortPath, source)
+    assertTrue(shortPathError.startsWith("Runtime error: $shortPath:1:"))
+    assertFalse(shortPathError.contains("[string"))
+
+    val longPath = "/tmp/test_chicc_runtime_multiline_field_any_long_path_regression.chi"
+    val longPathError = runCapturedCli(longPath, source)
+    assertTrue(longPathError.startsWith("Runtime error: $longPath:1:"))
+    assertFalse(longPathError.contains("[string"))
 }
 
 test("cliMain run and compile return 1 for an unknown type, writing nothing") {
