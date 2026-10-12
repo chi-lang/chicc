@@ -54,6 +54,10 @@ test("top-level else-less if followed by a parenthesized line") {
     assertEqual(runCaptured("if false { println(\"x\") }\n(5)\nprintln(\"ok\")"), "ok\n")
 }
 
+test("lambda parameters remain inferable") {
+    assertEqual(runCaptured("val f = { x -> x + 1 }\nprintln(f(1))"), "2\n")
+}
+
 // ---- else on the next line still binds ----
 
 test("else on the line after the then-block") {

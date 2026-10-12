@@ -60,6 +60,30 @@ test("an unknown type in a cast is reported") {
     assertEqual(compileErrors("val x = 5 as Nope\n"), unknownType("Nope", 1, 14))
 }
 
+test("parenthesized function types can appear in sums") {
+    val src = "package t/parenthesized_callback\ntype Cb = ((int) -> int) | unit\nval f: (int) -> int = { x: int -> x + 1 }\nval c: Cb = f\nval u: Cb = unit\npub val answer = f(41)\n"
+    assertEqual(compileAndRun(src).answer as int, 42)
+    assertTrue(compileErrors("type Cb = ((int) -> int) | unit\nval f: Cb = 5\n").startsWith("[TYPE_MISMATCH]"))
+}
+
+test("parenthesized sum types and grouped annotations compile") {
+    val src = "package t/parenthesized_sum\ntype Opt2 = (int | unit) | unit\nval o: Opt2 = 5\nval n: (int) = 5\npub val answer = n\n"
+    assertEqual(compileAndRun(src).answer as int, 5)
+}
+
+test("parenthesized parameter types and function return precedence are preserved") {
+    val src = "package t/parenthesized_parameter\nfn h(c: ((int) -> int) | unit): (int) { 0 }\npub val answer = h(unit)\n"
+    assertEqual(compileAndRun(src).answer as int, 0)
+
+    val precedenceSrc = "package t/grouped_function_return\nval g: (int) -> int | unit = { x: int -> unit }\npub val returnsUnit = g(1) == unit\n"
+    assertEqual(compileAndRun(precedenceSrc).returnsUnit as bool, true)
+}
+
+test("tuple-like and empty parenthesized type aliases are syntax errors") {
+    assertTrue(compileErrors("type Bad = (int, string)\n").startsWith("[SYNTAX_ERROR]"))
+    assertTrue(compileErrors("type Bad = ()\n").startsWith("[SYNTAX_ERROR]"))
+}
+
 // --- Declaration order ---
 
 val recordGotInt = "[TYPE_MISMATCH] Expected type is 'record' but got 'int'"
