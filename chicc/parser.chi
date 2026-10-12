@@ -770,38 +770,42 @@ parseBraceRecordFwd = { p: Parser -> parseBraceRecordImpl(p) }
 
 // -- parseFuncArgs: parse formal arguments for fn declarations --
 // Arguments require type annotations: (name: Type [= default], ...)
+fn parseFuncArg(p: Parser): any {
+    val nameTok = expect(p, TK_ID)
+    val nameSec = tokenSection(nameTok)
+    var argType: any = unit
+    if peek(p) == TK_COLON {
+        advance(p)
+        skipNewlines(p)
+        argType = parseTypeRefFwd(p)
+    } else {
+        recordParseError(p, "function parameter '${nameTok.value}' requires a type annotation", nameTok)
+        // Keep the rest of the parameter list and function body parseable.
+        // The invalid argument still carries a typeRef, but parse errors stop
+        // compilation before that placeholder can reach type checking.
+        while peek(p) != TK_COMMA && peek(p) != TK_RPAREN && peek(p) != TK_EQ && peek(p) != TK_NEWLINE && peek(p) != TK_LBRACE && peek(p) != TK_EOF {
+            advance(p)
+        }
+    }
+    var defVal: any = unit
+    if peek(p) == TK_EQ {
+        advance(p)
+        skipNewlines(p)
+        defVal = parseExpr(p, 1)
+    }
+    newFormalArgument(nameTok.value, argType, defVal, nameSec) as any
+}
+
 fn parseFuncArgs(p: Parser): array[any] {
     val args: array[any] = []
     expect(p, TK_LPAREN)
     skipNewlines(p)
     if peek(p) != TK_RPAREN {
-        val nameTok = expect(p, TK_ID)
-        val nameSec = tokenSection(nameTok)
-        expect(p, TK_COLON)
-        skipNewlines(p)
-        val argType = parseTypeRefFwd(p)
-        var defVal: any = unit
-        if peek(p) == TK_EQ {
-            advance(p)
-            skipNewlines(p)
-            defVal = parseExpr(p, 1)
-        }
-        args.push(newFormalArgument(nameTok.value, argType, defVal, nameSec) as any)
+        args.push(parseFuncArg(p))
         while peek(p) == TK_COMMA {
             advance(p)
             skipNewlines(p)
-            val nameTok2 = expect(p, TK_ID)
-            val nameSec2 = tokenSection(nameTok2)
-            expect(p, TK_COLON)
-            skipNewlines(p)
-            val argType2 = parseTypeRefFwd(p)
-            var defVal2: any = unit
-            if peek(p) == TK_EQ {
-                advance(p)
-                skipNewlines(p)
-                defVal2 = parseExpr(p, 1)
-            }
-            args.push(newFormalArgument(nameTok2.value, argType2, defVal2, nameSec2) as any)
+            args.push(parseFuncArg(p))
         }
     }
     skipNewlines(p)
