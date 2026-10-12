@@ -962,41 +962,34 @@ pub fn emitFieldAssignment(st: EmitterState, expr: Expr): string {
     valueVar
 }
 
-pub fn emitIs(st: EmitterState, expr: Expr): string {
-    // Check if value's type == checked type (statically known)
-    // AST fields: castExpr (the value being checked), checkedType (the type being checked against)
-    val castVal = expr.castExpr as Expr
-    val castET = castVal.exprType
-    val valueTag = if castET != unit { luaExpr("castET.tag") as string } else { "unknown" }
-    val checkedT = expr.checkedType
-    val checkedTag = if checkedT != unit { luaExpr("checkedT.tag") as string } else { "unknown" }
-    val valueTypeName = if castET != unit { luaExpr("castET.ids and castET.ids[1] and castET.ids[1].name or 'unknown'") as string } else { "unknown" }
-    val checkedTypeName = if checkedT != unit { luaExpr("checkedT.ids and checkedT.ids[1] and checkedT.ids[1].name or 'unknown'") as string } else { "unknown" }
-
-    // Variant discrimination is nominal: a checked type that is a record with a
-    // non-empty `name` (set only by variant lowering — type aliases keep name
-    // "") compares the runtime metatable tag rather than falling through to
-    // chi_is_record (true for every record). MUST precede the same-tag
-    // short-circuit below, or `someVariant is OtherVariant` would emit "true".
-    val checkedVariantName = if checkedT != unit { luaExpr("(checkedT.tag == 'record' and checkedT.name) or ''") as string } else { "" }
-    if checkedVariantName != "" {
-        val variantValue = emitExpr(st, castVal)
-        return "chi_is_variant($variantValue, \"$checkedVariantName\")"
+fn emitIsAgainstType(value: string, valueType: any, checkedType: any): string {
+    val checkedTag = if checkedType != unit { luaExpr("checkedType.tag") as string } else { "unknown" }
+    if checkedTag == "sum" {
+        val lhs = luaExpr("checkedType.lhs") as any
+        val rhs = luaExpr("checkedType.rhs") as any
+        val leftCheck = emitIsAgainstType(value, valueType, lhs)
+        val rightCheck = emitIsAgainstType(value, valueType, rhs)
+        return "($leftCheck or $rightCheck)"
     }
 
-    // If both are primitives with the same name, statically true
+    // Variant records need their nominal tag check before the same-tag
+    // shortcut, which would otherwise make different variants always match.
+    val checkedVariantName = if checkedType != unit { luaExpr("(checkedType.tag == 'record' and checkedType.name) or ''") as string } else { "" }
+    if checkedVariantName != "" {
+        return "chi_is_variant($value, \"$checkedVariantName\")"
+    }
+
+    val valueTag = if valueType != unit { luaExpr("valueType.tag") as string } else { "unknown" }
+    val valueTypeName = if valueType != unit { luaExpr("valueType.ids and valueType.ids[1] and valueType.ids[1].name or 'unknown'") as string } else { "unknown" }
+    val checkedTypeName = if checkedType != unit { luaExpr("checkedType.ids and checkedType.ids[1] and checkedType.ids[1].name or 'unknown'") as string } else { "unknown" }
+
     if valueTag == checkedTag {
         if valueTag == "primitive" {
-            if valueTypeName == checkedTypeName {
-                return "true"
-            }
+            if valueTypeName == checkedTypeName { return "true" }
         } else {
-            // Same non-primitive tag (e.g. both arrays, both records) — statically true
             return "true"
         }
     }
-
-    val value = emitExpr(st, castVal)
 
     if checkedTag == "primitive" {
         if checkedTypeName == "unit" {
@@ -1018,11 +1011,24 @@ pub fn emitIs(st: EmitterState, expr: Expr): string {
         return "chi_is_record($value)"
     } else if checkedTag == "fn" {
         return "type($value) == \"function\""
-    } else if checkedTag == "variable" {
-        return "false"
     } else {
         return "false"
     }
+}
+
+pub fn emitIs(st: EmitterState, expr: Expr): string {
+    val castVal = expr.castExpr as Expr
+    val valueType: any = castVal.exprType
+    val checkedType: any = expr.checkedType
+    val value = emitExpr(st, castVal)
+    val checkedTag = if checkedType != unit { luaExpr("checkedType.tag") as string } else { "unknown" }
+    if checkedTag == "sum" {
+        // An expression tested against several alternatives must run once.
+        val valueName = nextTmpName(st)
+        val check = emitIsAgainstType(valueName, valueType, checkedType)
+        return "(function($valueName) return $check end)($value)"
+    }
+    emitIsAgainstType(value, valueType, checkedType)
 }
 
 // --- Effect System ---

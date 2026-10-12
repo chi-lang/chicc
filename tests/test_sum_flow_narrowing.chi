@@ -1,0 +1,134 @@
+import chicc/test_util { test, assertEqual, summary, withinLimits }
+import chicc/compiler { compileToLua, newLuaCompilationEnv }
+import std/lang { loadLuaCode }
+
+fn codesOf(result: any): string {
+    val messages = result.messages as array[any]
+    messages.map { m -> m.code as string }.joinToStringWithSeparator(",")
+}
+
+fn messageCodes(src: string): string {
+    codesOf(compileToLua(src, newLuaCompilationEnv()))
+}
+
+fn compileAndRun(src: string): any {
+    val result: any = compileToLua(src, newLuaCompilationEnv())
+    assertEqual(codesOf(result), "")
+    val run = loadLuaCode(result.luaCode as string) as () -> any
+    run()
+}
+
+test("if type guard rejects a field from another variant") {
+    withinLimits(30) {
+        val src = "package t22/ifwrong\ndata Shape = Circle(r: int) | Rect(w: int, h: int)\nfn bad(s: Shape): int {\n    if s is Circle { s.w } else { 0 }\n}\n"
+        assertEqual(messageCodes(src), "MEMBER_NOT_FOUND")
+    }
+}
+
+test("if type guard narrows both variant branches") {
+    withinLimits(30) {
+        val src = "package t22/area\ndata Shape = Circle(r: int) | Rect(w: int, h: int)\nfn area(s: Shape): int {\n    if s is Circle { s.r * s.r * 3 } else { s.w * s.h }\n}\nfn localArea(): int {\n    val shape: Shape = Circle(2)\n    if shape is Circle { shape.r } else { shape.w }\n}\npub val result = area(Circle(2))\npub val localResult = localArea()\n"
+        val pkg: any = compileAndRun(src)
+        assertEqual(pkg.result as int, 12)
+        assertEqual(pkg.localResult as int, 2)
+    }
+}
+
+test("when type guard rejects a field from another variant") {
+    withinLimits(30) {
+        val src = "package t22/whenwrong\ndata Shape = Circle(r: int) | Rect(w: int, h: int)\nfn bad(s: Shape): int {\n    when {\n        s is Circle -> s.w\n        else -> 0\n    }\n}\n"
+        assertEqual(messageCodes(src), "MEMBER_NOT_FOUND")
+    }
+}
+
+test("a sum type test checks every alternative") {
+    withinLimits(30) {
+        val src = "package t22/istargetsum\nfn matches(x: int | string): bool { x is int | bool }\npub val matchesInt = matches(7)\npub val matchesString = matches(\"s\")\npub val matchesBool = (true as any) is int | string\n"
+        val pkg: any = compileAndRun(src)
+        assertEqual(pkg.matchesInt as bool, true)
+        assertEqual(pkg.matchesString as bool, false)
+        assertEqual(pkg.matchesBool as bool, false)
+    }
+}
+
+test("is narrows primitive sums") {
+    withinLimits(30) {
+        val src = "package t22/primitives\nfn classify(x: int | string): int { if x is int { x + 1 } else { 0 } }\npub val fromInt = classify(6)\npub val fromString = classify(\"x\")\n"
+        val pkg: any = compileAndRun(src)
+        assertEqual(pkg.fromInt as int, 7)
+        assertEqual(pkg.fromString as int, 0)
+    }
+}
+
+test("unit equality narrows both branches") {
+    withinLimits(30) {
+        val src = "package t22/unitchecks\nfn equal(o: string | unit): bool { if o == unit { val absent: unit = o\ntrue } else { o.len() == 3 } }\nfn notEqual(o: string | unit): bool { if o != unit { o.len() == 3 } else { val absent: unit = o\ntrue } }\npub val equalUnit = equal(unit)\npub val equalString = equal(\"abc\")\npub val notEqualUnit = notEqual(unit)\npub val notEqualString = notEqual(\"abc\")\n"
+        val pkg: any = compileAndRun(src)
+        assertEqual(pkg.equalUnit as bool, true)
+        assertEqual(pkg.equalString as bool, true)
+        assertEqual(pkg.notEqualUnit as bool, true)
+        assertEqual(pkg.notEqualString as bool, true)
+    }
+}
+
+test("is narrows optional sums") {
+    withinLimits(30) {
+        val src = "package t22/isunit\nfn lengthOrZero(o: string | unit): int { if o is unit { val absent: unit = o\n0 } else { o.len() } }\npub val fromUnit = lengthOrZero(unit)\npub val fromString = lengthOrZero(\"abc\")\n"
+        val pkg: any = compileAndRun(src)
+        assertEqual(pkg.fromUnit as int, 0)
+        assertEqual(pkg.fromString as int, 3)
+    }
+}
+
+test("an impossible type test stays false and checks its body with the original type") {
+    withinLimits(30) {
+        val src = "package t22/impossible\nfn impossible(x: int | string): int { if x is bool { val same: int | string = x\n1 } else { 0 } }\npub val result = impossible(\"x\")\npub val matchesBool = (\"x\" as any) is bool\n"
+        val pkg: any = compileAndRun(src)
+        assertEqual(pkg.result as int, 0)
+        assertEqual(pkg.matchesBool as bool, false)
+    }
+}
+
+test("when conditions accumulate exclusions in later cases") {
+    withinLimits(30) {
+        val src = "package t22/whenchain\nfn classify(x: int | string | bool): int { when { x is int -> x + 1\n x is string -> x.len()\n else -> if x { 1 } else { 0 } } }\npub val fromInt = classify(2)\npub val fromString = classify(\"abc\")\npub val fromBool = classify(true)\n"
+        val pkg: any = compileAndRun(src)
+        assertEqual(pkg.fromInt as int, 3)
+        assertEqual(pkg.fromString as int, 3)
+        assertEqual(pkg.fromBool as int, 1)
+    }
+}
+
+test("top-level immutable values narrow in their branches") {
+    withinLimits(30) {
+        val src = "package t22/packageval\ndata Shape = Circle(r: int) | Rect(w: int, h: int)\nval shape: Shape = Circle(2)\npub val area = if shape is Circle { shape.r * shape.r * 3 } else { shape.w * shape.h }\n"
+        val pkg: any = compileAndRun(src)
+        assertEqual(pkg.area as int, 12)
+    }
+}
+
+test("nested guards, lambda captures, and shadowed parameters keep binding identity") {
+    withinLimits(30) {
+        val src = "package t22/lexical\ndata Shape = Circle(r: int) | Rect(w: int, h: int)\nfn read(s: Shape): int { if s is Circle { if s is Circle { val captured = { -> s.r }\n val shadowed = { s: string -> s.len() }\n captured() + shadowed(\"abc\") } else { s.r } } else { s.w * s.h } }\npub val result = read(Circle(2))\n"
+        val pkg: any = compileAndRun(src)
+        assertEqual(pkg.result as int, 5)
+    }
+}
+
+test("mutable bindings and non-binding expressions are not narrowed") {
+    withinLimits(30) {
+        val src = "package t22/noextra\ndata Shape = Circle(r: int) | Rect(w: int, h: int)\nfn mutable(s: Shape): int { var v: Shape = s\n if v is Circle { v.w } else { 0 } }\nfn compound(s: Shape): int { if s is Circle && true { s.w } else { 0 } }\nfn field(h: { shape: Shape }): int { if h.shape is Circle { h.shape.w } else { 0 } }\n"
+        assertEqual(messageCodes(src), "")
+    }
+}
+
+test("a sum type test evaluates its source expression once") {
+    withinLimits(30) {
+        val src = "package t22/once\nvar calls = 0\nfn next(): any { calls += 1\n\"matched\" }\npub val result = next() is int | string\npub val callCount = calls\n"
+        val pkg: any = compileAndRun(src)
+        assertEqual(pkg.result as bool, true)
+        assertEqual(pkg.callCount as int, 1)
+    }
+}
+
+summary()

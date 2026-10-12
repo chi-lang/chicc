@@ -19,6 +19,17 @@ fn newConstraints(): any {
     luaExpr("{}")
 }
 
+fn assertFlowTypeStays(sourceType: Type, testedType: Type) {
+    initTestCtx()
+    icDefineLocalSymbol("value", sourceType)
+    val source = variableAccessExpr(localTarget("value"), testSection)
+    val condition = isExpr(source, testedType, testSection)
+    val thenAccess = variableAccessExpr(localTarget("value"), testSection)
+    val expr = ifElseExpr(condition, thenAccess, atomExpr("unit", tUnit, testSection), testSection)
+    typeTerm(expr, 0, newConstraints())
+    assertTrue(typeEquals(thenAccess.exprType as Type, sourceType))
+}
+
 // --- typeTerm: atom ---
 
 test("typeTerm: atom int returns int type") {
@@ -315,6 +326,40 @@ test("typeTerm: is returns bool") {
     val expr = isExpr(inner, tString, testSection)
     val result = typeTerm(expr, 0, constraints)
     assertTrue(result.typeEquals(tBool))
+}
+
+test("typeTerm: is refines both branches and restores the outer type") {
+    initTestCtx()
+    val sumT = sumType([] as array[TypeId], tInt, tString, [] as array[string])
+    icDefineLocalSymbol("s", sumT)
+    val constraints = newConstraints()
+    val source = variableAccessExpr(localTarget("s"), testSection)
+    val condition = isExpr(source, tInt, testSection)
+    val thenAccess = variableAccessExpr(localTarget("s"), testSection)
+    val elseAccess = variableAccessExpr(localTarget("s"), testSection)
+    val expr = ifElseExpr(condition, thenAccess, elseAccess, testSection)
+
+    typeTerm(expr, 0, constraints)
+
+    assertTrue(typeEquals(thenAccess.exprType as Type, tInt))
+    assertTrue(typeEquals(elseAccess.exprType as Type, tString))
+    val after = variableAccessExpr(localTarget("s"), testSection)
+    typeTerm(after, 0, constraints)
+    assertTrue(typeEquals(after.exprType as Type, sumT))
+}
+
+test("typeTerm: erased runtime checks keep ambiguous sum alternatives") {
+    val intArray = arrayType(tInt, [] as array[string])
+    val stringArray = arrayType(tString, [] as array[string])
+    assertFlowTypeStays(sumType([] as array[TypeId], intArray, stringArray, [] as array[string]), intArray)
+
+    val recordA = recordType([] as array[TypeId], [{ name: "a", fieldType: tInt }], [] as array[string])
+    val recordB = recordType([] as array[TypeId], [{ name: "b", fieldType: tInt }], [] as array[string])
+    assertFlowTypeStays(sumType([] as array[TypeId], recordA, recordB, [] as array[string]), recordA)
+
+    val intFunction = functionType([tInt, tInt], [] as array[string], 0)
+    val stringFunction = functionType([tString, tString], [] as array[string], 0)
+    assertFlowTypeStays(sumType([] as array[TypeId], intFunction, stringFunction, [] as array[string]), intFunction)
 }
 
 // --- typeTerm: interpolated_string ---

@@ -3,7 +3,7 @@ package chicc/inference_context
 import std/lang { luaExpr, embedLua }
 import std/lang.map { emptyMap, forEach }
 import chicc/types { Type, TypeId, tAny, variableType, polyType, instantiate }
-import chicc/ast { DotTarget, localBindingDotTarget }
+import chicc/ast { Target, DotTarget, localBindingDotTarget }
 import chicc/unification { tryUnify, newConstraint }
 
 // --- Module-level state ---
@@ -82,6 +82,10 @@ pub fn icDefineLocalSymbol(name: string, typeScheme: any) {
     icLocalSymbolsDefine(icLocalSymbols, name, typeScheme)
 }
 
+fn icTargetRefinementKey(tgt: Target): string {
+    "${tgt.moduleName}/${tgt.packageName}/${tgt.name}"
+}
+
 pub fn icUpdateSymbolType(tgt: any, typeScheme: any) {
     val tag: string = luaExpr("tgt.tag")
     if tag == "local" {
@@ -135,7 +139,10 @@ pub fn icGetTargetType(tgt: any, level: int, section: any): Type {
         val pkgMod = luaExpr("__P_.icPkg.moduleName") as string
         val pkgPkg = luaExpr("__P_.icPkg.packageName") as string
         val name = luaExpr("tgt.name") as string
-        if tgtMod == pkgMod && tgtPkg == pkgPkg {
+        val narrowed: any = icLocalSymbolsGet(icLocalSymbols, icTargetRefinementKey(tgt as Target))
+        if narrowed != unit {
+            (narrowed as Type).instantiate(level, icFreshVariable)
+        } else if tgtMod == pkgMod && tgtPkg == pkgPkg {
             // Same package — look up in package symbols
             val scheme = icLocalSymbolsGet(icPackageSymbols, name)
             if scheme == unit {

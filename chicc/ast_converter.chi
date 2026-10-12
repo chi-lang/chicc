@@ -4,7 +4,7 @@ import std/lang.map { emptyMap }
 import std/math { finf }
 import chicc/source { Section }
 import chicc/types { Type, TypeId, RecordField, tAny, tUnit, tBool, tInt, tFloat, tString, variableType, functionType, recordType, sumType, arrayType, recursiveType, polyType, occursIn, newTypeId, variantNameOf, sumListTypes }
-import chicc/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, packageTarget, setExprType, atomExpr, interpolatedStringExpr, createRecordExpr, createVariantExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, variableAssignmentExpr, declarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam }
+import chicc/ast { Expr, Target, FnParam, HandleCase, ExprField, localTarget, localTargetWithMutability, packageTarget, packageTargetWithMutability, setExprType, atomExpr, interpolatedStringExpr, createRecordExpr, createVariantExpr, createArrayExpr, variableAccessExpr, fieldAccessExpr, fieldAssignmentExpr, variableAssignmentExpr, declarationExpr, fnExpr, blockExpr, fnCallExpr, ifElseExpr, infixOpExpr, prefixOpExpr, castExpr_, whileLoopExpr, forLoopExpr, breakExpr, continueExpr, indexOpExpr, indexedAssignmentExpr, isExpr, effectDefinitionExpr, handleExpr, returnExpr, newHandleCase, newExprField, newFnParam }
 import chicc/parse_ast { ParseAst, ParseProgram, ParseTypeAlias, ParseVariantTypeDefinition, VariantConstructor, paArguments, paArrayValues, paBody, paBoolValue, paCallee, paCondition, paEffectCases, paElseBody, paElseCase, paFloatValue, paForBody, paForInit, paForState, paForVars, paFormalArguments, paFuncBody, paHandleBody, paIndexExpr, paIndexValue, paInterpValue, paIsMutable, paIsPublic, paIterable, paLeft, paLongValue, paLoopBody, paMemberName, paMemberSection, paName, paOp, paOpTemplate, paParts, paReceiver, paReceiverName, paRecordFields, paReturnTypeRef, paReturnValue, paRight, paSection, paStringValue, paSymbolName, paTag, paThenBody, paTypeParameters, paTypeRef, paValue, paVariable, paVariableName, paWhenCases }
 import chicc/symbols { FnSymbolTable, Symbol, newFnSymbolTable, fstAddLocal, fstAddArgument, fstGet, fstRemove, newSymbol, ctGetLocalSymbol, ctDefineSymbol, ctRemoveSymbol, ctGetAliasedPackage, lookupLoadedPublicSymbol, CompileTables, TypeTable, resolveType, arrayContains }
 
@@ -124,7 +124,7 @@ fn getSymbolSkippingLocals(name: string, tables: any): Target {
         val symMod = luaExpr("ctSym.moduleName") as string
         val symPkg = luaExpr("ctSym.packageName") as string
         val symName = luaExpr("ctSym.name") as string
-        return packageTarget(symMod, symPkg, symName)
+        return packageTargetWithMutability(symMod, symPkg, symName, ctSym.isMutable as bool)
     }
     // Fallback: search all loaded packages for a public symbol (JVM-style
     // import-free resolution of public declarations).
@@ -132,14 +132,14 @@ fn getSymbolSkippingLocals(name: string, tables: any): Target {
     if loadedSym != unit {
         val loadedMod = luaExpr("loadedSym.moduleName") as string
         val loadedPkg = luaExpr("loadedSym.packageName") as string
-        return packageTarget(loadedMod, loadedPkg, name)
+        return packageTargetWithMutability(loadedMod, loadedPkg, name, loadedSym.isMutable as bool)
     }
     // Not found: return local target
     localTarget(name)
 }
 
 pub fn getSymbol(name: string, tables: any): Target {
-    if isFnLocal(name) { localTarget(name) } else { getSymbolSkippingLocals(name, tables) }
+    if isFnLocal(name) { localTargetWithMutability(name, isMutableLocal(name)) } else { getSymbolSkippingLocals(name, tables) }
 }
 
 // Whether the local binding getSymbol resolves `name` to here is mutable;

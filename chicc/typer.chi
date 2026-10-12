@@ -1,9 +1,9 @@
 // chicc/chicc/typer.chi
 package chicc/typer
 import std/lang { luaExpr, embedLua }
-import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tFloat, tString, tAny, typeEquals, sumCreate, recordType, arrayType, functionType, polyType, mapType, intTypeId, floatTypeId, unfoldRecursive, typeToString, instantiate, sumListTypes }
+import chicc/types { Type, TypeId, RecordField, tUnit, tBool, tInt, tFloat, tString, tAny, typeEquals, sumCreate, sumType, recordType, arrayType, functionType, polyType, mapType, intTypeId, floatTypeId, unfoldRecursive, typeToString, instantiate, sumListTypes }
 import chicc/source { Section, toCodePoint }
-import chicc/ast { Expr, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget }
+import chicc/ast { Expr, Target, DotTarget, variableAccessExpr, localTarget, packageTarget, setExprType, setExprDotTarget, fieldDotTarget }
 import chicc/messages { notAFunction }
 import chicc/unification { unify, unifyWithUf, ufNew, ufResolve, ufAllBindings, ufLowerAbove, newConstraint }
 import chicc/inference_context { icFreshVariable, icGetTargetType, icWithNewLocalScope, icDefineLocalSymbol, icUpdateSymbolType, icListLocalFunctionsForType, icListCurrentPackageFunctionsForType, icListTypesPackageFunctionsForType, icListAllLoadedFunctionsForType }
@@ -112,6 +112,219 @@ fn sumRemoveType(sumT: any, toRemove: any): Type {
         j = j + 1
     }
     result
+}
+
+type TypeTestOutcome = { mayMatch: bool, mayMiss: bool }
+type FlowFilter = { hasValues: bool, resultType: Type }
+type FlowGuard = { target: Target, sourceType: Type, testedType: Type, matchesWhenTrue: bool }
+
+fn firstTypeIdName(t: Type): string {
+    if t.tag != "primitive" || t.ids.size() == 0 { return "" }
+    t.ids[1].name
+}
+
+fn primitiveRuntimeKind(t: Type): string {
+    if t.tag != "primitive" { return "" }
+    var foundAny = false
+    val ids = t.ids
+    var i = 1
+    while i <= ids.size() {
+        val name = ids[i].name
+        if name == "int" || name == "float" || name == "bool" || name == "string" || name == "unit" {
+            return name
+        }
+        if name == "any" { foundAny = true }
+        i = i + 1
+    }
+    if foundAny { "any" } else { "" }
+}
+
+fn isRuntimePrimitiveCheck(name: string): bool {
+    name == "int" || name == "float" || name == "bool" || name == "string" || name == "unit"
+}
+
+fn isUnknownFlowSource(t: Type): bool {
+    t.tag == "var" || t.tag == "poly" || t.tag == "recursive" ||
+        (t.tag == "primitive" && primitiveRuntimeKind(t) == "any")
+}
+
+fn uncertainTypeTest(): TypeTestOutcome {
+    { mayMatch: true, mayMiss: true }
+}
+
+fn alwaysMatchingTypeTest(): TypeTestOutcome {
+    { mayMatch: true, mayMiss: false }
+}
+
+fn neverMatchingTypeTest(): TypeTestOutcome {
+    { mayMatch: false, mayMiss: true }
+}
+
+// This mirrors emitIs: refinements only exclude values that its runtime check
+// can prove cannot pass. Arrays and structural records are checked by runtime
+// category, without inspecting generic arguments or fields.
+fn runtimeTestOutcome(source: Type, tested: Type): TypeTestOutcome {
+    if tested.tag == "sum" {
+        val lhs = runtimeTestOutcome(source, tested.lhs as Type)
+        val rhs = runtimeTestOutcome(source, tested.rhs as Type)
+        return { mayMatch: lhs.mayMatch || rhs.mayMatch, mayMiss: lhs.mayMiss && rhs.mayMiss }
+    }
+
+    val variantName = if tested.tag == "record" { tested.name } else { "" }
+    if variantName != "" {
+        if source.tag == "record" {
+            val sourceVariantName = source.name
+            if sourceVariantName == "" { return uncertainTypeTest() }
+            if sourceVariantName == variantName { return alwaysMatchingTypeTest() }
+            return neverMatchingTypeTest()
+        }
+        if isUnknownFlowSource(source) { return uncertainTypeTest() }
+        return neverMatchingTypeTest()
+    }
+
+    if source.tag == tested.tag {
+        if source.tag != "primitive" { return alwaysMatchingTypeTest() }
+        val sourceName = firstTypeIdName(source)
+        val testedName = firstTypeIdName(tested)
+        if sourceName == testedName { return alwaysMatchingTypeTest() }
+        if isRuntimePrimitiveCheck(testedName) {
+            val sourceKind = primitiveRuntimeKind(source)
+            if sourceKind == "any" || sourceKind == "" { return uncertainTypeTest() }
+            if sourceKind == testedName { return alwaysMatchingTypeTest() }
+        }
+        return neverMatchingTypeTest()
+    }
+
+    if isUnknownFlowSource(source) {
+        if tested.tag == "array" || tested.tag == "record" || tested.tag == "fn" {
+            return uncertainTypeTest()
+        }
+        if tested.tag == "primitive" && isRuntimePrimitiveCheck(firstTypeIdName(tested)) {
+            return uncertainTypeTest()
+        }
+        return neverMatchingTypeTest()
+    }
+
+    if tested.tag == "primitive" && isRuntimePrimitiveCheck(firstTypeIdName(tested)) && source.tag == "primitive" {
+        val sourceKind = primitiveRuntimeKind(source)
+        if sourceKind == "any" || sourceKind == "" { return uncertainTypeTest() }
+        if sourceKind == firstTypeIdName(tested) { return alwaysMatchingTypeTest() }
+    }
+    neverMatchingTypeTest()
+}
+
+fn filterFlowType(source: Type, tested: Type, keepMatches: bool): FlowFilter {
+    if source.tag == "sum" {
+        val lhs = filterFlowType(source.lhs as Type, tested, keepMatches)
+        val rhs = filterFlowType(source.rhs as Type, tested, keepMatches)
+        if lhs.hasValues && rhs.hasValues {
+            return {
+                hasValues: true,
+                resultType: sumType(source.ids, lhs.resultType, rhs.resultType, source.typeParams)
+            }
+        }
+        if lhs.hasValues {
+            return { hasValues: true, resultType: lhs.resultType }
+        }
+        if rhs.hasValues {
+            return { hasValues: true, resultType: rhs.resultType }
+        }
+        return { hasValues: false, resultType: tUnit }
+    }
+
+    val outcome = runtimeTestOutcome(source, tested)
+    val keep = if keepMatches { outcome.mayMatch } else { outcome.mayMiss }
+    if keep {
+        { hasValues: true, resultType: source }
+    } else {
+        { hasValues: false, resultType: tUnit }
+    }
+}
+
+fn refinedFlowType(source: Type, tested: Type, keepMatches: bool): Type {
+    val filtered = filterFlowType(source, tested, keepMatches)
+    // An impossible branch keeps the pre-test type instead of inventing a
+    // bottom or unit binding type.
+    if filtered.hasValues { filtered.resultType } else { source }
+}
+
+fn simpleBindingTarget(expr: any): Target | unit {
+    if expr.kind != "variable_access" { return unit }
+    val target = expr.target as Target
+    if target.isMutable || (target.tag != "local" && target.tag != "package") { return unit }
+    target
+}
+
+fn isUnitLiteral(expr: any): bool {
+    expr.kind == "atom" && expr.exprType != unit && (expr.exprType as Type).tag == "primitive" &&
+        primitiveRuntimeKind(expr.exprType as Type) == "unit"
+}
+
+fn guardForCondition(condition: any): FlowGuard | unit {
+    if condition.kind == "is" {
+        val source = condition.castExpr as any
+        val target = simpleBindingTarget(source)
+        if target == unit || source.exprType == unit || condition.checkedType == unit { return unit }
+        return {
+            target: target as Target,
+            sourceType: source.exprType as Type,
+            testedType: condition.checkedType as Type,
+            matchesWhenTrue: true
+        }
+    }
+    if condition.kind != "infix_op" { return unit }
+    val op = condition.op as string
+    if op != "==" && op != "!=" { return unit }
+    val left = condition.left as any
+    val right = condition.right as any
+    val leftTarget = simpleBindingTarget(left)
+    val rightTarget = simpleBindingTarget(right)
+    var source: any = unit
+    var target: any = unit
+    if leftTarget != unit && isUnitLiteral(right) {
+        source = left
+        target = leftTarget
+    } else if rightTarget != unit && isUnitLiteral(left) {
+        source = right
+        target = rightTarget
+    }
+    if source == unit { return unit }
+    {
+        target: target as Target,
+        sourceType: source.exprType as Type,
+        testedType: tUnit,
+        matchesWhenTrue: op == "=="
+    }
+}
+
+fn resolveFlowType(t: Type, constraints: any): Type {
+    if typerUf != unit {
+        unifyWithUf(constraints as array[any], typerUf)
+        clearConstraints(constraints)
+        ufResolve(typerUf, t)
+    } else {
+        mapType(t, unify(constraints as array[any]))
+    }
+}
+
+fn flowRefinementForBranch(condition: any, branchIsTrue: bool, constraints: any): any {
+    val guard = guardForCondition(condition)
+    if guard == unit { return unit }
+    val matches = (guard.matchesWhenTrue as bool) == branchIsTrue
+    val sourceType = resolveFlowType(guard.sourceType as Type, constraints)
+    val testedType = resolveFlowType(guard.testedType as Type, constraints)
+    val refined = refinedFlowType(sourceType, testedType, matches)
+    { target: guard.target, narrowedType: refined }
+}
+
+fn defineFlowRefinement(refinement: any) {
+    val target = refinement.target as Target
+    val narrowedType = refinement.narrowedType as Type
+    if target.tag == "local" {
+        icDefineLocalSymbol(target.name, narrowedType)
+    } else {
+        icDefineLocalSymbol("${target.moduleName}/${target.packageName}/${target.name}", narrowedType)
+    }
 }
 
 // --- Helper: types of omitted default arguments ---
@@ -656,11 +869,23 @@ fn typeTermImpl(term: any, level: int, constraints: any): Type {
         // Each branch is a scope even when it is not a block (a bare when
         // case body)
         val thenBranch = luaExpr("term.thenBranch") as any
-        val thenBranchType = icWithNewLocalScope({ typeTerm(thenBranch, level, constraints) }) as Type
+        val thenRefinement = flowRefinementForBranch(condition, true, constraints)
+        val thenBranchType = icWithNewLocalScope({
+            if thenRefinement != unit {
+                defineFlowRefinement(thenRefinement)
+            }
+            typeTerm(thenBranch, level, constraints)
+        }) as Type
         val elseBranch = luaExpr("term.elseBranch") as any
         val thenTerminates = branchTerminates(thenBranch)
         if elseBranch != unit {
-            val elseBranchType = icWithNewLocalScope({ typeTerm(elseBranch, level, constraints) }) as Type
+            val elseRefinement = flowRefinementForBranch(condition, false, constraints)
+            val elseBranchType = icWithNewLocalScope({
+                if elseRefinement != unit {
+                    defineFlowRefinement(elseRefinement)
+                }
+                typeTerm(elseBranch, level, constraints)
+            }) as Type
             val elseTerminates = branchTerminates(elseBranch)
             if thenTerminates && elseTerminates {
                 tUnit
