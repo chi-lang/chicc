@@ -220,4 +220,50 @@ test("nullary: N() is still accepted and yields the variant") {
     assertTrue(pkg.isN as bool)
 }
 
+test("recursive IntList values can be constructed and traversed") {
+    val src = "data IntList = Cons(head: int, tail: IntList) | End(unused: int)\n" +
+        "fn sum(l: IntList): int { if l is Cons { val c = l as Cons\n c.head + sum(c.tail) } else { 0 } }\n" +
+        "val result = sum(Cons(1, Cons(2, End(0))))"
+    val pkg = runVariantProgram(src)
+    assertEqual(pkg.result as int, 3)
+}
+
+test("recursive constructors share a parent type in mixed arrays") {
+    val pkg = runVariantProgram("data IntList = Cons(head: int, tail: IntList) | End(unused: int)\n" +
+        "val items = [Cons(1, End(0)), End(1)]\n" +
+        "val firstIsCons = items[1] is Cons\nval secondIsEnd = items[2] is End")
+    assertTrue(pkg.firstIsCons as bool)
+    assertTrue(pkg.secondIsEnd as bool)
+}
+
+test("recursive Tree values can be constructed and traversed") {
+    val src = "data Tree = Node(left: Tree, v: int, right: Tree) | Leaf(v: int)\n" +
+        "fn total(t: Tree): int { if t is Node { val n = t as Node\n total(n.left) + n.v + total(n.right) } else { (t as Leaf).v } }\n" +
+        "val result = total(Node(Leaf(1), 2, Leaf(3)))"
+    val pkg = runVariantProgram(src)
+    assertEqual(pkg.result as int, 6)
+}
+
+test("constructor fields can refer to a sibling constructor") {
+    val src = "data Two = Pair(a: Single, b: Single) | Single(v: int)\n" +
+        "val p = Pair(Single(1), Single(2))\nval result = (p as Pair).b.v"
+    val pkg = runVariantProgram(src)
+    assertEqual(pkg.result as int, 2)
+}
+
+test("same-named constructor keeps recursive array fields") {
+    val pkg = runVariantProgram("data Rose = Rose(v: int, kids: array[Rose])\nval result = Rose(1, []).v")
+    assertEqual(pkg.result as int, 1)
+}
+
+test("recursive constructor fields still reject incompatible arguments") {
+    val result: any = compileToLua("data IntList = Cons(head: int, tail: IntList) | End(unused: int)\nCons(1, 5)", newLuaCompilationEnv())
+    val messages = result.messages as array[any]
+    var foundMismatch = false
+    for message in messages {
+        if message.code == "TYPE_MISMATCH" { foundMismatch = true }
+    }
+    assertTrue(foundMismatch)
+}
+
 summary()
