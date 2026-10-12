@@ -154,6 +154,53 @@ test("parseTypeRef - function type unit return") {
     assertEqual(((tr as TypeRef).returnType as TypeRef).name, "unit")
 }
 
+test("parseTypeRef - parenthesized type is the inner TypeRef") {
+    val src = "(int)\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val grouped = parseTypeRefImpl(p) as TypeRef
+    assertEqual(grouped.tag, "TypeNameRef")
+    assertEqual(grouped.name, "int")
+}
+
+test("parseTypeRef - parenthesized sum type") {
+    val src = "(int | unit) | string\n"
+    val tokens = tokenize(src)
+    val p = newParser(tokens, src)
+    val tr = parseTypeRefImpl(p) as TypeRef
+    assertEqual(tr.tag, "SumTypeRef")
+    assertEqual((tr.lhs as TypeRef).tag, "SumTypeRef")
+    assertEqual(((tr.lhs as TypeRef).lhs as TypeRef).name, "int")
+    assertEqual(((tr.lhs as TypeRef).rhs as TypeRef).name, "unit")
+    assertEqual((tr.rhs as TypeRef).name, "string")
+}
+
+test("parseTypeRef - grouping works in generic and record field types") {
+    val genericSrc = "array[(int | unit)]\n"
+    val generic = parseTypeRefImpl(newParser(tokenize(genericSrc), genericSrc)) as TypeRef
+    val param = generic.typeParameters[1] as TypeRef
+    assertEqual(param.tag, "SumTypeRef")
+    assertEqual((param.lhs as TypeRef).name, "int")
+
+    val recordSrc = "{ value: (int) }\n"
+    val record = parseTypeRefImpl(newParser(tokenize(recordSrc), recordSrc)) as TypeRef
+    val fields = record.fields
+    assertEqual((trfTypeRef(fields[1]) as TypeRef).tag, "TypeNameRef")
+    assertEqual((trfTypeRef(fields[1]) as TypeRef).name, "int")
+}
+
+test("parseTypeRef - parenthesized zero or multiple types require an arrow") {
+    val emptySrc = "()\n"
+    val emptyParser = newParser(tokenize(emptySrc), emptySrc)
+    parseTypeRefImpl(emptyParser)
+    assertTrue(emptyParser.errors.size() > 0)
+
+    val tupleSrc = "(int, string)\n"
+    val tupleParser = newParser(tokenize(tupleSrc), tupleSrc)
+    parseTypeRefImpl(tupleParser)
+    assertTrue(tupleParser.errors.size() > 0)
+}
+
 // -- Record types --
 
 test("parseTypeRef - record type single field") {
