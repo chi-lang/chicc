@@ -343,7 +343,7 @@ test("compileToLua: default value of wrong type is a type error") {
 // parser's error-recovery sites used to println and carry on, so a
 // program with an unparseable declaration compiled and ran.
 test("compileToLua: recovered parse error fails the compilation") {
-    val src = "type Opt2 = (int | unit) | unit\nval x = 1"
+    val src = "type Opt2 = (int, string) | unit\nval x = 1"
     val result: any = compileToLua(src, newLuaCompilationEnv())
     val luaCode: any = luaExpr("result.luaCode")
     assertTrue(luaCode == unit)
@@ -356,7 +356,7 @@ test("compileToLua: recovered parse error fails the compilation") {
 test("compileToLua: recovery collects errors from several declarations") {
     // Two independently unparseable aliases — both must be reported,
     // each with its own source position.
-    val src = "type A = (int | unit) | unit\ntype B = ((int) -> int) | unit\nval x = 1"
+    val src = "type A = (int, string) | unit\ntype B = () | unit\nval x = 1"
     val result: any = compileToLua(src, newLuaCompilationEnv())
     assertTrue(luaExpr("result.luaCode") as any == unit)
     val msgs: array[any] = luaExpr("result.messages")

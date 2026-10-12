@@ -1159,7 +1159,7 @@ fn parseBaseTypeRef(p: Parser): any {
         return typeNameRef("", "", "unit", sec)
     }
 
-    // Function type: (T, ...) -> R
+    // Function type: (T, ...) -> R; otherwise, parentheses group one type.
     if kind == TK_LPAREN {
         val startTok = advance(p)
         val startSec = tokenSection(startTok)
@@ -1176,10 +1176,16 @@ fn parseBaseTypeRef(p: Parser): any {
         skipNewlines(p)
         expect(p, TK_RPAREN)
         skipNewlines(p)
-        expect(p, TK_ARROW)
-        skipNewlines(p)
-        val retType = parseTypeRefImplFwd(p)
-        return functionTypeRef([], argTypes, retType, startSec)
+        if matchToken(p, TK_ARROW) {
+            skipNewlines(p)
+            val retType = parseTypeRefImplFwd(p)
+            return functionTypeRef([], argTypes, retType, startSec)
+        }
+        if argTypes.size() == 1 {
+            return argTypes[1]
+        }
+        recordParseError(p, "expected '->' or a single type in parentheses", current(p))
+        return typeNameRef("", "", "any", startSec)
     }
 
     // Record type: { name: T, ... }
