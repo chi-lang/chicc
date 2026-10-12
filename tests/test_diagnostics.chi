@@ -51,6 +51,26 @@ test("missing type names the token found") {
     assertEqual(firstError("val x: = 1\n"), "$syntax expected a type but got '=' (line 1, col 8)")
 }
 
+test("named function parameter without annotation has one clear error") {
+    assertEqual(compileErrors("fn selfApply(f) { f(f) }"),
+        "$syntax function parameter 'f' requires a type annotation (line 1, col 14)")
+}
+
+test("missing named function parameter annotation recovers through later code") {
+    assertEqual(compileErrors("fn g(a: int, b) { a }\nfn h(): int { 1 }\nprintln(h())"),
+        "$syntax function parameter 'b' requires a type annotation (line 1, col 14)")
+}
+
+test("generic named function parameter without annotation has one clear error") {
+    assertEqual(compileErrors("fn id[T](x) { x }"),
+        "$syntax function parameter 'x' requires a type annotation (line 1, col 10)")
+}
+
+test("public named function parameter without annotation has one clear error") {
+    assertEqual(compileErrors("pub fn id[T](x) { x }"),
+        "$syntax function parameter 'x' requires a type annotation (line 1, col 14)")
+}
+
 test("type error in an array element points at the element") {
     val mismatch = "[TYPE_MISMATCH] Expected type is 'int' but got 'string'"
     assertEqual(compileErrors("val xs = [\n  1,\n  \"a\"\n]\n"), "$mismatch (line 3, col 3)")
