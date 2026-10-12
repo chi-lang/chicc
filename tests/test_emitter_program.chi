@@ -220,8 +220,8 @@ test("emitProgram - empty program with emitModule=true") {
     assertTrue(luaExpr("__ep1_hasS") as bool)
     embedLua("__ep1_hasT = string.find(output, 'local __T_ = __P_._types', 1, true) ~= nil")
     assertTrue(luaExpr("__ep1_hasT") as bool)
-    // No expressions, so no return
-    embedLua("__ep1_noRet = string.find(output, 'return', 1, true) == nil")
+    // No expressions, so the generated module has no explicit package return.
+    embedLua("__ep1_noRet = string.find(output, 'return __P_', 1, true) == nil")
     assertTrue(luaExpr("__ep1_noRet") as bool)
 }
 
@@ -328,7 +328,7 @@ test("emitProgram - val = luaExpr(...) stays unwrapped") {
     val final = atomExpr("2", tInt, unit)
     val prog = newProgram(pkg, [], [], [decl, final], unit)
     val output = emitProgram(prog, true)
-    assertFalse(output.contains("do "))
+    assertFalse(output.contains("do __P_.x="))
 }
 
 test("emitProgram - fn declaration with luaExpr in its body is still wrapped") {

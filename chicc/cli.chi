@@ -145,7 +145,7 @@ pub fn runFile(inputPath: string): int {
         1
     } else {
         // Load and execute the compiled Lua code
-        embedLua("local chunk, err = load(luaCode, inputPath)")
+        embedLua("local chunk, err = load(luaCode, '@' .. inputPath)")
         val loadErr: any = luaExpr("err")
         if loadErr != unit {
             val errStr = luaExpr("tostring(err)") as string
@@ -155,6 +155,7 @@ pub fn runFile(inputPath: string): int {
         embedLua("local ok, runErr = pcall(chunk)")
         val runOk = luaExpr("ok") as bool
         if runOk == false {
+            embedLua("io.flush()")
             val runErrStr = luaExpr("tostring(runErr)") as string
             eprintln("Runtime error: $runErrStr")
             return 1
